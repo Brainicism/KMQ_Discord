@@ -889,12 +889,6 @@ export default abstract class Session {
         });
 
         this.connection.once("error", async (err) => {
-            if (this.connection) {
-                // replace listener with no-op to catch any exceptions thrown after this event
-                this.connection.removeAllListeners("error");
-                this.connection.on("error", () => {});
-            }
-
             if (clipAction === ClipAction.END_ROUND) {
                 // Don't restart the round if the end round clip failed to play
                 return;

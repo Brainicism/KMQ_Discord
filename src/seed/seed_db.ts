@@ -732,13 +732,35 @@ async function reloadAutocompleteData(): Promise<void> {
             );
 
             logger.info("Calculating songs removed...");
-            const songsRemoved = availableSongsBefore.filter(
+            let songsRemoved = availableSongsBefore.filter(
                 (before) => !availableSongsAfterSet.has(before.daisuki_id),
             );
 
             logger.info("Calculating songs added...");
-            const songsAdded = availableSongsAfter.filter(
+            let songsAdded = availableSongsAfter.filter(
                 (after) => !availableSongsBeforeSet.has(after.daisuki_id),
+            );
+
+            logger.info("Calculating songs both added and removed");
+            const songsAddedLinks = songsAdded.map((x) => x.link);
+            const addedAndRemovedLinks = new Set(
+                songsRemoved
+                    .filter((removed) => songsAddedLinks.includes(removed.link))
+                    .map((x) => x.link),
+            );
+
+            logger.info(
+                `Added and removed count: ${addedAndRemovedLinks.size}`,
+            );
+
+            // remove songs that were both added and deleted
+            // i.e: we were using an AV initially, but AV gets added as a better audio for a new MV
+            songsRemoved = songsRemoved.filter(
+                (x) => !addedAndRemovedLinks.has(x.link),
+            );
+
+            songsAdded = songsAdded.filter(
+                (x) => !addedAndRemovedLinks.has(x.link),
             );
 
             logger.info(

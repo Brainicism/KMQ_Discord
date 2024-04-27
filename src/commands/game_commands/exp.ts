@@ -8,15 +8,14 @@ import {
 } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
-    getAvailableSongCount,
+    getDebugLogHeader,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import {
     isFirstGameOfDay,
     isPowerHour,
     userBonusIsActive,
 } from "../../helpers/game_utils";
-import {
-    getDebugLogHeader,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
 import { isWeekend } from "../../helpers/utils";
 import AnswerType from "../../enums/option_types/answer_type";
 import Eris from "eris";
@@ -352,7 +351,7 @@ export default class ExpCommand implements BaseCommand {
         }
 
         const { count, countBeforeLimit, ineligibleDueToCommonAlias } =
-            await getAvailableSongCount(guildPreference);
+            await guildPreference.getAvailableSongCount();
 
         if (count === undefined || countBeforeLimit === undefined) {
             throw new Error("Error retrieving song count");

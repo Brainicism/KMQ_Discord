@@ -1,7 +1,6 @@
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
-import { getAvailableSongCount } from "../../helpers/game_utils";
 import {
     getDebugChannel,
     getDebugLogHeader,
@@ -33,7 +32,7 @@ export default class DebugCommand implements BaseCommand {
 
         const messageContext = MessageContext.fromMessage(message);
         const { count, countBeforeLimit } =
-            await getAvailableSongCount(guildPreference);
+            await guildPreference.getAvailableSongCount();
 
         const fields: Array<Eris.EmbedField> = [];
         fields.push({

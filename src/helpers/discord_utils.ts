@@ -38,7 +38,7 @@ import {
     underline,
 } from "./utils";
 import { exec } from "child_process";
-import { getAvailableSongCount, userBonusIsActive } from "./game_utils";
+import { userBonusIsActive } from "./game_utils";
 import AppCommandsAction from "../enums/app_command_action";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type";
@@ -877,7 +877,7 @@ export async function generateOptionsMessage(
         optionStrings[GameOption.PLAYLIST_ID] = null;
     }
 
-    const totalSongs = await getAvailableSongCount(guildPreference);
+    const totalSongs = await guildPreference.getAvailableSongCount();
 
     if (
         totalSongs.count === undefined ||
