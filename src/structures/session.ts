@@ -749,8 +749,6 @@ export default abstract class Session {
                         ];
                     }
                 } else {
-                    let i = 0;
-
                     if (encoderArgs["-af"]) {
                         encoderArgs["-af"].push(
                             `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
@@ -761,8 +759,7 @@ export default abstract class Session {
                         ];
                     }
 
-                    while (i < 10) {
-                        i++;
+                    for (let i = 0; i < 10; i++) {
                         seekLocation = round.prepareSeekLocation(
                             seekType,
                             songDuration,
