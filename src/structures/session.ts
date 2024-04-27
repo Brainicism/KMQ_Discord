@@ -711,6 +711,15 @@ export default abstract class Session {
             let inputArgs = ["-ss", seekLocation.toString()];
             let encoderArgs: { [arg: string]: Array<string> } = {};
             const specialType = this.guildPreference.gameOptions.specialType;
+            if (specialType) {
+                const ffmpegArgs = specialFfmpegArgs[specialType](
+                    seekLocation,
+                    songDuration,
+                );
+
+                inputArgs = ffmpegArgs.inputArgs;
+                encoderArgs = ffmpegArgs.encoderArgs;
+            }
 
             if (isClipMode) {
                 if (clipAction === ClipAction.END_ROUND) {
@@ -721,17 +730,6 @@ export default abstract class Session {
                         ).toString(),
                     ];
                 } else if (clipAction === ClipAction.REPLAY) {
-                    inputArgs = ["-ss", seekLocation.toString()];
-                    if (specialType) {
-                        const ffmpegArgs = specialFfmpegArgs[specialType](
-                            seekLocation,
-                            songDuration,
-                        );
-
-                        inputArgs = ffmpegArgs.inputArgs;
-                        encoderArgs = ffmpegArgs.encoderArgs;
-                    }
-
                     encoderArgs["-t"] = [
                         (
                             this.clipDurationLength! +
@@ -739,25 +737,13 @@ export default abstract class Session {
                         ).toString(),
                     ];
 
-                    if (encoderArgs["-af"]) {
-                        encoderArgs["-af"].push(
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-                        );
-                    } else {
-                        encoderArgs["-af"] = [
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-                        ];
-                    }
+                    encoderArgs["-af"] = (encoderArgs["-af"] || []).concat([
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                    ]);
                 } else {
-                    if (encoderArgs["-af"]) {
-                        encoderArgs["-af"].push(
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-                        );
-                    } else {
-                        encoderArgs["-af"] = [
-                            `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
-                        ];
-                    }
+                    encoderArgs["-af"] = (encoderArgs["-af"] || []).concat([
+                        `adelay=delays=${CLIP_PADDING_BEGINNING_MS}ms:all=1`,
+                    ]);
 
                     for (let i = 0; i < 10; i++) {
                         seekLocation = round.prepareSeekLocation(
@@ -798,19 +784,11 @@ export default abstract class Session {
                             break;
                         } else {
                             logger.info(
-                                `Average volume was ${averageVolume}, i = ${i}, retrying...`,
+                                `${getDebugLogHeader(messageContext)} | ${this.getDebugSongDetails(round)} | Average volume was ${averageVolume}, i = ${i}, retrying...`,
                             );
                         }
                     }
                 }
-            } else if (specialType) {
-                const ffmpegArgs = specialFfmpegArgs[specialType](
-                    seekLocation,
-                    songDuration,
-                );
-
-                inputArgs = ffmpegArgs.inputArgs;
-                encoderArgs = ffmpegArgs.encoderArgs;
             }
 
             // Only set songStartedAt for clip mode at the start of the round
