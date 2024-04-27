@@ -727,6 +727,8 @@ export default abstract class Session {
                 this.guildPreference.gameOptions.guessModeType
             }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
+
+        // remove old 'end' listeners, which are unique for setup for each individual round
         this.connection.removeAllListeners("end");
         this.connection.stopPlaying();
 
