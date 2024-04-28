@@ -1240,11 +1240,13 @@ export default abstract class Session {
             selfDeaf: true,
         });
 
-        connection.on("error", (err) => {
-            logger.warn(
-                `Error receiving from voice connection WS. ${extractErrorString(err)}`,
-            );
-        });
+        if (!this.connection) {
+            connection.on("error", (err) => {
+                logger.warn(
+                    `Error receiving from voice connection WS. ${extractErrorString(err)}`,
+                );
+            });
+        }
 
         this.connection = connection;
     }
