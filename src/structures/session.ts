@@ -705,8 +705,6 @@ export default abstract class Session {
             }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
 
-        // remove old 'end' listeners, which are unique for setup for each individual round
-        this.connection.removeAllListeners("end");
         this.connection.stopPlaying();
 
         try {
@@ -1234,18 +1232,25 @@ export default abstract class Session {
      * @param client - The bot instance
      */
     private async ensureVoiceConnection(client: KmqClient): Promise<void> {
-        if (this.connection && this.connection.ready) return;
-        const connection = await client.joinVoiceChannel(this.voiceChannelID, {
-            opusOnly: true,
-            selfDeaf: true,
-        });
+        // re-attempt to join vc if new connection, or connection is not ready
+        if (!this.connection || !this.connection.ready) {
+            const connection = await client.joinVoiceChannel(
+                this.voiceChannelID,
+                {
+                    opusOnly: true,
+                    selfDeaf: true,
+                },
+            );
 
-        connection.on("error", (err) => {
+            this.connection = connection;
+        }
+
+        // clear existing listeners, and attach generic error handler
+        this.connection.removeAllListeners();
+        this.connection.on("error", (err) => {
             logger.warn(
                 `Error receiving from voice connection WS. ${extractErrorString(err)}`,
             );
         });
-
-        this.connection = connection;
     }
 }
