@@ -2,9 +2,11 @@ import { IPCLogger } from "../logger";
 import { SKIP_BUTTON_PREFIX } from "../constants";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
 import Eris from "eris";
+import SeekType from "../enums/option_types/seek_type";
 import State from "../state";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow } from "../types";
+import type ClipAction from "../enums/clip_action";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -103,6 +105,44 @@ export default abstract class Round {
      */
     getSkipCount(): number {
         return this.skippers.size;
+    }
+
+    /**
+     * Fetches the seek location for the song by the seek type
+     * @param seekType - where in the song to play from
+     * @param songDuration - the duration of the song in seconds
+     * @param isGodMode - hardcodes the seek location
+     * @param _clipAction - unused
+     * @returns the seek location
+     */
+    prepareSeekLocation(
+        seekType: SeekType,
+        songDuration: number,
+        isGodMode: boolean,
+        _clipAction: ClipAction | null = null,
+    ): number {
+        if (isGodMode) {
+            return 70;
+        }
+
+        let seekLocation = 0;
+
+        switch (seekType) {
+            case SeekType.BEGINNING:
+                seekLocation = 0;
+                break;
+            case SeekType.MIDDLE:
+                // Play from [0.4, 0.6]
+                seekLocation = songDuration * (0.4 + 0.2 * Math.random());
+                break;
+            case SeekType.RANDOM:
+            default:
+                // Play from [0, 0.6]
+                seekLocation = songDuration * (0.6 * Math.random());
+                break;
+        }
+
+        return seekLocation;
     }
 
     async interactionSuccessfulSkip(): Promise<void> {
