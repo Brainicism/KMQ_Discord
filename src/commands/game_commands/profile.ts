@@ -20,7 +20,6 @@ import {
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
