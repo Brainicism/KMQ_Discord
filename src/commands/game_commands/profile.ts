@@ -281,7 +281,7 @@ export default class ProfileCommand implements BaseCommand {
         userId: string,
         ephemeral: boolean,
     ): Promise<void> {
-        const user = await State.ipc.fetchUser(userId);
+        const user = await fetchUser(userId);
         if (!user) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,

@@ -142,7 +142,7 @@ function missingPermissionsText(
 }
 
 /**
- * Fetches Users from cache, IPC, or via REST and update cache
+ * Fetches Users from cache or via REST and update cache
  * @param userID - the user's ID
  * @param silentErrors - whether to log errors
  * @returns an instance of the User
@@ -152,18 +152,10 @@ export async function fetchUser(
     silentErrors = false,
 ): Promise<Eris.User | null> {
     let user: Eris.User | undefined;
-    const { client, ipc } = State;
+    const { client } = State;
 
     // fetch via cache
     user = client.users.get(userID);
-
-    // fetch via IPC from other clusters
-    if (!user) {
-        user = await ipc.fetchUser(userID);
-        if (user) {
-            logger.info(`User not in cache, fetched via IPC: ${userID}`);
-        }
-    }
 
     // fetch via REST
     if (!user) {
@@ -185,7 +177,7 @@ export async function fetchUser(
 }
 
 /**
- * Fetches TextChannel from cache, IPC, or via REST and update cache
+ * Fetches TextChannel from cache, or via REST and update cache
  * @param textChannelID - the text channel's ID
  * @returns an instance of the TextChannel
  */
@@ -193,18 +185,10 @@ export async function fetchChannel(
     textChannelID: string,
 ): Promise<Eris.TextChannel | null> {
     let channel: Eris.TextChannel | undefined;
-    const { client, ipc } = State;
+    const { client } = State;
 
     // fetch via cache
     channel = client.getChannel(textChannelID) as Eris.TextChannel | undefined;
-
-    // fetch via IPC from other clusters
-    if (!channel) {
-        logger.info(
-            `Text channel not in cache, attempting to fetch via IPC: ${textChannelID}`,
-        );
-        channel = await ipc.fetchChannel(textChannelID);
-    }
 
     // fetch via REST
     if (!channel) {
@@ -225,16 +209,10 @@ export async function fetchChannel(
     }
 
     // update cache
-    if (channel.guild as Eris.Guild | undefined) {
-        const guild = client.guilds.get(channel.guild.id);
-        if (guild) {
-            guild.channels.update(channel);
-            client.channelGuildMap[channel.id] = guild.id;
-        }
-    } else {
-        logger.warn(
-            `channel.guild unexpectedly undefined for channel ${textChannelID}`,
-        );
+    const guild = client.guilds.get(channel.guild.id);
+    if (guild) {
+        guild.channels.update(channel);
+        client.channelGuildMap[channel.id] = guild.id;
     }
 
     return channel;
