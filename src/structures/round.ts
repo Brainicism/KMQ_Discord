@@ -141,6 +141,7 @@ export default abstract class Round {
                 seekLocation = songDuration * (0.6 * Math.random());
                 break;
         }
+        console.log({ seekType, seekLocation });
 
         return seekLocation;
     }
