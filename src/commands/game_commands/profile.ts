@@ -20,7 +20,6 @@ import {
 import Eris from "eris";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
@@ -281,7 +280,7 @@ export default class ProfileCommand implements BaseCommand {
         userId: string,
         ephemeral: boolean,
     ): Promise<void> {
-        const user = await State.ipc.fetchUser(userId);
+        const user = await fetchUser(userId);
         if (!user) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
