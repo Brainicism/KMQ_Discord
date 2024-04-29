@@ -225,11 +225,16 @@ export async function fetchChannel(
     }
 
     // update cache
-
-    const guild = client.guilds.get(channel.guild.id);
-    if (guild) {
-        guild.channels.update(channel);
-        client.channelGuildMap[channel.id] = guild.id;
+    if (channel.guild as Eris.Guild | undefined) {
+        const guild = client.guilds.get(channel.guild.id);
+        if (guild) {
+            guild.channels.update(channel);
+            client.channelGuildMap[channel.id] = guild.id;
+        }
+    } else {
+        logger.warn(
+            `channel.guild unexpectedly undefined for channel ${textChannelID}`,
+        );
     }
 
     return channel;
