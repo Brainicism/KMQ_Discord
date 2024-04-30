@@ -1502,9 +1502,9 @@ eris-reactions@^0.1.4:
   resolved "https://registry.yarnpkg.com/eris-reactions/-/eris-reactions-0.1.4.tgz#4b642f7411144f164b6097138c262eac6b03def1"
   integrity sha512-U2rMtfywnhh4TmqFcF7uo/ciyQN8vb9ptwSJMQs/uaY1a401f+t3sei1R3IR2gYqaFejJzgjTmzBMT6jIBPYYQ==
 
-"eris@https://github.com/Brainicism/eris#2225e1e":
+"eris@https://github.com/Brainicism/eris#3747e9f":
   version "0.1.0-dev"
-  resolved "https://github.com/Brainicism/eris#2225e1ea81b5ddd46386457e1483f31206747a03"
+  resolved "https://github.com/Brainicism/eris#3747e9fe087a33389c3dda8c3310fc9fbab2e269"
   dependencies:
     ws "^8.2.3"
   optionalDependencies:
