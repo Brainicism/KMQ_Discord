@@ -10,6 +10,7 @@ import KmqMember from "../../../structures/kmq_member";
 import ListeningSession from "../../../structures/listening_session";
 import MessageContext from "../../../structures/message_context";
 import assert from "assert";
+import dbContext from "../../../database_context";
 import sinon from "sinon";
 
 describe("command prechecks", () => {
@@ -275,52 +276,6 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("debugServerPrecheck", () => {
-        const debugServerId = "69420";
-        const gameSession = new GameSession(
-            new GuildPreference("12"),
-            "123",
-            "1234",
-            debugServerId,
-            mockKmqMember,
-            GameType.CLASSIC,
-        );
-
-        afterEach(() => {
-            delete process.env.DEBUG_SERVER_ID;
-        });
-
-        describe("message originates in debug server", () => {
-            it("should return true", async () => {
-                process.env.DEBUG_SERVER_ID = debugServerId;
-
-                assert.strictEqual(
-                    await CommandPrechecks.debugServerPrecheck({
-                        session: gameSession,
-                        messageContext: {
-                            ...messageContext,
-                            guildID: debugServerId,
-                        },
-                    }),
-                    true,
-                );
-            });
-        });
-
-        describe("message does not originate in debug server", () => {
-            it("should return false", async () => {
-                process.env.DEBUG_SERVER_ID = debugServerId;
-                assert.strictEqual(
-                    await CommandPrechecks.debugServerPrecheck({
-                        session: gameSession,
-                        messageContext,
-                    }),
-                    false,
-                );
-            });
-        });
-    });
-
     describe("maintenanceModePrecheck", () => {
         describe("maintenance mode is on", () => {
             before(() => {
@@ -367,31 +322,34 @@ describe("command prechecks", () => {
         });
     });
 
-    describe("debugChannelPrecheck", () => {
-        const debugChannelId = "69420";
+    describe("userAdminPrecheck", () => {
+        const adminUserId = "987654321";
         const gameSession = new GameSession(
             new GuildPreference("12"),
-            debugChannelId,
+            "12",
             "1234",
             "12345",
             mockKmqMember,
             GameType.CLASSIC,
         );
 
-        afterEach(() => {
-            delete process.env.DEBUG_TEXT_CHANNEL_ID;
+        before(async () => {
+            await dbContext.kmq
+                .insertInto("admins")
+                .values({ user_id: adminUserId })
+                .execute();
         });
 
-        describe("message originates in debug channel", () => {
+        describe("message author is an admin", () => {
             it("should return true", async () => {
-                process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
+                messageContext.author.id = adminUserId;
 
                 assert.strictEqual(
-                    await CommandPrechecks.debugChannelPrecheck({
+                    await CommandPrechecks.userAdminPrecheck({
                         session: gameSession,
                         messageContext: {
                             ...messageContext,
-                            textChannelID: debugChannelId,
+                            textChannelID: "12",
                         },
                     }),
                     true,
@@ -399,12 +357,11 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("message does not originate in debug channel", () => {
-            it("should return true", async () => {
-                process.env.DEBUG_TEXT_CHANNEL_ID = debugChannelId;
-
+        describe("message author is not an admin", () => {
+            it("should return false", async () => {
+                messageContext.author.id = "nottheadmin";
                 assert.strictEqual(
-                    await CommandPrechecks.debugChannelPrecheck({
+                    await CommandPrechecks.userAdminPrecheck({
                         session: gameSession,
                         messageContext,
                     }),

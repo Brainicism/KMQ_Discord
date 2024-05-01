@@ -9,6 +9,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
 import { getTimeUntilRestart } from "./helpers/management_utils";
+import { userIsAdmin } from "./helpers/game_utils";
 import GameType from "./enums/game_type";
 import GuildPreference from "./structures/guild_preference";
 import KmqConfiguration from "./kmq_configuration";
@@ -156,39 +157,6 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static async debugServerPrecheck(
-        precheckArgs: PrecheckArgs,
-    ): Promise<boolean> {
-        const { messageContext, errorMessage, interaction } = precheckArgs;
-        const isDebugServer =
-            process.env.DEBUG_SERVER_ID === messageContext.guildID;
-
-        if (!isDebugServer) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | User attempted to use a command only usable in the debug server`,
-            );
-
-            const embedPayload: EmbedPayload = {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "misc.preCheck.title",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.debugServer",
-                ),
-            };
-
-            await sendErrorMessage(messageContext, embedPayload, interaction);
-
-            return false;
-        }
-
-        return true;
-    }
-
     static async maintenancePrecheck(
         precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
@@ -213,37 +181,10 @@ export default class CommandPrechecks {
         return true;
     }
 
-    static async debugChannelPrecheck(
+    static async userAdminPrecheck(
         precheckArgs: PrecheckArgs,
     ): Promise<boolean> {
-        const { messageContext, errorMessage, interaction } = precheckArgs;
-        const isDebugChannel =
-            process.env.DEBUG_TEXT_CHANNEL_ID === messageContext.textChannelID;
-
-        if (!isDebugChannel) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | User attempted to use a command only usable in the debug channel`,
-            );
-
-            const embedPayload: EmbedPayload = {
-                title: i18n.translate(
-                    messageContext.guildID,
-                    "misc.preCheck.title",
-                ),
-                description: i18n.translate(
-                    messageContext.guildID,
-                    errorMessage ?? "misc.preCheck.debugChannel",
-                ),
-            };
-
-            await sendErrorMessage(messageContext, embedPayload, interaction);
-
-            return false;
-        }
-
-        return true;
+        return userIsAdmin(precheckArgs.messageContext.author.id);
     }
 
     static async competitionPrecheck(

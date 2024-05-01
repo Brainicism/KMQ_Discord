@@ -12,15 +12,12 @@ declare namespace NodeJS {
         DISCORD_BOTS_GG_TOKEN?: string | undefined;
         DISCORD_BOT_LIST_TOKEN?: string | undefined;
         KOREAN_BOTS_TOKEN?: string | undefined;
-        DEBUG_SERVER_ID?: string | undefined;
-        DEBUG_TEXT_CHANNEL_ID?: string | undefined;
         BOT_PREFIX: string | undefined;
         NODE_ENV: string | undefined;
         WEB_SERVER_PORT: string | undefined;
         ALERT_WEBHOOK_URL?: string | undefined;
         SONG_UPDATES_WEBHOOK_URL?: string | undefined;
         DEBUG_LOGGING?: string | undefined;
-        POWER_HOUR_NOTIFICATION_CHANNEL_ID?: string | undefined;
         POWER_HOUR_NOTIFICATION_ROLE_ID?: string | undefined;
         SPOTIFY_CLIENT_ID?: string | undefined;
         SPOTIFY_CLIENT_SECRET?: string | undefined;
@@ -43,5 +40,7 @@ declare namespace NodeJS {
         END_TO_END_TEST_BOT_VOICE_CHANNEL: string | undefined;
         RUN_ID: string | undefined;
         GOD_MODE: string | undefined;
+        DEBUG_CHANNEL_WEBHOOK_URL: string | undefined;
+        POWER_HOUR_NOTIF_WEBHOOK_URL: string | undefined;
     }
 }

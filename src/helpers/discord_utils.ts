@@ -190,7 +190,7 @@ export async function fetchChannel(
     // fetch via cache
     channel = client.getChannel(textChannelID) as Eris.TextChannel | undefined;
 
-    // fetch via REST
+    // fetch via REST if channel is not cached for some reason
     if (!channel) {
         try {
             channel = (await client.getRESTChannel(
@@ -198,8 +198,34 @@ export async function fetchChannel(
             )) as Eris.TextChannel;
 
             logger.info(
-                `Text channel not in cache, fetched via REST: ${textChannelID}`,
+                `Text channel (${textChannelID}) not in cache, fetching channel via REST`,
             );
+
+            // guild is partial, grab and cache
+            if (!channel.guild.name) {
+                try {
+                    logger.info(
+                        `Text channel (${textChannelID}) not in cache, fetching guild (${channel.guild.id}) via REST`,
+                    );
+                    const guild = await client.getRESTGuild(channel.guild.id);
+                    channel.guild = guild;
+
+                    client.guilds.update(guild, client);
+                    logger.info(
+                        `Text channel (${textChannelID}) not in cache, fetching bot client (${process.env.BOT_CLIENT_ID!}) via REST`,
+                    );
+                    const member = await client.getRESTGuildMember(
+                        channel.guild.id,
+                        process.env.BOT_CLIENT_ID!,
+                    );
+
+                    guild.members.update(member);
+                } catch (e) {
+                    logger.warn(
+                        `Failed while fetching corresponding channel metadata via REST: ${extractErrorString(e)}`,
+                    );
+                }
+            }
         } catch (err) {
             logger.warn(
                 `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`,
@@ -1645,12 +1671,6 @@ export function checkBotIsAlone(guildID: string): boolean {
     return false;
 }
 
-/** @returns the debug TextChannel */
-export function getDebugChannel(): Promise<Eris.TextChannel | null> {
-    if (!process.env.DEBUG_TEXT_CHANNEL_ID) return Promise.resolve(null);
-    return fetchChannel(process.env.DEBUG_TEXT_CHANNEL_ID);
-}
-
 /**
  * @param guildID - The guild ID
  * @returns the number of users required for a majority
@@ -1695,6 +1715,31 @@ export async function sendInfoWebhook(
         username,
         avatar_url: avatarUrl,
         footerText: State.version,
+    });
+}
+
+/**
+ * Sends an alert to the message webhook
+ * @param webhookURL - The webhook URL
+ * @param embed - the embed payload
+ * @param content - the body text
+ */
+export async function sendInfoEmbedsWebhook(
+    webhookURL: string,
+    embed: EmbedPayload,
+    content: string | undefined,
+): Promise<void> {
+    if (!webhookURL) return;
+    await axios.post(webhookURL, {
+        content,
+        embeds: [
+            {
+                title: embed.title,
+                fields: embed.fields,
+                description: embed.description,
+                footer: { text: embed.footerText },
+            },
+        ],
     });
 }
 
@@ -2009,26 +2054,18 @@ export async function tryCreateInteractionErrorAcknowledgement(
  * Sends the power hour notification to the KMQ server
  */
 export async function sendPowerHourNotification(): Promise<void> {
-    if (
-        !process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID ||
-        !process.env.POWER_HOUR_NOTIFICATION_ROLE_ID
-    ) {
+    if (!process.env.POWER_HOUR_NOTIFICATION_ROLE_ID) {
         return;
     }
 
     logger.info("Sending power hour notification");
-    await sendInfoMessage(
-        new MessageContext(
-            process.env.POWER_HOUR_NOTIFICATION_CHANNEL_ID,
-            null,
-            "",
-        ),
+    await sendInfoEmbedsWebhook(
+        process.env.POWER_HOUR_NOTIF_WEBHOOK_URL!,
         {
             title: "⬆️ KMQ Power Hour Starts Now! ⬆️",
             description: "Earn 2x EXP for the next hour!",
             thumbnailUrl: KmqImages.LISTENING,
         },
-        false,
         `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`,
     );
 }
@@ -2246,9 +2283,11 @@ export async function sendDeprecatedTextCommandMessage(
 /**
  * Updates the Discord slash commands
  * @param appCommandType - Whether to reload or delete app commands
+ * @param guildId - The server ID to deploy guild commands to
  */
 export const updateAppCommands = async (
     appCommandType = AppCommandsAction.RELOAD,
+    guildId?: string,
 ): Promise<{ [commandName: string]: string }> => {
     const isProd = process.env.NODE_ENV === EnvType.PROD;
 
@@ -2390,15 +2429,11 @@ export const updateAppCommands = async (
             logger.error(`Error during bulkEditCommands: ${e}`);
         }
     } else {
-        const debugServer = State.client.guilds.get(
-            process.env.DEBUG_SERVER_ID as string,
-        );
-
-        if (debugServer) {
+        if (guildId) {
             try {
-                logger.info("bulkEditGuildCommands begin");
+                logger.info(`bulkEditGuildCommands begin for ${guildId}`);
                 appCommands = await State.client.bulkEditGuildCommands(
-                    debugServer.id,
+                    guildId,
                     commandStructures,
                 );
                 logger.info("bulkEditGuildCommands finish");

@@ -10,7 +10,7 @@ import type Eris from "eris";
 const logger = new IPCLogger("eval");
 
 export default class EvalCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const evalString = parsedMessage.argument;
