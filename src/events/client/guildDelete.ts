@@ -44,6 +44,8 @@ export default async function guildDeleteHandler(
                 footerText,
             },
             undefined,
+            undefined,
+            undefined,
         );
     } else {
         await sendInfoEmbedsWebhook(
@@ -52,6 +54,8 @@ export default async function guildDeleteHandler(
                 title,
                 footerText,
             },
+            undefined,
+            undefined,
             undefined,
         );
     }

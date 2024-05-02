@@ -51,5 +51,7 @@ export default async function guildCreateHandler(
             )} ${joinDate.toLocaleTimeString("en-US")}`,
         },
         undefined,
+        undefined,
+        undefined,
     );
 }

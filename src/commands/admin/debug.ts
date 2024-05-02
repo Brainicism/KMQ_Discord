@@ -93,6 +93,8 @@ export default class DebugCommand implements BaseCommand {
                 timestamp: new Date(),
             },
             undefined,
+            undefined,
+            undefined,
         );
 
         logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);

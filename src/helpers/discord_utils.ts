@@ -1723,11 +1723,15 @@ export async function sendInfoWebhook(
  * @param webhookURL - The webhook URL
  * @param embed - the embed payload
  * @param content - the body text
+ * @param avatarUrl - The avatar URL to show on the embed
+ * @param username - The username to show on the embed
  */
 export async function sendInfoEmbedsWebhook(
     webhookURL: string,
     embed: EmbedPayload,
     content: string | undefined,
+    avatarUrl: string | undefined,
+    username: string | undefined,
 ): Promise<void> {
     if (!webhookURL) return;
     await axios.post(webhookURL, {
@@ -1740,6 +1744,8 @@ export async function sendInfoEmbedsWebhook(
                 footer: { text: embed.footerText },
             },
         ],
+        username,
+        avatar_url: avatarUrl,
     });
 }
 
@@ -2067,6 +2073,8 @@ export async function sendPowerHourNotification(): Promise<void> {
             thumbnailUrl: KmqImages.LISTENING,
         },
         `<@&${process.env.POWER_HOUR_NOTIFICATION_ROLE_ID}>`,
+        undefined,
+        undefined,
     );
 }
 
