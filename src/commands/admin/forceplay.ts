@@ -15,7 +15,7 @@ const logger = new IPCLogger("forceplay");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class ForcePlayCommand implements BaseCommand {
-    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(

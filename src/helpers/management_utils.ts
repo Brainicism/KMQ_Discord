@@ -508,11 +508,7 @@ export function registerIntervals(clusterID: number): void {
 
     // Every hour
     schedule.scheduleJob("0 * * * *", async () => {
-        if (
-            isPowerHour() &&
-            !isWeekend() &&
-            State.client.guilds.has(process.env.DEBUG_SERVER_ID as string)
-        ) {
+        if (isPowerHour() && !isWeekend()) {
             // Ping a role in KMQ server notifying of power hour
             await sendPowerHourNotification();
         }

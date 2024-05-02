@@ -59,7 +59,6 @@ jobs:
                   echo "BOT_PREFIX=." >> .env
                   echo "APP_NAME=kmq-gci" >> .env
                   echo "DAISUKI_DB_PASSWORD=unusedpw" >> .env
-                  echo "DEBUG_SERVER_ID=${{ secrets.DEBUG_SERVER_ID }}" >> .env
                   echo "END_TO_END_TEST_BOT_TOKEN=$END_TO_END_TEST_BOT_TOKEN" >> .env
                   echo "END_TO_END_TEST_BOT_CLIENT=$END_TO_END_TEST_BOT_CLIENT" >> .env
                   echo "END_TO_END_TEST_BOT_CHANNEL=$END_TO_END_TEST_BOT_CHANNEL" >> .env

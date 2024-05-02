@@ -1,7 +1,6 @@
 import { IPCLogger } from "../../logger";
-import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils";
 import Eris from "eris";
-import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 
 const logger = new IPCLogger("guildDelete");
@@ -14,8 +13,6 @@ export default async function guildDeleteHandler(
     guild: Eris.Guild | { id: string },
 ): Promise<void> {
     logger.info(`Server left: ${guild.id}`);
-    const kmqDebugChannel = await getDebugChannel();
-    if (!kmqDebugChannel) return;
     const leaveDate = new Date();
     const title = "Server Left";
     const footerText = `gid: ${
@@ -25,12 +22,8 @@ export default async function guildDeleteHandler(
     )} ${leaveDate.toLocaleTimeString("en-US")}`;
 
     if (guild instanceof Eris.Guild) {
-        await sendInfoMessage(
-            new MessageContext(
-                kmqDebugChannel.id,
-                null,
-                kmqDebugChannel.guild.id,
-            ),
+        await sendInfoEmbedsWebhook(
+            process.env.DEBUG_CHANNEL_WEBHOOK_URL!,
             {
                 author: {
                     username: guild.name,
@@ -50,18 +43,20 @@ export default async function guildDeleteHandler(
                 ],
                 footerText,
             },
+            undefined,
+            undefined,
+            undefined,
         );
     } else {
-        await sendInfoMessage(
-            new MessageContext(
-                kmqDebugChannel.id,
-                null,
-                kmqDebugChannel.guild.id,
-            ),
+        await sendInfoEmbedsWebhook(
+            process.env.DEBUG_CHANNEL_WEBHOOK_URL!,
             {
                 title,
                 footerText,
             },
+            undefined,
+            undefined,
+            undefined,
         );
     }
 

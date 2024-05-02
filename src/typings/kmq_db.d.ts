@@ -5,6 +5,10 @@ export type Generated<T> =
         ? ColumnType<S, I | undefined, U>
         : ColumnType<T, T | undefined, T>;
 
+export interface Admins {
+    user_id: string;
+}
+
 export interface AvailableSongs {
     artist_aliases: string;
     artist_name_en: string;
@@ -261,6 +265,7 @@ export interface KmqDB {
     "kpop_videos.app_kpop_group_safe": AppKpopGroupSafe;
     "kpop_videos.app_kpop_ms": AppKpopMs;
     "kpop_videos.app_upcoming": AppUpcoming;
+    admins: Admins;
     available_songs: AvailableSongs;
     badges: Badges;
     badges_players: BadgesPlayers;

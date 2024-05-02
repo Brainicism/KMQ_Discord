@@ -66,19 +66,16 @@ export default class BotWorker extends BaseClusterWorker {
         logger.info(
             `${this.logHeader()} | Received cluster command: ${commandName}`,
         );
+        const components = commandName.split("|");
+        components.shift();
         if (commandName.startsWith("eval")) {
-            const evalString = commandName.substring(
-                commandName.indexOf("|") + 1,
-            );
+            const evalString = components[0]!;
 
             const evalResult = await EvalCommand.eval(evalString);
             return evalResult;
         }
 
         if (commandName.startsWith("announce_restart")) {
-            const components = commandName.split("|");
-            components.shift();
-
             const restartMinutes = parseInt(components[0]!, 10);
 
             const restartDate = new Date();
@@ -176,11 +173,13 @@ export default class BotWorker extends BaseClusterWorker {
             case "reload_app_commands":
                 State.commandToID = await updateAppCommands(
                     AppCommandsAction.RELOAD,
+                    components[0]!,
                 );
                 return null;
             case "delete_app_commands":
                 State.commandToID = await updateAppCommands(
                     AppCommandsAction.DELETE,
+                    components[0]!,
                 );
                 return null;
             default:

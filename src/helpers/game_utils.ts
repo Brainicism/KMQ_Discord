@@ -91,6 +91,18 @@ export async function userBonusIsActive(userId: string): Promise<boolean> {
 }
 
 /**
+ * @param userId - The user ID
+ * @returns whether the player is an admin
+ */
+export async function userIsAdmin(userId: string): Promise<boolean> {
+    return !!(await dbContext.kmq
+        .selectFrom("admins")
+        .select("user_id")
+        .where("user_id", "=", userId)
+        .executeTakeFirst());
+}
+
+/**
  * @returns whether the player has bonus active
  */
 export async function activeBonusUsers(): Promise<Set<string>> {

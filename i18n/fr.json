@@ -1662,8 +1662,7 @@
         },
         "preCheck": {
             "competition": "Cette commande a été désactivée pour les utilisateurs réguliers dans la compétition.",
-            "debugChannel": "Vous ne pouvez pas faire cela dans ce canal.",
-            "debugServer": "Vous ne pouvez pas faire cela dans ce serveur.",
+
             "differentVC": "Vous devez être dans le même canal vocal que le bot pour utiliser cette commande.",
             "notClipMode": "Vous ne pouvez pas faire cela en mode clip.",
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",

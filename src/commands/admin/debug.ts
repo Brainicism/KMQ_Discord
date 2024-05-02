@@ -2,9 +2,9 @@ import * as uuid from "uuid";
 import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
-    getDebugChannel,
     getDebugLogHeader,
     getUserVoiceChannel,
+    sendInfoEmbedsWebhook,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import GuildPreference from "../../structures/guild_preference";
@@ -20,12 +20,6 @@ const logger = new IPCLogger("debug");
 // eslint-disable-next-line import/no-unused-modules
 export default class DebugCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
-        const debugChannel = await getDebugChannel();
-        if (!debugChannel) {
-            logger.warn("No debug text channel specified");
-            return;
-        }
-
         const guildPreference = await GuildPreference.getGuildPreference(
             message.guildID,
         );
@@ -90,14 +84,17 @@ export default class DebugCommand implements BaseCommand {
             thumbnailUrl: KmqImages.READING_BOOK,
         });
 
-        await sendInfoMessage(
-            new MessageContext(debugChannel.id, null, debugChannel.guild.id),
+        await sendInfoEmbedsWebhook(
+            process.env.DEBUG_CHANNEL_WEBHOOK_URL!,
             {
                 title: `Debug Details for User: ${message.author.id}, Guild: ${message.guildID}`,
                 footerText: debugID,
                 fields,
                 timestamp: new Date(),
             },
+            undefined,
+            undefined,
+            undefined,
         );
 
         logger.info(`${getDebugLogHeader(message)} | Debug info retrieved.`);

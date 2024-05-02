@@ -1662,8 +1662,6 @@
         },
         "preCheck": {
             "competition": "This command has been disabled for regular users in the competition.",
-            "debugChannel": "You can't do that in this channel.",
-            "debugServer": "You can't do that in this server.",
             "differentVC": "You must be in the same voice channel as the bot to use this command.",
             "notClipMode": "You can't do that while in clip mode.",
             "notGameSession": "You can't do that while in a game session.",

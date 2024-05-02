@@ -1,8 +1,7 @@
 import { DiscordPreferredLocaleToInternal } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getDebugChannel, sendInfoMessage } from "../../helpers/discord_utils";
+import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils";
 import LocaleTypeCommand from "../../commands/misc_commands/locale";
-import MessageContext from "../../structures/message_context";
 import type Eris from "eris";
 
 const logger = new IPCLogger("guildCreate");
@@ -25,11 +24,9 @@ export default async function guildCreateHandler(
         );
     }
 
-    const kmqDebugChannel = await getDebugChannel();
-    if (!kmqDebugChannel) return;
     const joinDate: Date = new Date(guild.joinedAt);
-    await sendInfoMessage(
-        new MessageContext(kmqDebugChannel.id, null, kmqDebugChannel.guild.id),
+    await sendInfoEmbedsWebhook(
+        process.env.DEBUG_CHANNEL_WEBHOOK_URL!,
         {
             author: {
                 username: guild.name,
@@ -53,5 +50,8 @@ export default async function guildCreateHandler(
                 "en-US",
             )} ${joinDate.toLocaleTimeString("en-US")}`,
         },
+        undefined,
+        undefined,
+        undefined,
     );
 }

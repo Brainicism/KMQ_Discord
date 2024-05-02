@@ -25,28 +25,32 @@ export default class AppCommandsCommand implements BaseCommand {
         ],
     };
 
-    preRunChecks = [{ checkFn: CommandPrechecks.debugChannelPrecheck }];
+    preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 
     call = async ({ message, parsedMessage }: CommandArgs): Promise<void> => {
         const isProd = process.env.NODE_ENV === EnvType.PROD;
-        const debugServer = State.client.guilds.get(
-            process.env.DEBUG_SERVER_ID as string,
-        );
 
         const commandModificationScope = isProd ? "global" : "guild";
 
-        if (!isProd && !debugServer) return;
         const appCommandType = parsedMessage.components[0] as AppCommandsAction;
         if (appCommandType === AppCommandsAction.RELOAD) {
             logger.info(
                 `Creating ${commandModificationScope} application commands...`,
             );
-            await State.ipc.allClustersCommand("reload_app_commands", true);
+
+            await State.ipc.allClustersCommand(
+                `reload_app_commands|${message.guildID}`,
+                true,
+            );
         } else {
             logger.info(
                 `Deleting ${commandModificationScope} application commands`,
             );
-            await State.ipc.allClustersCommand("delete_app_commands", true);
+
+            await State.ipc.allClustersCommand(
+                `delete_app_commands|${message.guildID}`,
+                true,
+            );
         }
 
         await sendInfoMessage(MessageContext.fromMessage(message), {

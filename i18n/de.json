@@ -1662,8 +1662,6 @@
         },
         "preCheck": {
             "competition": "Dieser Befehl wurde für normale Benutzer im Wettbewerb deaktiviert.",
-            "debugChannel": "Das kannst du in diesem Kanal nicht tun.",
-            "debugServer": "Das kannst du auf diesem Server nicht tun.",
             "differentVC": "Du musst dich im selben Sprachkanal wie der Bot befinden, um diesen Befehl nutzen zu können.",
             "notClipMode": "Das kannst du im Clip-Modus nicht tun.",
             "notGameSession": "Das kannst du in einer Spielsitzung nicht tun.",
