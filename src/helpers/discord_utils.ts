@@ -1742,6 +1742,7 @@ export async function sendInfoEmbedsWebhook(
                 fields: embed.fields,
                 description: embed.description,
                 footer: { text: embed.footerText },
+                thumbnail: { url: embed.thumbnailUrl },
             },
         ],
         username,
