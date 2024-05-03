@@ -9,8 +9,8 @@ const logger = new IPCLogger("debug");
  */
 export default function debugHandler(message: string, shardID: number): void {
     if (shardID) {
-        logger.info(`Shard #${shardID} received debug message: ${message}`);
+        logger.debug(`Shard #${shardID} received debug message: ${message}`);
     } else {
-        logger.info(`Received debug message: ${message}`);
+        logger.debug(`Received debug message: ${message}`);
     }
 }
