@@ -29,19 +29,14 @@ export function getInternalLogger(): winston.Logger {
     );
 
     return winston.createLogger({
-        level: "info",
+        level: "debug",
         format: format.combine(format.timestamp(), logFormat),
         transports: [
             new winston.transports.Console({
                 format: format.combine(format.timestamp(), consoleFormat),
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/error-%DATE%.log"),
-                level: "error",
-                maxFiles: "14d",
-            }),
-            new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/combined-%DATE%.log"),
+                filename: path.join(__dirname, "../logs/kmq-%DATE%.log"),
                 maxFiles: "14d",
             }),
         ],
@@ -90,9 +85,9 @@ export class IPCLogger {
 
     debug(msg: LoggerArg): void {
         if (!isMaster) {
-            console.info(this.getCategorizedMessage(msg));
+            console.debug(this.getCategorizedMessage(msg));
         } else {
-            this.logger.info(this.getCategorizedMessage(msg));
+            this.logger.debug(this.getCategorizedMessage(msg));
         }
     }
 
