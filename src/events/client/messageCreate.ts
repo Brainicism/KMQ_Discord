@@ -173,7 +173,7 @@ export default async function messageCreateHandler(
             message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT &&
             !State.rateLimiter.check(message.author.id)
         ) {
-            logger.error(
+            logger.warn(
                 `User ${
                     message.author.id
                 } is being rate limited. ${State.rateLimiter.timeRemaining(

@@ -276,11 +276,42 @@ export default abstract class Session {
             await this.ensureVoiceConnection(State.client);
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Error obtaining voice connection. err = ${err.toString()}`,
-            );
+            if (err instanceof Error) {
+                const knownErrorStrings = [
+                    "Voice connection timeout",
+                    "Disconnected",
+                    "Insufficient permission to connect to voice channel",
+                ];
+
+                let isError = true;
+                if (
+                    knownErrorStrings.some((x) =>
+                        (err as Error).message.includes(x),
+                    )
+                ) {
+                    isError = false;
+                }
+
+                if (isError) {
+                    logger.error(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
+                    );
+                } else {
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
+                    );
+                }
+            } else {
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Error obtaining voice connection. Unexpected error type. err = ${err.toString()}`,
+                );
+            }
 
             await sendErrorMessage(messageContext, {
                 title: i18n.translate(
