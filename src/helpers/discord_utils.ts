@@ -332,8 +332,7 @@ async function sendMessageExceptionHandler(
 ): Promise<void> {
     if (typeof e === "string") {
         if (e.startsWith("Request timed out")) {
-            // Request Timeout
-            logger.error(
+            logger.warn(
                 `Error sending message. Request timed out. textChannelID = ${channelID}.`,
             );
         }
@@ -1874,27 +1873,36 @@ function interactionRejectionHandler(
     err: any,
 ): void {
     if (err instanceof DiscordRESTError || err instanceof DiscordHTTPError) {
-        if (err.code === 10062) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    interaction,
-                )} | Interaction acknowledge (unknown interaction)`,
-            );
-            return;
-        } else if (err.code === 40060) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    interaction,
-                )} | Interaction already acknowledged`,
-            );
-            return;
+        switch (err.code) {
+            case 10062:
+                logger.warn(
+                    `${getDebugLogHeader(
+                        interaction,
+                    )} | Interaction acknowledge (unknown interaction)`,
+                );
+                break;
+            case 40060:
+                logger.warn(
+                    `${getDebugLogHeader(
+                        interaction,
+                    )} | Interaction already acknowledged`,
+                );
+                break;
+            case 503:
+                logger.warn(
+                    `${getDebugLogHeader(
+                        interaction,
+                    )} | Interaction acknowledge failed (Bad Gateway)`,
+                );
+                break;
+            default:
+                logger.error(
+                    `${getDebugLogHeader(
+                        interaction,
+                    )} | Unknown Discord error acknowledging interaction. code = ${err.code}. ${extractErrorString(err)}`,
+                );
+                break;
         }
-
-        logger.error(
-            `${getDebugLogHeader(
-                interaction,
-            )} | Unknown Discord error acknowledging interaction. code = ${err.code}. ${extractErrorString(err)}`,
-        );
     } else if (err instanceof Error) {
         if (
             ["Request timed out"].some((errString) =>
