@@ -11,6 +11,7 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { sql } from "kysely";
+import { userIsAdmin } from "../../helpers/game_utils";
 import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
@@ -261,6 +262,35 @@ export default class StatsCommand implements BaseCommand {
                     .join("\n")}\`\`\``,
             },
         ];
+
+        if (await userIsAdmin(messageContext.author.id)) {
+            const runningStats = (await State.ipc.allClustersCommand(
+                "running_stats",
+                true,
+            )) as Map<number, { roundsPlayed: number; gamesPlayed: number }>;
+
+            const roundsPlayed = Array.from(runningStats.values()).reduce(
+                (x, y) => x + y.roundsPlayed,
+                0,
+            );
+
+            const gamesPlayed = Array.from(runningStats.values()).reduce(
+                (x, y) => x + y.gamesPlayed,
+                0,
+            );
+
+            const runningStatistics = {
+                "Rounds Played": roundsPlayed,
+                "Games Played": gamesPlayed,
+            };
+
+            fields.push({
+                name: "Running Stats",
+                value: `\`\`\`\n${Object.entries(runningStatistics)
+                    .map((stat) => `${stat[0]}: ${stat[1]}`)
+                    .join("\n")}\`\`\``,
+            });
+        }
 
         logger.info(`${getDebugLogHeader(messageContext)} | Stats retrieved`);
 

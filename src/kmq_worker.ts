@@ -143,7 +143,8 @@ export default class BotWorker extends BaseClusterWorker {
             case "reload_config":
                 KmqConfiguration.reload();
                 return null;
-
+            case "running_stats":
+                return State.runningStats;
             case "clear_restart":
                 if (!State.restartNotification) {
                     logger.warn(

@@ -27,6 +27,14 @@ export default class State {
     static bannedServers: Set<string> = new Set();
     static bannedPlayers: Set<string> = new Set();
     static processStartTime: number = Date.now();
+    static runningStats: {
+        roundsPlayed: number;
+        gamesPlayed: number;
+    } = {
+        roundsPlayed: 0,
+        gamesPlayed: 0,
+    };
+
     static ipc: IPC;
     static rateLimiter = new RateLimiter(15, 30);
     static bonusArtists: Set<string> = new Set<string>();
