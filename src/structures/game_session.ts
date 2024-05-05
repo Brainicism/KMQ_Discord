@@ -532,6 +532,8 @@ export default class GameSession extends Session {
 
         await super.endSession(reason, endedDueToError);
         await this.sendEndGameMessage();
+        State.runningStats.gamesPlayed += 1;
+        State.runningStats.roundsPlayed += this.roundsPlayed;
 
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`,
