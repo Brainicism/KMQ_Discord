@@ -347,7 +347,14 @@ const downloadNewSongs = async (
             } (${downloadCount + 1}/${songsToDownload.length})`,
         );
         try {
-            await retryJob(downloadSong, [db, song.youtubeLink], 1, true, 5000);
+            await retryJob(
+                downloadSong,
+                [db, song.youtubeLink],
+                1,
+                true,
+                5000,
+                false,
+            );
         } catch (err) {
             logger.error(
                 `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
