@@ -43,6 +43,7 @@ const generateFilteredQuery = (): string => {
         "Dance Challenge",
         "Dance Practice",
         "Meta",
+        "Megathread",
     ];
 
     const flairedFilters = filters.map((x) => `flair:"${x}"`);
