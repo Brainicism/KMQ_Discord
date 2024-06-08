@@ -564,7 +564,16 @@ export default class PlaylistManager {
         }
 
         if (!metadata) {
-            logger.warn(`${logHeader} | No Spotify metadata`);
+            logger.warn(
+                `${logHeader} | No Spotify metadata for id = ${playlistId}`,
+            );
+            return UNMATCHED_PLAYLIST;
+        }
+
+        if (!metadata.limit) {
+            logger.warn(
+                `${logHeader} | Playlist limit is 0, likely auto-generated Spotify playlist. id = ${metadata.playlistId}. name = ${metadata.playlistName}`,
+            );
             return UNMATCHED_PLAYLIST;
         }
 

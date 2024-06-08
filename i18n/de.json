@@ -966,7 +966,7 @@
                 "truncated": "Hinweis: Die Verarbeitung der Wiedergabeliste hat zu lange gedauert und wurde nicht abgeschlossen. Versuche es beim nächsten Mal mit einer kleineren Wiedergabeliste."
             },
             "noMatches": {
-                "description": "Keine Titel konnten abgestimmt werden. Stelle sicher, dass die Wiedergabeliste nicht privat ist.",
+                "description": "Keine Lieder wurden gefunden. Stellen Sie sicher, dass die Playlist nicht privat oder automatisch generiert ist.",
                 "title": "Fehler beim Abrufen von Songs aus der Wiedergabeliste"
             },
             "noPlaylistSet": {

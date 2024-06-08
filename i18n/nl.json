@@ -966,7 +966,7 @@
                 "truncated": "Let op: het verwerken van de playlist duurde te lang en was niet voltooid. Probeer het de volgende keer met een kleinere playlist."
             },
             "noMatches": {
-                "description": "Er zijn geen nummers gevonden. Zorg ervoor dat de afspeellijst niet privé is.",
+                "description": "Er zijn geen nummers gevonden. Zorg ervoor dat de afspeellijst niet privé is, of automatisch gegenereerd.",
                 "title": "Kon nummers niet ophalen uit afspeellijst"
             },
             "noPlaylistSet": {
@@ -1662,7 +1662,6 @@
         },
         "preCheck": {
             "competition": "Deze opdracht is uitgeschakeld voor gewone gebruikers in de competitie.",
-
             "differentVC": "Je moet in hetzelfde spraakkanaal zijn als de bot om deze opdracht te gebruiken.",
             "notClipMode": "Je kunt dat niet doen terwijl je in clipmodus bent.",
             "notGameSession": "Je kunt dat niet doen tijdens een spelsessie.",
