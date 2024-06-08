@@ -966,7 +966,7 @@
                 "truncated": "Nota: La lista de reproducción tardó demasiado en procesarse y no se completó. Intente de nuevo con una lista de reproducción más pequeña la próxima vez."
             },
             "noMatches": {
-                "description": "No se encontraron coincidencias con las canciones. Asegúrate de que la lista de reproducción no sea privada.",
+                "description": "No se encontraron canciones. Asegúrate de que la lista de reproducción no sea privada ni generada automáticamente.",
                 "title": "No se pudieron obtener canciones de la lista de reproducción"
             },
             "noPlaylistSet": {
@@ -1662,7 +1662,6 @@
         },
         "preCheck": {
             "competition": "Este comando ha sido desactivado para usuarios regulares en la competencia.",
-
             "differentVC": "Debes estar en el mismo canal de voz que el bot para usar este comando.",
             "notClipMode": "No puedes hacer eso mientras estás en modo de recorte.",
             "notGameSession": "No puedes hacer eso mientras estás en una sesión de juego.",

@@ -966,7 +966,7 @@
                 "truncated": "Note : La playlist a pris trop de temps à être traitée et n'a pas été complètement terminée. Essayez avec une playlist plus petite la prochaine fois."
             },
             "noMatches": {
-                "description": "Aucune chanson ne correspond. Assurez-vous que la playlist n'est pas privée.",
+                "description": "Aucune chanson n'a été trouvée. Assurez-vous que la playlist n'est pas privée ou générée automatiquement.",
                 "title": "Échec de la récupération des chansons depuis la playlist"
             },
             "noPlaylistSet": {
@@ -1662,7 +1662,6 @@
         },
         "preCheck": {
             "competition": "Cette commande a été désactivée pour les utilisateurs réguliers dans la compétition.",
-
             "differentVC": "Vous devez être dans le même canal vocal que le bot pour utiliser cette commande.",
             "notClipMode": "Vous ne pouvez pas faire cela en mode clip.",
             "notGameSession": "Vous ne pouvez pas faire cela pendant une session de jeu.",

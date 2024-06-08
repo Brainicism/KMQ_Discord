@@ -966,7 +966,7 @@
                 "truncated": "Observação: A lista de reprodução demorou muito para ser processada e não foi concluída. Tente novamente com uma lista de reprodução menor da próxima vez."
             },
             "noMatches": {
-                "description": "Nenhuma música foi associada. Certifique-se de que a playlist não seja privada.",
+                "description": "Nenhuma música foi encontrada. Certifique-se de que a playlist não é privada ou gerada automaticamente.",
                 "title": "Falha ao buscar músicas da lista de reprodução"
             },
             "noPlaylistSet": {
@@ -1662,7 +1662,6 @@
         },
         "preCheck": {
             "competition": "Este comando foi desabilitado para usuários regulares na competição.",
-
             "differentVC": "Você deve estar no mesmo canal de voz que o bot para usar este comando.",
             "notClipMode": "Você não pode fazer isso enquanto estiver no modo de recorte.",
             "notGameSession": "Você não pode fazer isso durante uma sessão de jogo.",

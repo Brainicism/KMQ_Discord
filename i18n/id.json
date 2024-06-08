@@ -966,7 +966,7 @@
                 "truncated": "Catatan: Daftar putar terlalu lama untuk diproses dan tidak selesai sampai akhir. Coba lagi dengan daftar putar yang lebih kecil lain kali."
             },
             "noMatches": {
-                "description": "Tidak ada lagu yang cocok. Pastikan bahwa daftar putar bukan privat.",
+                "description": "Tidak ada lagu yang cocok. Pastikan bahwa playlist tidak bersifat pribadi, atau dibuat secara otomatis.",
                 "title": "Gagal mengambil lagu dari daftar putar"
             },
             "noPlaylistSet": {
@@ -1662,7 +1662,6 @@
         },
         "preCheck": {
             "competition": "Perintah ini telah dinonaktifkan untuk pengguna reguler dalam kompetisi.",
-
             "differentVC": "Anda harus berada di saluran suara yang sama dengan bot untuk menggunakan perintah ini.",
             "notClipMode": "Anda tidak bisa melakukan itu saat dalam mode klip.",
             "notGameSession": "Anda tidak dapat melakukan itu saat dalam sesi permainan.",

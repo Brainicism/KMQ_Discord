@@ -966,7 +966,7 @@
                 "truncated": "Note: The playlist took too long to process and did not finish to completion. Try again with a smaller playlist next time."
             },
             "noMatches": {
-                "description": "No songs were matched. Make sure that the playlist is not private.",
+                "description": "No songs were matched. Make sure that the playlist is not private, or auto-generated.",
                 "title": "Failed to fetch songs from playlist"
             },
             "noPlaylistSet": {
