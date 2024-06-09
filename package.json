@@ -68,7 +68,6 @@
         "eris": "https://github.com/Brainicism/eris#3747e9f",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#9916334",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
-        "erlpack": "https://github.com/abalabahaha/erlpack.git",
         "fastify": "^4.26.0",
         "fluent-ffmpeg": "^2.1.2",
         "googleapis": "^131.0.0",
