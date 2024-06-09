@@ -26,7 +26,7 @@ COPY src/ src/
 RUN npx tsc
 
 # ================================================================= #
-FROM node:22-slim
+FROM node:22
 RUN apt-get update && apt-get install -y default-mysql-client \
   ffmpeg \
   curl \
