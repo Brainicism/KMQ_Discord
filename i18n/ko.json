@@ -1588,7 +1588,7 @@
             "correctGuess": "{{correctGuesser}}(이)가 올바르게 추측하였습니다 (+{{expGain}} 경험치) ({{timeToGuess}}초)",
             "hiddenRemainingPlayers": "기다리는 중",
             "hiddenTimerInfo": "{{guessButton}} 라운드 종료 전 {{timestamp}}!",
-            "noCorrectGuesses": "아무도 그것을 얻지 못했습니다.",
+            "noCorrectGuesses": "아무도 맞추지 못했습니다.",
             "noWinners": "아무도 우승하지 못했습니다.",
             "runnersUp": "준우승",
             "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
