@@ -68,6 +68,8 @@ jobs:
                   echo "YOUTUBE_API_KEY=$YOUTUBE_API_KEY" >> .env
             - name: Install ts-node
               run: yarn global add ts-node
+            - name: Install typescript
+              run: yarn add typescript
             - name: Extract metadata (tags, labels) for Docker
               id: meta
               uses: docker/metadata-action@v5
