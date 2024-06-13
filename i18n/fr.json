@@ -1677,7 +1677,7 @@
             "title": "Redémarrage à venir dans {{timeUntilRestart}} minutes."
         },
         "sendingBookmarkedSongs": {
-            "description": "Envoi de {{songs}} à {{players}}.\n\nAjoutez des chansons en favoris pendant le jeu en faisant un clic droit sur le message de la chanson et en sélectionnant `Applications > Ajouter aux favoris`",
+            "description": "Envoi de {{songs}} à {{players}}.",
             "title": "Envoi des chansons en favoris..."
         },
         "skip": "Passer",

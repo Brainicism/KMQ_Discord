@@ -1677,7 +1677,7 @@
             "title": "{{timeUntilRestart}} 分後に再起動が予定されています。"
         },
         "sendingBookmarkedSongs": {
-            "description": "{{players}} に {{songs}} を送信しています。\n\nゲーム中に曲をブックマークするには、曲のメッセージを右クリックして「アプリ > 曲をブックマーク」を選択してください。",
+            "description": "{{songs}}を{{players}}に送信中。",
             "title": "ブックマークされた曲を送信しています..."
         },
         "skip": "スキップ",

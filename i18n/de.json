@@ -1677,7 +1677,7 @@
             "title": "Neustart in {{timeUntilRestart}} Minuten."
         },
         "sendingBookmarkedSongs": {
-            "description": "Sende {{songs}} an {{players}}.\n\nDu kannst Songs während des Spiels mit einem Lesezeichen versehen, indem du mit der rechten Maustaste auf die Songnachricht klickst und `Apps > Song mit Lesezeichen versehen` auswählst.",
+            "description": "Senden von {{songs}} an {{players}}.",
             "title": "Gespeicherte Songs senden ..."
         },
         "skip": "Überspringen",

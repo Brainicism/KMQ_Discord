@@ -1677,7 +1677,7 @@
             "title": "Upcoming Restart in {{timeUntilRestart}} Minutes."
         },
         "sendingBookmarkedSongs": {
-            "description": "Sending {{songs}} to {{players}}.\n\nBookmark songs during the game by right-clicking the song message and selecting `Apps > Bookmark Song`",
+            "description": "Sending {{songs}} to {{players}}.",
             "title": "Sending Bookmarked Songs..."
         },
         "skip": "Skip",

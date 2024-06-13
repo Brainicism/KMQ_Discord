@@ -1677,7 +1677,7 @@
             "title": "Reinicio próximo en {{timeUntilRestart}} minutos."
         },
         "sendingBookmarkedSongs": {
-            "description": "Enviando {{songs}} a {{players}}.\n\nAgrega canciones a tus marcadores durante el juego haciendo clic derecho en el mensaje de la canción y seleccionando `Aplicaciones > Agregar canción a marcadores`",
+            "description": "Enviando {{songs}} a {{players}}.",
             "title": "Enviando canciones marcadas..."
         },
         "skip": "Saltar",
