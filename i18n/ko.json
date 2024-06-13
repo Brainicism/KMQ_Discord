@@ -1677,7 +1677,7 @@
             "title": "{{timeUntilRestart}} 분 후 재시동 예정"
         },
         "sendingBookmarkedSongs": {
-            "description": "{{songs}}을(를) {{players}(으)로 보내는 중입니다.\n\n노래 메시지를 마우스 오른쪽 단추로 클릭하고 `앱 > 북마크 노래`를 선택하여 게임 중 노래를 북마크합니다",
+            "description": "{{songs}}를 {{players}}에게 보내는 중입니다.",
             "title": "북마크된 노래를 보내는 중..."
         },
         "skip": "건너뛰기",

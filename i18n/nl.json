@@ -1677,7 +1677,7 @@
             "title": "Aankomende herstart over {{timeUntilRestart}} minuten."
         },
         "sendingBookmarkedSongs": {
-            "description": "Verzenden van {{songs}} naar {{players}}.\n\nMarkeer nummers tijdens het spel door met de rechtermuisknop op het nummerbericht te klikken en `Apps > Nummer markeren` te selecteren",
+            "description": "Het versturen van {{songs}} naar {{players}}.",
             "title": "Verstuur geboekmerkte nummers..."
         },
         "skip": "Overslaan",

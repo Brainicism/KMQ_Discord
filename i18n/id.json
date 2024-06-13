@@ -1677,7 +1677,7 @@
             "title": "Pemulaan Ulang Mendatang dalam {{timeUntilRestart}} Menit"
         },
         "sendingBookmarkedSongs": {
-            "description": "Mengirim {{songs}} ke {{players}}.\n\nTandai lagu selama permainan dengan klik kanan pesan lagu dan pilih `Aplikasi > Tandai Lagu`",
+            "description": "Mengirim {{songs}} ke {{players}}.",
             "title": "Mengirim Lagu yang Di-bookmark..."
         },
         "skip": "Lewati",

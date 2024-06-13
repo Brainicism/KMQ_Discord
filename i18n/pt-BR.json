@@ -1677,7 +1677,7 @@
             "title": "Próxima Reinicialização em {{timeUntilRestart}} minutos."
         },
         "sendingBookmarkedSongs": {
-            "description": "Enviando {{songs}} para {{players}}.\n\nMarque as músicas durante o jogo clicando com o botão direito na mensagem da música e selecionando `Apps > Marcar Música`",
+            "description": "Enviando {{songs}} para {{players}}.",
             "title": "Enviando Músicas Marcadas..."
         },
         "skip": "Pular",

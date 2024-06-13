@@ -1677,7 +1677,7 @@
             "title": "即将在{{timeUntilRestart}}分钟内重新启动。"
         },
         "sendingBookmarkedSongs": {
-            "description": "向{{players}}发送{{songs}}。\n\n在游戏过程中通过右键单击歌曲消息并选择\"应用程序> 添加书签\"来添加书签。",
+            "description": "向{{players}}发送{{songs}}。",
             "title": "正在发送已添加的书签歌曲..."
         },
         "skip": "跳过",
