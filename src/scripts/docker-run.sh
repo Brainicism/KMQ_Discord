@@ -6,11 +6,12 @@ echo "Preparing restart of $APP_NAME at port $WEB_SERVER_PORT..."
 while true; do
     result=$(curl -s 127.0.0.1:$WEB_SERVER_PORT/session-count)
 
-    if [ "$result" = "0" ]; then
+    if [ "$result" = "0" ] || [ -z "$result" ]; then
         echo "$APP_NAME at port $WEB_SERVER_PORT is ready to restart"
         sleep 5
         echo "$APP_NAME at port $WEB_SERVER_PORT restarting..."
-        docker rm -f $APP_NAME
+        docker stop $APP_NAME
+        docker rm $APP_NAME
         npm run docker-run-internal
         break
     fi
