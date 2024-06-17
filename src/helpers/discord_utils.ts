@@ -2443,7 +2443,11 @@ export const updateAppCommands = async (
                 await State.client.bulkEditCommands(commandStructures);
             logger.info("bulkEditCommands finish");
         } catch (e) {
-            logger.error(`Error during bulkEditCommands: ${e}`);
+            if ((e as Error).message.includes("Request timed out")) {
+                logger.warn(`Timeout during bulkEditCommands: ${e}`);
+            } else {
+                logger.warn(`Error during bulkEditCommands: ${e}`);
+            }
         }
     } else {
         if (guildId) {
@@ -2455,7 +2459,11 @@ export const updateAppCommands = async (
                 );
                 logger.info("bulkEditGuildCommands finish");
             } catch (e) {
-                logger.error(`Error during bulkEditGuildCommands: ${e}`);
+                if ((e as Error).message.includes("Request timed out")) {
+                    logger.warn(`Timeout during bulkEditGuildCommands: ${e}`);
+                } else {
+                    logger.error(`Error during bulkEditGuildCommands: ${e}`);
+                }
             }
         } else {
             logger.warn("Debug server unexpectedly unavailable");
