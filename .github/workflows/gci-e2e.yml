@@ -104,6 +104,8 @@ jobs:
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=production --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci &
             - name: Check pre-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
+            - name: Print ffmpeg version
+              run: docker exec --env-file	./.env kmq-gci sh -c 'ffmpeg -version'
             - name: Run test runner on live instance (game options test)
               run: docker exec --env-file	./.env kmq-gci sh -c 'npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug; exit $?'
             - name: Run test runner on live instance (gameplay test)
