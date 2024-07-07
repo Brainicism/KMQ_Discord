@@ -783,7 +783,15 @@ export default class GameSession extends Session {
                 ),
             );
 
-            round.interactionIncorrectAnswerUUIDs[interaction.data.custom_id]++;
+            const playerId = interaction.data.custom_id;
+            if (round.interactionIncorrectAnswerUUIDs[playerId]) {
+                round.interactionIncorrectAnswerUUIDs[playerId]++;
+            } else {
+                logger.warn(
+                    `interactionIncorrectAnswerUUIDs unexpectedly not initialized for ${playerId}`,
+                );
+                round.interactionIncorrectAnswerUUIDs[playerId] = 1;
+            }
 
             // Add the user as a participant
             await this.guessSong(messageContext, "", interaction.createdAt);
