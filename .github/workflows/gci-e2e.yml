@@ -119,7 +119,7 @@ jobs:
                   docker ps
                   echo OLD_CONTAINER_ID=$(sudo docker ps -aqf "name=kmq-gci") > $GITHUB_OUTPUT
             - name: Begin upgrade
-              run: bash src/scripts/announce-restart.sh --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
+              run: bash src/scripts/announce-restart.sh --docker-image ghcr.io/brainicism/kmq_discord:gci --timer 0 --provisioning-timeout 15
             - name: Check post-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check old primary no longer exists
