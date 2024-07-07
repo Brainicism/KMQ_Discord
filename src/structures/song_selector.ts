@@ -362,7 +362,7 @@ export default class SongSelector {
         const aliasToCountMapping: { [alias: string]: number } = {};
         for (const dedupedAliasesForSong of songAliasByMatchedSong) {
             for (const dedupedAlias of dedupedAliasesForSong) {
-                if (!(dedupedAlias in aliasToCountMapping)) {
+                if (!aliasToCountMapping[dedupedAlias]) {
                     aliasToCountMapping[dedupedAlias] = 1;
                     continue;
                 }
