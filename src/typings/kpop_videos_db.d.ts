@@ -17,13 +17,11 @@ export interface AppKpop {
     id_parent: Generated<number | null>;
     is_audio: Generated<"n" | "y">;
     kname: Generated<string>;
+    likehistory: string;
     likes: Generated<number>;
     name: Generated<string>;
     original_name: Generated<string>;
     original_vlink: Generated<string | null>;
-    promotedcharted: number;
-    promotedviews_yc: Generated<number>;
-    promotedweeks: number;
     publishedon: Date;
     recentlikes: Generated<number>;
     recentviews: Generated<number>;
@@ -34,6 +32,8 @@ export interface AppKpop {
     views: Generated<number>;
     vlink: Generated<string>;
     vtype: Generated<"alternate" | "duplicate" | "main">;
+    youtubeadviews: Generated<number>;
+    youtubecharts: string;
 }
 
 export interface AppKpopAgrelation {
@@ -54,6 +54,11 @@ export interface AppKpopAlbums {
     releaseyear: number;
 }
 
+export interface AppKpopBillboard {
+    data: Date;
+    ranklist: string;
+}
+
 export interface AppKpopCompany {
     id: number;
     id_company: number;
@@ -69,6 +74,7 @@ export interface AppKpopGaondigi {
 
 export interface AppKpopGroup {
     alias: Generated<string>;
+    awards: Generated<number>;
     date_birth: Generated<Date | null>;
     debut_date: Generated<Date | null>;
     disband: Generated<string>;
@@ -90,15 +96,18 @@ export interface AppKpopGroup {
     mslevel: Generated<number>;
     name: Generated<string | null>;
     original_name: Generated<string | null>;
+    pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;
     sales: Generated<number>;
     social: Generated<string>;
+    views: Generated<number>;
     yawards_total: Generated<number>;
 }
 
 export interface AppKpopGroupSafe {
     alias: Generated<string>;
+    awards: Generated<number>;
     date_birth: Generated<Date | null>;
     debut_date: Generated<Date | null>;
     disband: Generated<string>;
@@ -121,10 +130,12 @@ export interface AppKpopGroupSafe {
     mslevel: Generated<number>;
     name: string;
     original_name: Generated<string | null>;
+    pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;
     sales: Generated<number>;
     social: Generated<string>;
+    views: Generated<number>;
     yawards_total: Generated<number>;
 }
 
@@ -154,6 +165,7 @@ export interface KpopVideosDB {
     app_kpop: AppKpop;
     app_kpop_agrelation: AppKpopAgrelation;
     app_kpop_albums: AppKpopAlbums;
+    app_kpop_billboard: AppKpopBillboard;
     app_kpop_company: AppKpopCompany;
     app_kpop_gaondigi: AppKpopGaondigi;
     app_kpop_group: AppKpopGroup;

@@ -259,6 +259,7 @@ export interface KmqDB {
     "kpop_videos.app_kpop": AppKpop;
     "kpop_videos.app_kpop_agrelation": AppKpopAgrelation;
     "kpop_videos.app_kpop_albums": AppKpopAlbums;
+    "kpop_videos.app_kpop_billboard": AppKpopBillboard;
     "kpop_videos.app_kpop_company": AppKpopCompany;
     "kpop_videos.app_kpop_gaondigi": AppKpopGaondigi;
     "kpop_videos.app_kpop_group": AppKpopGroup;

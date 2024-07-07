@@ -361,7 +361,7 @@ export async function reloadArtists(): Promise<void> {
                 "artist_name_en as name",
                 "artist_name_ko as hangulName",
             ])
-            .orderBy((eb) => eb.fn("SUM", ["views"]), "desc")
+            .orderBy((eb) => eb.fn("SUM", ["available_songs.views"]), "desc")
             .groupBy("id_artist")
             .limit(25)
             .execute()
