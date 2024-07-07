@@ -123,7 +123,7 @@ jobs:
             - name: Install typescript
               run: yarn global add typescript
             - name: Begin upgrade
-              run: ts-node --swc src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
+              run: ts-node src/scripts/announce-restart.ts --docker-image=ghcr.io/brainicism/kmq_discord:gci --timer=0 --provisioning-timeout=15
             - name: Check post-upgrade KMQ healthiness
               run: while [[ "$(docker inspect --format='{{json .State.Health.Status}}' kmq-gci)" != "\"healthy\"" ]]; do sleep 1; done
             - name: Check old primary no longer exists
