@@ -178,13 +178,13 @@ export default class FactGenerator {
             .select([
                 "app_kpop.name",
                 "app_kpop_group_safe.name as artist",
-                "vlink as youtubeLink",
-                "publishedon",
-                "id_artist",
+                "app_kpop.vlink as youtubeLink",
+                "app_kpop.publishedon",
+                "app_kpop.id_artist",
             ])
-            .where("vtype", "=", "main")
-            .where("publishedon", ">", oneMonthPriorDate)
-            .orderBy("publishedon", "desc")
+            .where("app_kpop.vtype", "=", "main")
+            .where("app_kpop.publishedon", ">", oneMonthPriorDate)
+            .orderBy("app_kpop.publishedon", "desc")
             .execute();
 
         if (result.length === 0) {
@@ -223,7 +223,7 @@ export default class FactGenerator {
                 "app_kpop_group_safe.name as artist_name",
                 "app_kpop.vlink as link",
             ])
-            .where("date", ">", twoWeeksPriorDate)
+            .where("app_kpop_ms.date", ">", twoWeeksPriorDate)
             .where("app_kpop_ms.id_musicvideo", "!=", 0)
             .execute();
 
@@ -258,7 +258,9 @@ export default class FactGenerator {
             )
             .groupBy("app_kpop_ms.id_artist")
             .select(["app_kpop_group_safe.name as artist_name"])
-            .select((eb) => eb.fn.count<number>("id_artist").as("count"))
+            .select((eb) =>
+                eb.fn.count<number>("app_kpop_ms.id_artist").as("count"),
+            )
             .having(dbContext.kpopVideos.fn.count<number>("id_artist"), ">=", 5)
             .orderBy("count", "desc")
             .limit(25)
@@ -291,7 +293,7 @@ export default class FactGenerator {
                     .sum<number>("app_kpop.views")
                     .as("total_views"),
             )
-            .where("issolo", "=", "n")
+            .where("app_kpop_group_safe.issolo", "=", "n")
             .orderBy("total_views", "desc")
             .limit(25)
             .execute();
@@ -323,7 +325,7 @@ export default class FactGenerator {
                     .sum<number>("app_kpop.likes")
                     .as("total_likes"),
             )
-            .where("issolo", "=", "n")
+            .where("app_kpop_group_safe.issolo", "=", "n")
             .orderBy("total_likes", "desc")
             .limit(25)
             .execute();
@@ -354,8 +356,8 @@ export default class FactGenerator {
                 "app_kpop.views as views",
                 "app_kpop.vlink as link",
             ])
-            .where("vtype", "=", "main")
-            .orderBy("views", "desc")
+            .where("app_kpop.vtype", "=", "main")
+            .orderBy("app_kpop.views", "desc")
             .limit(25)
             .execute();
 
@@ -391,7 +393,7 @@ export default class FactGenerator {
                 "app_kpop.releasedate as releasedate",
             ])
             .where("app_kpop.has_pak", "=", "y")
-            .orderBy("releasedate", "desc")
+            .orderBy("app_kpop.releasedate", "desc")
             .limit(10)
             .execute();
 
@@ -426,7 +428,7 @@ export default class FactGenerator {
                 "app_kpop.likes as likes",
                 "app_kpop.vlink as link",
             ])
-            .orderBy("likes", "desc")
+            .orderBy("app_kpop.likes", "desc")
             .limit(25)
             .execute();
 
@@ -492,7 +494,7 @@ export default class FactGenerator {
                 "app_kpop_group_safe.id_company",
             )
             .select(["app_kpop_company.name as name"])
-            .where("is_collab", "=", "n")
+            .where("app_kpop_group_safe.is_collab", "=", "n")
             .groupBy("app_kpop_group_safe.id_company")
             .select((eb) => eb.fn.countAll<number>().as("count"))
             .orderBy("count", "desc")
@@ -520,9 +522,11 @@ export default class FactGenerator {
                 "app_kpop_group_safe.id",
             )
             .select(["app_kpop_group_safe.name as artist_name"])
-            .where("vtype", "=", "main")
-            .groupBy("id_artist")
-            .select((eb) => eb.fn.count<number>("id_artist").as("count"))
+            .where("app_kpop.vtype", "=", "main")
+            .groupBy("app_kpop.id_artist")
+            .select((eb) =>
+                eb.fn.count<number>("app_kpop.id_artist").as("count"),
+            )
             .orderBy("count", "desc")
             .limit(25)
             .execute();
@@ -668,7 +672,7 @@ export default class FactGenerator {
                 "app_kpop_group_safe.id",
             )
             .select(["app_kpop_group_safe.issolo as issolo"])
-            .groupBy("issolo")
+            .groupBy("app_kpop_group_safe.issolo")
             .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
             .orderBy("views", "desc")
             .limit(25)
@@ -733,9 +737,18 @@ export default class FactGenerator {
                 "available_songs.link",
                 "song_metadata.vlink",
             )
-            .select(["song_name_en", "artist_name_en", "link", "rounds_played"])
-            .select(sql`ROUND(correct_guesses/rounds_played * 100, 2)`.as("c"))
-            .where("rounds_played", ">", 2500)
+            .select([
+                "available_songs.song_name_en",
+                "available_songs.artist_name_en",
+                "available_songs.link",
+                "song_metadata.rounds_played",
+            ])
+            .select(
+                sql`ROUND(song_metadata.correct_guesses/song_metadata.rounds_played * 100, 2)`.as(
+                    "c",
+                ),
+            )
+            .where("song_metadata.rounds_played", ">", 2500)
             .orderBy(sql`RAND()`)
             .limit(100)
             .execute();
@@ -1210,9 +1223,9 @@ export default class FactGenerator {
                 "app_upcoming.name as release_name",
                 "app_kpop_group_safe.name as artist_name",
             ])
-            .select(sql`DATEDIFF(rdate, NOW())`.as("diff"))
-            .where(sql<boolean>`DATEDIFF(rdate, NOW()) >= 1`)
-            .where(sql<boolean>`DATEDIFF(rdate, NOW()) < 31`)
+            .select(sql`DATEDIFF(app_upcoming.rdate, NOW())`.as("diff"))
+            .where(sql<boolean>`DATEDIFF(app_upcoming.rdate, NOW()) >= 1`)
+            .where(sql<boolean>`DATEDIFF(app_upcoming.rdate, NOW()) < 31`)
             .where("app_upcoming.name", "<>", "")
             .execute();
 

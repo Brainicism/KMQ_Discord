@@ -121,16 +121,16 @@ export default class UpcomingReleasesCommand implements BaseCommand {
                     "app_upcoming.name",
                     "app_kpop_group_safe.name as artistName",
                     "app_kpop_group_safe.id as artistID",
-                    "kname as hangulArtistName",
-                    "rtype as releaseType",
-                    "rdate as releaseDate",
+                    "app_kpop_group_safe.kname as hangulArtistName",
+                    "app_upcoming.rtype as releaseType",
+                    "app_upcoming.rdate as releaseDate",
                 ])
                 .orderBy("rdate", "asc")
-                .where("rdate", ">=", new Date())
-                .where("rtype", "!=", "undefined")
+                .where("app_upcoming.rdate", ">=", new Date())
+                .where("app_upcoming.rtype", "!=", "undefined")
                 .where("app_upcoming.name", "!=", "")
                 .where(
-                    "rtype",
+                    "app_upcoming.rtype",
                     "in",
                     releaseType ? [releaseType] : Object.values(ReleaseType),
                 )

@@ -431,7 +431,7 @@ export default class SongSelector {
                     "app_kpop_agrelation.id_subgroup",
                     "app_kpop_group_safe.id",
                 )
-                .select(["id", "name"])
+                .select(["app_kpop_group_safe.id", "app_kpop_group_safe.name"])
                 .distinct()
                 .where("app_kpop_group_safe.is_collab", "=", "y")
                 .where("app_kpop_agrelation.id_artist", "in", groupIds)
@@ -523,7 +523,10 @@ export default class SongSelector {
                         "app_kpop_agrelation.id_subgroup",
                         "app_kpop_group_safe.id",
                     )
-                    .select(["id", "name"])
+                    .select([
+                        "app_kpop_group_safe.id",
+                        "app_kpop_group_safe.name",
+                    ])
                     .distinct()
                     .where("app_kpop_group_safe.is_collab", "=", "y");
 
