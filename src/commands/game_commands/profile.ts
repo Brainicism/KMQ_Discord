@@ -550,7 +550,7 @@ export default class ProfileCommand implements BaseCommand {
                 .selectFrom("badges_players")
                 .innerJoin("badges", "badges_players.badge_id", "badges.id")
                 .select(["badges.name as badge_name"])
-                .where("user_id", "=", requestedPlayer.id)
+                .where("badges_players.user_id", "=", requestedPlayer.id)
                 .orderBy("badges.priority", "desc")
                 .execute()
         )

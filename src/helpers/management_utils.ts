@@ -357,12 +357,12 @@ export async function reloadArtists(): Promise<void> {
                 "app_kpop_group.id",
             )
             .select([
-                "id_artist as id",
-                "artist_name_en as name",
-                "artist_name_ko as hangulName",
+                "available_songs.id_artist as id",
+                "available_songs.artist_name_en as name",
+                "available_songs.artist_name_ko as hangulName",
             ])
             .orderBy((eb) => eb.fn("SUM", ["available_songs.views"]), "desc")
-            .groupBy("id_artist")
+            .groupBy("available_songs.id_artist")
             .limit(25)
             .execute()
     ).map((x) => ({

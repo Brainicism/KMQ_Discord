@@ -152,7 +152,7 @@ export default class BookmarksCommand implements BaseCommand {
             )
             .select([
                 ...SongSelector.QueriedSongFields,
-                "bookmarked_at as bookmarkedAt",
+                "bookmarked_songs.bookmarked_at as bookmarkedAt",
             ])
             .where("user_id", "=", interaction.user!.id);
 
@@ -160,22 +160,30 @@ export default class BookmarksCommand implements BaseCommand {
             bookmarkedSongQuery = bookmarkedSongQuery
                 .where(({ or, eb }) =>
                     or([
-                        eb("song_name_en", "like", `%${songName}%`),
-                        eb("song_name_ko", "like", `%${songName}%`),
+                        eb(
+                            "available_songs.song_name_en",
+                            "like",
+                            `%${songName}%`,
+                        ),
+                        eb(
+                            "available_songs.song_name_ko",
+                            "like",
+                            `%${songName}%`,
+                        ),
                     ]),
                 )
                 .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
-                .orderBy("bookmarked_at", "desc");
+                .orderBy("bookmarked_songs.bookmarked_at", "desc");
         } else {
             bookmarkedSongQuery = bookmarkedSongQuery.orderBy(
-                "bookmarked_at",
+                "bookmarked_songs.bookmarked_at",
                 "desc",
             );
         }
 
         if (artistID) {
             bookmarkedSongQuery = bookmarkedSongQuery.where(
-                "id_artist",
+                "available_songs.id_artist",
                 "=",
                 artistID,
             );
