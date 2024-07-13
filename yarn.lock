@@ -92,17 +92,17 @@
     "@discordjs/node-pre-gyp" "^0.4.5"
     node-addon-api "^5.0.0"
 
-"@distube/ytdl-core@^4.13.3":
-  version "4.13.3"
-  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.13.3.tgz#963086184b2933f623655ec9a18b251bf153753f"
-  integrity sha512-WHVzp0NyUkmdxRkfU8tN7eRquL7bnia2U/EDNWVupCptRo7EToTdBKHwJrDFqvavbXsdqLG/kR1r+1LaPglrFQ==
+"@distube/ytdl-core@^4.13.5":
+  version "4.13.5"
+  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.13.5.tgz#f9bacaa43225953d0ccd2a682a31d9dbbc378973"
+  integrity sha512-g+4UJIR/auAJbia7iB0aWvaJDbs22P53NySWa47b1NT4xMTDJYguxHFArPrvRkcJrb/AgKjv/XoSZGghpL0CJA==
   dependencies:
-    http-cookie-agent "^5.0.4"
+    http-cookie-agent "^6.0.5"
     m3u8stream "^0.8.6"
     miniget "^4.2.3"
-    sax "^1.2.4"
-    tough-cookie "^4.1.3"
-    undici "^5.25.2"
+    sax "^1.4.1"
+    tough-cookie "^4.1.4"
+    undici "^6.19.2"
 
 "@es-joy/jsdoccomment@~0.41.0":
   version "0.41.0"
@@ -153,11 +153,6 @@
     ajv "^8.11.0"
     ajv-formats "^2.1.1"
     fast-uri "^2.0.0"
-
-"@fastify/busboy@^2.0.0":
-  version "2.0.0"
-  resolved "https://registry.yarnpkg.com/@fastify/busboy/-/busboy-2.0.0.tgz#f22824caff3ae506b18207bad4126dbc6ccdb6b8"
-  integrity sha512-JUFJad5lv7jxj926GPgymrWQxxjPYuJNiNjNMzqT+HiuP6Vl3dk5xzG+8sTX96np0ZAluvaMzPsjhHZ5rNuNQQ==
 
 "@fastify/deepmerge@^1.0.0":
   version "1.1.0"
@@ -740,10 +735,17 @@ agent-base@6:
   dependencies:
     debug "4"
 
-agent-base@^7.0.2, agent-base@^7.1.0:
+agent-base@^7.0.2:
   version "7.1.0"
   resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.0.tgz#536802b76bc0b34aa50195eb2442276d613e3434"
   integrity sha512-o/zjMZRhJxny7OyEF+Op8X+efiELC7k7yOjMzgfzVqOzXqkBkWI79YoTdOtsuWd5BWhAGAuOY/Xa6xpiaWXiNg==
+  dependencies:
+    debug "^4.3.4"
+
+agent-base@^7.1.1:
+  version "7.1.1"
+  resolved "https://registry.yarnpkg.com/agent-base/-/agent-base-7.1.1.tgz#bdbded7dfb096b751a2a087eeeb9664725b2e317"
+  integrity sha512-H0TSyFNDMomMNJQBn8wFV5YC/2eJ+VXECwOadZJT554xP6cODZHPX3H9QMQECxvrgiSOP1pHjy1sMWQVYJOUOA==
   dependencies:
     debug "^4.3.4"
 
@@ -1311,7 +1313,7 @@ dashdash@^1.12.0:
   dependencies:
     assert-plus "^1.0.0"
 
-debug@4, debug@4.3.4, debug@^4.0.0, debug@^4.1.1, debug@^4.3.2, debug@^4.3.4:
+debug@4, debug@4.3.4, debug@^4.0.0, debug@^4.1.1, debug@^4.3.2:
   version "4.3.4"
   resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.4.tgz#1319f6579357f2338d3337d2cdd4914bb5dcc865"
   integrity sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ==
@@ -1324,6 +1326,13 @@ debug@^3.2.7:
   integrity sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==
   dependencies:
     ms "^2.1.1"
+
+debug@^4.3.4:
+  version "4.3.5"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.5.tgz#e83444eceb9fedd4a1da56d671ae2446a01a6e1e"
+  integrity sha512-pt0bNEmneDIvdL1Xsd9oDQ/wrQRkXDT4AUWlNZNPKvW5x/jyO9VFXkJUP07vQ2upmw5PlaITaPKc31jK13V+jg==
+  dependencies:
+    ms "2.1.2"
 
 decamelize@^4.0.0:
   version "4.0.0"
@@ -2470,12 +2479,12 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-http-cookie-agent@^5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/http-cookie-agent/-/http-cookie-agent-5.0.4.tgz#b2dd3ba44f54f5c49387baac042c00ebba1216ae"
-  integrity sha512-OtvikW69RvfyP6Lsequ0fN5R49S+8QcS9zwd58k6VSr6r57T8G29BkPdyrBcSwLq6ExLs9V+rBlfxu7gDstJag==
+http-cookie-agent@^6.0.5:
+  version "6.0.5"
+  resolved "https://registry.yarnpkg.com/http-cookie-agent/-/http-cookie-agent-6.0.5.tgz#23b490439464424a689d80ea7f3a560a4a893ab8"
+  integrity sha512-sfZ8fDgDP3B1YB+teqSnAK1aPgBu8reUUGxSsndP2XnYN6cM29EURXWXZqQQiaRdor3B4QjpkUNfv21syaO4DA==
   dependencies:
-    agent-base "^7.1.0"
+    agent-base "^7.1.1"
 
 http-signature@~1.2.0:
   version "1.2.0"
@@ -3732,9 +3741,9 @@ punycode@^2.1.0:
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
 punycode@^2.1.1:
-  version "2.3.0"
-  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.0.tgz#f67fa67c94da8f4d0cfff981aee4118064199b8f"
-  integrity sha512-rRV+zQD8tVFys26lAGR9WUuS4iUAngJScM+ZRSKtvl5tKeZ2t5bvdNFdNHBW9FWR4guGHlgmsZ1G7BSm2wTbuA==
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.3.1.tgz#027422e2faec0b25e1549c3e1bd8309b9133b6e5"
+  integrity sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==
 
 qs@^6.7.0:
   version "6.11.2"
@@ -3996,10 +4005,10 @@ safe-stable-stringify@^2.3.1:
   resolved "https://registry.yarnpkg.com/safer-buffer/-/safer-buffer-2.1.2.tgz#44fa161b0187b9549dd84bb91802f9bd8385cd6a"
   integrity sha512-YZo3K82SD7Riyi0E1EQPojLz7kpepnSQI9IyPbHHg1XXXevb5dJI7tpyN2ADxGcQbHG7vcyRHk0cbwqcQriUtg==
 
-sax@^1.2.4:
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/sax/-/sax-1.3.0.tgz#a5dbe77db3be05c9d1ee7785dbd3ea9de51593d0"
-  integrity sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==
+sax@^1.2.4, sax@^1.4.1:
+  version "1.4.1"
+  resolved "https://registry.yarnpkg.com/sax/-/sax-1.4.1.tgz#44cc8988377f126304d3b3fc1010c733b929ef0f"
+  integrity sha512-+aWOz7yVScEGoKNd4PA10LZ8sk0A/z5+nXQG5giUO5rprX9jgYsTdov9qCchZiPIZezbZH+jRut8nPodFAX4Jg==
 
 secure-json-parse@^2.7.0:
   version "2.7.0"
@@ -4376,10 +4385,10 @@ tough-cookie@^2.3.3, tough-cookie@~2.5.0:
     psl "^1.1.28"
     punycode "^2.1.1"
 
-tough-cookie@^4.1.3:
-  version "4.1.3"
-  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.1.3.tgz#97b9adb0728b42280aa3d814b6b999b2ff0318bf"
-  integrity sha512-aX/y5pVRkfRnfmuX+OdbSdXvPe6ieKX/G2s7e98f4poJHnqH3281gDPm/metm6E/WRamfx7WC4HUqkWHfQHprw==
+tough-cookie@^4.1.4:
+  version "4.1.4"
+  resolved "https://registry.yarnpkg.com/tough-cookie/-/tough-cookie-4.1.4.tgz#945f1461b45b5a8c76821c33ea49c3ac192c1b36"
+  integrity sha512-Loo5UUvLD9ScZ6jh8beX1T6sO1w2/MpCRpEP7V280GKMVUQ0Jzar2U3UJPsrdbziLEMMhu3Ujnq//rhiFuIeag==
   dependencies:
     psl "^1.1.33"
     punycode "^2.1.1"
@@ -4565,12 +4574,10 @@ undici-types@~5.26.4:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-5.26.5.tgz#bcd539893d00b56e964fd2657a4866b221a65617"
   integrity sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==
 
-undici@^5.25.2:
-  version "5.28.4"
-  resolved "https://registry.yarnpkg.com/undici/-/undici-5.28.4.tgz#6b280408edb6a1a604a9b20340f45b422e373068"
-  integrity sha512-72RFADWFqKmUb2hmmvNODKL3p9hcB6Gt2DOQMis1SEBaV6a4MH8soBvzg+95CYhCKPFedut2JY9bMfrDl9D23g==
-  dependencies:
-    "@fastify/busboy" "^2.0.0"
+undici@^6.19.2:
+  version "6.19.2"
+  resolved "https://registry.yarnpkg.com/undici/-/undici-6.19.2.tgz#231bc5de78d0dafb6260cf454b294576c2f3cd31"
+  integrity sha512-JfjKqIauur3Q6biAtHJ564e3bWa8VvT+7cSiOJHFbX4Erv6CLGDpg8z+Fmg/1OI/47RA+GI2QZaF48SSaLvyBA==
 
 universalify@^0.2.0:
   version "0.2.0"
