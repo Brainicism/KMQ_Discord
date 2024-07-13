@@ -630,6 +630,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
                 logger.error(
                     "Timed out during download and seed after 30 minutes",
                 );
+
                 await sendInfoWebhook(
                     process.env.ALERT_WEBHOOK_URL!,
                     "Download and seed failure",
