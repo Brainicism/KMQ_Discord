@@ -95,7 +95,6 @@ server_shutdown() {
         local restart_date=$(date -d "+$restart_minutes minutes")
         announce_restart "$restart_minutes" "$restart_date" "$restart"
 
-        sleep $(($restart_minutes * 60))
         echo "Dropping old primary..."
         docker rm -f "$old_app_name"
 
