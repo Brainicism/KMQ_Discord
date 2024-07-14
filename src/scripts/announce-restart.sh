@@ -34,13 +34,12 @@ announce_restart() {
         -H "Content-Type: application/json" \
         -d "{\"restartMinutes\": $restart_minutes}"
 
+    echo "Next $(if $restart; then echo "restart"; else echo "shutdown"; fi) scheduled at $restart_date"
     local end_time=$(date -d "$restart_date" +%s)
     while [[ $(date +%s) -lt $end_time ]]; do
         echo "Restarting in $((end_time - $(date +%s))) seconds"
         sleep 10
     done
-
-    echo "Next $(if $restart; then echo "restart"; else echo "shutdown"; fi) scheduled at $restart_date"
 }
 
 delay() {
@@ -95,7 +94,6 @@ server_shutdown() {
         local restart_date=$(date -d "+$restart_minutes minutes")
         announce_restart "$restart_minutes" "$restart_date" "$restart"
 
-        sleep $(($restart_minutes * 60))
         echo "Dropping old primary..."
         docker rm -f "$old_app_name"
 
