@@ -625,6 +625,24 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
             throw e;
         }
 
+        const timer = setTimeout(
+            async () => {
+                logger.error(
+                    "Timed out during download and seed after 30 minutes",
+                );
+
+                await sendInfoWebhook(
+                    process.env.ALERT_WEBHOOK_URL!,
+                    "Download and seed failure",
+                    "Timed out while downloading new songs after 30 minutes",
+                    EMBED_ERROR_COLOR,
+                    KmqImages.NOT_IMPRESSED,
+                    "Kimiqo",
+                );
+            },
+            30 * 60 * 1000,
+        );
+
         let songsDownloaded = 0;
         if (!options.skipDownload) {
             songsDownloaded = await downloadAndConvertSongs(
@@ -643,6 +661,8 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
             logger.info("Frozen Daisuki schema doesn't exist... creating");
             await recordDaisukiTableSchema(db);
         }
+
+        clearTimeout(timer);
 
         logger.info(
             `Finishing seeding and downloading ${songsDownloaded} new songs`,
