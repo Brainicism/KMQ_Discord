@@ -9,11 +9,5 @@ updates:
       directory: "/" # Location of package manifests
       schedule:
           interval: "daily"
-      groups:
-          ytdlcore:
-              patterns:
-                  - "@distube/ytdl-core"
-              update-types:
-                  - "major"
-                  - "minor"
-                  - "patch"
+      allow:
+          - dependency-name: "@distube/ytdl-core"
