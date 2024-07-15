@@ -81,7 +81,7 @@
         "node-schedule": "^2.1.1",
         "sinon": "^17.0.1",
         "snoowrap": "^1.23.0",
-        "sodium-native": "^4.0.6",
+        "sodium-native": "^4.1.1",
         "tiny-async-pool": "^2.1.0",
         "ts-node": "^10.9.2",
         "uuid": "^9.0.1",

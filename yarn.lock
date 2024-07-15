@@ -3383,15 +3383,10 @@ node-fetch@^2.6.9:
   dependencies:
     whatwg-url "^5.0.0"
 
-node-gyp-build@^4.3.0:
-  version "4.6.0"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.0.tgz#0c52e4cbf54bbd28b709820ef7b6a3c2d6209055"
-  integrity sha512-NTZVKn9IylLwUzaKjkas1e4u2DLNcV4rdYagA4PWdPwW87Bi7z+BznyKSRwS/761tV/lzCGXplWsiaMjLqP2zQ==
-
-node-gyp-build@^4.6.0:
-  version "4.6.1"
-  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.6.1.tgz#24b6d075e5e391b8d5539d98c7fc5c210cac8a3e"
-  integrity sha512-24vnklJmyRS8ViBNI8KbtK/r/DmXQMRiOMXTNz2nrTnAYUwjmEEbnnpB/+kt+yWRv73bPsSPRFddrcIbAxSiMQ==
+node-gyp-build@^4.3.0, node-gyp-build@^4.8.0:
+  version "4.8.1"
+  resolved "https://registry.yarnpkg.com/node-gyp-build/-/node-gyp-build-4.8.1.tgz#976d3ad905e71b76086f4f0b0d3637fe79b6cda5"
+  integrity sha512-OSs33Z9yWr148JZcbZd5WiAXhh/n9z8TxQcdMhIOlpN9AhWpLfvVFO73+m77bBABQMaY9XSvIa+qk0jlI7Gcaw==
 
 node-schedule@^2.1.1:
   version "2.1.1"
@@ -4144,12 +4139,12 @@ snoowrap@^1.23.0:
     request-promise "^4.2.6"
     ws "^3.3.1"
 
-sodium-native@^4.0.6:
-  version "4.0.6"
-  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-4.0.6.tgz#6caf0d7fdcb14e3d5328ae3a634a22806918921f"
-  integrity sha512-uYsyycwcz9kYDwpXxJmL2YZosynsxcP6RPySbARVJdC9uNDa2CMjzJ7/WsMMvThKgvAYsBWdZc7L/WSVj9lTcA==
+sodium-native@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/sodium-native/-/sodium-native-4.1.1.tgz#109bc924dd55c13db87c6dd30da047487595723c"
+  integrity sha512-LXkAfRd4FHtkQS4X6g+nRcVaN7mWVNepV06phIsC6+IZFvGh1voW5TNQiQp2twVaMf05gZqQjuS+uWLM6gHhNQ==
   dependencies:
-    node-gyp-build "^4.6.0"
+    node-gyp-build "^4.8.0"
 
 sonic-boom@^3.7.0:
   version "3.7.0"
