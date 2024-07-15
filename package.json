@@ -68,7 +68,7 @@
         "eris": "https://github.com/Brainicism/eris#3747e9f",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#9916334",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
-        "fastify": "^4.26.0",
+        "fastify": "^4.28.1",
         "fluent-ffmpeg": "^2.1.2",
         "googleapis": "^131.0.0",
         "i18next": "^23.8.2",
