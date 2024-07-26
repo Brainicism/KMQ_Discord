@@ -669,6 +669,7 @@ export default class LookupCommand implements BaseCommand {
                     or([
                         eb("song_name_en", "like", `%${songName}%`),
                         eb("song_name_ko", "like", `%${songName}%`),
+                        eb("song_aliases", "like", `%${songName}%`),
                     ]),
                 )
                 .orderBy((eb) => eb.fn("CHAR_LENGTH", ["song_name_en"]), "asc")
