@@ -4,6 +4,7 @@ import {
     CLIP_MAX_REPLAY_COUNT,
     CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
+    KMQ_EMOJI,
     KmqImages,
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
@@ -274,6 +275,18 @@ export default abstract class Session {
         // join voice channel and start round
         try {
             await this.ensureVoiceConnection(State.client);
+            if (!voiceChannel.status) {
+                try {
+                    await State.client.setVoiceChannelStatus(
+                        this.voiceChannelID,
+                        KMQ_EMOJI,
+                    );
+                } catch (e) {
+                    logger.debug(
+                        `${getDebugLogHeader(messageContext)} Couldn't set voice channel status for ${voiceChannel.id}. e = ${e}`,
+                    );
+                }
+            }
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
             if (err instanceof Error) {
@@ -392,6 +405,19 @@ export default abstract class Session {
             ) as Eris.VoiceChannel | null;
 
             if (voiceChannel) {
+                if (voiceChannel.status === KMQ_EMOJI) {
+                    try {
+                        await State.client.setVoiceChannelStatus(
+                            this.voiceChannelID,
+                            "",
+                        );
+                    } catch (e) {
+                        logger.debug(
+                            `Couldn't reset voice channel status for ${voiceChannel.id}. e = ${e}`,
+                        );
+                    }
+                }
+
                 try {
                     voiceChannel.leave();
                 } catch (e) {
