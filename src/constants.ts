@@ -346,3 +346,5 @@ export const DiscordPreferredLocaleToInternal: {
     de: LocaleType.DE,
     hi: LocaleType.HI,
 };
+
+export const KMQ_EMOJI = "<:kmq:761624775843905546>";

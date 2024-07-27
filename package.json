@@ -65,7 +65,7 @@
         "damerau-levenshtein": "^1.0.8",
         "dotenv": "^16.4.1",
         "ejs": "^3.1.10",
-        "eris": "https://github.com/Brainicism/eris#3747e9f",
+        "eris": "https://github.com/Brainicism/eris#a412bb3",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#9916334",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#9a112cb",
         "fastify": "^4.26.0",
