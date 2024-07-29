@@ -194,10 +194,10 @@
     "@formatjs/ecma402-abstract" "1.4.0"
     tslib "^2.0.1"
 
-"@google/generative-ai@^0.2.0":
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.2.0.tgz#423a1b20eb7942ec6932634138a94bdea1c3f045"
-  integrity sha512-ivlJS7H/9YY1CMrGmcSXm7CRGDept5uvamIEZwHrInX0lA4K55U2YEjQyhRV+M0wgYix6EezEVCJzSdvxeZEkA==
+"@google/generative-ai@^0.16.0":
+  version "0.16.0"
+  resolved "https://registry.yarnpkg.com/@google/generative-ai/-/generative-ai-0.16.0.tgz#3d8cea2faf08dd8c249fa0726c9c7c460f65bb5f"
+  integrity sha512-doB5ZNxS6m+jUZqaLCeYXfBZCdq6Ho0ibkq5/17xe1qAUZpCLWlvCDGtqFPqqO+yezNmvGatS0KhV22yiOT3DA==
 
 "@google/generative-ai@^0.7.0":
   version "0.7.1"

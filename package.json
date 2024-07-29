@@ -43,7 +43,7 @@
         "@discordjs/opus": "^0.9.0",
         "@distube/ytdl-core": "^4.13.5",
         "@fastify/view": "^8.2.0",
-        "@google/generative-ai": "^0.2.0",
+        "@google/generative-ai": "^0.16.0",
         "@swc-node/register": "^1.8.0",
         "@swc/core": "^1.3.107",
         "@types/damerau-levenshtein": "^1.0.2",
