@@ -128,7 +128,7 @@ export interface AppKpopGroupSafe {
     kname: Generated<string | null>;
     members: "coed" | "female" | "male";
     mslevel: Generated<number>;
-    name: string;
+    name: Generated<string | null>;
     original_name: Generated<string | null>;
     pak_total: Generated<number>;
     previous_kname: Generated<string>;

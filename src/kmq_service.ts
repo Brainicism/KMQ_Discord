@@ -8,23 +8,20 @@ import EnvType from "./enums/env_type";
 import EnvVariableManager from "./env_variable_manager";
 import FactGenerator from "./fact_generator";
 import GeminiClient from "./helpers/gemini_client";
+import KmqConfiguration from "./kmq_configuration";
 import LocaleType from "./enums/locale_type";
 import NewsRange from "./enums/news_range";
+import dbContext from "./database_context";
+import type { Insertable } from "kysely";
 import type { KpopNewsRedditPost } from "./helpers/reddit_client";
+import type { News } from "./typings/kmq_db";
 import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
 import type FactCache from "./interfaces/fact_cache";
-import type NewsSummary from "./interfaces/news_summary";
 
 const logger = new IPCLogger("kmq_service");
 
 // eslint-disable-next-line import/no-unused-modules
 export default class ServiceWorker extends BaseServiceWorker {
-    news: {
-        [range: string]: {
-            [locale: string]: NewsSummary;
-        };
-    };
-
     facts: { [locale: string]: FactCache };
 
     constructor(setup: Setup) {
@@ -43,11 +40,6 @@ export default class ServiceWorker extends BaseServiceWorker {
                 newsFacts: [],
                 lastUpdated: null,
             };
-        }
-
-        this.news = {};
-        for (const range of Object.values(NewsRange)) {
-            this.news[range] = {};
         }
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
@@ -79,7 +71,12 @@ export default class ServiceWorker extends BaseServiceWorker {
         if (commandName.startsWith("getNews")) {
             const newsRange = components[0]!;
             const locale = components[1]!;
-            const news = this.news[newsRange]![locale];
+            const news = await dbContext.kmq
+                .selectFrom("news")
+                .select("content as text")
+                .where("identifier", "=", `${locale}-${newsRange}`)
+                .executeTakeFirst();
+
             if (!news) {
                 logger.error(
                     `News for ${components.join("-")} not yet generated`,
@@ -133,6 +130,11 @@ export default class ServiceWorker extends BaseServiceWorker {
     }
 
     async reloadNews(): Promise<void> {
+        if (!KmqConfiguration.Instance.newsGenerationEnabled()) {
+            logger.info("Skipping news generation, flag is disabled");
+            return;
+        }
+
         if (!process.env.GEMINI_API_KEY) {
             return;
         }
@@ -175,6 +177,26 @@ export default class ServiceWorker extends BaseServiceWorker {
 
         for (const locale of Object.values(LocaleType)) {
             for (const range of Object.values(NewsRange)) {
+                const newsIdentifier = `${locale}-${range}`;
+                // eslint-disable-next-line no-await-in-loop
+                const latestEntry = await dbContext.kmq
+                    .selectFrom("news")
+                    .select("generated_at")
+                    .where("identifier", "=", newsIdentifier)
+                    .executeTakeFirst();
+
+                // skip generation if news was generated in the past hour
+                if (
+                    latestEntry &&
+                    latestEntry.generated_at >
+                        new Date(new Date().getTime() - 60 * 60 * 1000)
+                ) {
+                    logger.info(
+                        `Skipping news generation for ${newsIdentifier}, entry too fresh. ${latestEntry.generated_at.toISOString()}`,
+                    );
+                    continue;
+                }
+
                 try {
                     // eslint-disable-next-line no-await-in-loop
                     await retryJob<void | Error>(
@@ -212,10 +234,17 @@ export default class ServiceWorker extends BaseServiceWorker {
                                 );
                             }
 
-                            this.news[range]![locale] = {
-                                text: summary,
-                                generatedAt: Date.now(),
+                            const updatePayload: Insertable<News> = {
+                                identifier: newsIdentifier,
+                                content: summary,
+                                generated_at: new Date(),
                             };
+
+                            await dbContext.kmq
+                                .insertInto("news")
+                                .values(updatePayload)
+                                .onDuplicateKeyUpdate(updatePayload)
+                                .execute();
 
                             logger.info(
                                 `Generated news for ${locale} ${range}`,

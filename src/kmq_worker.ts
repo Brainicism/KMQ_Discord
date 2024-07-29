@@ -62,20 +62,20 @@ export default class BotWorker extends BaseClusterWorker {
     ready = false;
     logHeader = (): string => `Cluster #${this.clusterID}`;
 
-    handleCommand = async (commandName: string): Promise<any> => {
+    handleCommand = async (command: string): Promise<any> => {
         logger.info(
-            `${this.logHeader()} | Received cluster command: ${commandName}`,
+            `${this.logHeader()} | Received cluster command: ${command}`,
         );
-        const components = commandName.split("|");
-        components.shift();
-        if (commandName.startsWith("eval")) {
+        const components = command.split("|");
+        const commandName = components.shift();
+        if (command.startsWith("eval")) {
             const evalString = components[0]!;
 
             const evalResult = await EvalCommand.eval(evalString);
             return evalResult;
         }
 
-        if (commandName.startsWith("announce_restart")) {
+        if (command.startsWith("announce_restart")) {
             const restartMinutes = parseInt(components[0]!, 10);
 
             const restartDate = new Date();

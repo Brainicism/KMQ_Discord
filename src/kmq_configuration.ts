@@ -71,4 +71,8 @@ export default class KmqConfiguration {
     partialChannelFetchingEnabled(): boolean {
         return this.config["partialChannelFetchingEnabled"] ?? false;
     }
+
+    newsGenerationEnabled(): boolean {
+        return this.config["newsGenerationEnabled"] ?? false;
+    }
 }
