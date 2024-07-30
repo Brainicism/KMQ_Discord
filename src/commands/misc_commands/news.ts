@@ -17,11 +17,12 @@ import State from "../../state";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
+import type { News } from "../../typings/kmq_db";
+import type { Selectable } from "kysely";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type NewsSubscription from "../../interfaces/news_subscription";
-import type NewsSummary from "../../interfaces/news_summary";
 
 enum Action {
     SUBSCRIBE = "subscribe",
@@ -257,7 +258,7 @@ export default class NewsCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> => {
         const locale = State.getGuildLocale(messageContext.guildID);
-        const summary: NewsSummary | null = await State.ipc.serviceCommand(
+        const summary: Selectable<News> | null = await State.ipc.serviceCommand(
             "kmq_service",
             `getNews|${range}|${locale}`,
             true,
@@ -338,7 +339,7 @@ export default class NewsCommand implements BaseCommand {
                     locale,
                     "command.news.title",
                 )} (${dateRange})`,
-                description: summary.text,
+                description: summary.content,
                 thumbnailUrl: thumbnail,
                 footerText: i18n.translate(locale, "command.news.disclaimer"),
             },

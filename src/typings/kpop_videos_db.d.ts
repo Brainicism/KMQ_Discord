@@ -17,7 +17,6 @@ export interface AppKpop {
     id_parent: Generated<number | null>;
     is_audio: Generated<"n" | "y">;
     kname: Generated<string>;
-    likehistory: string;
     likes: Generated<number>;
     name: Generated<string>;
     original_name: Generated<string>;
@@ -28,7 +27,6 @@ export interface AppKpop {
     regionlocked: Generated<string>;
     releasedate: Date;
     tags: Generated<string>;
-    viewhistory: string;
     views: Generated<number>;
     vlink: Generated<string>;
     vtype: Generated<"alternate" | "duplicate" | "main">;
@@ -91,11 +89,11 @@ export interface AppKpopGroup {
     is_collab: Generated<"n" | "y">;
     is_deceased: Generated<"n" | "y">;
     issolo: Generated<"n" | "y">;
-    kname: Generated<string | null>;
+    kname: string;
     members: "coed" | "female" | "male";
     mslevel: Generated<number>;
-    name: Generated<string | null>;
-    original_name: Generated<string | null>;
+    name: string;
+    original_name: string;
     pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;
@@ -125,11 +123,11 @@ export interface AppKpopGroupSafe {
     is_collab: Generated<"n" | "y">;
     is_deceased: Generated<"n" | "y">;
     issolo: Generated<"n" | "y">;
-    kname: Generated<string | null>;
+    kname: string;
     members: "coed" | "female" | "male";
     mslevel: Generated<number>;
     name: string;
-    original_name: Generated<string | null>;
+    original_name: string;
     pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;

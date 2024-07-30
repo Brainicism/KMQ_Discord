@@ -188,6 +188,12 @@ export interface Locale {
     locale: string;
 }
 
+export interface News {
+    content: string;
+    generated_at: Date;
+    identifier: string;
+}
+
 export interface NewsSubscriptions {
     created_at: Generated<Date>;
     guild_id: string;
@@ -289,6 +295,7 @@ export interface KmqDB {
     kpop_videos_sql_overrides: KpopVideosSqlOverrides;
     leaderboard_enrollment: LeaderboardEnrollment;
     locale: Locale;
+    news: News;
     news_subscriptions: NewsSubscriptions;
     not_downloaded: NotDownloaded;
     player_game_session_stats: PlayerGameSessionStats;
