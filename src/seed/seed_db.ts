@@ -538,11 +538,11 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
 
     // update collations of columns that have user-inputted queries
     logger.info("Updating collation overrides");
-    await sql`ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+    await sql`ALTER TABLE app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;`.execute(
         db.kpopVideos,
     );
 
-    await sql`ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`.execute(
+    await sql`ALTER TABLE app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;`.execute(
         db.kpopVideos,
     );
 

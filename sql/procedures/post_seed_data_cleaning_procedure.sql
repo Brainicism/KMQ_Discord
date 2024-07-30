@@ -3,7 +3,7 @@ DROP PROCEDURE IF EXISTS PostSeedDataCleaning //
 CREATE PROCEDURE PostSeedDataCleaning()
 BEGIN
 	/* de-duplicate conflicting names */
-	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS original_name VARCHAR(255);
+	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS original_name VARCHAR(255) NOT NULL;
 	UPDATE kpop_videos.app_kpop_group SET original_name = name;
 	
 	UPDATE kpop_videos.app_kpop_group as a
@@ -13,7 +13,7 @@ BEGIN
 	WHERE a.fname <> '';
 
 	/* remove bracketed components from song names */
-	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_name VARCHAR(255);
+	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_name VARCHAR(255) NOT NULL;
 	UPDATE kpop_videos.app_kpop SET original_name = name;
 	
 	UPDATE kpop_videos.app_kpop 
