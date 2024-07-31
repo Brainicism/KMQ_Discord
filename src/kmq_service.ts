@@ -73,7 +73,7 @@ export default class ServiceWorker extends BaseServiceWorker {
             const locale = components[1]!;
             const news = await dbContext.kmq
                 .selectFrom("news")
-                .select("content as text")
+                .select("content")
                 .where("identifier", "=", `${locale}-${newsRange}`)
                 .executeTakeFirst();
 
