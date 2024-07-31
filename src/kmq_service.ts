@@ -226,7 +226,7 @@ export default class ServiceWorker extends BaseServiceWorker {
                                 );
                             }
 
-                            if (summary.length < 400 || summary.length > 2500) {
+                            if (summary.length < 300 || summary.length > 2500) {
                                 return Promise.reject(
                                     new Error(
                                         `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
