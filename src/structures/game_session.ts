@@ -783,14 +783,14 @@ export default class GameSession extends Session {
                 ),
             );
 
-            const playerId = interaction.data.custom_id;
-            if (round.interactionIncorrectAnswerUUIDs[playerId]) {
-                round.interactionIncorrectAnswerUUIDs[playerId]++;
+            const buttonId = interaction.data.custom_id;
+            if (round.interactionIncorrectAnswerUUIDs[buttonId] !== undefined) {
+                round.interactionIncorrectAnswerUUIDs[buttonId]++;
             } else {
                 logger.warn(
-                    `interactionIncorrectAnswerUUIDs unexpectedly not initialized for ${playerId}`,
+                    `interactionIncorrectAnswerUUIDs unexpectedly not initialized for ${buttonId}`,
                 );
-                round.interactionIncorrectAnswerUUIDs[playerId] = 1;
+                round.interactionIncorrectAnswerUUIDs[buttonId] = 1;
             }
 
             // Add the user as a participant
