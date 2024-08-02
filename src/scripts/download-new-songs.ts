@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
 import {
+    extractErrorString,
     getAudioDurationInSeconds,
     pathExists,
     retryJob,
@@ -165,9 +166,18 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             }
 
             // download video
-            ytdl(`https://www.youtube.com/watch?v=${id}`, ytdlOptions).pipe(
-                cacheStream,
+            const ytdlReadableStream = ytdl(
+                `https://www.youtube.com/watch?v=${id}`,
+                ytdlOptions,
             );
+
+            ytdlReadableStream.on("error", (err: Error) => {
+                const errorMessage = `Error in ytdl readable stream. err = ${extractErrorString(err)}`;
+                logger.error(errorMessage);
+                reject(new Error(errorMessage));
+            });
+
+            ytdlReadableStream.pipe(cacheStream);
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
             await db.kmq
