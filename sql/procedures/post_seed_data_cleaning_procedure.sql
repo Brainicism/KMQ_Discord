@@ -2,6 +2,11 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS PostSeedDataCleaning //
 CREATE PROCEDURE PostSeedDataCleaning()
 BEGIN
+
+    /* update collations of columns that have user-inputted queries */
+	ALTER TABLE kpop_videos.app_kpop_group MODIFY name VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+	ALTER TABLE kpop_videos.app_kpop_group MODIFY kname VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL;
+
 	/* de-duplicate conflicting names */
 	ALTER TABLE kpop_videos.app_kpop_group ADD COLUMN IF NOT EXISTS original_name VARCHAR(255) NOT NULL;
 	UPDATE kpop_videos.app_kpop_group SET original_name = name;
