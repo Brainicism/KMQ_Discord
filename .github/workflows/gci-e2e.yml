@@ -91,12 +91,22 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-            - name: Dry-run bootstrap with MOCK_AUDIO
-              if: contains(github.event.pull_request.labels.*.name, 'mock audio')
-              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --env MOCK_AUDIO=true --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
-            - name: Dry-run bootstrap without MOCK_AUDIO
-              if: "!contains(github.event.pull_request.labels.*.name, 'mock audio')"
-              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
+            - name: Dry-run bootstrap
+              run: |
+                  . ./.env
+                  if [[ "${{ github.event.pull_request.labels.*.name }}" == *"mock audio"* ]]; then
+                    MOCK_AUDIO=true
+                  fi
+                  docker run \
+                    -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} \
+                    -v ${PWD}/data:/app/data \
+                    -v ${PWD}/.env:/app/.env \
+                    -v ${PWD}/logs:/app/logs \
+                    --env NODE_ENV=dry-run \
+                    ${MOCK_AUDIO:+--env MOCK_AUDIO=$MOCK_AUDIO} \
+                    --network=host \
+                    --name kmq-gci \
+                    ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
             - name: Validate available_songs
               run: |
                   [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 6 ]]
