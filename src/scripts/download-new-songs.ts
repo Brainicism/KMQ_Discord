@@ -435,6 +435,7 @@ export default async function downloadAndConvertSongs(
     limit?: number,
     songOverrides?: string[],
 ): Promise<{ songsDownloaded: number; songsFailed: number }> {
+    console.log(process.env);
     const db = getNewConnection();
     try {
         if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR as string))) {

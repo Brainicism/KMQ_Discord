@@ -91,10 +91,19 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-            - name: Dry-run bootstrap
+            - name: Determine if MOCK_AUDIO should be set
+              id: check_labels
+              run: |
+                  LABELS=$(echo "${{ toJSON(github.event.pull_request.labels) }}" | jq -r '.[] | .name')
+                  if echo "$LABELS" | grep -q "mock audio"; then
+                    echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+                  else
+                    echo "MOCK_AUDIO=false" >> $GITHUB_ENV
+                  fi
+            - name: Dry-run bootstrap test
               run: |
                   . ./.env
-                  if [[ "${{ github.event.pull_request.labels.*.name }}" == *"mock audio"* ]]; then
+                  if [[ contains(github.event.pull_request.labels.*.name, 'safe to test') ]]; then
                     MOCK_AUDIO=true
                   fi
                   docker run \
