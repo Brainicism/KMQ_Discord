@@ -157,14 +157,16 @@ export default class StatsCommand implements BaseCommand {
             sql`SELECT 1`.execute(dbContext.kmq),
         );
 
-        const requestLatency = (
-            await dbContext.kmq
-                .selectFrom("system_stats")
-                .select(["stat_value"])
-                .where("stat_name", "=", "request_latency")
-                .orderBy("date", "desc")
-                .executeTakeFirst()
-        )?.stat_value;
+        const requestLatency =
+            (
+                await dbContext.kmq
+                    .selectFrom("system_stats")
+                    .select(["stat_value"])
+                    .where("stat_name", "=", "avg_request_latency")
+                    .where("date", ">", new Date(Date.now() - 2 * 60 * 1000))
+                    .orderBy("date", "desc")
+                    .executeTakeFirst()
+            )?.stat_value ?? -1;
 
         const gameStatistics = {
             [i18n.translate(

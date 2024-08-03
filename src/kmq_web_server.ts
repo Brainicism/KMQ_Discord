@@ -316,7 +316,19 @@ export default class KmqWebServer {
             else databaseLatencyHealthIndicator = HealthIndicator.UNHEALTHY;
 
             const requestLatency =
-                fleetStats.centralRequestHandlerLatencyRef?.latency ?? -1;
+                (
+                    await this.dbContext.kmq
+                        .selectFrom("system_stats")
+                        .select(["stat_value"])
+                        .where("stat_name", "=", "avg_request_latency")
+                        .where(
+                            "date",
+                            ">",
+                            new Date(Date.now() - 2 * 60 * 1000),
+                        )
+                        .orderBy("date", "desc")
+                        .executeTakeFirst()
+                )?.stat_value ?? -1;
 
             let requestLatencyHealthIndicator: HealthIndicator;
             if (requestLatency < 500)

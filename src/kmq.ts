@@ -112,12 +112,41 @@ function registerGlobalIntervals(fleet: Fleet): void {
 
     // every minute
     schedule.scheduleJob("* * * * *", async () => {
+        const requestLatenciesByCluster = Array.from(
+            (await fleet.ipc.allClustersCommand(
+                "request_latency",
+                true,
+            )) as Map<number, number>,
+        );
+
+        const useCentralRequestHandler =
+            process.env.CENTRAL_REQUEST_HANDLER_ENABLED === "true";
+
+        const averageRequestLatency = useCentralRequestHandler
+            ? fleet.eris.requestHandler.latencyRef.latency
+            : requestLatenciesByCluster.reduce((a, b) => a + b[1], 0) /
+              requestLatenciesByCluster.length;
+
         if (await isPrimaryInstance()) {
+            if (!useCentralRequestHandler) {
+                for (const [clusterId, latency] of requestLatenciesByCluster) {
+                    await dbContext.kmq
+                        .insertInto("system_stats")
+                        .values({
+                            stat_name: "cluster_request_latency",
+                            stat_value: latency,
+                            date: new Date(),
+                            cluster_id: clusterId,
+                        })
+                        .execute();
+                }
+            }
+
             await dbContext.kmq
                 .insertInto("system_stats")
                 .values({
-                    stat_name: "request_latency",
-                    stat_value: fleet.eris.requestHandler.latencyRef.latency,
+                    stat_name: "avg_request_latency",
+                    stat_value: averageRequestLatency,
                     date: new Date(),
                 })
                 .execute();

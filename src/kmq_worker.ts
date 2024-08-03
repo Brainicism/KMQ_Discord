@@ -145,6 +145,8 @@ export default class BotWorker extends BaseClusterWorker {
                 return null;
             case "running_stats":
                 return State.runningStats;
+            case "request_latency":
+                return State.client.requestHandler.latencyRef.latency;
             case "clear_restart":
                 if (!State.restartNotification) {
                     logger.warn(
