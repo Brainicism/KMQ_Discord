@@ -91,7 +91,11 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
-            - name: Dry-run bootstrap
+            - name: Dry-run bootstrap with MOCK_AUDIO
+              if: contains(github.event.pull_request.labels.*.name, 'mock audio')
+              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --env MOCK_AUDIO=true --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
+            - name: Dry-run bootstrap without MOCK_AUDIO
+              if: "!contains(github.event.pull_request.labels.*.name, 'mock audio')"
               run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
             - name: Validate available_songs
               run: |
