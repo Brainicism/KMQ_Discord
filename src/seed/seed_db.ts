@@ -634,10 +634,25 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
         );
 
         let songsDownloaded = 0;
+        let songsDownloadFailures = 0;
         if (!options.skipDownload) {
-            songsDownloaded = await downloadAndConvertSongs(
+            const result = await downloadAndConvertSongs(
                 options.limit,
                 options.songs,
+            );
+
+            songsDownloaded = result.songsDownloaded;
+            songsDownloadFailures = result.songsFailed;
+        }
+
+        if (songsDownloadFailures > 0) {
+            await sendInfoWebhook(
+                process.env.ALERT_WEBHOOK_URL!,
+                "Download and seed failure",
+                `${songsDownloadFailures}/${songsDownloadFailures + songsDownloaded} song downloads failed.`,
+                EMBED_ERROR_COLOR,
+                KmqImages.NOT_IMPRESSED,
+                "Kimiqo",
             );
         }
 

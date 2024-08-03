@@ -292,7 +292,7 @@ const downloadNewSongs = async (
     db: DatabaseContext,
     limit?: number,
     songOverrides?: string[],
-): Promise<number> => {
+): Promise<{ songsDownloaded: number; songsFailed: number }> => {
     const allSongs: Array<{
         songName: string;
         views: number;
@@ -308,7 +308,7 @@ const downloadNewSongs = async (
     }
 
     let downloadCount = 0;
-    let deadLinksSkipped = 0;
+    let downloadsFailed = 0;
     const knownDeadIDs = new Set(
         (await db.kmq.selectFrom("dead_links").select("vlink").execute()).map(
             (x) => x.vlink,
@@ -372,7 +372,7 @@ const downloadNewSongs = async (
             logger.error(
                 `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
             );
-            deadLinksSkipped++;
+            downloadsFailed++;
             try {
                 await fs.promises.unlink(
                     `${process.env.SONG_DOWNLOAD_DIR as string}/${
@@ -406,9 +406,12 @@ const downloadNewSongs = async (
     // update final list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);
     logger.info(
-        `Total songs downloaded: ${downloadCount}, (${deadLinksSkipped} dead links skipped)`,
+        `Total songs downloaded: ${downloadCount}, (${downloadsFailed} downloads failed)`,
     );
-    return downloadCount;
+    return {
+        songsDownloaded: downloadCount,
+        songsFailed: downloadsFailed,
+    };
 };
 
 /**
@@ -419,12 +422,12 @@ const downloadNewSongs = async (
 export default async function downloadAndConvertSongs(
     limit?: number,
     songOverrides?: string[],
-): Promise<number> {
+): Promise<{ songsDownloaded: number; songsFailed: number }> {
     const db = getNewConnection();
     try {
         if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR as string))) {
             logger.error("Song cache directory doesn't exist.");
-            return 0;
+            return { songsDownloaded: 0, songsFailed: 0 };
         }
 
         await clearPartiallyCachedSongs();
