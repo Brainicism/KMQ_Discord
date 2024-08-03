@@ -352,7 +352,6 @@ const downloadNewSongs = async (
                 `${song.youtubeLink}.mp3`,
             );
 
-            console.log(process.env);
             if (process.env.MOCK_AUDIO === "true") {
                 logger.info(`Mocking downloading for ${song.youtubeLink}`);
                 await fs.promises.copyFile(

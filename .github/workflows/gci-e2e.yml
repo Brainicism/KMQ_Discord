@@ -103,8 +103,6 @@ jobs:
                   else
                     echo "MOCK_AUDIO=false" >> $GITHUB_ENV
                   fi
-                  echo $MOCK_AUDIO
-                  echo $LABELS
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   OWNER: ${{ github.repository_owner }}
@@ -113,7 +111,6 @@ jobs:
             - name: Dry-run bootstrap
               run: |
                   . ./.env
-                  echo $MOCK_AUDIO
                   docker run \
                     -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} \
                     -v ${PWD}/data:/app/data \
