@@ -106,6 +106,7 @@ jobs:
             - name: Dry-run bootstrap
               run: |
                   . ./.env
+                  echo $MOCK_AUDIO
                   docker run \
                     -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} \
                     -v ${PWD}/data:/app/data \
