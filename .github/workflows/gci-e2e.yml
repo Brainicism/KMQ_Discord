@@ -103,7 +103,7 @@ jobs:
                   else
                     echo "MOCK_AUDIO=false" >> $GITHUB_ENV
                   fi
-            - name: Dry-run bootstrap test
+            - name: Dry-run bootstrap
               run: |
                   . ./.env
                   docker run \

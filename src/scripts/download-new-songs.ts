@@ -364,7 +364,7 @@ const downloadNewSongs = async (
                 `${song.youtubeLink}.mp3`,
             );
 
-            if (!process.env.MOCK_AUDIO) {
+            if (!(process.env.MOCK_AUDIO === "true")) {
                 await retryJob(
                     downloadSong,
                     [db, song.youtubeLink, cachedSongLocation],
@@ -435,7 +435,6 @@ export default async function downloadAndConvertSongs(
     limit?: number,
     songOverrides?: string[],
 ): Promise<{ songsDownloaded: number; songsFailed: number }> {
-    console.log(process.env);
     const db = getNewConnection();
     try {
         if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR as string))) {
