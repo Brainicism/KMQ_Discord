@@ -180,14 +180,17 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
             ytdlReadableStream.pipe(cacheStream);
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
-            await db.kmq
-                .insertInto("dead_links")
-                .values({
-                    vlink: id,
-                    reason: errorMessage,
-                })
-                .ignore()
-                .execute();
+            // 403s might be due to youtube bot detection, don't consider them dead
+            if (!(e as Error).message.includes("Status code: 403")) {
+                await db.kmq
+                    .insertInto("dead_links")
+                    .values({
+                        vlink: id,
+                        reason: errorMessage,
+                    })
+                    .ignore()
+                    .execute();
+            }
 
             reject(new Error(errorMessage));
             return;
