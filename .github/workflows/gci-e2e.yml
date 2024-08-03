@@ -94,7 +94,10 @@ jobs:
             - name: Determine if MOCK_AUDIO should be set
               id: check_labels
               run: |
-                  LABELS=$(echo "${{ toJSON(github.event.pull_request.labels) }}" | jq -r '.[] | .name')
+                  # Extract the labels from the PR
+                  LABELS=$(echo '${{ toJSON(github.event.pull_request.labels) }}' | jq -r '.[].name')
+
+                  # Check if "mock audio" is among the labels
                   if echo "$LABELS" | grep -q "mock audio"; then
                     echo "MOCK_AUDIO=true" >> $GITHUB_ENV
                   else
