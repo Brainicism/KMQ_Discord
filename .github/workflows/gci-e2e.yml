@@ -84,13 +84,6 @@ jobs:
                   registry: ghcr.io
                   username: ${{ github.actor }}
                   password: ${{ secrets.GITHUB_TOKEN }}
-            - name: Build Docker image
-              uses: docker/build-push-action@v5
-              with:
-                  context: .
-                  file: docker/kmq/Dockerfile
-                  push: true
-                  tags: ghcr.io/brainicism/kmq_discord:gci
             - name: Determine if MOCK_AUDIO should be set
               id: check_labels
               run: |
@@ -106,9 +99,6 @@ jobs:
             - name: Dry-run bootstrap test
               run: |
                   . ./.env
-                  if [[ contains(github.event.pull_request.labels.*.name, 'safe to test') ]]; then
-                    MOCK_AUDIO=true
-                  fi
                   docker run \
                     -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} \
                     -v ${PWD}/data:/app/data \
