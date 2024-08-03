@@ -210,18 +210,6 @@ const downloadSong = (
                     ),
                 );
             }
-
-            try {
-                await cacheSongDuration(outputFile, id, db);
-                resolve();
-            } catch (e) {
-                reject(
-                    new Error(
-                        `Error calculating cached_song_duration. err = ${e}`,
-                    ),
-                );
-                await fs.promises.unlink(outputFile);
-            }
         });
         cacheStream.once("error", (e) => reject(e));
     });
@@ -364,7 +352,13 @@ const downloadNewSongs = async (
                 `${song.youtubeLink}.mp3`,
             );
 
-            if (!(process.env.MOCK_AUDIO === "true")) {
+            if (process.env.MOCK_AUDIO === "true") {
+                logger.info(`Mocking downloading for ${song.youtubeLink}`);
+                await fs.promises.copyFile(
+                    path.resolve(__dirname, "../test/silence.mp3"),
+                    cachedSongLocation,
+                );
+            } else {
                 await retryJob(
                     downloadSong,
                     [db, song.youtubeLink, cachedSongLocation],
@@ -373,11 +367,18 @@ const downloadNewSongs = async (
                     5000,
                     false,
                 );
-            } else {
-                logger.info(`Mocking downloading for ${song.youtubeLink}`);
-                await fs.promises.copyFile(
-                    path.resolve(__dirname, "../test/silence.mp3"),
+            }
+
+            try {
+                await cacheSongDuration(
                     cachedSongLocation,
+                    song.youtubeLink,
+                    db,
+                );
+            } catch (e) {
+                await fs.promises.unlink(cachedSongLocation);
+                throw new Error(
+                    `Error calculating cached_song_duration. err = ${e}`,
                 );
             }
         } catch (err) {
