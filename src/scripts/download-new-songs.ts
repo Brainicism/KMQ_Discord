@@ -126,13 +126,12 @@ async function cacheSongDuration(
         .execute();
 }
 
-const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
-    const cachedSongLocation = path.join(
-        process.env.SONG_DOWNLOAD_DIR as string,
-        `${id}.mp3`,
-    );
-
-    const tempLocation = `${cachedSongLocation}.part`;
+const downloadSong = (
+    db: DatabaseContext,
+    id: string,
+    outputFile: string,
+): Promise<void> => {
+    const tempLocation = `${outputFile}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
     const ytdlOptions = {
         filter: "audioonly" as const,
@@ -203,25 +202,13 @@ const downloadSong = (db: DatabaseContext, id: string): Promise<void> => {
                     return;
                 }
 
-                await fs.promises.rename(tempLocation, cachedSongLocation);
+                await fs.promises.rename(tempLocation, outputFile);
             } catch (err) {
                 reject(
                     new Error(
-                        `Error renaming temp song file from ${tempLocation} to ${cachedSongLocation}. err = ${err}`,
+                        `Error renaming temp song file from ${tempLocation} to ${outputFile}. err = ${err}`,
                     ),
                 );
-            }
-
-            try {
-                await cacheSongDuration(cachedSongLocation, id, db);
-                resolve();
-            } catch (e) {
-                reject(
-                    new Error(
-                        `Error calculating cached_song_duration. err = ${e}`,
-                    ),
-                );
-                await fs.promises.unlink(cachedSongLocation);
             }
         });
         cacheStream.once("error", (e) => reject(e));
@@ -360,14 +347,40 @@ const downloadNewSongs = async (
             } (${downloadCount + 1}/${songsToDownload.length})`,
         );
         try {
-            await retryJob(
-                downloadSong,
-                [db, song.youtubeLink],
-                1,
-                true,
-                5000,
-                false,
+            const cachedSongLocation = path.join(
+                process.env.SONG_DOWNLOAD_DIR as string,
+                `${song.youtubeLink}.mp3`,
             );
+
+            if (process.env.MOCK_AUDIO === "true") {
+                logger.info(`Mocking downloading for ${song.youtubeLink}`);
+                await fs.promises.copyFile(
+                    path.resolve(__dirname, "../test/silence.mp3"),
+                    cachedSongLocation,
+                );
+            } else {
+                await retryJob(
+                    downloadSong,
+                    [db, song.youtubeLink, cachedSongLocation],
+                    1,
+                    true,
+                    5000,
+                    false,
+                );
+            }
+
+            try {
+                await cacheSongDuration(
+                    cachedSongLocation,
+                    song.youtubeLink,
+                    db,
+                );
+            } catch (e) {
+                await fs.promises.unlink(cachedSongLocation);
+                throw new Error(
+                    `Error calculating cached_song_duration. err = ${e}`,
+                );
+            }
         } catch (err) {
             logger.error(
                 `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,

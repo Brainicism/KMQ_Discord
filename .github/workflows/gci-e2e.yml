@@ -91,8 +91,36 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   tags: ghcr.io/brainicism/kmq_discord:gci
+            - name: Determine if MOCK_AUDIO should be set
+              id: check_labels
+              run: |
+                  # Extract the labels from the PR
+                  LABELS="$(gh api repos/$OWNER/$REPO_NAME/pulls/$PULL_REQUEST_NUMBER --jq '.labels.[].name')"
+
+                  # Check if "mock audio" is among the labels
+                  if echo "$LABELS" | grep -q "mock audio"; then
+                    echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+                  else
+                    echo "MOCK_AUDIO=false" >> $GITHUB_ENV
+                  fi
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  OWNER: ${{ github.repository_owner }}
+                  REPO_NAME: ${{ github.event.repository.name }}
+                  PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
             - name: Dry-run bootstrap
-              run: . ./.env && docker run -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs --env NODE_ENV=dry-run --network=host --name kmq-gci ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
+              run: |
+                  . ./.env
+                  docker run \
+                    -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} \
+                    -v ${PWD}/data:/app/data \
+                    -v ${PWD}/.env:/app/.env \
+                    -v ${PWD}/logs:/app/logs \
+                    --env NODE_ENV=dry-run \
+                    ${MOCK_AUDIO:+--env MOCK_AUDIO=$MOCK_AUDIO} \
+                    --network=host \
+                    --name kmq-gci \
+                    ghcr.io/brainicism/kmq_discord:gci && docker rm -f kmq-gci
             - name: Validate available_songs
               run: |
                   [[ $(mysql kmq -s -N -h 127.0.0.1 -u $DB_USER_CI -p$DB_PASS_CI -e 'select count(1) from available_songs') -eq 6 ]]
