@@ -92,10 +92,10 @@
     "@discordjs/node-pre-gyp" "^0.4.5"
     node-addon-api "^5.0.0"
 
-"@distube/ytdl-core@^4.14.1":
-  version "4.14.1"
-  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.14.1.tgz#4cdd412e3fdf8f5a77f2ec6c790ecd861ab0c973"
-  integrity sha512-ymtw6IZyyUAzE+9Nbnhxa7PcFkPI+5OF9ckJZtqnI7gHlEH41jew6Z/im7mOAhmmiy6ppYXoAL0GhJIGRSGR1g==
+"@distube/ytdl-core@^4.14.3":
+  version "4.14.3"
+  resolved "https://registry.yarnpkg.com/@distube/ytdl-core/-/ytdl-core-4.14.3.tgz#ce862c7f6e68bf60a85a2d17a77a5f9c738f6b53"
+  integrity sha512-z6i5EVGEuKhuvuRNyIqafBSs5aRA28HssnWehCRhEtYrxeFgXImfmpKTjUusHYU5vQt1swSVPVb2JCd22P0CPA==
   dependencies:
     http-cookie-agent "^6.0.5"
     m3u8stream "^0.8.6"
