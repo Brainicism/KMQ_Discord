@@ -203,6 +203,7 @@ const downloadSong = (
                 }
 
                 await fs.promises.rename(tempLocation, outputFile);
+                resolve();
             } catch (err) {
                 reject(
                     new Error(
