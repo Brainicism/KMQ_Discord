@@ -65,9 +65,6 @@ server_shutdown() {
         echo "Renaming container..."
         docker rename "$APP_NAME" "$old_app_name"
 
-        echo "Pulling new docker image: $docker_image..."
-        docker pull "$docker_image"
-
         echo "Provisioning standby container with new image..."
         APP_NAME=$APP_NAME IMAGE_NAME=$docker_image IS_STANDBY=true npm run docker-run-internal
 
