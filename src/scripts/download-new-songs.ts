@@ -133,9 +133,10 @@ const downloadSong = (
 ): Promise<void> => {
     const tempLocation = `${outputFile}.part`;
     const cacheStream = fs.createWriteStream(tempLocation);
-    const ytdlOptions = {
+    const ytdlOptions: ytdl.downloadOptions = {
         filter: "audioonly" as const,
         quality: "highest",
+        agent: ytdl.createAgent(),
     };
 
     return new Promise(async (resolve, reject) => {
