@@ -127,6 +127,11 @@ program
     )
     .option("--songs <songs>", "Comma seperated youtube IDs to download", (x) =>
         x.split(",").map((y) => y.trim()),
+    )
+    .option(
+        "--check-song-durations",
+        "Check if downloaded songs have a cached song duration",
+        false,
     );
 
 program.parse();
@@ -639,6 +644,7 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
             const result = await downloadAndConvertSongs(
                 options.limit,
                 options.songs,
+                options.checkSongDurations,
             );
 
             songsDownloaded = result.songsDownloaded;
