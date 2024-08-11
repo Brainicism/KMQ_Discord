@@ -56,8 +56,26 @@ async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-async function ffmpegOpusJob(fileLocation: string): Promise<void> {
+async function cacheSongDuration(
+    songLocation: string,
+    id: string,
+    db: DatabaseContext,
+): Promise<void> {
+    const duration = await getAudioDurationInSeconds(songLocation);
+
+    await db.kmq
+        .insertInto("cached_song_duration")
+        .values({ vlink: id, duration })
+        .onDuplicateKeyUpdate({ vlink: id, duration })
+        .execute();
+}
+
+async function ffmpegOpusJob(
+    fileLocation: string,
+    db: DatabaseContext,
+): Promise<void> {
     return new Promise(async (resolve, reject) => {
+        const videoID = path.basename(fileLocation).replace(".mp3", "");
         const oggFileWithPath = fileLocation.replace(".mp3", ".ogg");
         if (await pathExists(oggFileWithPath)) {
             resolve();
@@ -88,6 +106,16 @@ async function ffmpegOpusJob(fileLocation: string): Promise<void> {
                             path.basename(fileLocation),
                         ),
                     );
+
+                    try {
+                        await cacheSongDuration(oggFileWithPath, videoID, db);
+                    } catch (e) {
+                        await fs.promises.unlink(oggFileWithPath);
+                        throw new Error(
+                            `Error calculating cached_song_duration. err = ${e}`,
+                        );
+                    }
+
                     resolve();
                 } catch (err) {
                     if (!(await pathExists(oggFileWithPath))) {
@@ -110,20 +138,6 @@ async function ffmpegOpusJob(fileLocation: string): Promise<void> {
             })
             .run();
     });
-}
-
-async function cacheSongDuration(
-    songLocation: string,
-    id: string,
-    db: DatabaseContext,
-): Promise<void> {
-    const duration = await getAudioDurationInSeconds(songLocation);
-
-    await db.kmq
-        .insertInto("cached_song_duration")
-        .values({ vlink: id, duration })
-        .onDuplicateKeyUpdate({ vlink: id, duration })
-        .execute();
 }
 
 const downloadSong = (
@@ -251,7 +265,7 @@ async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
 }
 
 // find half-finished song downloads, or mp3 files downloaded outside of ytdl-core
-async function processUnprocessedMp3Files(): Promise<void> {
+async function processUnprocessedMp3Files(db: DatabaseContext): Promise<void> {
     const mp3Files = (
         await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
     )
@@ -263,7 +277,7 @@ async function processUnprocessedMp3Files(): Promise<void> {
     logger.info(`Found ${mp3Files.length} unprocessed mp3 files`);
     for (const mp3File of mp3Files) {
         logger.info(`ffmpeg processing '${mp3File}'`);
-        await ffmpegOpusJob(mp3File);
+        await ffmpegOpusJob(mp3File, db);
     }
 }
 
@@ -300,7 +314,7 @@ const downloadNewSongs = async (
     songOverrides?: string[],
     checkSongDurations = false,
 ): Promise<{ songsDownloaded: number; songsFailed: number }> => {
-    await processUnprocessedMp3Files();
+    await processUnprocessedMp3Files(db);
 
     const allSongs: Array<{
         songName: string;
@@ -396,19 +410,6 @@ const downloadNewSongs = async (
                     false,
                 );
             }
-
-            try {
-                await cacheSongDuration(
-                    cachedSongLocation,
-                    song.youtubeLink,
-                    db,
-                );
-            } catch (e) {
-                await fs.promises.unlink(cachedSongLocation);
-                throw new Error(
-                    `Error calculating cached_song_duration. err = ${e}`,
-                );
-            }
         } catch (err) {
             logger.error(
                 `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
@@ -433,7 +434,7 @@ const downloadNewSongs = async (
             `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
         );
         try {
-            await ffmpegOpusJob(cachedSongLocation);
+            await ffmpegOpusJob(cachedSongLocation, db);
         } catch (err) {
             logger.error(
                 `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
