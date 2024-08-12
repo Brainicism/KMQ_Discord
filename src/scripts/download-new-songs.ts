@@ -169,7 +169,7 @@ async function downloadYouTubeAudio(
         ytSessionData.generated_at >
         new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
     ) {
-        logger.warn("Youtube session data is 6 hours old, should refresh");
+        logger.error("Youtube session data is 6 hours old, should refresh");
     }
 
     try {
