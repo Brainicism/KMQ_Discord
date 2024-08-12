@@ -75,4 +75,8 @@ export default class KmqConfiguration {
     newsGenerationEnabled(): boolean {
         return this.config["newsGenerationEnabled"] ?? false;
     }
+
+    ytdlpUpdatesEnabled(): boolean {
+        return this.config["ytdlpUpdatesEnabled"] ?? false;
+    }
 }

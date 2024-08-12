@@ -3,12 +3,14 @@ import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import {
     getAudioDurationInSeconds,
+    parseJsonFile,
     pathExists,
     retryJob,
     validateYouTubeID,
 } from "../helpers/utils";
 import { getAverageVolume } from "../helpers/discord_utils";
 import { getNewConnection } from "../database_context";
+import KmqConfiguration from "../kmq_configuration";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
@@ -152,8 +154,33 @@ async function downloadYouTubeAudio(
         throw new Error(`Invalid video ID. id = ${id}`);
     }
 
+    const sessionTokensPath = path.join(
+        __dirname,
+        "../../data/yt_session.json",
+    );
+
+    if (!(await pathExists(sessionTokensPath))) {
+        logger.warn("Youtube session token doesn't exist... aborting");
+        throw new Error("Youtube session token doesn't exist");
+    }
+
+    const ytSessionTokens: {
+        po_token: string;
+        visitor_data: string;
+        generated_at: Date;
+    } = await parseJsonFile(sessionTokensPath);
+
+    if (
+        ytSessionTokens.generated_at >
+        new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+    ) {
+        logger.error("Youtube session token is 6 hours old, should refresh");
+    }
+
     try {
-        await exec(`${ytDlpLocation} -f bestaudio -o "${outputFile}" '${id}';`);
+        await exec(
+            `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`,
+        );
     } catch (err) {
         throw new Error(err);
     }
@@ -251,6 +278,10 @@ async function updateNotDownloaded(
 }
 
 async function getLatestYtDlpBinary(): Promise<void> {
+    if (!KmqConfiguration.Instance.ytdlpUpdatesEnabled()) {
+        return;
+    }
+
     try {
         await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
     } catch (_err) {
