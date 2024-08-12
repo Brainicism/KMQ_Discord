@@ -15,6 +15,7 @@ import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
+import KmqConfiguration from "../kmq_configuration";
 
 const exec = util.promisify(cp.exec);
 
@@ -277,6 +278,10 @@ async function updateNotDownloaded(
 }
 
 async function getLatestYtDlpBinary(): Promise<void> {
+    if (!KmqConfiguration.Instance.ytdlpUpdatesEnabled()) {
+        return;
+    }
+
     try {
         await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
     } catch (_err) {
@@ -371,7 +376,7 @@ const downloadNewSongs = async (
     logger.info(`Total songs to be downloaded: ${songsToDownload.length}`);
 
     try {
-        // await getLatestYtDlpBinary();
+        await getLatestYtDlpBinary();
     } catch (err) {
         logger.warn(`Failed to get latest yt-dlp binary. err = ${err}`);
     }
