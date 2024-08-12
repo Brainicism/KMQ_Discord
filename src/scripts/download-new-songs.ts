@@ -3,6 +3,7 @@ import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import {
     getAudioDurationInSeconds,
+    parseJsonFile,
     pathExists,
     retryJob,
     validateYouTubeID,
@@ -152,8 +153,29 @@ async function downloadYouTubeAudio(
         throw new Error(`Invalid video ID. id = ${id}`);
     }
 
+    const sessionDataPath = path.join(__dirname, "../../data/yt_session.json");
+    if (!(await pathExists(sessionDataPath))) {
+        logger.warn("Youtube session data doesn't exist... aborting");
+        throw new Error("Youtube session data doesn't exist");
+    }
+
+    const ytSessionData: {
+        po_token: string;
+        visitor_data: string;
+        generated_at: Date;
+    } = await parseJsonFile(sessionDataPath);
+
+    if (
+        ytSessionData.generated_at >
+        new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+    ) {
+        logger.warn("Youtube session data is 6 hours old, should refresh");
+    }
+
     try {
-        await exec(`${ytDlpLocation} -f bestaudio -o "${outputFile}" '${id}';`);
+        await exec(
+            `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionData.po_token};visitor_data=${ytSessionData.visitor_data};player_skip=webpage,configs" '${id}';`,
+        );
     } catch (err) {
         throw new Error(err);
     }
