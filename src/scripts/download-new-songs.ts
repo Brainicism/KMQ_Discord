@@ -277,27 +277,26 @@ async function updateNotDownloaded(
 }
 
 async function getLatestYtDlpBinary(): Promise<void> {
-    try {
-        await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
-    } catch (_err) {
-        logger.warn("yt-dlp binary doesn't exist, downloading...");
-        try {
-            await exec(
-                `curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o ${ytDlpLocation}`,
-            );
-            await exec(`chmod u+x ${ytDlpLocation}`);
-        } catch (err) {
-            throw new Error(
-                `Failed to fetch latest yt-dlp library. err = ${err}`,
-            );
-        }
-    }
-
-    try {
-        await exec(`${ytDlpLocation} -U`);
-    } catch (err) {
-        throw new Error(`Failed to update yt-dlp library. err = ${err}`);
-    }
+    // try {
+    //     await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
+    // } catch (_err) {
+    //     logger.warn("yt-dlp binary doesn't exist, downloading...");
+    //     try {
+    //         await exec(
+    //             `curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o ${ytDlpLocation}`,
+    //         );
+    //         await exec(`chmod u+x ${ytDlpLocation}`);
+    //     } catch (err) {
+    //         throw new Error(
+    //             `Failed to fetch latest yt-dlp library. err = ${err}`,
+    //         );
+    //     }
+    // }
+    // try {
+    //     await exec(`${ytDlpLocation} -U`);
+    // } catch (err) {
+    //     throw new Error(`Failed to update yt-dlp library. err = ${err}`);
+    // }
 }
 
 const downloadNewSongs = async (
