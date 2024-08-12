@@ -5,7 +5,7 @@ import {
     getAudioDurationInSeconds,
     pathExists,
     retryJob,
-    validateID,
+    validateYouTubeID,
 } from "../helpers/utils";
 import { getAverageVolume } from "../helpers/discord_utils";
 import { getNewConnection } from "../database_context";
@@ -19,7 +19,7 @@ const exec = util.promisify(cp.exec);
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
-const ytdlpLocation = path.resolve(__dirname, "../../bin", "yt-dlp");
+const ytDlpLocation = path.resolve(__dirname, "../../bin", "yt-dlp");
 
 async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
@@ -145,42 +145,26 @@ async function ffmpegOpusJob(
 }
 
 async function ytdlp(id: string, outputFile: string): Promise<void> {
-    if (!validateID(id)) {
+    if (!validateYouTubeID(id)) {
         throw new Error(`Invalid video ID. id = ${id}`);
     }
 
     try {
         await exec(
-            `${ytdlpLocation} -x --audio-format mp3 -o "${outputFile}" --audio-quality 0 '${id}';`,
+            `${ytDlpLocation} -x --audio-format mp3 -o "${outputFile}" --audio-quality 0 '${id}';`,
         );
     } catch (err) {
         throw new Error(err);
     }
 }
 
-const downloadSong = (
-    db: DatabaseContext,
-    id: string,
-    outputFile: string,
-): Promise<void> =>
+const downloadSong = (id: string, outputFile: string): Promise<void> =>
     new Promise(async (resolve, reject) => {
         try {
             // download video
             await ytdlp(id, outputFile);
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
-            // 403s might be due to youtube bot detection, don't consider them dead
-            if (!(e as Error).message.includes("Video unavailable.")) {
-                await db.kmq
-                    .insertInto("dead_links")
-                    .values({
-                        vlink: id,
-                        reason: errorMessage,
-                    })
-                    .ignore()
-                    .execute();
-            }
-
             reject(new Error(errorMessage));
             return;
         }
@@ -267,15 +251,15 @@ async function updateNotDownloaded(
 
 async function getLatestYtdlpBinary(): Promise<void> {
     try {
-        await fs.promises.access(ytdlpLocation, fs.constants.F_OK);
+        await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
     } catch (_err) {
         // yt-dlp binary doesn't exist -- fetch it
         logger.warn("yt-dlp binary doesn't exist, downloading...");
         try {
             await exec(
-                `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ${ytdlpLocation}`,
+                `curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o ${ytDlpLocation}`,
             );
-            await exec(`chmod u+x ${ytdlpLocation}`);
+            await exec(`chmod u+x ${ytDlpLocation}`);
         } catch (err) {
             throw new Error(
                 `Failed to fetch latest yt-dlp library. err = ${err}`,
@@ -284,7 +268,7 @@ async function getLatestYtdlpBinary(): Promise<void> {
     }
 
     try {
-        await exec(`${ytdlpLocation} -U`);
+        await exec(`${ytDlpLocation} -U`);
     } catch (err) {
         throw new Error(`Failed to update yt-dlp library. err = ${err}`);
     }
@@ -363,8 +347,7 @@ const downloadNewSongs = async (
     try {
         await getLatestYtdlpBinary();
     } catch (err) {
-        logger.error(`Failed to get latest yt-dlp binary. err = ${err}`);
-        return { songsDownloaded: 0, songsFailed: songsToDownload.length };
+        logger.warn(`Failed to get latest yt-dlp binary. err = ${err}`);
     }
 
     // update current list of non-downloaded songs
@@ -392,7 +375,7 @@ const downloadNewSongs = async (
             } else {
                 await retryJob(
                     downloadSong,
-                    [db, song.youtubeLink, cachedSongLocation],
+                    [song.youtubeLink, cachedSongLocation],
                     1,
                     true,
                     5000,

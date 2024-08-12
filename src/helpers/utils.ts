@@ -717,7 +717,7 @@ export function extractErrorString(err: Error): string {
     return `Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`;
 }
 
-function getIDRegex(): RegExp {
+function getYouTubeIDRegex(): RegExp {
     return /^[a-zA-Z0-9-_]{11}$/;
 }
 
@@ -727,17 +727,17 @@ function getIDRegex(): RegExp {
  * @param id - the potential YouTube ID
  * @return whether valid ID
  */
-export function validateID(id: string): boolean {
-    return getIDRegex().test(id.trim());
+export function validateYouTubeID(id: string): boolean {
+    return getYouTubeIDRegex().test(id.trim());
 }
 
 /**
- * Gets video ID either from a url
+ * Gets video ID from a url
  *
  * @param link - the YouTube URL
  * @returns the ID
  */
-export function getURLVideoID(link: string): string {
+export function getYouTubeURLVideoID(link: string): string {
     const validPathDomains =
         /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts|live)\/)/;
 
@@ -763,9 +763,9 @@ export function getURLVideoID(link: string): string {
     }
 
     id = id.substring(0, 11);
-    if (!validateID(id)) {
+    if (!validateYouTubeID(id)) {
         throw TypeError(
-            `Video id (${id}) does not match expected format (${getIDRegex().toString()})`,
+            `Video id (${id}) does not match expected format (${getYouTubeIDRegex().toString()})`,
         );
     }
 
@@ -779,12 +779,12 @@ export function getURLVideoID(link: string): string {
  * @param idOrURL - the YouTube ID or URL
  * @returns the ID
  */
-export function getVideoID(idOrURL: string): string {
+export function getYouTubeVideoID(idOrURL: string): string {
     const urlRegex = /^https?:\/\//;
-    if (validateID(idOrURL)) {
+    if (validateYouTubeID(idOrURL)) {
         return idOrURL;
     } else if (urlRegex.test(idOrURL.trim())) {
-        return getURLVideoID(idOrURL);
+        return getYouTubeURLVideoID(idOrURL);
     } else {
         throw Error(`No video id found: ${idOrURL}`);
     }

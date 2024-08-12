@@ -5,10 +5,10 @@ import {
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
-    getVideoID,
+    getYouTubeVideoID,
     isValidURL,
     truncatedString,
-    validateID,
+    validateYouTubeID,
 } from "../../helpers/utils";
 import {
     clickableSlashCommand,
@@ -250,11 +250,11 @@ export default class LookupCommand implements BaseCommand {
         const locale = State.getGuildLocale(guildID as string);
 
         // attempt to look up by video ID
-        if (isValidURL(linkOrName) || validateID(linkOrName)) {
+        if (isValidURL(linkOrName) || validateYouTubeID(linkOrName)) {
             let videoID: string;
 
             try {
-                videoID = getVideoID(linkOrName);
+                videoID = getYouTubeVideoID(linkOrName);
             } catch {
                 await sendValidationErrorMessage(
                     messageContext,
