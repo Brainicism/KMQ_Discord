@@ -19,3 +19,6 @@ git log -n 1 --pretty
 
 echo "Initiating restart"
 bash src/scripts/announce-restart.sh --docker-image $docker_image --timer 3 --provisioning-timeout 15
+
+echo "Refreshing Youtube session data"
+bash src/scripts/session-generator.sh data/yt_session.json
