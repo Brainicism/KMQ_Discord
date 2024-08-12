@@ -406,7 +406,7 @@ const downloadNewSongs = async (
         logger.info(
             `Downloading song: '${song.songName}' by ${song.artistName} | ${
                 song.youtubeLink
-            } (${downloadCount + 1}/${songsToDownload.length})`,
+            } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})`,
         );
 
         const cachedSongLocation = path.join(
