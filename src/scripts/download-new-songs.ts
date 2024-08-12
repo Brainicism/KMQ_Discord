@@ -5,7 +5,6 @@ import {
     getAudioDurationInSeconds,
     parseJsonFile,
     pathExists,
-    retryJob,
     validateYouTubeID,
 } from "../helpers/utils";
 import { getAverageVolume } from "../helpers/discord_utils";
