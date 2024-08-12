@@ -5,8 +5,10 @@ import {
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
+    getYouTubeVideoID,
     isValidURL,
     truncatedString,
+    validateYouTubeID,
 } from "../../helpers/utils";
 import {
     clickableSlashCommand,
@@ -21,7 +23,6 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
-import { getVideoID, validateID } from "@distube/ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
 import GameRound from "../../structures/game_round";
@@ -249,11 +250,11 @@ export default class LookupCommand implements BaseCommand {
         const locale = State.getGuildLocale(guildID as string);
 
         // attempt to look up by video ID
-        if (isValidURL(linkOrName) || validateID(linkOrName)) {
+        if (isValidURL(linkOrName) || validateYouTubeID(linkOrName)) {
             let videoID: string;
 
             try {
-                videoID = getVideoID(linkOrName);
+                videoID = getYouTubeVideoID(linkOrName);
             } catch {
                 await sendValidationErrorMessage(
                     messageContext,

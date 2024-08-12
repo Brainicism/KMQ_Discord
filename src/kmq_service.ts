@@ -49,11 +49,13 @@ export default class ServiceWorker extends BaseServiceWorker {
 
     loadCaches = async (): Promise<void> => {
         if (!EnvVariableManager.isMinimalRun()) {
+            // Every hour
             schedule.scheduleJob("0 * * * *", async () => {
                 // Use reddit and Gemini to generate news
                 await this.reloadNews();
             });
 
+            // Every 6 hours
             schedule.scheduleJob("0 */6 * * *", async () => {
                 await this.reloadFactCache();
             });

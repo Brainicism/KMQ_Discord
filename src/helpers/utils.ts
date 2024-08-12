@@ -716,3 +716,76 @@ export function shufflePartitionedArray<T>(
 export function extractErrorString(err: Error): string {
     return `Name: ${err.name}. Reason: ${err.message}. Trace: ${err.stack}}`;
 }
+
+function getYouTubeIDRegex(): RegExp {
+    return /^[a-zA-Z0-9-_]{11}$/;
+}
+
+/**
+ * Returns true if given id satifies YouTube's id format.
+ *
+ * @param id - the potential YouTube ID
+ * @return whether valid ID
+ */
+export function validateYouTubeID(id: string): boolean {
+    return getYouTubeIDRegex().test(id.trim());
+}
+
+/**
+ * Gets video ID from a url
+ *
+ * @param link - the YouTube URL
+ * @returns the ID
+ */
+export function getYouTubeURLVideoID(link: string): string {
+    const validPathDomains =
+        /^https?:\/\/(youtu\.be\/|(www\.)?youtube\.com\/(embed|v|shorts|live)\/)/;
+
+    const validQueryDomains = new Set([
+        "youtube.com",
+        "www.youtube.com",
+        "m.youtube.com",
+        "music.youtube.com",
+        "gaming.youtube.com",
+    ]);
+
+    const parsed = new URL(link.trim());
+    let id = parsed.searchParams.get("v");
+    if (validPathDomains.test(link.trim()) && !id) {
+        const paths = parsed.pathname.split("/");
+        id = parsed.host === "youtu.be" ? paths[1]! : paths[2]!;
+    } else if (parsed.hostname && !validQueryDomains.has(parsed.hostname)) {
+        throw Error("Not a YouTube domain");
+    }
+
+    if (!id) {
+        throw Error(`No video id found: "${link}"`);
+    }
+
+    id = id.substring(0, 11);
+    if (!validateYouTubeID(id)) {
+        throw TypeError(
+            `Video id (${id}) does not match expected format (${getYouTubeIDRegex().toString()})`,
+        );
+    }
+
+    return id;
+}
+
+/**
+ * Gets video ID either from a url or by checking if the given string
+ * matches the video ID format.
+ *
+ * @param idOrURL - the YouTube ID or URL
+ * @returns the ID
+ */
+export function getYouTubeVideoID(idOrURL: string): string {
+    const urlRegex = /^https?:\/\//;
+    if (validateYouTubeID(idOrURL)) {
+        return idOrURL;
+    } else if (urlRegex.test(idOrURL.trim())) {
+        return getYouTubeURLVideoID(idOrURL);
+    } else {
+        throw Error(`No video id found: ${idOrURL}`);
+    }
+}

@@ -22,6 +22,10 @@ COPY sql_dumps/kmq-test-cached.sql sql_dumps/kmq-test-cached.sql
 COPY sql/ sql/
 COPY templates/ templates/
 
+RUN mkdir bin
+RUN curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o bin/yt-dlp
+RUN chmod u+x bin/yt-dlp
+
 COPY src/ src/
 RUN npx tsc
 
@@ -41,5 +45,5 @@ WORKDIR /app
 STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
-HEALTHCHECK --start-interval=5s --interval=60s --timeout=3s --start-period=30s CMD bash src/healthcheck.sh 
+HEALTHCHECK --start-interval=5s --interval=60s --timeout=3s --start-period=30s CMD bash src/healthcheck.sh
 ENTRYPOINT ["./start.sh", "docker"]
