@@ -183,11 +183,16 @@ async function downloadYouTubeAudio(
             `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`,
         );
     } catch (err) {
+        const errorMessage =
+            (err as Error).message
+                .split("\n")
+                .find((x) => x.startsWith("ERROR:")) || (err as Error).message;
+
         await db.kmq
             .insertInto("dead_links")
             .values({
                 vlink: id,
-                reason: `Failed to download video: error = ${(err as Error).message}`,
+                reason: `Failed to download video: error = ${errorMessage}`,
             })
             .ignore()
             .execute();
@@ -206,7 +211,7 @@ const downloadSong = (
             // download video
             await downloadYouTubeAudio(db, id, outputFile);
         } catch (e) {
-            const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
+            const errorMessage = `Failed to download video for '${id}'. error = ${e}`;
             reject(new Error(errorMessage));
             return;
         }
@@ -418,14 +423,7 @@ const downloadNewSongs = async (
                     cachedSongLocation,
                 );
             } else {
-                await retryJob(
-                    downloadSong,
-                    [db, song.youtubeLink, cachedSongLocation],
-                    1,
-                    true,
-                    5000,
-                    false,
-                );
+                await downloadSong(db, song.youtubeLink, cachedSongLocation);
             }
         } catch (err) {
             logger.error(
