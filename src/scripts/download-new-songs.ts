@@ -151,14 +151,17 @@ async function ytdlp(id: string, outputFile: string): Promise<void> {
 
     try {
         await exec(
-            `${ytDlpLocation} -x --audio-format mp3 -o "${outputFile}" --audio-quality 0 '${id}';`,
+            `${ytDlpLocation} -f bestaudio -o "${outputFile}" '${id}';`,
         );
     } catch (err) {
         throw new Error(err);
     }
 }
 
-const downloadSong = (id: string, outputFile: string): Promise<void> =>
+const downloadSong = (
+    id: string,
+    outputFile: string,
+): Promise<void> =>
     new Promise(async (resolve, reject) => {
         try {
             // download video
@@ -249,7 +252,7 @@ async function updateNotDownloaded(
     });
 }
 
-async function getLatestYtdlpBinary(): Promise<void> {
+async function getLatestYtDlpBinary(): Promise<void> {
     try {
         await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
     } catch (_err) {
@@ -345,7 +348,7 @@ const downloadNewSongs = async (
     logger.info(`Total songs to be downloaded: ${songsToDownload.length}`);
 
     try {
-        await getLatestYtdlpBinary();
+        await getLatestYtDlpBinary();
     } catch (err) {
         logger.warn(`Failed to get latest yt-dlp binary. err = ${err}`);
     }
