@@ -56,14 +56,27 @@ async function clearPartiallyCachedSongs(): Promise<void> {
     }
 }
 
-async function ffmpegOpusJob(id: string): Promise<void> {
-    const mp3File = path.join(
-        process.env.SONG_DOWNLOAD_DIR as string,
-        `${id}.mp3`,
-    );
+async function cacheSongDuration(
+    songLocation: string,
+    id: string,
+    db: DatabaseContext,
+): Promise<void> {
+    const duration = await getAudioDurationInSeconds(songLocation);
 
+    await db.kmq
+        .insertInto("cached_song_duration")
+        .values({ vlink: id, duration })
+        .onDuplicateKeyUpdate({ vlink: id, duration })
+        .execute();
+}
+
+async function ffmpegOpusJob(
+    fileLocation: string,
+    db: DatabaseContext,
+): Promise<void> {
     return new Promise(async (resolve, reject) => {
-        const oggFileWithPath = mp3File.replace(".mp3", ".ogg");
+        const videoID = path.basename(fileLocation).replace(".mp3", "");
+        const oggFileWithPath = fileLocation.replace(".mp3", ".ogg");
         if (await pathExists(oggFileWithPath)) {
             resolve();
         }
@@ -71,9 +84,14 @@ async function ffmpegOpusJob(id: string): Promise<void> {
         const oggPartWithPath = `${oggFileWithPath}.part`;
         const oggFfmpegOutputStream = fs.createWriteStream(oggPartWithPath);
 
-        const currentAverageVolume = await getAverageVolume(mp3File, [], []);
+        const currentAverageVolume = await getAverageVolume(
+            fileLocation,
+            [],
+            [],
+        );
+
         const volumeDifferential = TARGET_AVERAGE_VOLUME - currentAverageVolume;
-        ffmpeg(mp3File)
+        ffmpeg(fileLocation)
             .renice(20)
             .format("opus")
             .audioCodec("libopus")
@@ -85,9 +103,19 @@ async function ffmpegOpusJob(id: string): Promise<void> {
                     await fs.promises.unlink(
                         path.join(
                             process.env.SONG_DOWNLOAD_DIR as string,
-                            path.basename(mp3File),
+                            path.basename(fileLocation),
                         ),
                     );
+
+                    try {
+                        await cacheSongDuration(oggFileWithPath, videoID, db);
+                    } catch (e) {
+                        await fs.promises.unlink(oggFileWithPath);
+                        throw new Error(
+                            `Error calculating cached_song_duration. err = ${e}`,
+                        );
+                    }
+
                     resolve();
                 } catch (err) {
                     if (!(await pathExists(oggFileWithPath))) {
@@ -110,20 +138,6 @@ async function ffmpegOpusJob(id: string): Promise<void> {
             })
             .run();
     });
-}
-
-async function cacheSongDuration(
-    songLocation: string,
-    id: string,
-    db: DatabaseContext,
-): Promise<void> {
-    const duration = await getAudioDurationInSeconds(songLocation);
-
-    await db.kmq
-        .insertInto("cached_song_duration")
-        .values({ vlink: id, duration })
-        .onDuplicateKeyUpdate({ vlink: id, duration })
-        .execute();
 }
 
 const downloadSong = (
@@ -250,6 +264,23 @@ async function getCurrentlyDownloadedFiles(): Promise<Set<string>> {
     );
 }
 
+// find half-finished song downloads, or mp3 files downloaded outside of ytdl-core
+async function processUnprocessedMp3Files(db: DatabaseContext): Promise<void> {
+    const mp3Files = (
+        await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
+    )
+        .filter((file) => file.endsWith(".mp3"))
+        .map((x) => path.join(process.env.SONG_DOWNLOAD_DIR as string, x));
+
+    if (mp3Files.length === 0) return;
+
+    logger.info(`Found ${mp3Files.length} unprocessed mp3 files`);
+    for (const mp3File of mp3Files) {
+        logger.info(`ffmpeg processing '${mp3File}'`);
+        await ffmpegOpusJob(mp3File, db);
+    }
+}
+
 async function updateNotDownloaded(
     db: DatabaseContext,
     songs: Array<{
@@ -281,7 +312,10 @@ const downloadNewSongs = async (
     db: DatabaseContext,
     limit?: number,
     songOverrides?: string[],
+    checkSongDurations = false,
 ): Promise<{ songsDownloaded: number; songsFailed: number }> => {
+    await processUnprocessedMp3Files(db);
+
     const allSongs: Array<{
         songName: string;
         views: number;
@@ -306,28 +340,33 @@ const downloadNewSongs = async (
 
     const currentlyDownloadedFiles = await getCurrentlyDownloadedFiles();
 
-    // check for downloaded songs without cache duration
-    for (const currentlyDownloadedFile of currentlyDownloadedFiles) {
-        const result = !!(await db.kmq
-            .selectFrom("cached_song_duration")
-            .selectAll()
-            .where("vlink", "=", currentlyDownloadedFile.replace(".ogg", ""))
-            .executeTakeFirst());
+    if (checkSongDurations)
+        // check for downloaded songs without cache duration
+        for (const currentlyDownloadedFile of currentlyDownloadedFiles) {
+            const result = !!(await db.kmq
+                .selectFrom("cached_song_duration")
+                .selectAll()
+                .where(
+                    "vlink",
+                    "=",
+                    currentlyDownloadedFile.replace(".ogg", ""),
+                )
+                .executeTakeFirst());
 
-        if (!result) {
-            logger.warn(
-                `${currentlyDownloadedFile} is downloaded, but missing cache duration`,
-            );
+            if (!result) {
+                logger.warn(
+                    `${currentlyDownloadedFile} is downloaded, but missing cache duration`,
+                );
 
-            const songLocation = `${process.env.SONG_DOWNLOAD_DIR as string}/${currentlyDownloadedFile}`;
+                const songLocation = `${process.env.SONG_DOWNLOAD_DIR as string}/${currentlyDownloadedFile}`;
 
-            await cacheSongDuration(
-                songLocation,
-                currentlyDownloadedFile.replace(".ogg", ""),
-                db,
-            );
+                await cacheSongDuration(
+                    songLocation,
+                    currentlyDownloadedFile.replace(".ogg", ""),
+                    db,
+                );
+            }
         }
-    }
 
     logger.info(`Total songs in database: ${allSongs.length}`);
     songsToDownload = songsToDownload.filter(
@@ -348,12 +387,13 @@ const downloadNewSongs = async (
                 song.youtubeLink
             } (${downloadCount + 1}/${songsToDownload.length})`,
         );
-        try {
-            const cachedSongLocation = path.join(
-                process.env.SONG_DOWNLOAD_DIR as string,
-                `${song.youtubeLink}.mp3`,
-            );
 
+        const cachedSongLocation = path.join(
+            process.env.SONG_DOWNLOAD_DIR as string,
+            `${song.youtubeLink}.mp3`,
+        );
+
+        try {
             if (process.env.MOCK_AUDIO === "true") {
                 logger.info(`Mocking downloading for ${song.youtubeLink}`);
                 await fs.promises.copyFile(
@@ -368,19 +408,6 @@ const downloadNewSongs = async (
                     true,
                     5000,
                     false,
-                );
-            }
-
-            try {
-                await cacheSongDuration(
-                    cachedSongLocation,
-                    song.youtubeLink,
-                    db,
-                );
-            } catch (e) {
-                await fs.promises.unlink(cachedSongLocation);
-                throw new Error(
-                    `Error calculating cached_song_duration. err = ${e}`,
                 );
             }
         } catch (err) {
@@ -407,7 +434,7 @@ const downloadNewSongs = async (
             `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
         );
         try {
-            await retryJob(ffmpegOpusJob, [song.youtubeLink], 1, true, 5000);
+            await ffmpegOpusJob(cachedSongLocation, db);
         } catch (err) {
             logger.error(
                 `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
@@ -432,11 +459,13 @@ const downloadNewSongs = async (
 /**
  * @param limit - The limit specified for downloading songs
  * @param songOverrides - Song overrides
+ * @param checkSongDurations - Whether to check if song durations are cached
  * @returns - the number of songs downloaded
  */
 export default async function downloadAndConvertSongs(
     limit?: number,
     songOverrides?: string[],
+    checkSongDurations?: boolean,
 ): Promise<{ songsDownloaded: number; songsFailed: number }> {
     const db = getNewConnection();
     try {
@@ -450,6 +479,7 @@ export default async function downloadAndConvertSongs(
             db,
             limit,
             songOverrides,
+            checkSongDurations,
         );
 
         return songsDownloaded;
