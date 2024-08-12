@@ -144,7 +144,10 @@ async function ffmpegOpusJob(
     });
 }
 
-async function ytdlp(id: string, outputFile: string): Promise<void> {
+async function downloadYouTubeAudio(
+    id: string,
+    outputFile: string,
+): Promise<void> {
     if (!validateYouTubeID(id)) {
         throw new Error(`Invalid video ID. id = ${id}`);
     }
@@ -160,7 +163,7 @@ const downloadSong = (id: string, outputFile: string): Promise<void> =>
     new Promise(async (resolve, reject) => {
         try {
             // download video
-            await ytdlp(id, outputFile);
+            await downloadYouTubeAudio(id, outputFile);
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
             reject(new Error(errorMessage));
@@ -251,7 +254,6 @@ async function getLatestYtDlpBinary(): Promise<void> {
     try {
         await fs.promises.access(ytDlpLocation, fs.constants.F_OK);
     } catch (_err) {
-        // yt-dlp binary doesn't exist -- fetch it
         logger.warn("yt-dlp binary doesn't exist, downloading...");
         try {
             await exec(
