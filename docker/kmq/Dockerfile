@@ -22,8 +22,7 @@ COPY sql_dumps/kmq-test-cached.sql sql_dumps/kmq-test-cached.sql
 COPY sql/ sql/
 COPY templates/ templates/
 
-RUN mkdir bin
-RUN curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o bin/yt-dlp
+COPY bin/ bin/
 RUN chmod u+x bin/yt-dlp
 
 COPY src/ src/
