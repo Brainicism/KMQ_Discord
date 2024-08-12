@@ -1,21 +1,25 @@
 /* eslint-disable no-await-in-loop */
+import * as cp from "child_process";
 import { IPCLogger } from "../logger";
 import {
-    extractErrorString,
     getAudioDurationInSeconds,
     pathExists,
     retryJob,
+    validateID,
 } from "../helpers/utils";
 import { getAverageVolume } from "../helpers/discord_utils";
 import { getNewConnection } from "../database_context";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
-import ytdl from "@distube/ytdl-core";
+import util from "util";
 import type { DatabaseContext } from "../database_context";
+
+const exec = util.promisify(cp.exec);
 
 const logger = new IPCLogger("download-new-songs");
 const TARGET_AVERAGE_VOLUME = -30;
+const ytdlpLocation = path.resolve(__dirname, "../../bin", "yt-dlp");
 
 async function clearPartiallyCachedSongs(): Promise<void> {
     logger.info("Clearing partially cached songs");
@@ -140,62 +144,33 @@ async function ffmpegOpusJob(
     });
 }
 
+async function ytdlp(id: string, outputFile: string): Promise<void> {
+    if (!validateID(id)) {
+        throw new Error(`Invalid video ID. id = ${id}`);
+    }
+
+    try {
+        await exec(
+            `${ytdlpLocation} -x --audio-format mp3 -o "${outputFile}" --audio-quality 0 '${id}';`,
+        );
+    } catch (err) {
+        throw new Error(err);
+    }
+}
+
 const downloadSong = (
     db: DatabaseContext,
     id: string,
     outputFile: string,
-): Promise<void> => {
-    const tempLocation = `${outputFile}.part`;
-    const cacheStream = fs.createWriteStream(tempLocation);
-    const ytdlOptions: ytdl.downloadOptions = {
-        filter: "audioonly" as const,
-        quality: "highest",
-        agent: ytdl.createAgent(),
-    };
-
-    return new Promise(async (resolve, reject) => {
+): Promise<void> =>
+    new Promise(async (resolve, reject) => {
         try {
-            // check to see if the video is downloadable
-            const infoResponse = await ytdl.getBasicInfo(
-                `https://www.youtube.com/watch?v=${id}`,
-            );
-
-            const { playabilityStatus }: any = infoResponse.player_response;
-            if (playabilityStatus.status !== "OK") {
-                await db.kmq
-                    .insertInto("dead_links")
-                    .values({
-                        vlink: id,
-                        reason: `Failed to load video: error = ${playabilityStatus.reason}`,
-                    })
-                    .ignore()
-                    .execute();
-
-                reject(
-                    new Error(
-                        `Failed to load video: error = ${playabilityStatus.reason}`,
-                    ),
-                );
-                return;
-            }
-
             // download video
-            const ytdlReadableStream = ytdl(
-                `https://www.youtube.com/watch?v=${id}`,
-                ytdlOptions,
-            );
-
-            ytdlReadableStream.on("error", (err: Error) => {
-                const errorMessage = `Error in ytdl readable stream. err = ${extractErrorString(err)}`;
-                logger.error(errorMessage);
-                reject(new Error(errorMessage));
-            });
-
-            ytdlReadableStream.pipe(cacheStream);
+            await ytdlp(id, outputFile);
         } catch (e) {
             const errorMessage = `Failed to retrieve video metadata for '${id}'. error = ${e}`;
             // 403s might be due to youtube bot detection, don't consider them dead
-            if (!(e as Error).message.includes("Status code: 403")) {
+            if (!(e as Error).message.includes("Video unavailable.")) {
                 await db.kmq
                     .insertInto("dead_links")
                     .values({
@@ -210,26 +185,8 @@ const downloadSong = (
             return;
         }
 
-        cacheStream.once("finish", async () => {
-            try {
-                if ((await fs.promises.stat(tempLocation)).size === 0) {
-                    reject(new Error(`Song file is empty. id = ${id}`));
-                    return;
-                }
-
-                await fs.promises.rename(tempLocation, outputFile);
-                resolve();
-            } catch (err) {
-                reject(
-                    new Error(
-                        `Error renaming temp song file from ${tempLocation} to ${outputFile}. err = ${err}`,
-                    ),
-                );
-            }
-        });
-        cacheStream.once("error", (e) => reject(e));
+        resolve();
     });
-};
 
 async function getSongsFromDb(db: DatabaseContext): Promise<
     {
@@ -308,6 +265,31 @@ async function updateNotDownloaded(
     });
 }
 
+async function getLatestYtdlpBinary(): Promise<void> {
+    try {
+        await fs.promises.access(ytdlpLocation, fs.constants.F_OK);
+    } catch (_err) {
+        // yt-dlp binary doesn't exist -- fetch it
+        logger.warn("yt-dlp binary doesn't exist, downloading...");
+        try {
+            await exec(
+                `curl -L https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -o ${ytdlpLocation}`,
+            );
+            await exec(`chmod u+x ${ytdlpLocation}`);
+        } catch (err) {
+            throw new Error(
+                `Failed to fetch latest yt-dlp library. err = ${err}`,
+            );
+        }
+    }
+
+    try {
+        await exec(`${ytdlpLocation} -U`);
+    } catch (err) {
+        throw new Error(`Failed to update yt-dlp library. err = ${err}`);
+    }
+}
+
 const downloadNewSongs = async (
     db: DatabaseContext,
     limit?: number,
@@ -378,6 +360,13 @@ const downloadNewSongs = async (
     );
     logger.info(`Total songs to be downloaded: ${songsToDownload.length}`);
 
+    try {
+        await getLatestYtdlpBinary();
+    } catch (err) {
+        logger.error(`Failed to get latest yt-dlp binary. err = ${err}`);
+        return { songsDownloaded: 0, songsFailed: songsToDownload.length };
+    }
+
     // update current list of non-downloaded songs
     await updateNotDownloaded(db, allSongs);
 
@@ -415,18 +404,6 @@ const downloadNewSongs = async (
                 `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
             );
             downloadsFailed++;
-            try {
-                await fs.promises.unlink(
-                    `${process.env.SONG_DOWNLOAD_DIR as string}/${
-                        song.youtubeLink
-                    }.mp3.part`,
-                );
-            } catch (tempErr) {
-                logger.error(
-                    `Error deleting temp file ${song.youtubeLink}.mp3.part, err = ${tempErr}`,
-                );
-            }
-
             continue;
         }
 

@@ -5,8 +5,10 @@ import {
     containsHangul,
     friendlyFormattedDate,
     friendlyFormattedNumber,
+    getVideoID,
     isValidURL,
     truncatedString,
+    validateID,
 } from "../../helpers/utils";
 import {
     clickableSlashCommand,
@@ -21,7 +23,6 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
-import { getVideoID, validateID } from "@distube/ytdl-core";
 import { sendValidationErrorMessage } from "../../helpers/validate";
 import Eris from "eris";
 import GameRound from "../../structures/game_round";
