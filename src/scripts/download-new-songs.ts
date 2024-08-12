@@ -150,18 +150,13 @@ async function ytdlp(id: string, outputFile: string): Promise<void> {
     }
 
     try {
-        await exec(
-            `${ytDlpLocation} -f bestaudio -o "${outputFile}" '${id}';`,
-        );
+        await exec(`${ytDlpLocation} -f bestaudio -o "${outputFile}" '${id}';`);
     } catch (err) {
         throw new Error(err);
     }
 }
 
-const downloadSong = (
-    id: string,
-    outputFile: string,
-): Promise<void> =>
+const downloadSong = (id: string, outputFile: string): Promise<void> =>
     new Promise(async (resolve, reject) => {
         try {
             // download video
