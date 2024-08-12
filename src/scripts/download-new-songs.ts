@@ -10,12 +10,12 @@ import {
 } from "../helpers/utils";
 import { getAverageVolume } from "../helpers/discord_utils";
 import { getNewConnection } from "../database_context";
+import KmqConfiguration from "../kmq_configuration";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import util from "util";
 import type { DatabaseContext } from "../database_context";
-import KmqConfiguration from "../kmq_configuration";
 
 const exec = util.promisify(cp.exec);
 
