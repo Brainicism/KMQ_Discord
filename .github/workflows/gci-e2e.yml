@@ -107,6 +107,8 @@ jobs:
                   OWNER: ${{ github.repository_owner }}
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+            - name: Acquire youtube session data
+              run: bash src/scripts/session-generator.sh data/yt_session.json
             - name: Dry-run bootstrap
               run: |
                   . ./.env
