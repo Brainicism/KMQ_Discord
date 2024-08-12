@@ -160,7 +160,7 @@ async function ytdlp(id: string, outputFile: string): Promise<void> {
         po_token: string;
         visitor_data: string;
         generated_at: Date;
-    } = await parseJsonFile(path.join(__dirname, sessionDataPath));
+    } = await parseJsonFile(sessionDataPath);
 
     if (
         ytSessionData.generated_at >
