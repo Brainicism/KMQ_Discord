@@ -153,28 +153,32 @@ async function downloadYouTubeAudio(
         throw new Error(`Invalid video ID. id = ${id}`);
     }
 
-    const sessionDataPath = path.join(__dirname, "../../data/yt_session.json");
-    if (!(await pathExists(sessionDataPath))) {
-        logger.warn("Youtube session data doesn't exist... aborting");
-        throw new Error("Youtube session data doesn't exist");
+    const sessionTokensPath = path.join(
+        __dirname,
+        "../../data/yt_session.json",
+    );
+
+    if (!(await pathExists(sessionTokensPath))) {
+        logger.warn("Youtube session token doesn't exist... aborting");
+        throw new Error("Youtube session token doesn't exist");
     }
 
-    const ytSessionData: {
+    const ytSessionTokens: {
         po_token: string;
         visitor_data: string;
         generated_at: Date;
-    } = await parseJsonFile(sessionDataPath);
+    } = await parseJsonFile(sessionTokensPath);
 
     if (
-        ytSessionData.generated_at >
+        ytSessionTokens.generated_at >
         new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
     ) {
-        logger.error("Youtube session data is 6 hours old, should refresh");
+        logger.error("Youtube session token is 6 hours old, should refresh");
     }
 
     try {
         await exec(
-            `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionData.po_token};visitor_data=${ytSessionData.visitor_data};player_skip=webpage,configs" '${id}';`,
+            `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`,
         );
     } catch (err) {
         throw new Error(err);
