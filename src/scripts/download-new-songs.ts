@@ -153,7 +153,7 @@ async function ytdlp(id: string, outputFile: string): Promise<void> {
     const sessionDataPath = path.join(__dirname, "../../data/yt_session.json");
     if (!(await pathExists(sessionDataPath))) {
         logger.warn("Youtube session data doesn't exist... aborting");
-        return;
+        throw new Error("Youtube session data doesn't exist");
     }
 
     const ytSessionData: {
