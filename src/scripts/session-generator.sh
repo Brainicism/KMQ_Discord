@@ -17,6 +17,11 @@ json_output=$(jq -n \
                   --arg visitor_id "$visitor_id" \
                   '{visitor_data: $visitor_data, po_token: $po_token, generated_at: $generated_at, visitor_id: $visitor_id}')
 
+# Create a cookie file with the specified format
+cookie_file="${output_file%.json}.cookie"
+expiration_time=$(date -d "+6 months" +"%s")
+echo "# Netscape HTTP Cookie File" > "$cookie_file"
+echo -e ".youtube.com\tTRUE\t/\tTRUE\t$expiration_time\tVISITOR_INFO1_LIVE\t$visitor_id" >> "$cookie_file"
 
 output_file="$1"
 echo "$json_output" > "$output_file"
