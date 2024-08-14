@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ "$#" -ne 1 ]; then
-    echo "Usage: $0 <output_file>"
+    echo "Usage: $0 <session_data>"
     exit 1
 fi
 
@@ -17,11 +17,11 @@ json_output=$(jq -n \
                   --arg visitor_id "$visitor_id" \
                   '{visitor_data: $visitor_data, po_token: $po_token, generated_at: $generated_at, visitor_id: $visitor_id}')
 
+session_data="$1"
+echo "$json_output" > "$session_data"
 
-echo "$json_output" > "$output_file"
-
-expiration_time=$(date -d "+1 months" +"%s")
+cookie_file="${session_data%.json}.cookie"
+expiration_time=$(date -d "+6 months" +"%s")
 echo "# Netscape HTTP Cookie File" > "$cookie_file"
 echo -e ".youtube.com\tTRUE\t/\tTRUE\t$expiration_time\tVISITOR_INFO1_LIVE\t$visitor_id" >> "$cookie_file"
 
-output_file="$1"
