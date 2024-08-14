@@ -159,6 +159,11 @@ async function downloadYouTubeAudio(
         "../../data/yt_session.json",
     );
 
+    const sessionCookiePath = path.join(
+        __dirname,
+        "../../data/yt_session.cookie",
+    );
+
     if (!(await pathExists(sessionTokensPath))) {
         logger.warn("Youtube session token doesn't exist... aborting");
         throw new Error("Youtube session token doesn't exist");
@@ -178,9 +183,14 @@ async function downloadYouTubeAudio(
     }
 
     try {
-        await exec(
-            `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`,
-        );
+        let ytdlpCommand: string;
+        if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
+            ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-args  "youtube:player-client=web,default;po_token=${ytSessionTokens.po_token}" --cookies ${sessionCookiePath} '${id}';`;
+        } else {
+            ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`;
+        }
+
+        await exec(ytdlpCommand);
     } catch (err) {
         const errorMessage =
             (err as Error).message

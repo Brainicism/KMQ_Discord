@@ -108,7 +108,7 @@ jobs:
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
             - name: Acquire youtube session tokens
-              run: mkdir data && bash src/scripts/session-generator.sh data/yt_session.json
+              run: mkdir data && bash src/scripts/session-generator.sh data/
             - name: Dry-run bootstrap
               run: |
                   . ./.env
