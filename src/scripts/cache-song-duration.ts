@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
-import { getAudioDurationInSeconds } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
+import KmqSongDownloader from "../helpers/kmq_song_downloader";
 import fs from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
@@ -30,9 +30,13 @@ async function cacheSongDuration(db: DatabaseContext): Promise<void> {
                 .executeTakeFirst())
         ) {
             // uncached song
-            const songDuration = await getAudioDurationInSeconds(
-                path.join(process.env.SONG_DOWNLOAD_DIR as string, fileName),
-            );
+            const songDuration =
+                await KmqSongDownloader.getAudioDurationInSeconds(
+                    path.join(
+                        process.env.SONG_DOWNLOAD_DIR as string,
+                        fileName,
+                    ),
+                );
 
             await db.kmq
                 .insertInto("cached_song_duration")

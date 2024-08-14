@@ -2,7 +2,6 @@
 import * as uuid from "uuid";
 import { DataFiles } from "../constants";
 import { IPCLogger } from "../logger";
-import { exec } from "child_process";
 import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
@@ -95,29 +94,6 @@ export function chunkArray<T>(
     }
 
     return chunkedArrays;
-}
-
-/**
- * @param songPath - the file path of the song file
- * @returns the audio duration of the song
- */
-export function getAudioDurationInSeconds(songPath: string): Promise<number> {
-    return new Promise((resolve) => {
-        exec(
-            `ffprobe -i "${songPath}" -show_entries format=duration -v quiet -of csv="p=0"`,
-            (_err, stdout, stderr) => {
-                if (!stdout || stderr) {
-                    logger.error(
-                        `Error getting audio duration: path = ${songPath}, err = ${stderr}`,
-                    );
-                    resolve(0);
-                    return;
-                }
-
-                resolve(parseInt(stdout, 10));
-            },
-        );
-    });
 }
 
 /**
