@@ -190,7 +190,6 @@ async function downloadYouTubeAudio(
             ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`;
         }
 
-        logger.info(ytdlpCommand);
         await exec(ytdlpCommand);
     } catch (err) {
         const errorMessage =
