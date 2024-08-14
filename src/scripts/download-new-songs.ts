@@ -185,7 +185,7 @@ async function downloadYouTubeAudio(
     try {
         let ytdlpCommand: string;
         if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-            ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" ---extractor-args  "youtube:player-client=web,default;po_token=${ytSessionTokens.po_token}" --cookies ${sessionCookiePath} '${id}';`;
+            ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-args  "youtube:player-client=web,default;po_token=${ytSessionTokens.po_token}" --cookies ${sessionCookiePath} '${id}';`;
         } else {
             ytdlpCommand = `${ytDlpLocation} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" '${id}';`;
         }
