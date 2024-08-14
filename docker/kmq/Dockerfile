@@ -43,7 +43,6 @@ RUN apt-get update && apt-get install -y default-mysql-client \
 COPY --from=build /app /app
 WORKDIR /app
 
-RUN mkdir data
 STOPSIGNAL SIGINT
 ARG NODE_ENV
 ENV NODE_ENV=$NODE_ENV
