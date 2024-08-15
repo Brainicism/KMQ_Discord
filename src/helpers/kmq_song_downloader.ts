@@ -1,14 +1,15 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
 import { IPCLogger } from "../logger";
-import { getAverageVolume } from "./discord_utils";
-import { getNewConnection } from "../database_context";
 import {
+    extractErrorString,
     parseJsonFile,
     pathExists,
     pathExistsSync,
     validateYouTubeID,
 } from "./utils";
+import { getAverageVolume } from "./discord_utils";
+import { getNewConnection } from "../database_context";
 import KmqConfiguration from "../kmq_configuration";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
@@ -23,6 +24,25 @@ const logger = new IPCLogger("download-new-songs");
 export default class KmqSongDownloader {
     TARGET_AVERAGE_VOLUME = -30;
     YT_DLP_LOCATION = path.resolve(__dirname, "../../bin", "yt-dlp");
+
+    YOUTUBE_SESSION_TOKENS_PATH = path.join(
+        __dirname,
+        "../../data/yt_session.json",
+    );
+
+    YOUTUBE_SESSION_COOKIE_PATH = path.join(
+        __dirname,
+        "../../data/yt_session.cookie",
+    );
+
+    private youtubeSessionTokens:
+        | {
+              po_token: string;
+              visitor_data: string;
+              generated_at: string;
+          }
+        | undefined;
+
     /**
      * @param songPath - the file path of the song file
      * @returns the audio duration of the song
@@ -61,6 +81,7 @@ export default class KmqSongDownloader {
                 return { songsDownloaded: 0, songsFailed: 0 };
             }
 
+            await this.reloadYoutubeSessionTokens();
             await this.clearPartiallyCachedSongs();
             await this.processUnprocessedMp3Files(db);
 
@@ -275,6 +296,43 @@ export default class KmqSongDownloader {
             .execute();
     }
 
+    private async reloadYoutubeSessionTokens(): Promise<void> {
+        logger.info("Reloading Youtube session tokens");
+        try {
+            this.youtubeSessionTokens = await parseJsonFile(
+                this.YOUTUBE_SESSION_TOKENS_PATH,
+            );
+        } catch (e) {
+            logger.error(
+                `Error while trying to reload youtube session token. e = ${extractErrorString(e)}`,
+            );
+        }
+
+        if (
+            !this.youtubeSessionTokens ||
+            !this.youtubeSessionTokens.po_token ||
+            !this.youtubeSessionTokens.visitor_data
+        ) {
+            logger.error(
+                `Youtube session tokens unexpectedly empty. ${JSON.stringify(this.youtubeSessionTokens)}`,
+            );
+            return;
+        }
+
+        if (
+            new Date(this.youtubeSessionTokens.generated_at) <
+            new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+        ) {
+            logger.error(
+                "Youtube session token is 6 hours old, should refresh",
+            );
+        }
+
+        logger.info(
+            `Youtube session tokens reloaded (${this.youtubeSessionTokens.generated_at})`,
+        );
+    }
+
     private async encodeToOpus(
         fileLocation: string,
         db: DatabaseContext,
@@ -364,42 +422,17 @@ export default class KmqSongDownloader {
             throw new Error(`Invalid video ID. id = ${id}`);
         }
 
-        const sessionTokensPath = path.join(
-            __dirname,
-            "../../data/yt_session.json",
-        );
-
-        const sessionCookiePath = path.join(
-            __dirname,
-            "../../data/yt_session.cookie",
-        );
-
-        if (!(await pathExists(sessionTokensPath))) {
+        if (!this.youtubeSessionTokens) {
             logger.warn("Youtube session token doesn't exist... aborting");
             throw new Error("Youtube session token doesn't exist");
         }
 
-        const ytSessionTokens: {
-            po_token: string;
-            visitor_data: string;
-            generated_at: string;
-        } = await parseJsonFile(sessionTokensPath);
-
-        if (
-            new Date(ytSessionTokens.generated_at) <
-            new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-        ) {
-            logger.error(
-                "Youtube session token is 6 hours old, should refresh",
-            );
-        }
-
         try {
-            let ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${ytSessionTokens.po_token};visitor_data=${ytSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
+            let ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                if (pathExistsSync(sessionCookiePath)) {
-                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${ytSessionTokens.po_token}" --cookies ${sessionCookiePath} -- '${id}';`;
+                if (pathExistsSync(this.YOUTUBE_SESSION_COOKIE_PATH)) {
+                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
                 } else {
                     logger.warn(
                         "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
@@ -415,9 +448,15 @@ export default class KmqSongDownloader {
                     .find((x) => x.startsWith("ERROR:")) ||
                 (err as Error).message;
 
-            const sessionGeneratedOn = new Date(ytSessionTokens.generated_at);
-            const cookieGeneratedOn = pathExistsSync(sessionCookiePath)
-                ? (await fs.promises.stat(sessionCookiePath)).mtime
+            const sessionGeneratedOn = new Date(
+                this.youtubeSessionTokens.generated_at,
+            );
+
+            const cookieGeneratedOn = pathExistsSync(
+                this.YOUTUBE_SESSION_COOKIE_PATH,
+            )
+                ? (await fs.promises.stat(this.YOUTUBE_SESSION_COOKIE_PATH))
+                      .mtime
                 : null;
 
             errorMessage += `.\nsessionGeneratedOn=${sessionGeneratedOn.toISOString()}. cookieGeneratedOn=${cookieGeneratedOn?.toISOString()}. curr_time=${new Date().toISOString()}`;
