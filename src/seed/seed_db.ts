@@ -27,8 +27,8 @@ import {
 import { sql } from "kysely";
 import Axios from "axios";
 import EnvType from "../enums/env_type";
+import KmqSongDownloader from "../helpers/kmq_song_downloader";
 import _ from "lodash";
-import downloadAndConvertSongs from "../scripts/download-new-songs";
 import fs from "fs";
 import path from "path";
 import util from "util";
@@ -640,8 +640,9 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
 
         let songsDownloaded = 0;
         let songsDownloadFailures = 0;
+        const songDownloader = new KmqSongDownloader();
         if (!options.skipDownload) {
-            const result = await downloadAndConvertSongs(
+            const result = await songDownloader.downloadNewSongs(
                 options.limit,
                 options.songs,
                 options.checkSongDurations,

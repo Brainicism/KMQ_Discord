@@ -21,7 +21,7 @@ import { pathExists } from "../helpers/utils";
 import EnvType from "../enums/env_type";
 import EnvVariableManager from "../env_variable_manager";
 import KmqConfiguration from "../kmq_configuration";
-import downloadAndConvertSongs from "../scripts/download-new-songs";
+import KmqSongDownloader from "../helpers/kmq_song_downloader";
 import fs, { promises as fsp } from "fs";
 import path from "path";
 import type { DatabaseContext } from "../database_context";
@@ -205,7 +205,8 @@ async function bootstrapDatabases(): Promise<void> {
         logger.info(
             `Downloading minimum threshold (${SONG_DOWNLOAD_THRESHOLD}) songs`,
         );
-        await downloadAndConvertSongs(SONG_DOWNLOAD_THRESHOLD);
+
+        await new KmqSongDownloader().downloadNewSongs(SONG_DOWNLOAD_THRESHOLD);
         await generateKmqDataTables(db);
     }
 
