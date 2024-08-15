@@ -43,6 +43,8 @@ export default class KmqSongDownloader {
           }
         | undefined;
 
+    private hasYtDlpSessionCookies = false;
+
     /**
      * @param songPath - the file path of the song file
      * @returns the audio duration of the song
@@ -308,6 +310,10 @@ export default class KmqSongDownloader {
             );
         }
 
+        this.hasYtDlpSessionCookies = pathExistsSync(
+            this.YOUTUBE_SESSION_COOKIE_PATH,
+        );
+
         if (
             !this.youtubeSessionTokens ||
             !this.youtubeSessionTokens.po_token ||
@@ -431,7 +437,7 @@ export default class KmqSongDownloader {
             let ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                if (pathExistsSync(this.YOUTUBE_SESSION_COOKIE_PATH)) {
+                if (this.hasYtDlpSessionCookies) {
                     ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
                 } else {
                     logger.warn(
@@ -452,9 +458,7 @@ export default class KmqSongDownloader {
                 this.youtubeSessionTokens.generated_at,
             );
 
-            const cookieGeneratedOn = pathExistsSync(
-                this.YOUTUBE_SESSION_COOKIE_PATH,
-            )
+            const cookieGeneratedOn = this.hasYtDlpSessionCookies
                 ? (await fs.promises.stat(this.YOUTUBE_SESSION_COOKIE_PATH))
                       .mtime
                 : null;
