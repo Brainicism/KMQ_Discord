@@ -442,13 +442,7 @@ export default class KmqSongDownloader {
             let ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --add-header "Cookie: VISITOR_INFO1_LIVE=${this.youtubeSessionTokens.visitor_data};" -- '${id}';`;
-                } else {
-                    logger.warn(
-                        "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
-                    );
-                }
+                ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --add-header "Cookie: VISITOR_INFO1_LIVE=${this.youtubeSessionTokens.visitor_data};" -- '${id}';`;
             }
 
             await exec(ytdlpCommand);
