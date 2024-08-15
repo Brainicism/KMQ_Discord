@@ -168,6 +168,10 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
 
+            logger.info(
+                `Beginning song download. cookie_mode = ${KmqConfiguration.Instance.ytdlpDownloadWithCookie()}`,
+            );
+
             for (const song of songsToDownload) {
                 logger.info(
                     `Downloading song: '${song.songName}' by ${song.artistName} | ${
