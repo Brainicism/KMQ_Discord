@@ -1,6 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
 import { IPCLogger } from "../logger";
+import { YT_DLP_LOCATION } from "../constants";
 import {
     extractErrorString,
     parseJsonFile,
@@ -23,7 +24,6 @@ const logger = new IPCLogger("download-new-songs");
 
 export default class KmqSongDownloader {
     TARGET_AVERAGE_VOLUME = -30;
-    YT_DLP_LOCATION = path.resolve(__dirname, "../../bin", "yt-dlp");
 
     YOUTUBE_SESSION_TOKENS_PATH = path.join(
         __dirname,
@@ -160,7 +160,7 @@ export default class KmqSongDownloader {
             );
 
             try {
-                await this.getLatestYtDlpBinary();
+                await this.updateYtDlp();
             } catch (err) {
                 logger.warn(`Failed to get latest yt-dlp binary. err = ${err}`);
             }
@@ -438,11 +438,11 @@ export default class KmqSongDownloader {
         }
 
         try {
-            let ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
+            let ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
+                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
                 } else {
                     logger.warn(
                         "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
@@ -566,29 +566,13 @@ export default class KmqSongDownloader {
         });
     }
 
-    private async getLatestYtDlpBinary(): Promise<void> {
+    private async updateYtDlp(): Promise<void> {
         if (!KmqConfiguration.Instance.ytdlpUpdatesEnabled()) {
             return;
         }
 
         try {
-            await fs.promises.access(this.YT_DLP_LOCATION, fs.constants.F_OK);
-        } catch (_err) {
-            logger.warn("yt-dlp binary doesn't exist, downloading...");
-            try {
-                await exec(
-                    `curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o ${this.YT_DLP_LOCATION}`,
-                );
-                await exec(`chmod u+x ${this.YT_DLP_LOCATION}`);
-            } catch (err) {
-                throw new Error(
-                    `Failed to fetch latest yt-dlp library. err = ${err}`,
-                );
-            }
-        }
-
-        try {
-            await exec(`${this.YT_DLP_LOCATION} -U`);
+            await exec(`${YT_DLP_LOCATION} -U`);
         } catch (err) {
             throw new Error(`Failed to update yt-dlp library. err = ${err}`);
         }

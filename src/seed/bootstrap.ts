@@ -6,6 +6,7 @@ import {
     STANDBY_COOKIE,
     STATUS_COOKIE,
     TEST_DB_CACHED_EXPORT,
+    YT_DLP_LOCATION,
 } from "../constants";
 import { config } from "dotenv";
 import {
@@ -24,7 +25,10 @@ import KmqConfiguration from "../kmq_configuration";
 import KmqSongDownloader from "../helpers/kmq_song_downloader";
 import fs, { promises as fsp } from "fs";
 import path from "path";
+import util from "util";
 import type { DatabaseContext } from "../database_context";
+
+const exec = util.promisify(cp.exec);
 
 const logger = new IPCLogger("bootstrap");
 
@@ -230,6 +234,24 @@ async function bootstrapDatabases(): Promise<void> {
     await db.destroy();
 }
 
+async function ensureYtDlpBinary(): Promise<void> {
+    try {
+        await fs.promises.access(YT_DLP_LOCATION, fs.constants.F_OK);
+    } catch (_err) {
+        logger.warn("yt-dlp binary doesn't exist, downloading...");
+        try {
+            await exec(
+                `curl -L https://github.com/yt-dlp/yt-dlp-nightly-builds/releases/latest/download/yt-dlp -o ${YT_DLP_LOCATION}`,
+            );
+            await exec(`chmod u+x ${YT_DLP_LOCATION}`);
+        } catch (err) {
+            throw new Error(
+                `Failed to fetch latest yt-dlp library. err = ${err}`,
+            );
+        }
+    }
+}
+
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
@@ -259,6 +281,7 @@ async function bootstrapDatabases(): Promise<void> {
             logger.info("Data directory already exists");
         }
 
+        await ensureYtDlpBinary();
         await bootstrapDatabases();
     }
 })();
