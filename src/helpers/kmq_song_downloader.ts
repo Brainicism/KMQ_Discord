@@ -40,6 +40,7 @@ export default class KmqSongDownloader {
               po_token: string;
               visitor_data: string;
               generated_at: string;
+              visitor_id: string;
           }
         | undefined;
 
@@ -442,7 +443,7 @@ export default class KmqSongDownloader {
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
+                    ytdlpCommand = `${this.YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --add-header "Cookie: VISITOR_INFO1_LIVE=${this.youtubeSessionTokens.visitor_data};" -- '${id}';`;
                 } else {
                     logger.warn(
                         "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
