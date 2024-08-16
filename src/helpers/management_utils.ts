@@ -22,7 +22,6 @@ import i18n from "./localization_manager";
 import schedule from "node-schedule";
 import type LocaleType from "../enums/locale_type";
 import type MatchedArtist from "../interfaces/matched_artist";
-import type NewsSubscription from "../interfaces/news_subscription";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
