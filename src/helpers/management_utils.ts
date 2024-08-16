@@ -456,28 +456,20 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
         `Sending ${newsRange} news notifications to ${subscriptions.length} channels`,
     );
 
-    await Promise.allSettled(
-        subscriptions.map(async (s) => {
-            const subscription: NewsSubscription = {
-                guildID: s.guild_id,
-                textChannelID: s.text_channel_id,
-                range: s.range as NewsRange,
-                createdAt: new Date(s.created_at),
-            };
+    for (const subscription of subscriptions) {
+        const subscriptionContext = new MessageContext(
+            subscription.text_channel_id,
+            null,
+            subscription.guild_id,
+        );
 
-            const subscriptionContext = new MessageContext(
-                subscription.textChannelID,
-                null,
-                subscription.guildID,
-            );
-
-            await NewsCommand.sendNews(
-                subscriptionContext,
-                subscription.range,
-                true,
-            );
-        }),
-    );
+        // eslint-disable-next-line no-await-in-loop
+        await NewsCommand.sendNews(
+            subscriptionContext,
+            subscription.range as NewsRange,
+            true,
+        );
+    }
 }
 
 /**
