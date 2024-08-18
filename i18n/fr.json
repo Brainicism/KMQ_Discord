@@ -1084,6 +1084,9 @@
                 "description": "Vous pouvez charger ce préréglage plus tard avec {{presetLoad}}."
             }
         },
+        "privateMessage": {
+            "disclaimer": "Ce compte n'est pas surveillé. Pour toute question ou suivi, rejoignez le serveur de soutien officiel KMQ à {{supportServer}}"
+        },
         "profile": {
             "badges": "Badges",
             "experience": "Expérience",

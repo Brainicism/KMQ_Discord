@@ -627,7 +627,7 @@ export async function sendMessage(
  * @param userID - the user's ID
  * @param messageContent - the message content
  */
-async function sendDmMessage(
+export async function sendDmMessage(
     userID: string,
     messageContent: Eris.AdvancedMessageContent,
 ): Promise<Eris.Message | null> {

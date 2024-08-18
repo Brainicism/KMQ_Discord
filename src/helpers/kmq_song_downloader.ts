@@ -303,7 +303,13 @@ export default class KmqSongDownloader {
     }
 
     private async reloadYoutubeSessionTokens(): Promise<void> {
+        if (process.env.MOCK_AUDIO === "true") {
+            logger.info("Skipping Youtube session reload due to mock audio");
+            return;
+        }
+
         logger.info("Reloading Youtube session tokens");
+
         try {
             this.youtubeSessionTokens = await parseJsonFile(
                 this.YOUTUBE_SESSION_TOKENS_PATH,

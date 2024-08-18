@@ -1084,6 +1084,9 @@
                 "description": "Je kunt deze voorinstelling later laden met {{presetLoad}}."
             }
         },
+        "privateMessage": {
+            "disclaimer": "Dit account wordt niet beheerd. Voor vragen of opvolging, ga naar de officiële KMQ support server op {{supportServer}}"
+        },
         "profile": {
             "badges": "Badges",
             "experience": "Ervaring",

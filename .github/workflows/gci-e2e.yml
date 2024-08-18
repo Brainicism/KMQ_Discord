@@ -91,7 +91,7 @@ jobs:
                   tags: ghcr.io/brainicism/kmq_discord:gci
             - name: Determine if MOCK_AUDIO should be set
               id: check_labels
-              if: github.event_name == 'pull_request'
+              if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
               run: |
                   # Extract the labels from the PR
                   LABELS="$(gh api repos/$OWNER/$REPO_NAME/pulls/$PULL_REQUEST_NUMBER --jq '.labels.[].name')"
@@ -108,6 +108,7 @@ jobs:
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
             - name: Acquire youtube session tokens
+              if: ${{ env.MOCK_AUDIO != 'true' }}
               run: mkdir data && bash src/scripts/session-generator.sh data/
             - name: Dry-run bootstrap
               run: |

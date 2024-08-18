@@ -1084,6 +1084,9 @@
                 "description": "您可以稍后使用{{presetLoad}}加载此预设。"
             }
         },
+        "privateMessage": {
+            "disclaimer": "此账户不受监控。如有任何问题或后续事宜，请加入官方 KMQ 支持服务器 {{supportServer}}"
+        },
         "profile": {
             "badges": "徽章",
             "experience": "经验值",
