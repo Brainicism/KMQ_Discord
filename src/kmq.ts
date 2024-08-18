@@ -78,7 +78,8 @@ const options: Options = {
                 ERIS_INTENTS.guildVoiceStates ^
                 ERIS_INTENTS.guildMessages ^
                 ERIS_INTENTS.guildMessageReactions ^
-                ERIS_INTENTS.messageContent,
+                ERIS_INTENTS.messageContent ^
+                ERIS_INTENTS.directMessages,
         },
         restMode: true,
         messageLimit: 0,

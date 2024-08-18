@@ -1084,6 +1084,9 @@
                 "description": "後で{{presetLoad}}でこのプリセットをロードできます。"
             }
         },
+        "privatemessage": {
+            "disclaimer": "このアカウントは監視されていません。質問やフォローアップがある場合は、公式KMQサポートサーバー {{supportServer}} に参加してください"
+        },
         "profile": {
             "badges": "バッジ",
             "experience": "経験値",

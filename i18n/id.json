@@ -1084,6 +1084,9 @@
                 "description": "Anda dapat memuat prasetel ini nanti dengan {{presetLoad}}"
             }
         },
+        "privatemessage": {
+            "disclaimer": "Akun ini tidak dipantau. Untuk pertanyaan atau tindak lanjut, bergabunglah dengan server dukungan resmi KMQ di {{supportServer}}"
+        },
         "profile": {
             "badges": "Lencana",
             "experience": "Pengalaman",
