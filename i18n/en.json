@@ -1084,7 +1084,7 @@
                 "description": "You can load this preset later with {{presetLoad}}."
             }
         },
-        "privatemessage": {
+        "privateMessage": {
             "disclaimer": "This account is not monitored. For any questions or followup, join the official KMQ support server at {{supportServer}}"
         },
         "profile": {

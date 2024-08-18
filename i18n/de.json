@@ -1084,7 +1084,7 @@
                 "description": "Du kannst diese Voreinstellung später mit {{presetLoad}} laden."
             }
         },
-        "privatemessage": {
+        "privateMessage": {
             "disclaimer": "Dieses Konto wird nicht überwacht. Für Fragen oder Nachverfolgungen, treten Sie dem offiziellen KMQ-Support-Server bei {{supportServer}}"
         },
         "profile": {

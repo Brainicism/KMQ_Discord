@@ -61,7 +61,7 @@ export default class PrivateMessageCommand implements BaseCommand {
                 {
                     description: `${messageToSend}\n\n${i18n.translate(
                         LocaleType.EN,
-                        "command.privatemessage.disclaimer",
+                        "command.privateMessage.disclaimer",
                         {
                             supportServer: "https://discord.gg/RCuzwYV",
                         },

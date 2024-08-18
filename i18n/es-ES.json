@@ -1084,7 +1084,7 @@
                 "description": "Puedes cargar este preestablecido más tarde con {{presetLoad}}."
             }
         },
-        "privatemessage": {
+        "privateMessage": {
             "disclaimer": "Esta cuenta no está supervisada. Para cualquier pregunta o seguimiento, únete al servidor de soporte oficial de KMQ en {{supportServer}}"
         },
         "profile": {
