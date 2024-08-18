@@ -1084,6 +1084,9 @@
                 "description": "Puedes cargar este preestablecido más tarde con {{presetLoad}}."
             }
         },
+        "privatemessage": {
+            "disclaimer": "Esta cuenta no está supervisada. Para cualquier pregunta o seguimiento, únete al servidor de soporte oficial de KMQ en {{supportServer}}"
+        },
         "profile": {
             "badges": "Insignias",
             "experience": "Experiencia",

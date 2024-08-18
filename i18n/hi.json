@@ -1084,6 +1084,9 @@
                 "description": "आप इसे बाद में {{presetLoad}} से लोड कर सकते हैं।"
             }
         },
+        "privatemessage": {
+            "disclaimer": "यह खाता निगरानी में नहीं है। किसी भी प्रश्न या अनुसरण के लिए, आधिकारिक KMQ सहायता सर्वर में शामिल हों {{supportServer}}"
+        },
         "profile": {
             "badges": "बैज",
             "experience": "अनुभव",

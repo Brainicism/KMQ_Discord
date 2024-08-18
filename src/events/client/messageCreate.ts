@@ -13,6 +13,7 @@ import Eris from "eris";
 import GuildPreference from "../../structures/guild_preference";
 import KmqConfiguration from "../../kmq_configuration";
 import MessageContext from "../../structures/message_context";
+import PrivateMessageCommand from "../../commands/admin/privatemessage";
 import Session from "../../structures/session";
 import State from "../../state";
 import i18n from "../../helpers/localization_manager";
@@ -63,6 +64,14 @@ export default async function messageCreateHandler(
         message.author.bot &&
         message.author.id !== process.env.END_TO_END_TEST_BOT_CLIENT
     ) {
+        return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (message.channel.type === undefined) {
+        logger.debug(`Message received in DMs. msg = ${message.content}`);
+
+        await PrivateMessageCommand.sendPrivateMessage(message.author.id, "");
         return;
     }
 
