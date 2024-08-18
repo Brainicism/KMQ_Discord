@@ -444,9 +444,6 @@
             },
             "title": "{{kmq}} Command Help"
         },
-        "privatemessage": {
-            "disclaimer": "This account is not monitored. For any questions or followup, join the official KMQ support server at {{supportServer}}"
-        },
         "hint": {
             "artistName": "Artist Name",
             "failure": {
@@ -1086,6 +1083,9 @@
             "savedOrReplaced": {
                 "description": "You can load this preset later with {{presetLoad}}."
             }
+        },
+        "privatemessage": {
+            "disclaimer": "This account is not monitored. For any questions or followup, join the official KMQ support server at {{supportServer}}"
         },
         "profile": {
             "badges": "Badges",
