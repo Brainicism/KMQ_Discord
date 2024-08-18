@@ -1,4 +1,4 @@
-FROM node:18 AS build
+FROM node:20 AS build
 ARG TARGETARCH
 
 RUN apt-get update && apt-get install -y git \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y git \
 
 WORKDIR /app
 COPY yarn.lock package.json ./
-RUN yarn global add node-gyp@9.4.0
+RUN yarn global add node-gyp@10.2.0
 RUN yarn install --frozen-lockfile
 
 COPY start.sh tsconfig.json ./
@@ -31,7 +31,7 @@ COPY src/ src/
 RUN npx tsc
 
 # ================================================================= #
-FROM node:18-slim
+FROM node:20-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
   ffmpeg \
   curl \
