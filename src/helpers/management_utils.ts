@@ -456,6 +456,8 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
     );
 
     for (const subscription of subscriptions) {
+        if (!State.client.guilds.has(subscription.guild_id)) continue;
+
         const subscriptionContext = new MessageContext(
             subscription.text_channel_id,
             null,
