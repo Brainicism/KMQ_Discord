@@ -456,18 +456,26 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
     );
 
     for (const subscription of subscriptions) {
+        if (!State.client.guilds.has(subscription.guild_id)) continue;
+
         const subscriptionContext = new MessageContext(
             subscription.text_channel_id,
             null,
             subscription.guild_id,
         );
 
-        // eslint-disable-next-line no-await-in-loop
-        await NewsCommand.sendNews(
-            subscriptionContext,
-            subscription.range as NewsRange,
-            true,
-        );
+        try {
+            // eslint-disable-next-line no-await-in-loop
+            await NewsCommand.sendNews(
+                subscriptionContext,
+                subscription.range as NewsRange,
+                true,
+            );
+        } catch (e) {
+            logger.warn(
+                `Failed to send news for guild ${subscriptionContext.guildID}. e = ${e}`,
+            );
+        }
     }
 }
 
