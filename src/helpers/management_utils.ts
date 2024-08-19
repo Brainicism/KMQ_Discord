@@ -473,7 +473,7 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
             );
         } catch (e) {
             logger.warn(
-                `Failed to send news for guild ${subscriptionContext.guildID}`,
+                `Failed to send news for guild ${subscriptionContext.guildID}. e = ${e}`,
             );
         }
     }
