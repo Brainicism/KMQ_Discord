@@ -462,12 +462,18 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
             subscription.guild_id,
         );
 
-        // eslint-disable-next-line no-await-in-loop
-        await NewsCommand.sendNews(
-            subscriptionContext,
-            subscription.range as NewsRange,
-            true,
-        );
+        try {
+            // eslint-disable-next-line no-await-in-loop
+            await NewsCommand.sendNews(
+                subscriptionContext,
+                subscription.range as NewsRange,
+                true,
+            );
+        } catch (e) {
+            logger.warn(
+                `Failed to send news for guild ${subscriptionContext.guildID}`,
+            );
+        }
     }
 }
 
