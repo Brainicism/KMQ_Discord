@@ -59,6 +59,7 @@
         "@typescript-eslint/parser": "^6.20.0",
         "async-mutex": "^0.5.0",
         "axios": "^1.7.4",
+        "bgutils-js": "^1.0.1",
         "bufferutil": "^4.0.8",
         "commander": "^12.1.0",
         "damerau-levenshtein": "^1.0.8",
@@ -72,6 +73,7 @@
         "googleapis": "^142.0.0",
         "i18next": "^23.14.0",
         "i18next-fs-backend": "^2.3.2",
+        "jsdom": "^24.1.1",
         "kysely": "^0.27.4",
         "lodash": "^4.17.21",
         "mocha": "^10.7.3",
@@ -86,9 +88,11 @@
         "ts-node": "^10.9.2",
         "uuid": "^10.0.0",
         "winston": "^3.14.2",
-        "winston-daily-rotate-file": "^5.0.0"
+        "winston-daily-rotate-file": "^5.0.0",
+        "youtubei.js": "^10.3.0"
     },
     "devDependencies": {
+        "@types/jsdom": "^21.1.7",
         "eslint": "^8.56.0",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-config-airbnb-typescript": "^18.0.0",
