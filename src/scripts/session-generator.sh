@@ -15,12 +15,17 @@ if [ ! -d "$output_dir" ]; then
     exit 1
 fi
 
+cookie_file="$output_dir/yt_session.cookie"
+
 generate_session_data_via_docker_chrome_driver() {
     echo "Running session generator with Docker"
     session_data=$(docker run quay.io/invidious/youtube-trusted-session-generator)
 }
 
 generate_session_data_via_bgutils() {
+    echo "Grabbing cookies (with visitor ID) from youtube"
+    curl --cookie-jar $cookie_file --silent --output /dev/null --show-error --fail https://www.youtube.com
+    
     echo "Running session generator with BG Utils"
     session_data=$(npx ts-node src/scripts/generate-yt-session-bgutils.ts)
 }
@@ -53,7 +58,6 @@ session_data_file="$output_dir/yt_session.json"
 echo "$json_output" > "$session_data_file"
 echo "Session data saved to $session_data_file"
 
-cookie_file="$output_dir/yt_session.cookie"
 expiration_time=$(date -d "+6 months" +"%s")
 echo "# Netscape HTTP Cookie File" > "$cookie_file"
 echo -e ".youtube.com\tTRUE\t/\tTRUE\t$expiration_time\tVISITOR_INFO1_LIVE\t$visitor_id" >> "$cookie_file"

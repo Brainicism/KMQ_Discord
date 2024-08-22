@@ -1,16 +1,38 @@
+/* eslint-disable node/no-sync */
 /* eslint-disable @typescript-eslint/no-implied-eval */
 /* eslint-disable no-console */
 import { BG } from "bgutils-js";
 import { JSDOM } from "jsdom";
-import { Proto, Utils } from "youtubei.js";
+import { Proto } from "youtubei.js";
+import { YOUTUBE_SESSION_COOKIE_PATH } from "../constants";
+import fs from "fs";
+
 // mostly copied from https://github.com/LuanRT/BgUtils/tree/main/examples/node
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     // hardcoded API key that has been used by youtube for years
     const requestKey = "O43z0dpjhgX20SCx4KAo";
+
+    const visitorId = fs
+        .readFileSync(YOUTUBE_SESSION_COOKIE_PATH)
+        .toString()
+        .split("\n")
+        .find((x) => x.includes("VISITOR_INFO1_LIVE"))
+        ?.split("\t")
+        .at(-1);
+
+    if (!visitorId) {
+        console.error(
+            "Visitor ID could not be found. Make sure to grab basic cookie from Youtube first",
+        );
+        process.exit(1);
+    }
+
+    console.info(`Found visitor ID: ${visitorId}`);
+
     const visitorData = Proto.encodeVisitorData(
-        Utils.generateRandomString(11),
+        visitorId,
         Math.floor(Date.now() / 1000),
     );
 
