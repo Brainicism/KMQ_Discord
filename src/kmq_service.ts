@@ -157,7 +157,7 @@ export default class ServiceWorker extends BaseServiceWorker {
 
                             if (topPosts.length === 0) {
                                 throw new Error(
-                                    `Failed to fetch topPosts(). newsRange = ${range}`,
+                                    `Failed to reload news. newsRange = ${range}`,
                                 );
                             }
 

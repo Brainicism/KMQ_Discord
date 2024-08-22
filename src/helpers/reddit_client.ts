@@ -1,7 +1,8 @@
+import { Client } from "snoots-revived";
 import { IPCLogger } from "../logger";
 import { KMQ_USER_AGENT } from "../constants";
 import NewsRange from "../enums/news_range";
-import Snoowrap from "snoowrap";
+import type { Post } from "snoots-revived";
 
 const logger = new IPCLogger("reddit_client");
 
@@ -52,7 +53,7 @@ const generateFilteredQuery = (): string => {
 };
 
 export class RedditClient {
-    private client: Snoowrap | null;
+    private client: Client | null;
 
     constructor() {
         if (
@@ -67,38 +68,44 @@ export class RedditClient {
             return;
         }
 
-        this.client = new Snoowrap({
-            clientId: process.env.REDDIT_CLIENT_ID,
-            clientSecret: process.env.REDDIT_CLIENT_SECRET,
+        this.client = new Client({
+            creds: {
+                clientId: process.env.REDDIT_CLIENT_ID,
+                clientSecret: process.env.REDDIT_CLIENT_SECRET,
+            },
             userAgent: KMQ_USER_AGENT,
-            refreshToken: process.env.REDDIT_CLIENT_REFRESH_TOKEN,
         });
     }
 
     async getRecentPopularPosts(): Promise<Array<KpopNewsRedditPost>> {
         if (!this.client) return [];
         try {
-            const matchingPosts = await this.client.search({
-                subreddit: "kpop",
-                query: "flair:'news' OR flair:'Tour News' OR flair:'Rumor' OR flair:'Achievement'",
-                sort: "top",
-                time: RedditInterval.WEEK,
+            const matchingPostIterator = this.client.subreddits.search(
+                "kpop",
+                "flair:'news' OR flair:'Tour News' OR flair:'Rumor' OR flair:'Achievement'",
+                "week",
+                "top",
+            );
+
+            const matchingPosts: Array<Post> = [];
+            await matchingPostIterator.eachPage((page) => {
+                matchingPosts.push(...page);
+                return !(matchingPosts.length > 50);
             });
 
             const popularPosts = matchingPosts
                 .filter((x) => x.score > 100)
                 .filter(
                     (x) =>
-                        Date.now() - new Date(x.created_utc * 1000).getTime() <=
+                        Date.now() - new Date(x.createdUtc * 1000).getTime() <=
                         3 * 24 * 60 * 60 * 1000,
                 );
 
             return popularPosts.map((x) => ({
                 title: x.title,
                 link: `https://reddit.com${x.permalink}`,
-                date: new Date(x.created_utc * 1000),
-                flair: x.link_flair_css_class as string,
-                x: Date.now() - new Date(x.created_utc * 1000).getTime(),
+                date: new Date(x.createdUtc * 1000),
+                flair: x.linkFlairCssClass as string,
             }));
         } catch (e) {
             logger.error(
@@ -114,12 +121,17 @@ export class RedditClient {
         if (!this.client) return [];
 
         try {
-            const matchingPosts = await this.client.search({
-                subreddit: "kpop",
-                query: generateFilteredQuery(),
-                sort: "top",
-                time: newsRangeToRedditInterval(interval),
-                count: 30,
+            const matchingPostIterator = this.client.subreddits.search(
+                "kpop",
+                generateFilteredQuery(),
+                newsRangeToRedditInterval(interval),
+                "top",
+            );
+
+            const matchingPosts: Array<Post> = [];
+            await matchingPostIterator.eachPage((page) => {
+                matchingPosts.push(...page);
+                return !(matchingPosts.length > 50);
             });
 
             return matchingPosts
@@ -127,8 +139,8 @@ export class RedditClient {
                 .filter((x) => !x.title.toLowerCase().includes("pictorial"))
                 .slice(0, 25)
                 .map((x) => {
-                    const flairGroup = x.link_flair_css_class as string;
-                    let flair = (x.link_flair_text as string).toLowerCase();
+                    const flairGroup = x.linkFlairCssClass as string;
+                    let flair = (x.linkFlairText as string).toLowerCase();
                     if (flair.startsWith("[") && flair.endsWith("]")) {
                         flair = flair.slice(1, flair.length - 1);
                     }
@@ -140,11 +152,8 @@ export class RedditClient {
                     return {
                         title: x.title,
                         link: `https://reddit.com${x.permalink}`,
-                        date: new Date(x.created_utc * 1000),
+                        date: new Date(x.createdUtc * 1000),
                         flair: `${flairGroup}:${flair}`,
-                        x:
-                            Date.now() -
-                            new Date(x.created_utc * 1000).getTime(),
                     };
                 })
                 .filter(
