@@ -1,7 +1,7 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
 import { IPCLogger } from "../logger";
-import { YT_DLP_LOCATION } from "../constants";
+import { YOUTUBE_SESSION_COOKIE_PATH, YT_DLP_LOCATION } from "../constants";
 import {
     extractErrorString,
     parseJsonFile,
@@ -28,11 +28,6 @@ export default class KmqSongDownloader {
     YOUTUBE_SESSION_TOKENS_PATH = path.join(
         __dirname,
         "../../data/yt_session.json",
-    );
-
-    YOUTUBE_SESSION_COOKIE_PATH = path.join(
-        __dirname,
-        "../../data/yt_session.cookie",
     );
 
     private youtubeSessionTokens:
@@ -321,7 +316,7 @@ export default class KmqSongDownloader {
         }
 
         this.hasYtDlpSessionCookies = pathExistsSync(
-            this.YOUTUBE_SESSION_COOKIE_PATH,
+            YOUTUBE_SESSION_COOKIE_PATH,
         );
 
         if (
@@ -448,7 +443,7 @@ export default class KmqSongDownloader {
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${this.YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
+                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
                 } else {
                     logger.warn(
                         "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
@@ -469,8 +464,7 @@ export default class KmqSongDownloader {
             );
 
             const cookieGeneratedOn = this.hasYtDlpSessionCookies
-                ? (await fs.promises.stat(this.YOUTUBE_SESSION_COOKIE_PATH))
-                      .mtime
+                ? (await fs.promises.stat(YOUTUBE_SESSION_COOKIE_PATH)).mtime
                 : null;
 
             errorMessage += `.\nsessionGeneratedOn=${sessionGeneratedOn.toISOString()}. cookieGeneratedOn=${cookieGeneratedOn?.toISOString()}. curr_time=${new Date().toISOString()}`;

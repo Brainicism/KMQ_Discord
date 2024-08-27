@@ -349,3 +349,8 @@ export const DiscordPreferredLocaleToInternal: {
 
 export const KMQ_EMOJI = "<:kmq:761624775843905546>";
 export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
+
+export const YOUTUBE_SESSION_COOKIE_PATH = path.join(
+    __dirname,
+    "../data/yt_session.cookie",
+);

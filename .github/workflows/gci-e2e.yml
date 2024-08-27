@@ -107,9 +107,11 @@ jobs:
                   OWNER: ${{ github.repository_owner }}
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile
             - name: Acquire youtube session tokens
               if: ${{ env.MOCK_AUDIO != 'true' }}
-              run: mkdir data && bash src/scripts/session-generator.sh data/
+              run: mkdir data && bash src/scripts/session-generator.sh data/ bgutil
             - name: Dry-run bootstrap
               run: |
                   . ./.env
