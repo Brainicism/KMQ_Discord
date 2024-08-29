@@ -15,7 +15,7 @@ if [ ! -d "$output_dir" ]; then
     exit 1
 fi
 
-# use tmp file to ensure JSON data and cookie are in sync even if error occurs midway
+# use tmp file to ensure JSON data and cookie are in sync if error occurs midway
 cookie_file_tmp="$output_dir/yt_session.cookie.tmp"
 cookie_file="$output_dir/yt_session.cookie"
 
