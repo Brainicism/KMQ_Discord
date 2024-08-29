@@ -15,6 +15,8 @@ if [ ! -d "$output_dir" ]; then
     exit 1
 fi
 
+# use tmp file to ensure JSON data and cookie are in sync even if error occurs midway
+cookie_file_tmp="$output_dir/yt_session.cookie.tmp"
 cookie_file="$output_dir/yt_session.cookie"
 
 generate_session_data_via_docker_chrome_driver() {
@@ -24,7 +26,7 @@ generate_session_data_via_docker_chrome_driver() {
 
 generate_session_data_via_bgutils() {
     echo "Grabbing cookies (with visitor ID) from youtube"
-    curl --cookie-jar $cookie_file --silent --output /dev/null --show-error --fail https://www.youtube.com
+    curl --cookie-jar $cookie_file_tmp --silent --output /dev/null --show-error --fail https://www.youtube.com
     
     echo "Running session generator with BG Utils"
     session_data=$(npx ts-node src/scripts/generate-yt-session-bgutils.ts)
@@ -59,7 +61,8 @@ echo "$json_output" > "$session_data_file"
 echo "Session data saved to $session_data_file"
 
 expiration_time=$(date -d "+6 months" +"%s")
-echo "# Netscape HTTP Cookie File" > "$cookie_file"
-echo -e ".youtube.com\tTRUE\t/\tTRUE\t$expiration_time\tVISITOR_INFO1_LIVE\t$visitor_id" >> "$cookie_file"
+echo "# Netscape HTTP Cookie File" > "$cookie_file_tmp"
+echo -e ".youtube.com\tTRUE\t/\tTRUE\t$expiration_time\tVISITOR_INFO1_LIVE\t$visitor_id" >> "$cookie_file_tmp"
 
+mv $cookie_file_tmp $cookie_file
 echo "Cookie file saved to $cookie_file"
