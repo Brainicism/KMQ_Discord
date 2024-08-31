@@ -83,6 +83,7 @@ export interface DailyStats {
 }
 
 export interface DeadLinks {
+    created_at: Generated<Date>;
     reason: Generated<string | null>;
     vlink: string;
 }
