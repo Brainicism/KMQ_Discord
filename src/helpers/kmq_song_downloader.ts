@@ -472,6 +472,7 @@ export default class KmqSongDownloader {
             await db.kmq
                 .insertInto("dead_links")
                 .values({
+                    created_at: new Date(),
                     vlink: id,
                     reason: `Failed to download video: error = ${errorMessage}. `,
                 })
