@@ -73,6 +73,7 @@ BEGIN
 	FROM kpop_videos.app_kpop
 	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
 	AND vtype = 'main'
+	AND kpop_videos.app_kpop.name REGEXP '[0-9a-zA-Z[:punct:]]' -- only songs with english song names
 	AND tags NOT LIKE "%c%" -- no covers
 	AND tags NOT LIKE "%x%"; -- no remixes
 
