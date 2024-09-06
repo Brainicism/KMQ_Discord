@@ -1,3 +1,4 @@
+/* eslint-disable no-await-in-loop */
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
 import { DATABASE_DOWNLOAD_DIR } from "../../constants";
@@ -10,11 +11,43 @@ import {
 import { sql } from "kysely";
 import EnvType from "../../enums/env_type";
 import dbContext, { getNewConnection } from "../../database_context";
+import fs from "fs";
 import path from "path";
 import sinon from "sinon";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();
+
+async function loadStoredProceduresForTest(): Promise<void> {
+    const storedProcedureDefinitions = (
+        await fs.promises.readdir(
+            path.join(__dirname, "../../../sql/procedures"),
+        )
+    )
+        .map((x) => path.join(__dirname, "../../../sql/procedures", x))
+        .sort();
+
+    for (const storedProcedureDefinition of storedProcedureDefinitions) {
+        const testProcedurePath = path.resolve(
+            path.dirname(storedProcedureDefinition),
+            "..",
+            path
+                .basename(storedProcedureDefinition)
+                .replace(".sql", ".test.sql"),
+        );
+
+        cp.execSync(
+            `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${storedProcedureDefinition} > ${testProcedurePath}`,
+        );
+
+        logger.info(`Loading procedure for test: ${testProcedurePath}`);
+
+        cp.execSync(
+            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testProcedurePath}`,
+            { stdio: "inherit" },
+        );
+    }
+}
 
 before(async function () {
     if (process.env.NODE_ENV !== EnvType.TEST) {
@@ -48,47 +81,10 @@ before(async function () {
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_test < ${dbSeedFilePath}`,
     );
 
-    // create post seed data cleaning procedure
-    const originalPostSeedDataCleaningSqlPath = path.join(
-        __dirname,
-        "../../../sql/procedures/040-post_seed_data_cleaning_procedure.sql",
-    );
-
-    const testPostSeedDataCleaningSqlPath = path.join(
-        __dirname,
-        "../../../sql/040-post_seed_data_cleaning_procedure.test.sql",
-    );
-
-    cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalPostSeedDataCleaningSqlPath} > ${testPostSeedDataCleaningSqlPath}`,
-    );
-
-    cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testPostSeedDataCleaningSqlPath}`,
-        { stdio: "inherit" },
-    );
+    await loadStoredProceduresForTest();
 
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL PostSeedDataCleaning()"`,
-    );
-
-    const originalGenerateExpectedSongsSqlPath = path.join(
-        __dirname,
-        "../../../sql/procedures/020-generate_expected_available_songs_procedure.sql",
-    );
-
-    const testGenerateExpectedSongsSqlPath = path.join(
-        __dirname,
-        "../../../sql/020-generate_expected_available_songs_procedure.test.sql",
-    );
-
-    cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g' ${originalGenerateExpectedSongsSqlPath} > ${testGenerateExpectedSongsSqlPath}`,
-    );
-
-    cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testGenerateExpectedSongsSqlPath}`,
-        { stdio: "inherit" },
     );
 
     cp.execSync(
@@ -100,26 +96,7 @@ before(async function () {
         db.agnostic,
     );
 
-    // create kmq data generation procedure
-    const originalCreateKmqTablesProcedureSqlPath = path.join(
-        __dirname,
-        "../../../sql/procedures/030-create_kmq_data_tables_procedure.sql",
-    );
-
-    const testCreateKmqTablesProcedureSqlPath = path.join(
-        __dirname,
-        "../../../sql/030-create_kmq_data_tables_procedure.test.sql",
-    );
-
-    cp.execSync(
-        `sed 's/kpop_videos/kpop_videos_test/g;s/kmq/kmq_test/g' ${originalCreateKmqTablesProcedureSqlPath} > ${testCreateKmqTablesProcedureSqlPath}`,
-    );
-
     logger.info("Creating KMQ data tables");
-    cp.execSync(
-        `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testCreateKmqTablesProcedureSqlPath}`,
-        { stdio: "inherit" },
-    );
 
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test -e "CALL CreateKmqDataTables()"`,

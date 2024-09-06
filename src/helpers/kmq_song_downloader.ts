@@ -340,7 +340,7 @@ export default class KmqSongDownloader {
         }
 
         logger.info(
-            `Youtube session tokens reloaded (${this.youtubeSessionTokens.generated_at})`,
+            `Youtube session tokens loaded (${this.youtubeSessionTokens.generated_at})`,
         );
     }
 
