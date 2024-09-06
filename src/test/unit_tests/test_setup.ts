@@ -51,12 +51,12 @@ before(async function () {
     // create post seed data cleaning procedure
     const originalPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../../sql/procedures/post_seed_data_cleaning_procedure.sql",
+        "../../../sql/procedures/040-post_seed_data_cleaning_procedure.sql",
     );
 
     const testPostSeedDataCleaningSqlPath = path.join(
         __dirname,
-        "../../../sql/post_seed_data_cleaning_procedure.test.sql",
+        "../../../sql/040-post_seed_data_cleaning_procedure.test.sql",
     );
 
     cp.execSync(
@@ -74,12 +74,12 @@ before(async function () {
 
     const originalGenerateExpectedSongsSqlPath = path.join(
         __dirname,
-        "../../../sql/procedures/generate_expected_available_songs_procedure.sql",
+        "../../../sql/procedures/020-generate_expected_available_songs_procedure.sql",
     );
 
     const testGenerateExpectedSongsSqlPath = path.join(
         __dirname,
-        "../../../sql/generate_expected_available_songs_procedure.test.sql",
+        "../../../sql/020-generate_expected_available_songs_procedure.test.sql",
     );
 
     cp.execSync(
@@ -103,12 +103,12 @@ before(async function () {
     // create kmq data generation procedure
     const originalCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../../sql/procedures/create_kmq_data_tables_procedure.sql",
+        "../../../sql/procedures/030-create_kmq_data_tables_procedure.sql",
     );
 
     const testCreateKmqTablesProcedureSqlPath = path.join(
         __dirname,
-        "../../../sql/create_kmq_data_tables_procedure.test.sql",
+        "../../../sql/030-create_kmq_data_tables_procedure.test.sql",
     );
 
     cp.execSync(

@@ -53,8 +53,8 @@ BEGIN
 			WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' -- no-op if song name is fully non-alphanumeric (i.e punctuation)
 			THEN kpop_videos.app_kpop.name 
 			WHEN kpop_videos.app_kpop.name REGEXP '\\([^)]*\\)$' -- ignore bracketed part if at end of the song name
-			THEN REGEXP_REPLACE(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1), '[^0-9a-zA-Z]', '') 
-			ELSE REGEXP_REPLACE(kpop_videos.app_kpop.name, '[^0-9a-zA-Z]', '') -- regular cleaning
+			THEN CleanSongName(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1))
+			ELSE CleanSongName(kpop_videos.app_kpop.name) -- regular cleaning
 		END) AS clean_song_name_alpha_numeric,
 		kpop_videos.app_kpop.kname AS song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,

@@ -183,9 +183,12 @@ export async function generateExpectedAvailableSongs(
 export async function loadStoredProcedures(): Promise<void> {
     const storedProcedureDefinitions = (
         await fs.promises.readdir(path.join(__dirname, "../../sql/procedures"))
-    ).map((x) => path.join(__dirname, "../../sql/procedures", x));
+    )
+        .map((x) => path.join(__dirname, "../../sql/procedures", x))
+        .sort();
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
+        logger.info(`Loading procedure: ${storedProcedureDefinition}`);
         await exec(
             `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`,
         );
@@ -381,12 +384,12 @@ async function validateSqlDump(
             logger.info("Validating post-seed data cleaning");
             const originalDedupGroupNamesSqlPath = path.join(
                 __dirname,
-                "../../sql/procedures/post_seed_data_cleaning_procedure.sql",
+                "../../sql/procedures/040-post_seed_data_cleaning_procedure.sql",
             );
 
             const validationDedupGroupNamesSqlPath = path.join(
                 __dirname,
-                "../../sql/post_seed_data_cleaning_procedure.validation.sql",
+                "../../sql/040-post_seed_data_cleaning_procedure.validation.sql",
             );
 
             await exec(
@@ -404,12 +407,12 @@ async function validateSqlDump(
             // generate expected available songs
             const originalGenerateExpectedSongsSqlPath = path.join(
                 __dirname,
-                "../../sql/procedures/generate_expected_available_songs_procedure.sql",
+                "../../sql/procedures/020-generate_expected_available_songs_procedure.sql",
             );
 
             const validationGenerateExpectedSongsSqlPath = path.join(
                 __dirname,
-                "../../sql/generate_expected_available_songs_procedure.validation.sql",
+                "../../sql/020-generate_expected_available_songs_procedure.validation.sql",
             );
 
             await exec(
@@ -427,12 +430,12 @@ async function validateSqlDump(
             logger.info("Validating creation of data tables");
             const originalCreateKmqTablesProcedureSqlPath = path.join(
                 __dirname,
-                "../../sql/procedures/create_kmq_data_tables_procedure.sql",
+                "../../sql/procedures/030-create_kmq_data_tables_procedure.sql",
             );
 
             const validationCreateKmqTablesProcedureSqlPath = path.join(
                 __dirname,
-                "../../sql/create_kmq_data_tables_procedure.validation.sql",
+                "../../sql/030-create_kmq_data_tables_procedure.validation.sql",
             );
 
             await exec(
