@@ -1,9 +1,10 @@
 import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
+import { KmqImages, LATEST_DAISUKI_DUMP } from "../../constants";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
+    pathExists,
 } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -16,6 +17,7 @@ import Eris from "eris";
 import MessageContext from "../../structures/message_context";
 import State from "../../state";
 import dbContext from "../../database_context";
+import fs from "fs";
 import i18n from "../../helpers/localization_manager";
 import os from "os";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
@@ -143,15 +145,9 @@ export default class StatsCommand implements BaseCommand {
                     .executeTakeFirst()
             )?.count || 0;
 
-        const latestAvailableSong = new Date(
-            (
-                await dbContext.kmq
-                    .selectFrom("available_songs")
-                    .select(["publishedon"])
-                    .orderBy("publishedon", "desc")
-                    .executeTakeFirst()
-            )?.publishedon as Date,
-        );
+        const latestAvailableSongDate = (await pathExists(LATEST_DAISUKI_DUMP))
+            ? (await fs.promises.stat(LATEST_DAISUKI_DUMP)).ctime
+            : null;
 
         const mysqlLatency = await measureExecutionTime(
             sql`SELECT 1`.execute(dbContext.kmq),
@@ -198,10 +194,12 @@ export default class StatsCommand implements BaseCommand {
             [i18n.translate(
                 messageContext.guildID,
                 "command.stats.game.latestSongUpdate",
-            )]: friendlyFormattedDate(
-                latestAvailableSong,
-                messageContext.guildID,
-            ),
+            )]: latestAvailableSongDate
+                ? friendlyFormattedDate(
+                      latestAvailableSongDate,
+                      messageContext.guildID,
+                  )
+                : "null",
         };
 
         const guild = State.client.guilds.get(guildID) as Eris.Guild;

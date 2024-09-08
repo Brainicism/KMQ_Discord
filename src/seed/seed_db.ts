@@ -8,6 +8,7 @@ import {
     EMBED_SUCCESS_COLOR,
     KMQ_USER_AGENT,
     KmqImages,
+    LATEST_DAISUKI_DUMP,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
@@ -242,7 +243,6 @@ async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
 }
 
 const downloadDb = async (): Promise<void> => {
-    const mvOutput = `${DATABASE_DOWNLOAD_DIR}/mv-download.zip`;
     const daisukiDownloadResp = await Axios.get(
         daisukiDbDownloadUrl.replace(
             "$PASSWORD",
@@ -256,7 +256,7 @@ const downloadDb = async (): Promise<void> => {
         },
     );
 
-    await fs.promises.writeFile(mvOutput, daisukiDownloadResp.data, {
+    await fs.promises.writeFile(LATEST_DAISUKI_DUMP, daisukiDownloadResp.data, {
         encoding: null,
     });
     logger.info("Downloaded Daisuki database archive");
@@ -264,9 +264,7 @@ const downloadDb = async (): Promise<void> => {
 
 async function extractDb(): Promise<void> {
     await fs.promises.mkdir(`${DATABASE_DOWNLOAD_DIR}/`, { recursive: true });
-    await exec(
-        `unzip -oq ${DATABASE_DOWNLOAD_DIR}/mv-download.zip -d ${DATABASE_DOWNLOAD_DIR}/`,
-    );
+    await exec(`unzip -oq ${LATEST_DAISUKI_DUMP} -d ${DATABASE_DOWNLOAD_DIR}/`);
 
     logger.info("Extracted Daisuki database");
 }

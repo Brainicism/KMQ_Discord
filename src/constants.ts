@@ -176,6 +176,11 @@ export const DATABASE_DOWNLOAD_DIR = path.join(
     "../sql_dumps/daisuki",
 );
 
+export const LATEST_DAISUKI_DUMP = path.join(
+    DATABASE_DOWNLOAD_DIR,
+    "mv-download.zip",
+);
+
 export const EMBED_DESCRIPTION_MAX_LENGTH = 4096;
 
 export const ELIMINATION_DEFAULT_LIVES = 10;
