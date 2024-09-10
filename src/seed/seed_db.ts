@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
+import { Command } from "@commander-js/extra-typings";
 import {
     DATABASE_DOWNLOAD_DIR,
     DataFiles,
@@ -20,7 +21,6 @@ import {
     truncatedString,
 } from "../helpers/utils";
 import { getNewConnection } from "../database_context";
-import { program } from "commander";
 import {
     sendDebugAlertFileWebhook,
     sendInfoWebhook,
@@ -110,7 +110,7 @@ async function listTables(
     ).map((x) => x["TABLE_NAME"]);
 }
 
-program
+const program = new Command()
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option(
         "-r, --skip-reseed",

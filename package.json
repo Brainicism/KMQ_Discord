@@ -40,6 +40,7 @@
     "author": "Brian Le",
     "license": "GPL-3.0",
     "dependencies": {
+        "@commander-js/extra-typings": "^12.1.0",
         "@discordjs/opus": "^0.9.0",
         "@fastify/view": "^9.1.0",
         "@google/generative-ai": "^0.17.0",
