@@ -20,7 +20,7 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
-import { mapTo } from "../helpers/utils";
+import { extractErrorString, mapTo } from "../helpers/utils";
 import AdvancedCommandActionName from "../enums/advanced_setting_action_name";
 import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
@@ -293,6 +293,7 @@ export default class GuildPreference {
                         "=",
                         process.env.BOT_CLIENT_ID as string,
                     )
+                    .where("option_name", "<>", "uuid")
                     .execute()
             )
                 .map((x) => ({
@@ -398,6 +399,9 @@ export default class GuildPreference {
             });
             return true;
         } catch (e) {
+            logger.warn(
+                `failed to save preset. presetName = '${presetName}'. oldUUID = ${oldUUID}. e = ${extractErrorString(e)}`,
+            );
             return false;
         }
     }
@@ -417,6 +421,7 @@ export default class GuildPreference {
                 .select(["option_name", "option_value"])
                 .where("guild_id", "=", guildID)
                 .where("preset_name", "=", presetName)
+                .where("option_name", "<>", "uuid")
                 .execute()
         )
             .map((x) => ({
