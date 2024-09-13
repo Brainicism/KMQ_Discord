@@ -4,19 +4,18 @@
 /* eslint-disable no-console */
 /* eslint-disable no-await-in-loop */
 import * as Eris from "eris";
+import { Command } from "@commander-js/extra-typings";
 import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
+import { KmqResponseType } from "./test_suites/test_suite";
 import { delay } from "../../helpers/utils";
 import { sendInfoWebhook } from "../../helpers/discord_utils";
+import Axios from "axios";
 import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
+import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
+import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 import crypto from "crypto";
 import type ParsedGameOptionValues from "./parsed_game_options_value";
 import type TestSuite from "./test_suites/test_suite";
-
-import { KmqResponseType } from "./test_suites/test_suite";
-import { program } from "commander";
-import Axios from "axios";
-import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
-import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 
 function log(msg: string): void {
     console.log(`${new Date().toISOString()} | ${msg}`);
@@ -57,7 +56,7 @@ const bot = new Eris.Client(process.env.END_TO_END_TEST_BOT_TOKEN!, {
     },
 });
 
-program
+const program = new Command()
     .option("-t, --test-suite <suite>", "The test suite")
     .option("-d, --debug")
     .option("--stage-delay <seconds>", "Delay between test stages", (x) =>

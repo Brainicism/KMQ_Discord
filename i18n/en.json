@@ -990,7 +990,7 @@
             },
             "failure": {
                 "alreadyExists": {
-                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with {{presetDelete}} `preset_name:{{presetName}}`.",
+                    "description": "Preset {{presetNameFormatted}} already exists. You can delete the old one with `{{presetDelete}} preset_name:{{presetName}}`.",
                     "title": "Preset Already Exists"
                 },
                 "illegalPrefix": {
