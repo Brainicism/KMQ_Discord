@@ -439,11 +439,11 @@ export default class KmqSongDownloader {
         }
 
         try {
-            let ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-arg "youtube:player_client=web;po_token=${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
+            let ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-arg "youtube:player_client=web;po_token=web+${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
 
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web,default;po_token=${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
+                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web,default;po_token=web+${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
                 } else {
                     logger.warn(
                         "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
