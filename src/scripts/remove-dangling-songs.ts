@@ -1,8 +1,8 @@
 /* eslint-disable node/no-sync */
+import { Command } from "@commander-js/extra-typings";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import { getNewConnection } from "../database_context";
-import { program } from "commander";
 import _ from "lodash";
 import fs from "fs";
 import path from "path";
@@ -11,7 +11,7 @@ const logger = new IPCLogger("remove-dangling-songs");
 
 config({ path: path.resolve(__dirname, "../../.env") });
 
-program.option("--delete", "Delete the songs");
+const program = new Command().option("--delete", "Delete the songs");
 program.parse();
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises

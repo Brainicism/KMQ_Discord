@@ -1,8 +1,8 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
+import { Command } from "@commander-js/extra-typings";
 import { IPCLogger } from "../logger";
 import { join } from "path";
-import { program } from "commander";
 import fs from "fs";
 import util from "util";
 
@@ -13,7 +13,10 @@ const BACKUP_TTL = 30;
 const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
 
 const logger = new IPCLogger("backup-kmq");
-program.option("-i, --import <file>", "The dump file to import");
+const program = new Command().option(
+    "-i, --import <file>",
+    "The dump file to import",
+);
 
 program.parse();
 const options = program.opts();
