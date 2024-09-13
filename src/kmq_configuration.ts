@@ -77,7 +77,7 @@ export default class KmqConfiguration {
     }
 
     ytdlpUpdatesEnabled(): boolean {
-        return this.config["ytdlpUpdatesEnabled"] ?? false;
+        return this.config["ytdlpUpdatesEnabled"] ?? true;
     }
 
     ytdlpDownloadWithCookie(): boolean {
