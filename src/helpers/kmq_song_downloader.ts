@@ -80,7 +80,7 @@ export default class KmqSongDownloader {
 
             await this.reloadYoutubeSessionTokens();
             await this.clearPartiallyCachedSongs();
-            await this.processUnprocessedMp3Files(db);
+            await this.processUnprocessedM4aFiles(db);
 
             const allSongs: Array<{
                 songName: string;
@@ -176,7 +176,7 @@ export default class KmqSongDownloader {
 
                 const cachedSongLocation = path.join(
                     process.env.SONG_DOWNLOAD_DIR as string,
-                    `${song.youtubeLink}.mp3`,
+                    `${song.youtubeLink}.m4a`,
                 );
 
                 try {
@@ -186,7 +186,7 @@ export default class KmqSongDownloader {
                         );
 
                         await fs.promises.copyFile(
-                            path.resolve(__dirname, "../test/silence.mp3"),
+                            path.resolve(__dirname, "../test/silence.m4a"),
                             cachedSongLocation,
                         );
                     } else {
@@ -349,8 +349,8 @@ export default class KmqSongDownloader {
         db: DatabaseContext,
     ): Promise<void> {
         return new Promise(async (resolve, reject) => {
-            const videoID = path.basename(fileLocation).replace(".mp3", "");
-            const oggFileWithPath = fileLocation.replace(".mp3", ".ogg");
+            const videoID = path.basename(fileLocation).replace(".m4a", "");
+            const oggFileWithPath = fileLocation.replace(".m4a", ".ogg");
             if (await pathExists(oggFileWithPath)) {
                 resolve();
             }
@@ -439,16 +439,11 @@ export default class KmqSongDownloader {
         }
 
         try {
-            let ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-arg "youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token};visitor_data=${this.youtubeSessionTokens.visitor_data};player_skip=webpage,configs" -- '${id}';`;
-
+            let ytdlpCommand;
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                if (this.hasYtDlpSessionCookies) {
-                    ytdlpCommand = `${YT_DLP_LOCATION} -f bestaudio -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
-                } else {
-                    logger.warn(
-                        "ytdlpDownloadWithCookie enabled but cookie file missing, falling back to non-cookie",
-                    );
-                }
+                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
+            } else {
+                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments -- '${id}';`;
             }
 
             await exec(ytdlpCommand);
@@ -518,22 +513,22 @@ export default class KmqSongDownloader {
         );
     }
 
-    // find half-finished song downloads, or mp3 files downloaded outside of ytdl-core
-    private async processUnprocessedMp3Files(
+    // find half-finished song downloads, or externally downloaded m4a files
+    private async processUnprocessedM4aFiles(
         db: DatabaseContext,
     ): Promise<void> {
-        const mp3Files = (
+        const m4aFiles = (
             await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)
         )
-            .filter((file) => file.endsWith(".mp3"))
+            .filter((file) => file.endsWith(".m4a"))
             .map((x) => path.join(process.env.SONG_DOWNLOAD_DIR as string, x));
 
-        if (mp3Files.length === 0) return;
+        if (m4aFiles.length === 0) return;
 
-        logger.info(`Found ${mp3Files.length} unprocessed mp3 files`);
-        for (const mp3File of mp3Files) {
-            logger.info(`ffmpeg processing '${mp3File}'`);
-            await this.encodeToOpus(mp3File, db);
+        logger.info(`Found ${m4aFiles.length} unprocessed m4a files`);
+        for (const m4aFile of m4aFiles) {
+            logger.info(`ffmpeg processing '${m4aFile}'`);
+            await this.encodeToOpus(m4aFile, db);
         }
     }
 
