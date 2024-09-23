@@ -81,6 +81,10 @@ export default class KmqConfiguration {
     }
 
     ytdlpDownloadWithCookie(): boolean {
-        return this.config["ytdlpDownloadWithCookie"] ?? true;
+        return this.config["ytdlpDownloadWithCookie"] ?? false;
+    }
+
+    ytdlpDownloadWithProxy(): boolean {
+        return this.config["ytdlpDownloadWithProxy"] ?? false;
     }
 }
