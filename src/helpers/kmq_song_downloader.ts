@@ -1,7 +1,11 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
+import {
+    DataFiles,
+    YOUTUBE_SESSION_COOKIE_PATH,
+    YT_DLP_LOCATION,
+} from "../constants";
 import { IPCLogger } from "../logger";
-import { YOUTUBE_SESSION_COOKIE_PATH, YT_DLP_LOCATION } from "../constants";
 import {
     extractErrorString,
     parseJsonFile,
@@ -163,9 +167,19 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
 
-            logger.info(
-                `Beginning song download. cookie_mode = ${KmqConfiguration.Instance.ytdlpDownloadWithCookie()}`,
-            );
+            let proxy: string | null = null;
+            if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
+                proxy = await this.findWorkingProxy();
+                if (!proxy) {
+                    throw new Error("No working proxy found");
+                }
+            }
+
+            if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
+                logger.info(
+                    `Beginning song download. cookie_mode = ${KmqConfiguration.Instance.ytdlpDownloadWithCookie()}`,
+                );
+            }
 
             for (const song of songsToDownload) {
                 logger.info(
@@ -195,6 +209,7 @@ export default class KmqSongDownloader {
                                 db,
                                 song.youtubeLink,
                                 cachedSongLocation,
+                                proxy,
                             );
                         } catch (e) {
                             throw new Error(
@@ -334,9 +349,7 @@ export default class KmqSongDownloader {
             new Date(this.youtubeSessionTokens.generated_at) <
             new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
         ) {
-            logger.error(
-                "Youtube session token is 6 hours old, should refresh",
-            );
+            logger.warn("Youtube session token is 6 hours old, should refresh");
         }
 
         logger.info(
@@ -428,6 +441,7 @@ export default class KmqSongDownloader {
         db: DatabaseContext,
         id: string,
         outputFile: string,
+        proxy: string | null,
     ): Promise<void> {
         if (!validateYouTubeID(id)) {
             throw new Error(`Invalid video ID. id = ${id}`);
@@ -440,7 +454,9 @@ export default class KmqSongDownloader {
 
         try {
             let ytdlpCommand;
-            if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
+            if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
+                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments --proxy ${proxy} -- '${id}';`;
+            } else if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
             } else {
                 ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments -- '${id}';`;
@@ -511,6 +527,31 @@ export default class KmqSongDownloader {
                 )
             ).filter((file) => file.endsWith(".ogg")),
         );
+    }
+
+    private async findWorkingProxy(): Promise<string | null> {
+        if (!(await pathExists(DataFiles.PROXY_FILE))) {
+            logger.warn("Proxy file doesn't exist");
+            return null;
+        }
+
+        const proxies = (await fs.promises.readFile(DataFiles.PROXY_FILE))
+            .toString()
+            .split("\n");
+
+        for (const proxy of proxies) {
+            try {
+                await exec(
+                    `${YT_DLP_LOCATION} --proxy ${proxy} -F -- 9bZkp7q19f0`,
+                );
+                logger.info(`Proxy working: ${proxy}`);
+                return proxy;
+            } catch (e) {
+                logger.warn(`Proxy dead: ${proxy}`);
+            }
+        }
+
+        return null;
     }
 
     // find half-finished song downloads, or externally downloaded m4a files
