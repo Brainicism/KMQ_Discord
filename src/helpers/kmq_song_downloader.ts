@@ -193,12 +193,6 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
 
-            if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                logger.info(
-                    `Beginning song download. cookie_mode = ${KmqConfiguration.Instance.ytdlpDownloadWithCookie()}`,
-                );
-            }
-
             for (const song of songsToDownload) {
                 let proxy: string | undefined;
                 if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
@@ -481,15 +475,33 @@ export default class KmqSongDownloader {
         }
 
         try {
-            let ytdlpCommand;
+            const ytdlpArgs = [
+                YT_DLP_LOCATION,
+                "-f",
+                "'bestaudio[ext=m4a]'",
+                "-o",
+                `'${outputFile}'`,
+                "--abort-on-unavailable-fragments",
+            ];
+
             if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
-                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments --proxy ${proxy} -- '${id}';`;
-            } else if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
-                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments --extractor-args "youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}" --cookies ${YOUTUBE_SESSION_COOKIE_PATH} -- '${id}';`;
-            } else {
-                ytdlpCommand = `${YT_DLP_LOCATION} -f "bestaudio[ext=m4a]" -o "${outputFile}" --abort-on-unavailable-fragments -- '${id}';`;
+                if (proxy) {
+                    ytdlpArgs.push("--proxy", proxy);
+                } else {
+                    logger.warn("Proxy unexpectedly empty");
+                }
             }
 
+            if (KmqConfiguration.Instance.ytdlpDownloadWithPoToken()) {
+                ytdlpArgs.push(
+                    "--extractor-args",
+                    `"youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}"`,
+                );
+                ytdlpArgs.push("--cookies", YOUTUBE_SESSION_COOKIE_PATH);
+            }
+
+            ytdlpArgs.push("--", `'${id}'`);
+            const ytdlpCommand = ytdlpArgs.join(" ");
             await exec(ytdlpCommand);
         } catch (err) {
             let errorMessage =
