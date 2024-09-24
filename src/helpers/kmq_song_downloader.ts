@@ -108,9 +108,7 @@ export default class KmqSongDownloader {
                 youtubeLink: string;
             }> = await this.getExpectedSongsToDownload(db);
 
-            let songsToDownload = limit
-                ? allSongs.slice(0, limit)
-                : allSongs.slice();
+            let songsToDownload = allSongs;
 
             if (songOverrides) {
                 songsToDownload = songsToDownload.filter((x) =>
@@ -168,6 +166,13 @@ export default class KmqSongDownloader {
             songsToDownload = songsToDownload.filter(
                 (x) => !knownDeadIDs.has(x.youtubeLink),
             );
+
+            if (limit) {
+                logger.info(
+                    `Limiting song downloads at: ${limit} out of ${songsToDownload.length}`,
+                );
+                songsToDownload = songsToDownload.slice(0, limit);
+            }
 
             logger.info(
                 `Total songs to be downloaded: ${songsToDownload.length}`,
