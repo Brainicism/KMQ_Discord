@@ -187,10 +187,11 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
 
-            for (const song of songsToDownload) {
+            for (let i = 0; i < songsToDownload.length; i++) {
+                const song = songsToDownload[i]!;
                 let proxy: string | undefined;
                 if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
-                    proxy = chooseRandom(this.proxies);
+                    proxy = this.proxies[i % this.proxies.length];
                     logger.info(
                         `Downloading song: '${song.songName}' by ${song.artistName} | ${
                             song.youtubeLink
