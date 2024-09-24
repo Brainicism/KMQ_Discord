@@ -7,7 +7,6 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
-    chooseRandom,
     extractErrorString,
     parseJsonFile,
     pathExists,
