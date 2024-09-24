@@ -80,8 +80,8 @@ export default class KmqConfiguration {
         return this.config["ytdlpUpdatesEnabled"] ?? true;
     }
 
-    ytdlpDownloadWithCookie(): boolean {
-        return this.config["ytdlpDownloadWithCookie"] ?? false;
+    ytdlpDownloadWithPoToken(): boolean {
+        return this.config["ytdlpDownloadWithPoToken"] ?? false;
     }
 
     ytdlpDownloadWithProxy(): boolean {
