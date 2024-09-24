@@ -91,7 +91,7 @@ jobs:
                   tags: ghcr.io/brainicism/kmq_discord:gci
             - name: Determine if MOCK_AUDIO should be set
               id: check_labels
-              if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+              # if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
               run: |
                   # Extract the labels from the PR
                   LABELS="$(gh api repos/$OWNER/$REPO_NAME/pulls/$PULL_REQUEST_NUMBER --jq '.labels.[].name')"
@@ -102,6 +102,10 @@ jobs:
                   else
                     echo "MOCK_AUDIO=false" >> $GITHUB_ENV
                   fi
+
+                  # temporarily (?) mock audio until we have a longer term solution
+                  echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
                   OWNER: ${{ github.repository_owner }}
