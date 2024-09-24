@@ -93,15 +93,15 @@ jobs:
               id: check_labels
               # if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
               run: |
-                  # Extract the labels from the PR
-                  LABELS="$(gh api repos/$OWNER/$REPO_NAME/pulls/$PULL_REQUEST_NUMBER --jq '.labels.[].name')"
+                  # # Extract the labels from the PR
+                  # LABELS="$(gh api repos/$OWNER/$REPO_NAME/pulls/$PULL_REQUEST_NUMBER --jq '.labels.[].name')"
 
-                  # Check if "mock audio" is among the labels
-                  if echo "$LABELS" | grep -q "mock audio"; then
-                    echo "MOCK_AUDIO=true" >> $GITHUB_ENV
-                  else
-                    echo "MOCK_AUDIO=false" >> $GITHUB_ENV
-                  fi
+                  # # Check if "mock audio" is among the labels
+                  # if echo "$LABELS" | grep -q "mock audio"; then
+                  #   echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+                  # else
+                  #   echo "MOCK_AUDIO=false" >> $GITHUB_ENV
+                  # fi
 
                   # temporarily (?) mock audio until we have a longer term solution
                   echo "MOCK_AUDIO=true" >> $GITHUB_ENV
