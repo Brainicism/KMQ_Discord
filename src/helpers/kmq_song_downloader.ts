@@ -55,7 +55,13 @@ export default class KmqSongDownloader {
             this.proxies = fs
                 .readFileSync(DataFiles.PROXY_FILE)
                 .toString()
-                .split("\n");
+                .trim()
+                .split("\n")
+                .filter((x) => x);
+
+            logger.info(
+                `Found ${this.proxies} proxies. proxies = ${JSON.stringify(this.proxies)}`,
+            );
         }
     }
 
