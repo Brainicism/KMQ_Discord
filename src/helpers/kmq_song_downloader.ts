@@ -7,6 +7,7 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
+    chooseRandom,
     extractErrorString,
     parseJsonFile,
     pathExists,
@@ -34,6 +35,7 @@ export default class KmqSongDownloader {
         "../../data/yt_session.json",
     );
 
+    private proxies: Array<string>;
     private youtubeSessionTokens:
         | {
               po_token: string;
@@ -43,6 +45,19 @@ export default class KmqSongDownloader {
         | undefined;
 
     private hasYtDlpSessionCookies = false;
+
+    constructor() {
+        if (!pathExistsSync(DataFiles.PROXY_FILE)) {
+            logger.warn("Proxy file doesn't exist");
+            this.proxies = [];
+        } else {
+            // eslint-disable-next-line node/no-sync
+            this.proxies = fs
+                .readFileSync(DataFiles.PROXY_FILE)
+                .toString()
+                .split("\n");
+        }
+    }
 
     /**
      * @param songPath - the file path of the song file
@@ -167,14 +182,6 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
 
-            let proxy: string | null = null;
-            if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
-                proxy = await this.findWorkingProxy();
-                if (!proxy) {
-                    throw new Error("No working proxy found");
-                }
-            }
-
             if (KmqConfiguration.Instance.ytdlpDownloadWithCookie()) {
                 logger.info(
                     `Beginning song download. cookie_mode = ${KmqConfiguration.Instance.ytdlpDownloadWithCookie()}`,
@@ -182,11 +189,21 @@ export default class KmqSongDownloader {
             }
 
             for (const song of songsToDownload) {
-                logger.info(
-                    `Downloading song: '${song.songName}' by ${song.artistName} | ${
-                        song.youtubeLink
-                    } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})`,
-                );
+                let proxy: string | undefined;
+                if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
+                    proxy = chooseRandom(this.proxies);
+                    logger.info(
+                        `Downloading song: '${song.songName}' by ${song.artistName} | ${
+                            song.youtubeLink
+                        } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})  (proxy = ${proxy})`,
+                    );
+                } else {
+                    logger.info(
+                        `Downloading song: '${song.songName}' by ${song.artistName} | ${
+                            song.youtubeLink
+                        } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})`,
+                    );
+                }
 
                 const cachedSongLocation = path.join(
                     process.env.SONG_DOWNLOAD_DIR as string,
@@ -441,7 +458,7 @@ export default class KmqSongDownloader {
         db: DatabaseContext,
         id: string,
         outputFile: string,
-        proxy: string | null,
+        proxy: string | undefined,
     ): Promise<void> {
         if (!validateYouTubeID(id)) {
             throw new Error(`Invalid video ID. id = ${id}`);
@@ -527,31 +544,6 @@ export default class KmqSongDownloader {
                 )
             ).filter((file) => file.endsWith(".ogg")),
         );
-    }
-
-    private async findWorkingProxy(): Promise<string | null> {
-        if (!(await pathExists(DataFiles.PROXY_FILE))) {
-            logger.warn("Proxy file doesn't exist");
-            return null;
-        }
-
-        const proxies = (await fs.promises.readFile(DataFiles.PROXY_FILE))
-            .toString()
-            .split("\n");
-
-        for (const proxy of proxies) {
-            try {
-                await exec(
-                    `${YT_DLP_LOCATION} --proxy ${proxy} -F -- 9bZkp7q19f0`,
-                );
-                logger.info(`Proxy working: ${proxy}`);
-                return proxy;
-            } catch (e) {
-                logger.warn(`Proxy dead: ${proxy}`);
-            }
-        }
-
-        return null;
     }
 
     // find half-finished song downloads, or externally downloaded m4a files
