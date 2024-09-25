@@ -59,7 +59,7 @@ export default class KmqSongDownloader {
                 .filter((x) => x);
 
             logger.info(
-                `Found ${this.proxies} proxies. proxies = ${JSON.stringify(this.proxies)}`,
+                `Found ${this.proxies.length} proxies. proxies = ${JSON.stringify(this.proxies)}`,
             );
         }
     }
