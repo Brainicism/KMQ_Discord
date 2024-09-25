@@ -59,7 +59,7 @@ export default class KmqSongDownloader {
                 .filter((x) => x);
 
             logger.info(
-                `Found ${this.proxies} proxies. proxies = ${JSON.stringify(this.proxies)}`,
+                `Found ${this.proxies.length} proxies. proxies = ${JSON.stringify(this.proxies)}`,
             );
         }
     }
@@ -191,12 +191,12 @@ export default class KmqSongDownloader {
 
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
-
+            const proxySeed = Date.now();
             for (let i = 0; i < songsToDownload.length; i++) {
                 const song = songsToDownload[i]!;
                 let proxy: string | undefined;
                 if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
-                    proxy = this.proxies[i % this.proxies.length];
+                    proxy = this.proxies[(i + proxySeed) % this.proxies.length];
                     logger.info(
                         `Downloading song: '${song.songName}' by ${song.artistName} | ${
                             song.youtubeLink
