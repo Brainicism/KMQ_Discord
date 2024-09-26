@@ -64,7 +64,7 @@ describe("game round", () => {
         });
 
         describe("artist collabs", () => {
-            it.only("should record them as two separate artists", () => {
+            it("should record them as two separate artists", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Poggers Song",
