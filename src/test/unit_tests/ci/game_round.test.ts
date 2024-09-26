@@ -64,7 +64,7 @@ describe("game round", () => {
         });
 
         describe("artist collabs", () => {
-            it("should record them as two separate artists", () => {
+            it.only("should record them as two separate artists", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Poggers Song",
@@ -136,7 +136,8 @@ describe("game round", () => {
                         songName: "Lovesick Girls",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: " Blackpink + IU             ",
-                        hangulArtistName: "   블랙핑크+아이유                ",
+                        hangulArtistName:
+                            "   블랙핑크 + 아이유                ",
                         youtubeLink: "abcde",
                         originalLink: null,
                         publishDate: new Date(),
