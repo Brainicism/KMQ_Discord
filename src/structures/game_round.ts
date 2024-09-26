@@ -267,7 +267,6 @@ export default class GameRound extends Round {
         guessModeType: GuessModeType,
         typosAllowed = false,
     ): number {
-        // if (!guess) return 0;
         let pointReward = 0;
 
         const songGuessResult = this.checkSongGuess(guess);
