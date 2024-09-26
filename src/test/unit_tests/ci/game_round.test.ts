@@ -70,7 +70,7 @@ describe("game round", () => {
                         songName: "Poggers Song",
                         hangulSongName: "리그마 포트나이트",
                         artistName: "IU + Blackpink",
-                        hangulArtistName: "아이유+블랙핑크",
+                        hangulArtistName: "아이유 + 블랙핑크",
                         youtubeLink: "abcde",
                         originalLink: null,
                         publishDate: new Date(),
@@ -136,7 +136,8 @@ describe("game round", () => {
                         songName: "Lovesick Girls",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: " Blackpink + IU             ",
-                        hangulArtistName: "   블랙핑크+아이유                ",
+                        hangulArtistName:
+                            "   블랙핑크 + 아이유                ",
                         youtubeLink: "abcde",
                         originalLink: null,
                         publishDate: new Date(),

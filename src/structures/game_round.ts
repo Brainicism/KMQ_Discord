@@ -119,10 +119,15 @@ export default class GameRound extends Round {
             this.acceptedSongAnswers.push(song.hangulSongName);
         }
 
-        const artistNames = song.artistName.split("+").map((x) => x.trim());
+        const artistNames = song.artistName.includes(" + ")
+            ? song.artistName.split("+").map((x) => x.trim())
+            : [song.artistName];
+
         if (song.hangulArtistName) {
             artistNames.push(
-                ...song.hangulArtistName.split("+").map((x) => x.trim()),
+                ...(song.hangulArtistName.includes(" + ")
+                    ? song.hangulArtistName.split("+").map((x) => x.trim())
+                    : [song.hangulArtistName]),
             );
         }
 
@@ -262,6 +267,7 @@ export default class GameRound extends Round {
         guessModeType: GuessModeType,
         typosAllowed = false,
     ): number {
+        if (!guess) return 0;
         let pointReward = 0;
 
         const songGuessResult = this.checkSongGuess(guess);
