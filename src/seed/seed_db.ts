@@ -752,9 +752,19 @@ async function reloadAutocompleteData(): Promise<void> {
 
             logger.info("Calculating songs both added and removed");
             const songsAddedLinks = songsAdded.map((x) => x.link);
+            const songNameHash = function (a: AvailableSongDeltaData): string {
+                return `${a.song_name_en}|${a.artist_name_en}`.toLowerCase();
+            };
+
+            const songAddedNameHashes = songsAdded.map((x) => songNameHash(x));
+
             const addedAndRemovedLinks = new Set(
                 songsRemoved
-                    .filter((removed) => songsAddedLinks.includes(removed.link))
+                    .filter(
+                        (removed) =>
+                            songsAddedLinks.includes(removed.link) ||
+                            songAddedNameHashes.includes(songNameHash(removed)),
+                    )
                     .map((x) => x.link),
             );
 
