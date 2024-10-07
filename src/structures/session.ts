@@ -853,6 +853,8 @@ export default abstract class Session {
                 round.songStartedAt = Date.now();
             }
 
+            await this.ensureConnectionReady();
+
             this.connection.play(stream, {
                 inputArgs,
                 encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
@@ -1318,5 +1320,29 @@ export default abstract class Session {
                 `Error receiving from voice connection WS. ${extractErrorString(err)}`,
             );
         });
+    }
+
+    private async ensureConnectionReady(): Promise<void> {
+        if (!this.connection) {
+            throw new Error(
+                "Connection is unexpectedly null in ensureConnectionReady",
+            );
+        }
+
+        if (!this.connection.piper.encoding) {
+            return;
+        }
+
+        logger.warn("Connection is unexpectedly in encoding state.");
+        await delay(1000);
+
+        // if still encoding, force stop
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (this.connection.piper.encoding) {
+            logger.warn(
+                "Connection is still in encoding state after timeout, force stop.",
+            );
+            this.connection.stopPlaying();
+        }
     }
 }
