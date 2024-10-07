@@ -1334,6 +1334,12 @@ export default abstract class Session {
             );
         }
 
+        // check if voice connection is still valid
+        // channel ID is null'd if disconnected
+        if (this.connection.channelID) {
+            return;
+        }
+
         if (!this.connection.piper.encoding) {
             return;
         }
