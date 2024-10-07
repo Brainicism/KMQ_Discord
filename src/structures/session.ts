@@ -951,11 +951,20 @@ export default abstract class Session {
                 return;
             }
 
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails(round)}. err = ${err}`,
-            );
+            if ((err as Error).message.includes("Already encoding")) {
+                logger.warn(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Already encoding. song = ${this.getDebugSongDetails(round)}. err = ${err}`,
+                );
+            } else {
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Unknown error with stream dispatcher. song = ${this.getDebugSongDetails(round)}. err = ${err}`,
+                );
+            }
+
             await this.errorRestartRound();
         });
 
