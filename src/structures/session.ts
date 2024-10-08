@@ -170,7 +170,11 @@ export default abstract class Session {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | ${this.sessionName()} starting`,
+                )} | ${this.sessionName()} initializing session`,
+            );
+        } else {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Round starting`,
             );
         }
 
@@ -357,6 +361,7 @@ export default abstract class Session {
         isError: boolean,
         _messageContext?: MessageContext,
     ): Promise<void> {
+        logger.info(`gid: ${this.guildID} | Round ending`);
         if (this.round === null) {
             return;
         }
@@ -1329,18 +1334,26 @@ export default abstract class Session {
             );
         }
 
+        // check if voice connection is still valid
+        // channel ID is null'd if disconnected
+        if (this.connection.channelID) {
+            return;
+        }
+
         if (!this.connection.piper.encoding) {
             return;
         }
 
-        logger.warn("Connection is unexpectedly in encoding state.");
+        logger.warn(
+            `gid: ${this.guildID} | Connection is unexpectedly in encoding state.`,
+        );
         await delay(1000);
 
         // if still encoding, force stop
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (this.connection.piper.encoding) {
             logger.warn(
-                "Connection is still in encoding state after timeout, force stop.",
+                `gid: ${this.guildID} | Connection is still in encoding state after timeout, force stop.`,
             );
             this.connection.stopPlaying();
         }
