@@ -408,7 +408,7 @@ export default class KmqSongDownloader {
                 .audioCodec("libopus")
                 .audioFilters(`volume=${volumeDifferential}dB`)
                 .output(oggFfmpegOutputStream)
-                .audioChannels(6) // Set to 6 channels for 5.1 surround
+                .audioChannels(2) // discord only supports stereo
                 .on("end", async () => {
                     try {
                         await fs.promises.rename(
