@@ -471,12 +471,9 @@ export default class KmqSongDownloader {
     ): Promise<void> {
         try {
             const onesieUrl = await this.onesieProvider.getDownloadUrl(id);
-            logger.info(`Downloading via onesie: ${onesieUrl}`);
             const downloadResponse = await Axios.get(onesieUrl, {
                 responseType: "stream",
             });
-
-            logger.info(`Downloaded via onesie: ${onesieUrl} to ${outputFile}`);
 
             await fs.promises.writeFile(outputFile, downloadResponse.data, {
                 encoding: null,
