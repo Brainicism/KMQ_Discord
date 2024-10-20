@@ -14,7 +14,7 @@ WORKDIR /app
 COPY yarn.lock package.json package-lock.json ./
 RUN yarn global add node-gyp@10.2.0
 # RUN yarn install --frozen-lockfile
-RUN npm ci
+RUN npm ci --force
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql

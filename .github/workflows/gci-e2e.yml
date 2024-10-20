@@ -114,7 +114,7 @@ jobs:
             - name: Install dependencies
               run: |
                   # yarn install --frozen-lockfile
-                  npm ci
+                  npm ci --force
             - name: Acquire youtube session tokens
               if: ${{ env.MOCK_AUDIO != 'true' }}
               run: mkdir data && bash src/scripts/session-generator.sh data/ bgutil

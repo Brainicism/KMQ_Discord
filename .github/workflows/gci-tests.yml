@@ -49,7 +49,7 @@ jobs:
             - name: Install node dependencies
               run: |
                   # yarn install --frozen-lockfile
-                  npm ci
+                  npm ci --force
             - name: Prettier
               run: npm run prettier-ci
             - name: npm run lint
