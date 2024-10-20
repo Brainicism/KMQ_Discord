@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y git \
   autoconf \
   automake \
   libtool \
+  protobuf-compiler \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
