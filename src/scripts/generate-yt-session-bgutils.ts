@@ -3,8 +3,8 @@
 /* eslint-disable no-console */
 import { BG } from "bgutils-js";
 import { JSDOM } from "jsdom";
+import { ProtoUtils } from "youtubei.js";
 import { YOUTUBE_SESSION_TMP_COOKIE_PATH } from "../constants";
-import { encodeVisitorData } from "youtubei.js/dist/src/utils/ProtoUtils";
 import fs from "fs";
 
 // mostly copied from https://github.com/LuanRT/BgUtils/tree/main/examples/node
@@ -31,7 +31,7 @@ import fs from "fs";
 
     console.info(`Found visitor ID: ${visitorId}`);
 
-    const visitorData = encodeVisitorData(
+    const visitorData = ProtoUtils.encodeVisitorData(
         visitorId,
         Math.floor(Date.now() / 1000),
     );
