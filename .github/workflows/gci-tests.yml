@@ -47,7 +47,9 @@ jobs:
               with:
                   node-version: 18
             - name: Install node dependencies
-              run: yarn install --frozen-lockfile
+              run: |
+                  # yarn install --frozen-lockfile
+                  npm ci
             - name: Prettier
               run: npm run prettier-ci
             - name: npm run lint

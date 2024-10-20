@@ -103,8 +103,8 @@ jobs:
                   #   echo "MOCK_AUDIO=false" >> $GITHUB_ENV
                   # fi
 
-                  # temporarily (?) mock audio until we have a longer term solution
-                  echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+                  # # temporarily (?) mock audio until we have a longer term solution
+                  # echo "MOCK_AUDIO=true" >> $GITHUB_ENV
 
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -112,7 +112,9 @@ jobs:
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
             - name: Install dependencies
-              run: yarn install --frozen-lockfile
+              run: |
+                  # yarn install --frozen-lockfile
+                  npm ci
             - name: Acquire youtube session tokens
               if: ${{ env.MOCK_AUDIO != 'true' }}
               run: mkdir data && bash src/scripts/session-generator.sh data/ bgutil

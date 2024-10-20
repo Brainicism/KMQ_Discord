@@ -1,1 +1,2 @@
-yarn install --frozen-lockfile;
+# yarn install --frozen-lockfile;
+npm ci
