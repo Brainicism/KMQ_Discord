@@ -99,6 +99,12 @@ export default class KmqSongDownloader {
         songOverrides?: string[],
         checkSongDurations?: boolean,
     ): Promise<{ songsDownloaded: number; songsFailed: number }> {
+        if (KmqConfiguration.Instance.downloadWithOnesieRequest()) {
+            logger.info("Downloading via onesie URLs");
+        } else {
+            logger.info("Downloading via yt-dlp");
+        }
+
         const db = getNewConnection();
         try {
             if (!(await pathExists(process.env.SONG_DOWNLOAD_DIR as string))) {
