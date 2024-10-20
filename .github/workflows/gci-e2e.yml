@@ -111,6 +111,8 @@ jobs:
                   OWNER: ${{ github.repository_owner }}
                   REPO_NAME: ${{ github.event.repository.name }}
                   PULL_REQUEST_NUMBER: ${{ github.event.pull_request.number }}
+            - name: Install protobuf compiler
+              run: sudo apt install -y protobuf-compiler
             - name: Install dependencies
               run: |
                   # yarn install --frozen-lockfile
