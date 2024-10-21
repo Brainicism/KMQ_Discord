@@ -10,7 +10,11 @@ RUN_ID=$(openssl rand -hex 12)
 
 if [ "${MINIMAL_RUN}" != "true" ]; then
     echo "Bootstrapping..."
-    npx ts-node --swc src/seed/bootstrap.ts
+    if [ "${NODE_ENV}" == "production" ]; then
+        npx ts-node src/seed/bootstrap.ts
+    else
+        npx ts-node --swc src/seed/bootstrap.ts
+    fi
 fi
 
 # run with ts-node + swc, no transpile needed

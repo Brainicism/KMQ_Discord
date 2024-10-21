@@ -103,6 +103,7 @@ export default class KmqSongDownloader {
             logger.info("Downloading via onesie URLs");
         } else {
             logger.info("Downloading via yt-dlp");
+            await this.reloadYoutubeSessionTokens();
         }
 
         const db = getNewConnection();
@@ -112,7 +113,6 @@ export default class KmqSongDownloader {
                 return { songsDownloaded: 0, songsFailed: 0 };
             }
 
-            await this.reloadYoutubeSessionTokens();
             await this.clearPartiallyCachedSongs();
             await this.processUnprocessedM4aFiles(db);
 
