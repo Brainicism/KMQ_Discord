@@ -87,4 +87,8 @@ export default class KmqConfiguration {
     ytdlpDownloadWithProxy(): boolean {
         return this.config["ytdlpDownloadWithProxy"] ?? false;
     }
+
+    downloadWithOnesieRequest(): boolean {
+        return this.config["downloadWithOnesieRequest"] ?? true;
+    }
 }

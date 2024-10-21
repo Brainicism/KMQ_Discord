@@ -30,7 +30,8 @@ then
         npm run clean
         echo "Installing dependencies..."
         rm -rf node_modules/
-        yarn install --frozen-lockfile
+        # yarn install --frozen-lockfile
+        npm ci --force
         git log -n 1 --pretty=format:"%H" > ../version
     fi
     rebuild

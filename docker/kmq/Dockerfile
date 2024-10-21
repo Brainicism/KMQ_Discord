@@ -8,13 +8,14 @@ RUN apt-get update && apt-get install -y git \
   autoconf \
   automake \
   libtool \
+  protobuf-compiler \
   && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-COPY yarn.lock package.json ./
+COPY yarn.lock package.json package-lock.json ./
 RUN yarn global add node-gyp@10.2.0
-RUN yarn install --frozen-lockfile
-
+# RUN yarn install --frozen-lockfile
+RUN npm ci --force
 COPY start.sh tsconfig.json ./
 COPY i18n/ i18n/
 COPY sql_dumps/daisuki/bootstrap.sql sql_dumps/daisuki/bootstrap.sql
