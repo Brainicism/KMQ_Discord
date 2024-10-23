@@ -316,7 +316,7 @@ export async function reloadArtists(): Promise<void> {
             "id_artist",
         ])
         .distinct()
-        .where("artist_name_en", "not like", "%+%")
+        .where("artist_name_en", "not like", "% + %")
         .execute();
 
     for (const mapping of artistAliasMapping) {
