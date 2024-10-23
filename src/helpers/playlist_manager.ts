@@ -995,7 +995,7 @@ export default class PlaylistManager {
                         const expressions = [
                             eb("original_artist_name_en", "like", artistName),
                             and([
-                                eb("original_artist_name_en", "like", "%+%"),
+                                eb("original_artist_name_en", "like", "% + %"),
                                 eb(
                                     "original_artist_name_en",
                                     "like",
