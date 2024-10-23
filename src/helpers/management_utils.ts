@@ -338,7 +338,7 @@ export async function reloadArtists(): Promise<void> {
             State.artistToEntry[mapping["artist_name_ko"]] = artistEntry;
         }
 
-        for (const alias in aliases) {
+        for (const alias of aliases) {
             if (alias.length > 0) {
                 State.artistToEntry[
                     GameRound.normalizePunctuationInName(alias)
