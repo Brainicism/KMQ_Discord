@@ -68,7 +68,7 @@ export default async function messageCreateHandler(
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-    if (message.channel.type === undefined) {
+    if (message.guildID === undefined) {
         logger.debug(`Message received in DMs. msg = ${message.content}`);
 
         await PrivateMessageCommand.sendPrivateMessage(message.author.id, "");
