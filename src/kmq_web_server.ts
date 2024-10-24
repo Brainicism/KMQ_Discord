@@ -287,8 +287,8 @@ export default class KmqWebServer {
                 clusterData.push({
                     id: fleetCluster.id,
                     ram: Math.ceil(fleetCluster.ram).toLocaleString(),
-                    apiLatency: _.mean(
-                        fleetCluster.shards.map((x) => x.latency),
+                    apiLatency: Math.ceil(
+                        _.mean(fleetCluster.shards.map((x) => x.latency)),
                     ).toLocaleString(),
                     uptime: standardDateFormat(
                         new Date(Date.now() - fleetCluster.uptime),
@@ -359,8 +359,6 @@ export default class KmqWebServer {
                     loadAverage: loadAvg.map((x) => x.toFixed(2)).join(", "),
                     healthIndicator: loadAvgHealthIndicator,
                 },
-                cachedUsers: fleetStats.users.toLocaleString(),
-                totalMembers: fleetStats.members.toLocaleString(),
                 totalVoiceConnections: fleetStats.voice,
                 totalRAM: Math.ceil(fleetStats.totalRam).toLocaleString(),
                 lastUpdated: new Date(),
