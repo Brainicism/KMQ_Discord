@@ -104,7 +104,7 @@ export default abstract class Session {
     };
 
     /** Timer function used to for /timer command */
-    private guessTimeoutFunc: NodeJS.Timer | undefined;
+    private guessTimeoutFunc: NodeJS.Timeout | undefined;
 
     constructor(
         guildPreference: GuildPreference,
