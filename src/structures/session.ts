@@ -757,8 +757,6 @@ export default abstract class Session {
             songDuration = 252;
         }
 
-        const stream = fs.createReadStream(songLocation);
-
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
@@ -869,7 +867,7 @@ export default abstract class Session {
                 voiceDataTimeout = 2000;
             }
 
-            this.connection.play(stream, {
+            this.connection.play(songLocation, {
                 inputArgs,
                 encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
                     x[0],
