@@ -860,6 +860,15 @@ export default abstract class Session {
 
             await this.ensureConnectionReady();
 
+            let voiceDataTimeout: number | undefined;
+            if (isClipMode) {
+                voiceDataTimeout = CLIP_VC_END_TIMEOUT_MS;
+            } else if (specialType) {
+                voiceDataTimeout = 7500;
+            } else {
+                voiceDataTimeout = 2000;
+            }
+
             this.connection.play(stream, {
                 inputArgs,
                 encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
@@ -867,9 +876,7 @@ export default abstract class Session {
                     x[1].join(","),
                 ]),
                 opusPassthrough: specialType === null && !isClipMode,
-                voiceDataTimeout: isClipMode
-                    ? CLIP_VC_END_TIMEOUT_MS
-                    : undefined,
+                voiceDataTimeout,
             });
         } catch (e) {
             if (e instanceof Error) {
