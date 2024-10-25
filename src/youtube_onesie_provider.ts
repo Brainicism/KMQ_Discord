@@ -143,11 +143,11 @@ export default class YoutubeOnesieProvider {
             },
         ];
 
-        const onesieRequest = Protos.OnesieRequest.encode({
+        const onesieRequest = Protos.OnesiePlayerRequest.encode({
             url: "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8",
             headers,
             body: JSON.stringify(playerRequestJson),
-            field4: false,
+            proxiedByTrustedBandaid: true,
             field6: false,
         }).finish();
 
@@ -156,10 +156,11 @@ export default class YoutubeOnesieProvider {
             onesieRequest,
         );
 
-        const body = Protos.OnesieInnertubeRequest.encode({
-            encryptedRequest: {
+        const body = Protos.OnesieRequest.encode({
+            urls: [],
+            playerRequest: {
                 encryptedClientKey,
-                encryptedOnesieRequest: encrypted,
+                encryptedOnesiePlayerRequest: encrypted,
                 enableCompression: false,
                 hmac,
                 iv,
@@ -185,6 +186,7 @@ export default class YoutubeOnesieProvider {
                         innertube.session.context.client.clientVersion,
                 },
             },
+            bufferedRanges: [],
             onesieUstreamerConfig,
         }).finish();
 
@@ -294,12 +296,13 @@ export default class YoutubeOnesieProvider {
             );
 
             const onesieResponse =
-                Protos.OnesieInnertubeResponse.decode(decryptedData);
+                Protos.OnesiePlayerResponse.decode(decryptedData);
 
-            if (onesieResponse.proxyStatus !== 1)
+            if (onesieResponse.onesieProxyStatus !== 1)
                 throw new Error("Proxy status not OK");
 
-            if (onesieResponse.status !== 200) throw new Error("Status not OK");
+            if (onesieResponse.httpStatus !== 200)
+                throw new Error("Status not OK");
 
             const playerResponse = {
                 success: true,
