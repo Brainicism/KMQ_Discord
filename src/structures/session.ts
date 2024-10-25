@@ -46,7 +46,6 @@ import SeekType from "../enums/option_types/seek_type";
 import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
-import fs from "fs";
 import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type ClipGameRound from "./clip_game_round";
@@ -757,8 +756,6 @@ export default abstract class Session {
             songDuration = 252;
         }
 
-        const stream = fs.createReadStream(songLocation);
-
         logger.info(
             `${getDebugLogHeader(
                 messageContext,
@@ -869,7 +866,7 @@ export default abstract class Session {
                 voiceDataTimeout = 2000;
             }
 
-            this.connection.play(stream, {
+            this.connection.play(songLocation, {
                 inputArgs,
                 encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
                     x[0],
