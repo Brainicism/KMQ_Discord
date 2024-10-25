@@ -72,7 +72,7 @@
         "fastify": "^4.28.1",
         "fluent-ffmpeg": "^2.1.3",
         "googleapis": "^142.0.0",
-        "googlevideo": "github:LuanRT/googlevideo",
+        "googlevideo": "^1.1.0",
         "i18next": "^23.14.0",
         "i18next-fs-backend": "^2.3.2",
         "jsdom": "^24.1.1",
