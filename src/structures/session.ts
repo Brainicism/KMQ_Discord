@@ -46,7 +46,6 @@ import SeekType from "../enums/option_types/seek_type";
 import SongSelector from "./song_selector";
 import State from "../state";
 import dbContext from "../database_context";
-import fs from "fs";
 import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
 import type ClipGameRound from "./clip_game_round";
