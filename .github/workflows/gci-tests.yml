@@ -49,8 +49,7 @@ jobs:
             - name: Install protobuf compiler
               run: sudo apt install -y protobuf-compiler
             - name: Install node dependencies
-              run: |
-                  yarn install --frozen-lockfile
+              run: yarn install --frozen-lockfile
             - name: Prettier
               run: npm run prettier-ci
             - name: npm run lint

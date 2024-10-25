@@ -114,8 +114,7 @@ jobs:
             - name: Install protobuf compiler
               run: sudo apt install -y protobuf-compiler
             - name: Install dependencies
-              run: |
-                  yarn install --frozen-lockfile
+              run: yarn install --frozen-lockfile
             - name: Acquire youtube session tokens
               if: ${{ env.MOCK_AUDIO != 'true' }}
               run: mkdir data && bash src/scripts/session-generator.sh data/ bgutil
