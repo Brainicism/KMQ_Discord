@@ -29,6 +29,8 @@ jobs:
                   ssh-keyscan ${{ secrets.PROD_SSH_ADDRESS }} > ~/.ssh/known_hosts
             - name: Redeploy over SSH
               run: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_ADDRESS }} "source ~/.zshrc; ./.github/workflows/redeploy_prod.sh $KMQ_DIR ${{ inputs.image-name }}"
+            - name: Wait for KMQ up
+              run: timeout 60 bash -c 'until curl -s -o /dev/null -w "%{http_code}" 127.0.0.1:5858/ping | grep -q "^200$"; do sleep 5; done' || { echo "KMQ did not return 200 within 1 minute"; exit 1; }
             - name: Run basic options test
               run: ssh ${{ secrets.PROD_SSH_USER }}@${{ secrets.PROD_SSH_ADDRESS }} "docker exec kmq-prod sh -c '. ./.env && npx ts-node --swc src/test/end-to-end-tests/test-runner-bot.ts --test-suite=BASIC_OPTIONS --debug --stage-delay=5'"
             - name: Run basic gameplay test
