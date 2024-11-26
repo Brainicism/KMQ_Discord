@@ -191,7 +191,7 @@ export async function loadStoredProcedures(): Promise<void> {
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
         logger.info(`Loading procedure: ${storedProcedureDefinition}`);
         await exec(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`,
+            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${storedProcedureDefinition}`,
         );
     }
 }
@@ -219,7 +219,7 @@ async function loadStoredProceduresForValidation(): Promise<void> {
         logger.info(`Loading procedure for validation: ${testProcedurePath}`);
 
         await exec(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${testProcedurePath}`,
+            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${testProcedurePath}`,
         );
     }
 }

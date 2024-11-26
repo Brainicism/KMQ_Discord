@@ -43,7 +43,7 @@ async function loadStoredProceduresForTest(): Promise<void> {
         logger.info(`Loading procedure for test: ${testProcedurePath}`);
 
         cp.execSync(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testProcedurePath}`,
+            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq_test < ${testProcedurePath}`,
             { stdio: "inherit" },
         );
     }
