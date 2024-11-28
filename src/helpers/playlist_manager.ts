@@ -14,6 +14,7 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "./discord_utils";
+import { sql } from "kysely";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
 import EnvVariableManager from "../env_variable_manager";
@@ -985,8 +986,7 @@ export default class PlaylistManager {
                                 eb(
                                     "clean_song_name_alpha_numeric",
                                     "like",
-                                    songName.replace(/[^0-9a-z]/gi, "") ||
-                                        songName,
+                                    songName.replace(/[^0-9a-z]/gi, "") ?  eb.fn("CleanSongName", [sql`${songName}`]): eb.fn("CleanSongName", [sql`${songName.replace(/[^0-9a-z]/gi, "")}`])
                                 ),
                             ),
                         ),
