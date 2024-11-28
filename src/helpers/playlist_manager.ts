@@ -986,7 +986,13 @@ export default class PlaylistManager {
                                 eb(
                                     "clean_song_name_alpha_numeric",
                                     "like",
-                                    songName.replace(/[^0-9a-z]/gi, "") ?  eb.fn("CleanSongName", [sql`${songName}`]): eb.fn("CleanSongName", [sql`${songName.replace(/[^0-9a-z]/gi, "")}`])
+                                    songName.replace(/[^0-9a-z]/gi, "")
+                                        ? eb.fn("CleanSongName", [
+                                              sql`${songName}`,
+                                          ])
+                                        : eb.fn("CleanSongName", [
+                                              sql`${songName.replace(/[^0-9a-z]/gi, "")}`,
+                                          ]),
                                 ),
                             ),
                         ),
