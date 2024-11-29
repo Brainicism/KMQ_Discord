@@ -1344,7 +1344,8 @@ export default abstract class Session {
             return;
         }
 
-        if (!this.connection.piper.encoding) {
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (!this.connection.piper?.encoding) {
             return;
         }
 
@@ -1355,7 +1356,7 @@ export default abstract class Session {
 
         // if still encoding, force stop
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (this.connection.piper.encoding) {
+        if (this.connection.piper?.encoding) {
             logger.warn(
                 `gid: ${this.guildID} | Connection is still in encoding state after timeout, force stop.`,
             );
