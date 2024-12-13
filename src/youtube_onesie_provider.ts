@@ -110,6 +110,7 @@ export default class YoutubeOnesieProvider {
         const { videoId, poToken, clientConfig, innertube } = args;
         const { clientKeyData, encryptedClientKey, onesieUstreamerConfig } =
             clientConfig;
+
         const clonedInnerTubeContext: Context = structuredClone(
             innertube.session.context,
         );
