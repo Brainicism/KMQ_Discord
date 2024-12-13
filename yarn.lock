@@ -2972,10 +2972,10 @@ jest-get-type@^22.4.3:
   resolved "https://registry.yarnpkg.com/jest-get-type/-/jest-get-type-22.4.3.tgz#e3a8504d8479342dd4420236b322869f18900ce4"
   integrity sha512-/jsz0Y+V29w1chdXVygEKSz2nBoHoYqNShPe+QgxSNjAuP1i8+k4LbQNrfoliKej0P45sivkSCh7yiD6ubHS3w==
 
-jintr@^2.1.1:
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/jintr/-/jintr-2.1.1.tgz#84d555df06d26128c2a1d0e1eebd6fecdf8eb280"
-  integrity sha512-89cwX4ouogeDGOBsEVsVYsnWWvWjchmwXBB4kiBhmjOKw19FiOKhNhMhpxhTlK2ctl7DS+d/ethfmuBpzoNNgA==
+jintr@^3.2.0:
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/jintr/-/jintr-3.2.0.tgz#38bfc2311c7ed4412ebe0bfc5c2e700f8f433921"
+  integrity sha512-psD1yf05kMKDNsUdW1l5YhO59pHScQ6OIHHb8W5SKSM2dCOFPsqolmIuSHgVA8+3Dc47NJR181CXZ4alCAPTkA==
   dependencies:
     acorn "^8.8.0"
 
@@ -4945,12 +4945,12 @@ yocto-queue@^0.1.0:
   resolved "https://registry.yarnpkg.com/yocto-queue/-/yocto-queue-0.1.0.tgz#0294eb3dee05028d31ee1a5fa2c556a6aaf10a1b"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-youtubei.js@^10.3.0:
-  version "10.5.0"
-  resolved "https://registry.yarnpkg.com/youtubei.js/-/youtubei.js-10.5.0.tgz#3cf0c79cf73fb26e13d167f37dec7d65419e91b8"
-  integrity sha512-iyA+VF28c15tCCKH9ExM2RKC3zYiHzA/eixGlJ3vERANkuI+xYKzAZ4vtOhmyqwrAddu88R/DkzEsmpph5NWjg==
+youtubei.js@^12.2.0:
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/youtubei.js/-/youtubei.js-12.2.0.tgz#54f058b5d0892b5c7e35019e2be6a2a7f7ba4447"
+  integrity sha512-G+50qrbJCToMYhu8jbaHiS3Vf+RRul+CcDbz3hEGwHkGPh+zLiWwD6SS+YhYF+2/op4ZU5zDYQJrGqJ+wKh7Gw==
   dependencies:
     "@bufbuild/protobuf" "^2.0.0"
-    jintr "^2.1.1"
+    jintr "^3.2.0"
     tslib "^2.5.0"
     undici "^5.19.1"
