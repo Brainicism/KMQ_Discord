@@ -27,6 +27,7 @@
         "docker-build": "cd docker/ && DOCKER_BUILDKIT=1 docker build -f kmq/Dockerfile -t ghcr.io/brainicism/kmq_discord:latest ../",
         "docker-run": "bash src/scripts/docker-run.sh",
         "docker-run-internal": ". ./.env && docker run --restart unless-stopped -d -v ${SONG_DOWNLOAD_DIR}:${SONG_DOWNLOAD_DIR} -v ${PWD}/data:/app/data -v ${PWD}/.env:/app/.env -v ${PWD}/logs:/app/logs -v ${PWD}/sql_dumps:/app/sql_dumps --env NODE_ENV=production --env IS_STANDBY=${IS_STANDBY:=false} --network=host --name ${APP_NAME} ${IMAGE_NAME:=ghcr.io/brainicism/kmq_discord:latest}",
+        "docker-stop": "docker stop ${APP_NAME}",
         "backup": "ts-node --swc src/scripts/backup-kmq-database",
         "import": "ts-node --swc src/scripts/backup-kmq-database --import",
         "regenerate-test-db-dump": "NODE_ENV=test ts-node src/scripts/regenerate-test-db-dump",
