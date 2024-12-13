@@ -1,4 +1,4 @@
-import { type Context, Endpoints, YT } from "youtubei.js";
+import { Constants, type Context, YT } from "youtubei.js";
 import { IPCLogger } from "./logger";
 import GoogleVideo, { PART, Protos, QUALITY, base64ToU8 } from "googlevideo";
 import Innertube, { UniversalCache } from "youtubei.js";
@@ -111,21 +111,35 @@ export default class YoutubeOnesieProvider {
         const { clientKeyData, encryptedClientKey, onesieUstreamerConfig } =
             clientConfig;
 
-        const clonedInnerTubeContext: Context = JSON.parse(
-            JSON.stringify(innertube.session.context),
+        const clonedInnerTubeContext: Context = structuredClone(
+            innertube.session.context,
         );
 
         // Change or remove these if you want to use a different client. I chose TVHTML5 purely for testing.
-        clonedInnerTubeContext.client.clientName = "TVHTML5";
-        clonedInnerTubeContext.client.clientVersion = "7.20240717.18.00";
+        clonedInnerTubeContext.client.clientName = Constants.CLIENTS.TV.NAME;
+        clonedInnerTubeContext.client.clientVersion =
+            Constants.CLIENTS.TV.VERSION;
+
+        const params: Record<string, any> = {
+            playbackContext: {
+                contentPlaybackContext: {
+                    vis: 0,
+                    splay: false,
+                    lactMilliseconds: "-1",
+                    signatureTimestamp: innertube.session.player?.sts,
+                },
+            },
+            videoId,
+        };
+
+        if (poToken) {
+            params.serviceIntegrityDimensions = {};
+            params.serviceIntegrityDimensions.poToken = poToken;
+        }
 
         const playerRequestJson = {
             context: clonedInnerTubeContext,
-            ...Endpoints.PlayerEndpoint.build({
-                video_id: videoId,
-                po_token: poToken,
-                sts: innertube.session.player?.sts,
-            }),
+            ...params,
         };
 
         const headers = [
