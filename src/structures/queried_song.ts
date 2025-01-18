@@ -4,6 +4,7 @@ import type { AvailableGenders } from "../enums/option_types/gender";
 
 export default class QueriedSong extends BaseArtistInfo {
     songName: string;
+    cleanSongName: string;
     hangulSongName: string | null;
     youtubeLink: string;
     originalLink: string | null;
@@ -17,6 +18,7 @@ export default class QueriedSong extends BaseArtistInfo {
 
     constructor({
         songName,
+        cleanSongName,
         hangulSongName,
         artistName,
         hangulArtistName,
@@ -32,6 +34,7 @@ export default class QueriedSong extends BaseArtistInfo {
         selectionWeight,
     }: {
         songName: string;
+        cleanSongName: string;
         hangulSongName: string | null;
         artistName: string;
         hangulArtistName: string | null;
@@ -48,6 +51,7 @@ export default class QueriedSong extends BaseArtistInfo {
     }) {
         super({ artistName, hangulArtistName, artistID });
         this.songName = songName;
+        this.cleanSongName = cleanSongName;
         this.artistName = artistName;
         this.hangulSongName = hangulSongName === "" ? null : hangulSongName;
         this.hangulArtistName =
