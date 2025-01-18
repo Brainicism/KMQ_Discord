@@ -18,6 +18,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Song1",
+                        cleanSongName: "Song1",
                         hangulSongName: "노래1",
                         artistName: "Jisoo",
                         hangulArtistName: "지수",
@@ -68,6 +69,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Poggers Song",
+                        cleanSongName: "Poggers Song",
                         hangulSongName: "리그마 포트나이트",
                         artistName: "IU + Blackpink",
                         hangulArtistName: "아이유 + 블랙핑크",
@@ -102,6 +104,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Good Girls in the Dark",
+                        cleanSongName: "Good Girls in the Dark",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: "Yena (Choi Yena)",
                         hangulArtistName: "최예나 (나)",
@@ -134,6 +137,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Lovesick Girls",
+                        cleanSongName: "Lovesick Girls",
                         hangulSongName: "상사병에 걸린 소녀들",
                         artistName: " Blackpink + IU             ",
                         hangulArtistName:
@@ -169,6 +173,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Sev en  !",
+                        cleanSongName: "Sev en",
                         hangulSongName: "금  !요",
                         artistName: "Jung  kook",
                         hangulArtistName: "정  국",
@@ -224,6 +229,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "?!",
+                        cleanSongName: "?!",
                         hangulSongName: "@#",
                         artistName: "a",
                         hangulArtistName: "a",
@@ -265,6 +271,7 @@ describe("game round", () => {
                         gameRound = new GameRound(
                             new QueriedSong({
                                 songName: "A really epic song",
+                                cleanSongName: "A really epic song that's cleaned",
                                 hangulSongName: "정말 서사시 노래",
                                 artistName: "A really epic person",
                                 hangulArtistName: "정말 서사시인",
@@ -286,6 +293,13 @@ describe("game round", () => {
                         assert.ok(
                             gameRound.checkGuess(
                                 "A really epic song",
+                                GuessModeType.SONG_NAME,
+                            ),
+                        );
+
+                        assert.ok(
+                            gameRound.checkGuess(
+                                "A really epic song that's cleaned",
                                 GuessModeType.SONG_NAME,
                             ),
                         );
@@ -325,6 +339,7 @@ describe("game round", () => {
                         gameRound = new GameRound(
                             new QueriedSong({
                                 songName: "A really epic song",
+                                cleanSongName: "A really epic song",
                                 hangulSongName: "정말 서사시 노래",
                                 artistName: "Person2",
                                 hangulArtistName: "2인칭",
@@ -377,6 +392,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "Perfect Night",
+                        cleanSongName: "Perfect Night",
                         hangulSongName: "Perfect Night",
                         artistName: "Le Sserafim",
                         hangulArtistName: "르세라핌",
@@ -435,6 +451,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 new QueriedSong({
                     songName: "1",
+                    cleanSongName: "2",
                     hangulSongName: "3",
                     artistName: "5",
                     hangulArtistName: "6",
@@ -497,6 +514,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 new QueriedSong({
                     songName: "very cool song",
+                    cleanSongName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
@@ -788,6 +806,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 new QueriedSong({
                     songName: "very cool song",
+                    cleanSongName: "very cool song",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
@@ -841,6 +860,7 @@ describe("game round", () => {
             gameRound = new GameRound(
                 new QueriedSong({
                     songName: "dalla dalla",
+                    cleanSongName: "dalla dalla",
                     hangulSongName: "매우 시원한 노래",
                     artistName: "artist",
                     hangulArtistName: "예술가",
@@ -969,6 +989,7 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "long song name to prevent rng collision",
+                        cleanSongName: "long song name to prevent rng collision",
                         hangulSongName: "충돌을 피하기 위해 긴 노래 이름",
                         artistName: "long artist name to prevent rng collision",
                         hangulArtistName: "충돌 방지를 위해 긴 아티스트 이름",
@@ -1009,6 +1030,7 @@ describe("game round", () => {
         describe("songs have the same english and korean names, or missing korean name", () => {
             it("should generate the same hint", () => {
                 const songName = "long song name to prevent rng collision";
+                const cleanSongName = songName;
                 const artistName = "long artist name to prevent rng collision";
                 for (const [koSongName, koArtistName] of [
                     [songName, artistName],
@@ -1019,6 +1041,7 @@ describe("game round", () => {
                     gameRound = new GameRound(
                         new QueriedSong({
                             songName,
+                            cleanSongName,
                             hangulSongName: koSongName!,
                             artistName,
                             hangulArtistName: koArtistName!,

@@ -452,6 +452,7 @@ describe("exp command", () => {
             gameRound = new GameRound(
                 new QueriedSong({
                     songName: "x",
+                    cleanSongName: "x",
                     hangulSongName: "x",
                     artistName: "x",
                     hangulArtistName: "x",
