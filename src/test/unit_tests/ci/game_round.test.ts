@@ -271,7 +271,8 @@ describe("game round", () => {
                         gameRound = new GameRound(
                             new QueriedSong({
                                 songName: "A really epic song",
-                                cleanSongName: "A really epic song that's cleaned",
+                                cleanSongName:
+                                    "A really epic song that's cleaned",
                                 hangulSongName: "정말 서사시 노래",
                                 artistName: "A really epic person",
                                 hangulArtistName: "정말 서사시인",
@@ -989,7 +990,8 @@ describe("game round", () => {
                 gameRound = new GameRound(
                     new QueriedSong({
                         songName: "long song name to prevent rng collision",
-                        cleanSongName: "long song name to prevent rng collision",
+                        cleanSongName:
+                            "long song name to prevent rng collision",
                         hangulSongName: "충돌을 피하기 위해 긴 노래 이름",
                         artistName: "long artist name to prevent rng collision",
                         hangulArtistName: "충돌 방지를 위해 긴 아티스트 이름",
