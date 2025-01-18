@@ -1376,6 +1376,9 @@ describe("song selector", () => {
                             "Jungkook",
                         ]);
 
+                        await gp.setBeginningCutoffYear(2009);
+                        await gp.setEndCutoffYear(2024);
+
                         await gp.setExcludes(excludeGroups.matchedGroups);
                     },
                 },
