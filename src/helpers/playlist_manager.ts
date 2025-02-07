@@ -46,6 +46,7 @@ const PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
 );
 
 const SONG_MATCH_TIMEOUT_MS = 90000;
+const DEFAULT_RATE_LIMIT_SECS = 5;
 
 export default class PlaylistManager {
     public cachedPlaylists: {
@@ -833,21 +834,29 @@ export default class PlaylistManager {
                         },
                     });
 
-                let response = await spotifyRequest(requestURL);
+                let response: AxiosResponse;
+                try {
+                    response = await spotifyRequest(requestURL);
+                } catch (err) {
+                    if (err.responseCode === 429) {
+                        const rateLimit =
+                            Number(err.response.headers["retry-after"]) ||
+                            DEFAULT_RATE_LIMIT_SECS;
 
-                const rateLimit = Number(response.headers["retry-after"]);
-                if (rateLimit) {
-                    logger.warn(
-                        `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
-                    );
+                        logger.warn(
+                            `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
+                        );
 
-                    response = await retryJob(
-                        spotifyRequest,
-                        [requestURL],
-                        1,
-                        false,
-                        rateLimit,
-                    );
+                        response = await retryJob(
+                            spotifyRequest,
+                            [requestURL],
+                            1,
+                            false,
+                            rateLimit * 1000,
+                        );
+                    } else {
+                        throw err;
+                    }
                 }
 
                 if (!response.data.items) {
