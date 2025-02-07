@@ -48,7 +48,7 @@ export default class GeminiClient {
 
     constructor() {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        this.client = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+        this.client = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     }
 
     async getPostSummary(
