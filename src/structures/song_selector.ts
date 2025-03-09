@@ -55,7 +55,7 @@ export default class SongSelector {
         "available_songs.artist_name_en as artistName",
         "available_songs.artist_name_ko as hangulArtistName",
         "available_songs.link as youtubeLink",
-        "available_songs.original_link as originalLink",
+        "available_songs.better_audio_link as betterAudioLink",
         "available_songs.publishedon as publishDate",
         "available_songs.members",
         "available_songs.id_artist as artistID",
@@ -72,7 +72,7 @@ export default class SongSelector {
         "expected_available_songs.artist_name_en as artistName",
         "expected_available_songs.artist_name_ko as hangulArtistName",
         "expected_available_songs.link as youtubeLink",
-        "expected_available_songs.original_link as originalLink",
+        "expected_available_songs.better_audio_link as betterAudioLink",
         "expected_available_songs.publishedon as publishDate",
         "expected_available_songs.members",
         "expected_available_songs.id_artist as artistID",
@@ -410,7 +410,7 @@ export default class SongSelector {
             .where((eb) =>
                 eb.or([
                     eb("link", "=", youtubeLink),
-                    eb("original_link", "=", youtubeLink),
+                    eb("better_audio_link", "=", youtubeLink),
                 ]),
             )
             .executeTakeFirst();

@@ -1127,7 +1127,7 @@ export default abstract class Session {
         const songAndArtist = `"${song}" - ${artist}`;
 
         // prioritize original link (usually the music video)
-        const youtubeLink = round.song.originalLink || round.song.youtubeLink;
+        const youtubeLink = round.song.youtubeLink;
         const embed: EmbedPayload = {
             color: embedColor,
             title: `${songAndArtist} (${round.song.publishDate.getFullYear()})`,

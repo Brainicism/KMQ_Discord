@@ -116,12 +116,7 @@ export default class KmqSongDownloader {
             await this.clearPartiallyCachedSongs();
             await this.processUnprocessedM4aFiles(db);
 
-            const allSongs: Array<{
-                songName: string;
-                views: number;
-                artistName: string;
-                youtubeLink: string;
-            }> = await this.getExpectedSongsToDownload(db);
+            const allSongs = await this.getExpectedSongsToDownload(db);
 
             let songsToDownload = allSongs;
 
@@ -220,6 +215,12 @@ export default class KmqSongDownloader {
                     );
                 }
 
+                if (song.betterAudioLink) {
+                    logger.info(
+                        `Detected better audio link for ${song.youtubeLink}: ${song.betterAudioLink}`,
+                    );
+                }
+
                 const cachedSongLocation = path.join(
                     process.env.SONG_DOWNLOAD_DIR as string,
                     `${song.youtubeLink}.m4a`,
@@ -239,7 +240,7 @@ export default class KmqSongDownloader {
                         try {
                             await this.downloadYouTubeAudio(
                                 db,
-                                song.youtubeLink,
+                                song.betterAudioLink || song.youtubeLink,
                                 cachedSongLocation,
                                 proxy,
                             );
@@ -593,6 +594,7 @@ export default class KmqSongDownloader {
             views: number;
             artistName: string;
             youtubeLink: string;
+            betterAudioLink: string | null;
         }[]
     > {
         const deadLinks = (
@@ -600,11 +602,12 @@ export default class KmqSongDownloader {
         ).map((x) => x.vlink);
 
         return db.kmq
-            .selectFrom("expected_available_songs" as any)
+            .selectFrom("expected_available_songs")
             .select([
                 "song_name_en as songName",
                 "artist_name_en as artistName",
                 "link as youtubeLink",
+                "better_audio_link as betterAudioLink",
                 "views",
             ])
             .where("link", "not in", deadLinks)

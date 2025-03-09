@@ -2,22 +2,12 @@ DELIMITER //
 DROP PROCEDURE IF EXISTS GenerateExpectedAvailableSongs //
 CREATE PROCEDURE GenerateExpectedAvailableSongs()
 BEGIN
-	/* replace songs with better audio counterpart */
-	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS original_vlink VARCHAR(255);
-	DROP TEMPORARY TABLE IF EXISTS temp_tbl;
-	CREATE TEMPORARY TABLE temp_tbl
-	SELECT a.id as original_id, a.original_name as original_name, a.vlink as original_link, b.vlink as better_audio_link
-	FROM kpop_videos.app_kpop as a
-	LEFT JOIN kpop_videos.app_kpop as b ON a.id_better_audio = b.id
-	WHERE b.vlink is not null
-	AND a.vtype IN ('main', 'audio');
-
-	DELETE kpop_videos.app_kpop FROM kpop_videos.app_kpop
-	JOIN temp_tbl tt on kpop_videos.app_kpop.vlink = tt.better_audio_link
-	WHERE kpop_videos.app_kpop.vlink = tt.better_audio_link;
-
-	UPDATE kpop_videos.app_kpop JOIN temp_tbl tt on kpop_videos.app_kpop.id = tt.original_id
-	SET kpop_videos.app_kpop.vlink = tt.better_audio_link, kpop_videos.app_kpop.original_vlink = tt.original_link;
+	/* Add better audio column */
+	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS better_audio_link VARCHAR(255);	
+	
+	UPDATE kpop_videos.app_kpop a
+	LEFT JOIN kpop_videos.app_kpop b ON a.id_better_audio = b.id
+	SET a.better_audio_link = b.vlink;
 
 	/* Generate table of expected available songs */
 	DROP TABLE IF EXISTS expected_available_songs;
@@ -27,7 +17,7 @@ BEGIN
 		song_name_ko VARCHAR(255) NOT NULL,
 		song_aliases VARCHAR(255) NOT NULL,
 		link VARCHAR(255) NOT NULL,
-		original_link VARCHAR(255),
+		better_audio_link VARCHAR(255),
 		artist_name_en VARCHAR(255) NOT NULL,
 		original_artist_name_en VARCHAR(255) NOT NULL,
 		artist_name_ko VARCHAR(255),
@@ -59,7 +49,7 @@ BEGIN
 		kpop_videos.app_kpop.kname AS song_name_ko,
 		kpop_videos.app_kpop.alias AS song_aliases,
 		vlink AS link,
-		kpop_videos.app_kpop.original_vlink AS original_link,
+		kpop_videos.app_kpop.better_audio_link AS better_audio_link,
 		kpop_videos.app_kpop_group.name AS artist_name_en,
 		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
 		kpop_videos.app_kpop_group.kname AS artist_name_ko,

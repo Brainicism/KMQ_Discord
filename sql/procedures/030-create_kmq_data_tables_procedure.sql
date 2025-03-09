@@ -14,7 +14,7 @@ BEGIN
 		song_name_ko,
 		song_aliases,
 		link,
-		original_link,
+		better_audio_link,
 		artist_name_en,
 		original_artist_name_en,
 		artist_name_ko,
