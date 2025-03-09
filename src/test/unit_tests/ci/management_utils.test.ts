@@ -11,7 +11,7 @@ describe("management utils", () => {
 
         describe("song aliases", () => {
             it("should add the song aliases", () => {
-                const videoID = "lQaclKRINdA";
+                const videoID = "Bsiv1mo0HTQ";
                 const expectedAliases = ["It Is War", "It's War"];
 
                 assert.deepStrictEqual(

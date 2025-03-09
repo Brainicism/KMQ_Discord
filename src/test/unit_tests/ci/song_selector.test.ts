@@ -537,7 +537,6 @@ describe("song selector", () => {
                     const { songs } = guildPreference.songSelector.getSongs();
 
                     assert.strict(songs.size > 0);
-
                     // all songs must be one of the artist
                     assert.strictEqual(
                         Array.from(songs).every(
