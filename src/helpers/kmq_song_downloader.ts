@@ -611,7 +611,6 @@ export default class KmqSongDownloader {
                 "views",
             ])
             .where("link", "not in", deadLinks)
-            .where("better_audio_link", "is not", null)
             .orderBy("views", "desc")
             .execute();
     }
