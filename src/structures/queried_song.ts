@@ -7,7 +7,7 @@ export default class QueriedSong extends BaseArtistInfo {
     cleanSongName: string;
     hangulSongName: string | null;
     youtubeLink: string;
-    originalLink: string | null;
+    betterAudioLink: string | null;
     publishDate: Date;
     members: AvailableGenders;
     isSolo: string;
@@ -23,7 +23,7 @@ export default class QueriedSong extends BaseArtistInfo {
         artistName,
         hangulArtistName,
         youtubeLink,
-        originalLink,
+        betterAudioLink,
         publishDate,
         members,
         artistID,
@@ -39,7 +39,7 @@ export default class QueriedSong extends BaseArtistInfo {
         artistName: string;
         hangulArtistName: string | null;
         youtubeLink: string;
-        originalLink: string | null;
+        betterAudioLink: string | null;
         publishDate: Date;
         members: AvailableGenders;
         artistID: number;
@@ -57,7 +57,7 @@ export default class QueriedSong extends BaseArtistInfo {
         this.hangulArtistName =
             hangulArtistName === "" ? null : hangulArtistName;
         this.youtubeLink = youtubeLink;
-        this.originalLink = originalLink;
+        this.betterAudioLink = betterAudioLink;
         this.publishDate = publishDate;
         this.members = members;
         this.artistID = artistID;

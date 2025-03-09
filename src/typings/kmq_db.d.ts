@@ -13,6 +13,7 @@ export interface AvailableSongs {
     artist_aliases: string;
     artist_name_en: string;
     artist_name_ko: Generated<string | null>;
+    better_audio_link: Generated<string | null>;
     clean_song_name_alpha_numeric: string;
     daisuki_id: number;
     dead: "n" | "y";
@@ -22,7 +23,6 @@ export interface AvailableSongs {
     link: string;
     members: "coed" | "female" | "male";
     original_artist_name_en: string;
-    original_link: Generated<string | null>;
     previous_name_en: Generated<string | null>;
     previous_name_ko: Generated<string | null>;
     publishedon: Date;
@@ -92,6 +92,7 @@ export interface ExpectedAvailableSongs {
     artist_aliases: string;
     artist_name_en: string;
     artist_name_ko: Generated<string | null>;
+    better_audio_link: Generated<string | null>;
     clean_song_name_alpha_numeric: string;
     daisuki_id: number;
     dead: "n" | "y";
@@ -101,7 +102,6 @@ export interface ExpectedAvailableSongs {
     link: string;
     members: "coed" | "female" | "male";
     original_artist_name_en: string;
-    original_link: Generated<string | null>;
     previous_name_en: Generated<string | null>;
     previous_name_ko: Generated<string | null>;
     publishedon: Date;

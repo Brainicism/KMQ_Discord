@@ -430,7 +430,7 @@ export default class PlaylistManager {
                                 youtubePlaylistVideoIDs.map((x) => x.videoId),
                             ),
                             eb(
-                                "original_link",
+                                "better_audio_link",
                                 "in",
                                 youtubePlaylistVideoIDs.map((x) => x.videoId),
                             ),
@@ -444,8 +444,8 @@ export default class PlaylistManager {
                     (x) =>
                         !matchedSongs
                             .flatMap((y) =>
-                                y.originalLink
-                                    ? [y.originalLink, y.youtubeLink]
+                                y.betterAudioLink
+                                    ? [y.betterAudioLink, y.youtubeLink]
                                     : [y.youtubeLink],
                             )
                             .includes(x.videoId),
