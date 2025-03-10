@@ -9,6 +9,11 @@ BEGIN
 	LEFT JOIN kpop_videos.app_kpop b ON a.id_better_audio = b.id
 	SET a.better_audio_link = b.vlink;
 
+	DELETE a
+	FROM kpop_videos.app_kpop a
+	JOIN (SELECT DISTINCT id_better_audio FROM kpop_videos.app_kpop WHERE id_better_audio IS NOT NULL) b
+	ON a.id = b.id_better_audio;
+	
 	/* Generate table of expected available songs */
 	DROP TABLE IF EXISTS expected_available_songs;
 	CREATE TABLE expected_available_songs (

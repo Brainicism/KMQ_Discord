@@ -413,13 +413,12 @@ async function validateSqlDump(
                 .raw("CALL PostSeedDataCleaning();")
                 .execute(db.kpopVideosValidation);
 
-            // generate expected available songs
+            logger.info("Validating generate expected available songs");
             await sql
                 .raw("CALL GenerateExpectedAvailableSongs();")
                 .execute(db.kpopVideosValidation);
 
             logger.info("Validating creation of data tables");
-
             await sql
                 .raw("CALL CreateKmqDataTables();")
                 .execute(db.kpopVideosValidation);
