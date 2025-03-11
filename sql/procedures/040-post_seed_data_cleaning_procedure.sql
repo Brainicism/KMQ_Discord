@@ -1,4 +1,5 @@
 DELIMITER //
+START TRANSACTION //
 DROP PROCEDURE IF EXISTS PostSeedDataCleaning //
 CREATE PROCEDURE PostSeedDataCleaning()
 BEGIN
@@ -24,4 +25,5 @@ BEGIN
 	UPDATE kpop_videos.app_kpop 
 	SET name = (CASE name LIKE '%(%' AND RIGHT(name, 1) = ')' WHEN 1 THEN TRIM(SUBSTRING_INDEX(name, '(', 1)) ELSE name END);
 END //
+COMMIT //
 DELIMITER ;

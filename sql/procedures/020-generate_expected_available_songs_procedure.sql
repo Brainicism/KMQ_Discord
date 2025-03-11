@@ -1,4 +1,5 @@
 DELIMITER //
+START TRANSACTION //
 DROP PROCEDURE IF EXISTS GenerateExpectedAvailableSongs //
 CREATE PROCEDURE GenerateExpectedAvailableSongs()
 BEGIN
@@ -79,4 +80,5 @@ BEGIN
 	AND tags NOT LIKE "%x%"; -- no remixes
 
 END //
+COMMIT //
 DELIMITER ;
