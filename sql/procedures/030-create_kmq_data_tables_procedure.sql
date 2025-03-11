@@ -1,4 +1,5 @@
 DELIMITER //
+START TRANSACTION //
 DROP PROCEDURE IF EXISTS CreateKmqDataTables //
 CREATE PROCEDURE CreateKmqDataTables()
 BEGIN
@@ -63,4 +64,5 @@ BEGIN
 	DROP TABLE kpop_videos.old;
 
 END //
+COMMIT //
 DELIMITER ;
