@@ -110,6 +110,26 @@ async function listTables(
     ).map((x) => x["TABLE_NAME"]);
 }
 
+async function getBetterAudioMapping(
+    db: DatabaseContext,
+): Promise<Record<string, string | null>> {
+    let betterAudioMappings: Record<string, string | null> = {};
+    if (await tableExists(db, "kmq", "expected_available_songs")) {
+        betterAudioMappings = (
+            await db.kmq
+                .selectFrom("expected_available_songs")
+                .select(["better_audio_link", "link"])
+                .execute()
+        ).reduce((acc: Record<string, string | null>, entry) => {
+            acc[entry.link] = entry.better_audio_link;
+
+            return acc;
+        }, {});
+    }
+
+    return betterAudioMappings;
+}
+
 const program = new Command()
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option(
@@ -557,7 +577,40 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
+        const oldBetterAudioMapping = await getBetterAudioMapping(db);
         await generateExpectedAvailableSongs(db);
+        const newBetterAudioMapping = await getBetterAudioMapping(db);
+        for (const primarySongLink in oldBetterAudioMapping) {
+            if (primarySongLink in newBetterAudioMapping) {
+                const oldBetterAudioLink =
+                    oldBetterAudioMapping[primarySongLink];
+
+                const newBetterAudioLink =
+                    newBetterAudioMapping[primarySongLink];
+
+                if (oldBetterAudioLink !== newBetterAudioLink) {
+                    logger.info(
+                        `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... deleting`,
+                    );
+
+                    const songAudioPath = path.resolve(
+                        process.env.SONG_DOWNLOAD_DIR!,
+                        `${primarySongLink}.ogg`,
+                    );
+
+                    if (await pathExists(songAudioPath)) {
+                        logger.info(
+                            `Deleting old better audio file: ${songAudioPath}`,
+                        );
+
+                        await fs.promises.rename(
+                            songAudioPath,
+                            `${songAudioPath}.old`,
+                        );
+                    }
+                }
+            }
+        }
     } else {
         logger.info("Skipping reseed");
     }
@@ -614,19 +667,16 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
             30 * 60 * 1000,
         );
 
-        let songsDownloaded = 0;
-        let songsDownloadFailures = 0;
         const songDownloader = new KmqSongDownloader();
-        if (!options.skipDownload) {
-            const result = await songDownloader.downloadNewSongs(
-                options.limit,
-                options.songs,
-                options.checkSongDurations,
-            );
+        const result = await songDownloader.downloadNewSongs(
+            options.limit,
+            options.songs,
+            options.checkSongDurations,
+            options.skipDownload,
+        );
 
-            songsDownloaded = result.songsDownloaded;
-            songsDownloadFailures = result.songsFailed;
-        }
+        const songsDownloaded = result.songsDownloaded;
+        const songsDownloadFailures = result.songsFailed;
 
         if (songsDownloadFailures > 0) {
             await sendInfoWebhook(
