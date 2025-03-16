@@ -92,12 +92,14 @@ export default class KmqSongDownloader {
      * @param limit - The limit specified for downloading songs
      * @param songOverrides - Song overrides
      * @param checkSongDurations - Whether to check if song durations are cached
+     * @param skipDownload - Whether ot skip download
      * @returns - the number of songs downloaded
      */
     public async downloadNewSongs(
         limit?: number,
         songOverrides?: string[],
         checkSongDurations?: boolean,
+        skipDownload = false,
     ): Promise<{ songsDownloaded: number; songsFailed: number }> {
         if (KmqConfiguration.Instance.downloadWithOnesieRequest()) {
             logger.info("Downloading via onesie URLs");
@@ -197,80 +199,84 @@ export default class KmqSongDownloader {
             // update current list of non-downloaded songs
             await this.updateNotDownloaded(db, allSongs);
             const proxySeed = Date.now();
-            for (let i = 0; i < songsToDownload.length; i++) {
-                const song = songsToDownload[i]!;
-                let proxy: string | undefined;
-                if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
-                    proxy = this.proxies[(i + proxySeed) % this.proxies.length];
-                    logger.info(
-                        `Downloading song: '${song.songName}' by ${song.artistName} | ${
-                            song.youtubeLink
-                        } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})  (proxy = ${proxy})`,
-                    );
-                } else {
-                    logger.info(
-                        `Downloading song: '${song.songName}' by ${song.artistName} | ${
-                            song.youtubeLink
-                        } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})`,
-                    );
-                }
+            if (!skipDownload) {
+                for (let i = 0; i < songsToDownload.length; i++) {
+                    const song = songsToDownload[i]!;
+                    let proxy: string | undefined;
+                    if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
+                        proxy =
+                            this.proxies[(i + proxySeed) % this.proxies.length];
 
-                if (song.betterAudioLink) {
-                    logger.info(
-                        `Detected better audio link for ${song.youtubeLink}: ${song.betterAudioLink}`,
-                    );
-                }
-
-                const cachedSongLocation = path.join(
-                    process.env.SONG_DOWNLOAD_DIR as string,
-                    `${song.youtubeLink}.m4a`,
-                );
-
-                try {
-                    if (process.env.MOCK_AUDIO === "true") {
                         logger.info(
-                            `Mocking downloading for ${song.youtubeLink}`,
-                        );
-
-                        await fs.promises.copyFile(
-                            path.resolve(__dirname, "../test/silence.m4a"),
-                            cachedSongLocation,
+                            `Downloading song: '${song.songName}' by ${song.artistName} | ${
+                                song.youtubeLink
+                            } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})  (proxy = ${proxy})`,
                         );
                     } else {
-                        try {
-                            await this.downloadYouTubeAudio(
-                                db,
-                                song.betterAudioLink || song.youtubeLink,
-                                cachedSongLocation,
-                                proxy,
-                            );
-                        } catch (e) {
-                            throw new Error(
-                                `Failed to download video for '${song.youtubeLink}'. error = ${e}`,
-                            );
-                        }
+                        logger.info(
+                            `Downloading song: '${song.songName}' by ${song.artistName} | ${
+                                song.youtubeLink
+                            } (${downloadCount + downloadsFailed + 1}/${songsToDownload.length})`,
+                        );
                     }
-                } catch (err) {
-                    logger.error(
-                        `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
-                    );
-                    downloadsFailed++;
-                    continue;
-                }
 
-                logger.info(
-                    `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
-                );
-                try {
-                    await this.encodeToOpus(cachedSongLocation, db);
-                } catch (err) {
-                    logger.error(
-                        `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
-                    );
-                    break;
-                }
+                    if (song.betterAudioLink) {
+                        logger.info(
+                            `Detected better audio link for ${song.youtubeLink}: ${song.betterAudioLink}`,
+                        );
+                    }
 
-                downloadCount++;
+                    const cachedSongLocation = path.join(
+                        process.env.SONG_DOWNLOAD_DIR as string,
+                        `${song.youtubeLink}.m4a`,
+                    );
+
+                    try {
+                        if (process.env.MOCK_AUDIO === "true") {
+                            logger.info(
+                                `Mocking downloading for ${song.youtubeLink}`,
+                            );
+
+                            await fs.promises.copyFile(
+                                path.resolve(__dirname, "../test/silence.m4a"),
+                                cachedSongLocation,
+                            );
+                        } else {
+                            try {
+                                await this.downloadYouTubeAudio(
+                                    db,
+                                    song.betterAudioLink || song.youtubeLink,
+                                    cachedSongLocation,
+                                    proxy,
+                                );
+                            } catch (e) {
+                                throw new Error(
+                                    `Failed to download video for '${song.youtubeLink}'. error = ${e}`,
+                                );
+                            }
+                        }
+                    } catch (err) {
+                        logger.error(
+                            `Error downloading song ${song.youtubeLink}, skipping... err = ${err}`,
+                        );
+                        downloadsFailed++;
+                        continue;
+                    }
+
+                    logger.info(
+                        `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
+                    );
+                    try {
+                        await this.encodeToOpus(cachedSongLocation, db);
+                    } catch (err) {
+                        logger.error(
+                            `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
+                        );
+                        break;
+                    }
+
+                    downloadCount++;
+                }
             }
 
             // update final list of non-downloaded songs
