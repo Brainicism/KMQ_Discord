@@ -67,7 +67,7 @@ export default class SongSelector {
 
     public static ExpectedQueriedSongFields = [
         "expected_available_songs.song_name_en as songName",
-        "available_songs.clean_song_name_alpha_numeric as cleanSongName",
+        "expected_available_songs.clean_song_name_alpha_numeric as cleanSongName",
         "expected_available_songs.song_name_ko as hangulSongName",
         "expected_available_songs.artist_name_en as artistName",
         "expected_available_songs.artist_name_ko as hangulArtistName",
