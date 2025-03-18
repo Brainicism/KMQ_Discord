@@ -598,6 +598,11 @@ async function updateKpopDatabase(
                         `${primarySongLink}.ogg`,
                     );
 
+                    await db.kmq
+                        .deleteFrom("cached_song_duration")
+                        .where("vlink", "=", primarySongLink)
+                        .execute();
+
                     if (await pathExists(songAudioPath)) {
                         logger.info(
                             `Deleting old better audio file: ${songAudioPath}`,
