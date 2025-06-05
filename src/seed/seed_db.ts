@@ -578,6 +578,16 @@ async function updateKpopDatabase(
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
         const oldBetterAudioMapping = await getBetterAudioMapping(db);
+        const numSongsWithBetterAudio = Object.values(
+            oldBetterAudioMapping,
+        ).filter((x) => !!x).length;
+
+        if (numSongsWithBetterAudio === 0) {
+            throw new Error(
+                "Number of songs with better audio links is 0, this is unexpected. Please inspect the database state, do not re-seed.",
+            );
+        }
+
         await generateExpectedAvailableSongs(db);
         const newBetterAudioMapping = await getBetterAudioMapping(db);
         for (const primarySongLink in oldBetterAudioMapping) {
