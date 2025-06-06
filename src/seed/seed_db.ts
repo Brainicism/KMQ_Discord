@@ -566,6 +566,7 @@ async function pruneSqlDumps(): Promise<void> {
 async function checkModifiedBetterAudioLinks(
     db: DatabaseContext,
 ): Promise<void> {
+    logger.info("Checking if better audio links have been modified...");
     if (!(await tableExists(db, "kmq", "expected_available_songs"))) {
         logger.info(
             "Table 'expected_available_songs' doesn't exist (likely an initial seed), skipping better audio link check",
