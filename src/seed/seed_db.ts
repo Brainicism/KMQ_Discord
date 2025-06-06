@@ -560,6 +560,69 @@ async function pruneSqlDumps(): Promise<void> {
 }
 
 /**
+ * Checks if the better audio links have been modified
+ * @param db - The database context
+ */
+async function checkModifiedBetterAudioLinks(
+    db: DatabaseContext,
+): Promise<void> {
+    if (!(await tableExists(db, "kmq", "expected_available_songs"))) {
+        logger.info(
+            "Table 'expected_available_songs' doesn't exist (likely an initial seed), skipping better audio link check",
+        );
+        return;
+    }
+
+    const oldBetterAudioMapping = await getBetterAudioMapping(db);
+    const numSongsWithBetterAudio = Object.values(oldBetterAudioMapping).filter(
+        (x) => !!x,
+    ).length;
+
+    if (numSongsWithBetterAudio === 0) {
+        throw new Error(
+            "Number of songs with better audio links is 0, this is unexpected. Please inspect the database state, do not re-seed.",
+        );
+    }
+
+    await generateExpectedAvailableSongs(db);
+    const newBetterAudioMapping = await getBetterAudioMapping(db);
+    for (const primarySongLink in oldBetterAudioMapping) {
+        if (primarySongLink in newBetterAudioMapping) {
+            const oldBetterAudioLink = oldBetterAudioMapping[primarySongLink];
+
+            const newBetterAudioLink = newBetterAudioMapping[primarySongLink];
+
+            if (oldBetterAudioLink !== newBetterAudioLink) {
+                logger.info(
+                    `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... deleting`,
+                );
+
+                const songAudioPath = path.resolve(
+                    process.env.SONG_DOWNLOAD_DIR!,
+                    `${primarySongLink}.ogg`,
+                );
+
+                await db.kmq
+                    .deleteFrom("cached_song_duration")
+                    .where("vlink", "=", primarySongLink)
+                    .execute();
+
+                if (await pathExists(songAudioPath)) {
+                    logger.info(
+                        `Deleting old better audio file: ${songAudioPath}`,
+                    );
+
+                    await fs.promises.rename(
+                        songAudioPath,
+                        `${songAudioPath}.old`,
+                    );
+                }
+            }
+        }
+    }
+}
+
+/**
  * @param db - The database context
  * @param bootstrap - Whether or not this is a bootstrap run
  */
@@ -577,55 +640,7 @@ async function updateKpopDatabase(
     if (!options.skipReseed) {
         await seedDb(db, bootstrap);
         await postSeedDataCleaning(db);
-        const oldBetterAudioMapping = await getBetterAudioMapping(db);
-        const numSongsWithBetterAudio = Object.values(
-            oldBetterAudioMapping,
-        ).filter((x) => !!x).length;
-
-        if (numSongsWithBetterAudio === 0) {
-            throw new Error(
-                "Number of songs with better audio links is 0, this is unexpected. Please inspect the database state, do not re-seed.",
-            );
-        }
-
-        await generateExpectedAvailableSongs(db);
-        const newBetterAudioMapping = await getBetterAudioMapping(db);
-        for (const primarySongLink in oldBetterAudioMapping) {
-            if (primarySongLink in newBetterAudioMapping) {
-                const oldBetterAudioLink =
-                    oldBetterAudioMapping[primarySongLink];
-
-                const newBetterAudioLink =
-                    newBetterAudioMapping[primarySongLink];
-
-                if (oldBetterAudioLink !== newBetterAudioLink) {
-                    logger.info(
-                        `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... deleting`,
-                    );
-
-                    const songAudioPath = path.resolve(
-                        process.env.SONG_DOWNLOAD_DIR!,
-                        `${primarySongLink}.ogg`,
-                    );
-
-                    await db.kmq
-                        .deleteFrom("cached_song_duration")
-                        .where("vlink", "=", primarySongLink)
-                        .execute();
-
-                    if (await pathExists(songAudioPath)) {
-                        logger.info(
-                            `Deleting old better audio file: ${songAudioPath}`,
-                        );
-
-                        await fs.promises.rename(
-                            songAudioPath,
-                            `${songAudioPath}.old`,
-                        );
-                    }
-                }
-            }
-        }
+        await checkModifiedBetterAudioLinks(db);
     } else {
         logger.info("Skipping reseed");
     }
