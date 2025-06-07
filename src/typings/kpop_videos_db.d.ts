@@ -90,6 +90,7 @@ export interface AppKpopGroup {
     is_deceased: Generated<"n" | "y">;
     issolo: Generated<"n" | "y">;
     kname: string;
+    melonid: Generated<number>;
     members: "coed" | "female" | "male";
     mslevel: Generated<number>;
     name: string;
@@ -97,6 +98,7 @@ export interface AppKpopGroup {
     pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;
+    releases: Generated<string | null>;
     sales: Generated<number>;
     social: Generated<string>;
     views: Generated<number>;
@@ -124,6 +126,7 @@ export interface AppKpopGroupSafe {
     is_deceased: Generated<"n" | "y">;
     issolo: Generated<"n" | "y">;
     kname: string;
+    melonid: Generated<number>;
     members: "coed" | "female" | "male";
     mslevel: Generated<number>;
     name: string;
@@ -131,6 +134,7 @@ export interface AppKpopGroupSafe {
     pak_total: Generated<number>;
     previous_kname: Generated<string>;
     previous_name: Generated<string>;
+    releases: Generated<string | null>;
     sales: Generated<number>;
     social: Generated<string>;
     views: Generated<number>;
