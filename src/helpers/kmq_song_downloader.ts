@@ -245,7 +245,8 @@ export default class KmqSongDownloader {
                             try {
                                 await this.downloadYouTubeAudio(
                                     db,
-                                    song.betterAudioLink || song.youtubeLink,
+                                    song.youtubeLink,
+                                    song.betterAudioLink,
                                     cachedSongLocation,
                                     proxy,
                                 );
@@ -480,10 +481,14 @@ export default class KmqSongDownloader {
     private async downloadYoutubeViaOnesieRequest(
         db: DatabaseContext,
         id: string,
+        idBetterAudio: string | null,
         outputFile: string,
     ): Promise<void> {
+        const idToDownload = idBetterAudio || id;
         try {
-            const onesieUrl = await this.onesieProvider.getDownloadUrl(id);
+            const onesieUrl =
+                await this.onesieProvider.getDownloadUrl(idToDownload);
+
             const downloadResponse = await Axios.get(onesieUrl, {
                 responseType: "stream",
             });
@@ -496,7 +501,7 @@ export default class KmqSongDownloader {
                 .insertInto("dead_links")
                 .values({
                     created_at: new Date(),
-                    vlink: id,
+                    vlink: idToDownload,
                     reason: `Failed to download video: error = ${e}. `,
                 })
                 .ignore()
@@ -509,9 +514,11 @@ export default class KmqSongDownloader {
     private async downloadYoutubeViaYtDlp(
         db: DatabaseContext,
         id: string,
+        idBetterAudio: string | null,
         outputFile: string,
         proxy: string | undefined,
     ): Promise<void> {
+        const idToDownload = idBetterAudio || id;
         if (!this.youtubeSessionTokens) {
             logger.warn("Youtube session token doesn't exist... aborting");
             throw new Error("Youtube session token doesn't exist");
@@ -543,7 +550,7 @@ export default class KmqSongDownloader {
                 ytdlpArgs.push("--cookies", YOUTUBE_SESSION_COOKIE_PATH);
             }
 
-            ytdlpArgs.push("--", `'${id}'`);
+            ytdlpArgs.push("--", `'${idToDownload}'`);
             const ytdlpCommand = ytdlpArgs.join(" ");
             await exec(ytdlpCommand);
         } catch (err) {
@@ -567,7 +574,7 @@ export default class KmqSongDownloader {
                 .insertInto("dead_links")
                 .values({
                     created_at: new Date(),
-                    vlink: id,
+                    vlink: idToDownload,
                     reason: `Failed to download video: error = ${errorMessage}. `,
                 })
                 .ignore()
@@ -580,6 +587,7 @@ export default class KmqSongDownloader {
     private async downloadYouTubeAudio(
         db: DatabaseContext,
         id: string,
+        idBetterAudio: string | null,
         outputFile: string,
         proxy: string | undefined,
     ): Promise<void> {
@@ -588,9 +596,20 @@ export default class KmqSongDownloader {
         }
 
         if (KmqConfiguration.Instance.downloadWithOnesieRequest()) {
-            await this.downloadYoutubeViaOnesieRequest(db, id, outputFile);
+            await this.downloadYoutubeViaOnesieRequest(
+                db,
+                id,
+                idBetterAudio,
+                outputFile,
+            );
         } else {
-            await this.downloadYoutubeViaYtDlp(db, id, outputFile, proxy);
+            await this.downloadYoutubeViaYtDlp(
+                db,
+                id,
+                idBetterAudio,
+                outputFile,
+                proxy,
+            );
         }
     }
 
@@ -617,6 +636,7 @@ export default class KmqSongDownloader {
                 "views",
             ])
             .where("link", "not in", deadLinks)
+            .where("better_audio_link", "not in", deadLinks)
             .orderBy("views", "desc")
             .execute();
     }
