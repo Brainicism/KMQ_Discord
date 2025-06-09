@@ -1,5 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "../logger";
+import { PLAYLIST_CACHE_TTL_HOURS } from "../constants";
 import {
     extractErrorString,
     parseKmqPlaylistIdentifier,
@@ -35,7 +36,6 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
 import type SpotifyTrack from "../interfaces/spotify_track";
-import { PLAYLIST_CACHE_TTL_HOURS } from "../constants";
 
 const logger = new IPCLogger("playlist_manager");
 
