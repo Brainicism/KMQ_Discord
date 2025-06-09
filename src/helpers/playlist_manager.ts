@@ -35,6 +35,7 @@ import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
 import type Eris from "eris";
 import type MessageContext from "../structures/message_context";
 import type SpotifyTrack from "../interfaces/spotify_track";
+import { PLAYLIST_CACHE_TTL_HOURS } from "../constants";
 
 const logger = new IPCLogger("playlist_manager");
 
@@ -52,8 +53,6 @@ export default class PlaylistManager {
     public cachedPlaylists: {
         [playlistID: string]: MatchedPlaylist;
     } = {};
-
-    static PLAYLIST_CACHE_TTL_HOURS = 1;
 
     private youtubeClient: youtube_v3.Youtube | undefined;
     private accessToken: string | undefined;
@@ -509,9 +508,7 @@ export default class PlaylistManager {
             metadata,
             truncated,
             unmatchedSongs,
-            expiresAt:
-                Date.now() +
-                PlaylistManager.PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
+            expiresAt: Date.now() + PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
         };
 
         this.cachedPlaylists[playlistId] = playlist;
@@ -813,9 +810,7 @@ export default class PlaylistManager {
             matchedSongs,
             truncated,
             unmatchedSongs,
-            expiresAt:
-                Date.now() +
-                PlaylistManager.PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
+            expiresAt: Date.now() + PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
         };
 
         this.cachedPlaylists[playlistId] = playlist;

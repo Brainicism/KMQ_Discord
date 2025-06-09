@@ -365,3 +365,5 @@ export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
     __dirname,
     "../data/yt_session.cookie.tmp",
 );
+
+export const PLAYLIST_CACHE_TTL_HOURS = 1;
