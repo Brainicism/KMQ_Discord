@@ -53,6 +53,8 @@ export default class PlaylistManager {
         [playlistID: string]: MatchedPlaylist;
     } = {};
 
+    static PLAYLIST_CACHE_TTL_HOURS = 1;
+
     private youtubeClient: youtube_v3.Youtube | undefined;
     private accessToken: string | undefined;
     private guildsParseInProgress: { [guildID: string]: Date } = {};
@@ -118,7 +120,7 @@ export default class PlaylistManager {
 
         const playlistId = kmqPlaylistParsed.playlistId;
 
-        const UNMATCHED_PLAYLIST = {
+        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
             metadata: {
                 playlistId,
                 playlistName: "",
@@ -131,6 +133,7 @@ export default class PlaylistManager {
             matchedSongs: [],
             truncated: false,
             unmatchedSongs: [],
+            expiresAt: Date.now(),
         };
 
         let logHeader: string;
@@ -191,7 +194,7 @@ export default class PlaylistManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
-        const UNMATCHED_PLAYLIST = {
+        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
             metadata: {
                 playlistId,
                 playlistName: "",
@@ -204,6 +207,7 @@ export default class PlaylistManager {
             matchedSongs: [],
             truncated: false,
             unmatchedSongs: [],
+            expiresAt: Date.now(),
         };
 
         if (!this.youtubeClient) {
@@ -223,7 +227,11 @@ export default class PlaylistManager {
         let metadata: PlaylistMetadata | null;
         const cachedPlaylist = this.cachedPlaylists[playlistId];
 
-        if (forceRefreshMetadata || !cachedPlaylist) {
+        if (
+            forceRefreshMetadata ||
+            !cachedPlaylist ||
+            cachedPlaylist.expiresAt < Date.now()
+        ) {
             metadata = await this.getYoutubePlaylistMetadata(playlistId);
             logger.info(
                 `${logHeader} | Refreshing YouTube metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
@@ -254,6 +262,7 @@ export default class PlaylistManager {
                 metadata,
                 truncated,
                 unmatchedSongs,
+                expiresAt: cachedPlaylist.expiresAt,
             };
         }
 
@@ -500,6 +509,9 @@ export default class PlaylistManager {
             metadata,
             truncated,
             unmatchedSongs,
+            expiresAt:
+                Date.now() +
+                PlaylistManager.PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
         };
 
         this.cachedPlaylists[playlistId] = playlist;
@@ -520,7 +532,7 @@ export default class PlaylistManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
-        const UNMATCHED_PLAYLIST = {
+        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
             metadata: {
                 playlistId,
                 playlistName: "",
@@ -533,6 +545,7 @@ export default class PlaylistManager {
             matchedSongs: [],
             truncated: false,
             unmatchedSongs: [],
+            expiresAt: Date.now(),
         };
 
         let logHeader: string;
@@ -556,7 +569,11 @@ export default class PlaylistManager {
 
         const cachedPlaylist = this.cachedPlaylists[playlistId];
         let metadata: PlaylistMetadata | null;
-        if (forceRefreshMetadata || !cachedPlaylist) {
+        if (
+            forceRefreshMetadata ||
+            !cachedPlaylist ||
+            cachedPlaylist.expiresAt < Date.now()
+        ) {
             metadata = await this.getSpotifyPlaylistMetadata(playlistId);
             logger.info(
                 `${logHeader} | Refreshing Spotify metadata. forceRefreshMetadata: ${forceRefreshMetadata}, cachedPlaylist: ${!!cachedPlaylist}`,
@@ -597,6 +614,7 @@ export default class PlaylistManager {
                 metadata,
                 truncated,
                 unmatchedSongs,
+                expiresAt: cachedPlaylist.expiresAt,
             };
         }
 
@@ -795,6 +813,9 @@ export default class PlaylistManager {
             matchedSongs,
             truncated,
             unmatchedSongs,
+            expiresAt:
+                Date.now() +
+                PlaylistManager.PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
         };
 
         this.cachedPlaylists[playlistId] = playlist;

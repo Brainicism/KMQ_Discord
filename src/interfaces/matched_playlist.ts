@@ -7,4 +7,5 @@ export interface MatchedPlaylist {
     truncated: boolean;
     unmatchedSongs: Array<string>;
     ineligibleDueToCommonAlias?: number;
+    expiresAt: number;
 }
