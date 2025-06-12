@@ -366,4 +366,4 @@ export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
     "../data/yt_session.cookie.tmp",
 );
 
-export const PLAYLIST_CACHE_TTL_HOURS = 1;
+export const PLAYLIST_CACHE_TTL_HOURS = 12;
