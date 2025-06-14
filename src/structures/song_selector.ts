@@ -1,6 +1,7 @@
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
+    PLAYLIST_CACHE_TTL_HOURS,
     SELECTION_WEIGHT_VALUES_EASY,
     SELECTION_WEIGHT_VALUES_HARD,
     SHADOW_BANNED_ARTIST_IDS,
@@ -398,6 +399,7 @@ export default class SongSelector {
             truncated,
             unmatchedSongs,
             ineligibleDueToCommonAlias: ineligibleDueToCommonAliasCount,
+            expiresAt: Date.now() + PLAYLIST_CACHE_TTL_HOURS * 3600 * 1000,
         };
     }
 
