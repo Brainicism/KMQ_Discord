@@ -575,18 +575,10 @@ async function checkModifiedBetterAudioLinks(
     }
 
     const oldBetterAudioMapping = await getBetterAudioMapping(db);
-    const numSongsWithBetterAudio = Object.values(oldBetterAudioMapping).filter(
-        (x) => !!x,
-    ).length;
-
-    if (numSongsWithBetterAudio === 0) {
-        throw new Error(
-            "Number of songs with better audio links is 0, this is unexpected. Please inspect the database state, do not re-seed.",
-        );
-    }
-
     await generateExpectedAvailableSongs(db);
     const newBetterAudioMapping = await getBetterAudioMapping(db);
+
+    const invalidatedBetterAudioToDelete: Array<string> = [];
     for (const primarySongLink in oldBetterAudioMapping) {
         if (primarySongLink in newBetterAudioMapping) {
             const oldBetterAudioLink = oldBetterAudioMapping[primarySongLink];
@@ -595,30 +587,36 @@ async function checkModifiedBetterAudioLinks(
 
             if (oldBetterAudioLink !== newBetterAudioLink) {
                 logger.info(
-                    `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... deleting`,
+                    `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... scheduling for deletion`,
                 );
 
-                const songAudioPath = path.resolve(
-                    process.env.SONG_DOWNLOAD_DIR!,
-                    `${primarySongLink}.ogg`,
-                );
-
-                await db.kmq
-                    .deleteFrom("cached_song_duration")
-                    .where("vlink", "=", primarySongLink)
-                    .execute();
-
-                if (await pathExists(songAudioPath)) {
-                    logger.info(
-                        `Deleting old better audio file: ${songAudioPath}`,
-                    );
-
-                    await fs.promises.rename(
-                        songAudioPath,
-                        `${songAudioPath}.old`,
-                    );
-                }
+                invalidatedBetterAudioToDelete.push(primarySongLink);
             }
+        }
+    }
+
+    if (invalidatedBetterAudioToDelete.length > 100) {
+        throw new Error(
+            `Number of invalidated better audio links is too high (${invalidatedBetterAudioToDelete.length}), this is unexpected. Please inspect the database state, do not re-seed.`,
+        );
+    }
+
+    for (const songToDelete of invalidatedBetterAudioToDelete) {
+        logger.info(`Deleting old better audio for ${songToDelete}`);
+        const songAudioPath = path.resolve(
+            process.env.SONG_DOWNLOAD_DIR!,
+            `${songToDelete}.ogg`,
+        );
+
+        await db.kmq
+            .deleteFrom("cached_song_duration")
+            .where("vlink", "=", songToDelete)
+            .execute();
+
+        if (await pathExists(songAudioPath)) {
+            logger.info(`Deleting old better audio file: ${songAudioPath}`);
+
+            await fs.promises.rename(songAudioPath, `${songAudioPath}.old`);
         }
     }
 }
