@@ -181,7 +181,7 @@ export default class KmqSongDownloader {
 
             if (limit) {
                 logger.info(
-                    `Limiting song downloads at: ${limit} out of ${songsToDownload.length}`,
+                    `Limiting song downloads at: ${Math.min(limit, songsToDownload.length)} out of ${songsToDownload.length}`,
                 );
                 songsToDownload = songsToDownload.slice(0, limit);
             }

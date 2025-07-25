@@ -327,7 +327,11 @@ export const IGNORED_WARNING_SUBSTRINGS = [
     "Unknown guild text channel type",
 ];
 
-export const SHADOW_BANNED_ARTIST_IDS = [1177, 170];
+export const SHADOW_BANNED_ARTIST_IDS = [
+    1177, // Woojin
+    170, // Seungri
+    2681, // Taeil
+];
 
 export const CORRECT_GUESS_EMOJI = "✅";
 export const INCORRECT_GUESS_EMOJI = "❌";
