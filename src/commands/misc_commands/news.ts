@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import { chooseRandom, discordDateFormat } from "../../helpers/utils.js";
@@ -9,7 +10,6 @@ import {
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";
 import NewsRange from "../../enums/news_range.js";

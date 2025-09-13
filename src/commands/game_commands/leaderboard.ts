@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants.js";
 import {
@@ -17,7 +18,6 @@ import {
 } from "../../helpers/discord_utils.js";
 import { sendValidationErrorMessage } from "../../helpers/validate.js";
 import EnvType from "../../enums/env_type.js";
-import * as Eris from "eris";
 import KmqMember from "../../structures/kmq_member.js";
 import LeaderboardDuration from "../../enums/option_types/leaderboard_duration.js";
 import LeaderboardScope from "../../enums/option_types/leaderboard_scope.js";

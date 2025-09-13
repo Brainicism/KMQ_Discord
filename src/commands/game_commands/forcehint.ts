@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import {
@@ -7,7 +8,6 @@ import {
 } from "../../helpers/discord_utils.js";
 import { getMention } from "../../helpers/utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import HintCommand from "./hint.js";
 import MessageContext from "../../structures/message_context.js";

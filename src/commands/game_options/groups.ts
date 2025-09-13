@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { GROUP_LIST_URL, GroupAction } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -18,7 +19,6 @@ import {
 import { getOrdinalNum, setIntersection } from "../../helpers/utils.js";
 import AddCommand, { AddType } from "./add.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GameOption from "../../enums/game_option_name.js";
 import GuildPreference from "../../structures/guild_preference.js";
 import LocaleType from "../../enums/locale_type.js";

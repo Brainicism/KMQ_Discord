@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages, MAX_AUTOCOMPLETE_FIELDS } from "../../constants.js";
 import { chunkArray } from "../../helpers/utils.js";
@@ -10,7 +11,6 @@ import {
     sendPaginationedEmbed,
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import KmqMember from "../../structures/kmq_member.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

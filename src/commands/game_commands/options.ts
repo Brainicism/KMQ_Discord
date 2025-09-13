@@ -1,9 +1,9 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import MessageContext from "../../structures/message_context.js";
 import Session from "../../structures/session.js";

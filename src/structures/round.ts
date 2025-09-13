@@ -1,7 +1,7 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../logger.js";
 import { SKIP_BUTTON_PREFIX } from "../constants.js";
 import { codeLine, friendlyFormattedNumber } from "../helpers/utils.js";
-import * as Eris from "eris";
 import SeekType from "../enums/option_types/seek_type.js";
 import State from "../state.js";
 import i18n from "../helpers/localization_manager.js";

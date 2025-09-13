@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
+import * as Eris from "eris";
 import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -17,7 +18,6 @@ import {
     romanize,
     visualProgressBar,
 } from "../../helpers/utils.js";
-import * as Eris from "eris";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";
 import dbContext from "../../database_context.js";

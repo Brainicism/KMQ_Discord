@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     chunkArray,
@@ -16,7 +17,6 @@ import {
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils.js";
 import { getEmojisFromSongTags } from "../../helpers/game_utils.js";
-import * as Eris from "eris";
 import GameRound from "../../structures/game_round.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

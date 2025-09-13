@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
@@ -8,7 +9,6 @@ import {
     sendMessage,
 } from "../../helpers/discord_utils.js";
 import { standardDateFormat } from "../../helpers/utils.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

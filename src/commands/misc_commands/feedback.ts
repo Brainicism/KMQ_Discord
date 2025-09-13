@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import * as uuid from "uuid";
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
@@ -6,7 +7,6 @@ import {
     sendDeprecatedTextCommandMessage,
     sendInfoWebhook,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import MessageContext from "../../structures/message_context.js";
 import i18n from "../../helpers/localization_manager.js";
 import type { DefaultSlashCommand } from "../interfaces/base_command.js";

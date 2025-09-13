@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-use-before-define */
+import * as Eris from "eris";
 import * as uuid from "uuid";
 import {
     ConflictingGameOptions,
@@ -19,6 +20,7 @@ import {
     SPOTIFY_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
 } from "../constants.js";
+import { DiscordHTTPError, DiscordRESTError } from "eris";
 import { IPCLogger } from "../logger.js";
 import {
     bold,
@@ -42,8 +44,6 @@ import { userBonusIsActive } from "./game_utils.js";
 import AppCommandsAction from "../enums/app_command_action.js";
 import EmbedPaginator from "eris-pagination";
 import EnvType from "../enums/env_type.js";
-import { DiscordHTTPError, DiscordRESTError } from "eris";
-import * as Eris from "eris";
 import GameOption from "../enums/game_option_name.js";
 import GameRound from "../structures/game_round.js";
 import GameType from "../enums/game_type.js";

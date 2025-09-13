@@ -1,6 +1,6 @@
 /* eslint-disable no-return-assign */
-import * as uuid from "uuid";
 import * as Eris from "eris";
+import * as uuid from "uuid";
 import _ from "lodash";
 
 import {

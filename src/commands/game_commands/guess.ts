@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
@@ -7,7 +8,6 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils.js";
 import AnswerType from "../../enums/option_types/answer_type.js";
-import * as Eris from "eris";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";
 import Session from "../../structures/session.js";

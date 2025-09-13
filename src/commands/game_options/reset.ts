@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { GameOptionInternalToGameOption } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -6,7 +7,6 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import MessageContext from "../../structures/message_context.js";
 import Session from "../../structures/session.js";

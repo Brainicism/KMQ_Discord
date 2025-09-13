@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import {
@@ -24,7 +25,6 @@ import {
 } from "../../helpers/discord_utils.js";
 import { getEmojisFromSongTags } from "../../helpers/game_utils.js";
 import { sendValidationErrorMessage } from "../../helpers/validate.js";
-import * as Eris from "eris";
 import GameRound from "../../structures/game_round.js";
 import GuildPreference from "../../structures/guild_preference.js";
 import KmqMember from "../../structures/kmq_member.js";

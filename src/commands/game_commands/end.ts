@@ -1,10 +1,10 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import MessageContext from "../../structures/message_context.js";
 import Session from "../../structures/session.js";
 import i18n from "../../helpers/localization_manager.js";

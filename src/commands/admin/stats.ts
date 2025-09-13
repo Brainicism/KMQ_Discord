@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages, LATEST_DAISUKI_DUMP } from "../../constants.js";
 import {
@@ -13,7 +14,6 @@ import {
 } from "../../helpers/discord_utils.js";
 import { sql } from "kysely";
 import { userIsAdmin } from "../../helpers/game_utils.js";
-import * as Eris from "eris";
 import MessageContext from "../../structures/message_context.js";
 import State from "../../state.js";
 import dbContext from "../../database_context.js";

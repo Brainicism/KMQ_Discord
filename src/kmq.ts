@@ -1,4 +1,5 @@
 /* eslint-disable no-await-in-loop */
+import * as Eris from "eris";
 import {
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
@@ -9,7 +10,6 @@ import {
 import { Fleet } from "eris-fleet";
 import { clearRestartNotification } from "./helpers/management_utils.js";
 import { config } from "dotenv";
-import { fileURLToPath } from "url";
 import {
     delay,
     extractErrorString,
@@ -18,7 +18,6 @@ import {
 } from "./helpers/utils.js";
 import { getInternalLogger } from "./logger.js";
 import EnvType from "./enums/env_type.js";
-import * as Eris from "eris";
 import KmqClient from "./kmq_client.js";
 import backupKmqDatabase from "./scripts/backup-kmq-database.js";
 import cluster from "cluster";

@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { DEFAULT_SUBUNIT_PREFERENCE, OptionAction } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -7,7 +8,6 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GameOption from "../../enums/game_option_name.js";
 import GuildPreference from "../../structures/guild_preference.js";
 import LocaleType from "../../enums/locale_type.js";

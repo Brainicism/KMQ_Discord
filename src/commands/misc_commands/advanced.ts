@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { OptionAction } from "../../constants.js";
 import { bold } from "../../helpers/utils.js";
@@ -8,7 +9,6 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
 import AdvancedCommandActionName from "../../enums/advanced_setting_action_name.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import {
@@ -7,7 +8,6 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GameType from "../../enums/game_type.js";
 import GuildPreference from "../../structures/guild_preference.js";
 import MessageContext from "../../structures/message_context.js";

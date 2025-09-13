@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import { chunkArray, discordDateFormat } from "../../helpers/utils.js";
@@ -9,7 +10,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import KmqMember from "../../structures/kmq_member.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

@@ -65,6 +65,7 @@ export default class KmqClient extends Eris.Client {
                     // ESM dynamic import
                     const command = await import(commandFile);
                     const commandName = path.parse(commandFile).name;
+                    // eslint-disable-next-line new-cap
                     commandMap[commandName] = new command.default(); // ESM default export
                 } catch (e) {
                     throw new Error(

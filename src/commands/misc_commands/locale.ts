@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { DEFAULT_LOCALE, KmqImages } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -6,7 +7,6 @@ import {
     getInteractionValue,
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";
 import State from "../../state.js";

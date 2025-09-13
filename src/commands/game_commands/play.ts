@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     CLIP_DEFAULT_DURATION_SEC,
     CLIP_MAX_DURATION_SEC,
@@ -44,7 +45,6 @@ import {
 import AnswerCommand from "../game_options/answer.js";
 import AnswerType from "../../enums/option_types/answer_type.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GameSession from "../../structures/game_session.js";
 import GameType from "../../enums/game_type.js";
 import GuildPreference from "../../structures/guild_preference.js";

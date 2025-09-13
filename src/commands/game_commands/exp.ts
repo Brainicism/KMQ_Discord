@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
+import * as Eris from "eris";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
@@ -18,7 +19,6 @@ import {
 } from "../../helpers/game_utils.js";
 import { isWeekend } from "../../helpers/utils.js";
 import AnswerType from "../../enums/option_types/answer_type.js";
-import * as Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier.js";
 import GuessModeType from "../../enums/option_types/guess_mode_type.js";
 import GuildPreference from "../../structures/guild_preference.js";

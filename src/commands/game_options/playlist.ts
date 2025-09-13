@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import {
     SPOTIFY_BASE_URL,
@@ -23,7 +24,6 @@ import {
     standardDateFormat,
 } from "../../helpers/utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GameOption from "../../enums/game_option_name.js";
 import GuildPreference from "../../structures/guild_preference.js";
 import LimitCommand from "./limit.js";

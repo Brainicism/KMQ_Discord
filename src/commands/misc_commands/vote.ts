@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
@@ -13,7 +14,6 @@ import {
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
 import { userBonusIsActive } from "../../helpers/game_utils.js";
-import * as Eris from "eris";
 import MessageContext from "../../structures/message_context.js";
 import dbContext from "../../database_context.js";
 import i18n from "../../helpers/localization_manager.js";

@@ -1,10 +1,10 @@
+import * as Eris from "eris";
 import {
     BOOKMARK_BUTTON_PREFIX,
     EMBED_SUCCESS_BONUS_COLOR,
     SKIP_BUTTON_PREFIX,
 } from "../constants.js";
 import { IPCLogger } from "../logger.js";
-import * as Eris from "eris";
 import Round from "./round.js";
 import type MessageContext from "./message_context.js";
 import type PlayerRoundResult from "../interfaces/player_round_result.js";

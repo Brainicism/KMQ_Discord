@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
@@ -13,7 +14,6 @@ import {
     voicePermissionsCheck,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import KmqMember from "../../structures/kmq_member.js";
 import ListeningSession from "../../structures/listening_session.js";

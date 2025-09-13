@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     ExpBonusModifierValues,
     HIDDEN_DEFAULT_TIMER,
@@ -12,7 +13,6 @@ import {
 } from "../../helpers/discord_utils.js";
 import AnswerType from "../../enums/option_types/answer_type.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import ExpBonusModifier from "../../enums/exp_bonus_modifier.js";
 import GameOption from "../../enums/game_option_name.js";
 import GuildPreference from "../../structures/guild_preference.js";

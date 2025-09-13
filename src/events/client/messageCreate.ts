@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import * as uuid from "uuid";
 import { IPCLogger } from "../../logger.js";
 import { extractErrorString } from "../../helpers/utils.js";
@@ -9,7 +10,6 @@ import {
     sendOptionsMessage,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import KmqConfiguration from "../../kmq_configuration.js";
 import MessageContext from "../../structures/message_context.js";

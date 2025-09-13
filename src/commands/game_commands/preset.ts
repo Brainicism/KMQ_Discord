@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import * as uuid from "uuid";
 import {
     GameOptionInternalToGameOption,
@@ -15,7 +16,6 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils.js";
 import CommandPrechecks from "../../command_prechecks.js";
-import * as Eris from "eris";
 import GuildPreference from "../../structures/guild_preference.js";
 import LocaleType from "../../enums/locale_type.js";
 import MessageContext from "../../structures/message_context.js";

@@ -1,10 +1,10 @@
+import * as Eris from "eris";
 import { DataFiles, KmqImages } from "../../constants.js";
 import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import MessageContext from "../../structures/message_context.js";
 import State from "../../state.js";
 import fs from "fs";

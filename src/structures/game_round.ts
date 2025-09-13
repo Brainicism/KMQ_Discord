@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     BOOKMARK_BUTTON_PREFIX,
     CORRECT_GUESS_EMOJI,
@@ -17,7 +18,6 @@ import {
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils.js";
-import * as Eris from "eris";
 import ExpBonusModifier from "../enums/exp_bonus_modifier.js";
 import GuessModeType from "../enums/option_types/guess_mode_type.js";
 import KmqMember from "./kmq_member.js";

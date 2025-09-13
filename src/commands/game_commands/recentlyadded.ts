@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import { IPCLogger } from "../../logger.js";
 import { KmqImages } from "../../constants.js";
 import {
@@ -11,7 +12,6 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils.js";
-import * as Eris from "eris";
 import KmqMember from "../../structures/kmq_member.js";
 import MessageContext from "../../structures/message_context.js";
 import QueriedSong from "../../structures/queried_song.js";
