@@ -1,21 +1,21 @@
 /* eslint-disable no-return-assign */
-import AdvancedCommandAction from "./enums/advanced_setting_action_name";
-import AnswerType from "./enums/option_types/answer_type";
-import ArtistType from "./enums/option_types/artist_type";
-import ExpBonusModifier from "./enums/exp_bonus_modifier";
-import GameOption from "./enums/game_option_name";
-import GuessModeType from "./enums/option_types/guess_mode_type";
-import LanguageType from "./enums/option_types/language_type";
-import LocaleType from "./enums/locale_type";
-import MultiGuessType from "./enums/option_types/multiguess_type";
-import OstPreference from "./enums/option_types/ost_preference";
-import ReleaseType from "./enums/option_types/release_type";
-import SeekType from "./enums/option_types/seek_type";
-import ShuffleType from "./enums/option_types/shuffle_type";
-import SpecialType from "./enums/option_types/special_type";
-import SubunitsPreference from "./enums/option_types/subunit_preference";
+import AdvancedCommandAction from "./enums/advanced_setting_action_name.js";
+import AnswerType from "./enums/option_types/answer_type.js";
+import ArtistType from "./enums/option_types/artist_type.js";
+import ExpBonusModifier from "./enums/exp_bonus_modifier.js";
+import GameOption from "./enums/game_option_name.js";
+import GuessModeType from "./enums/option_types/guess_mode_type.js";
+import LanguageType from "./enums/option_types/language_type.js";
+import LocaleType from "./enums/locale_type.js";
+import MultiGuessType from "./enums/option_types/multiguess_type.js";
+import OstPreference from "./enums/option_types/ost_preference.js";
+import ReleaseType from "./enums/option_types/release_type.js";
+import SeekType from "./enums/option_types/seek_type.js";
+import ShuffleType from "./enums/option_types/shuffle_type.js";
+import SpecialType from "./enums/option_types/special_type.js";
+import SubunitsPreference from "./enums/option_types/subunit_preference.js";
 import path from "path";
-import type { GenderModeOptions } from "./enums/option_types/gender";
+import type { GenderModeOptions } from "./enums/option_types/gender.js";
 
 export class KmqImages {
     public static READING_BOOK =
@@ -172,7 +172,7 @@ export const EMBED_SUCCESS_COLOR = 0x57f287; // Green
 export const EMBED_SUCCESS_BONUS_COLOR = 0xfee75c; // Gold
 
 export const DATABASE_DOWNLOAD_DIR = path.join(
-    __dirname,
+    import.meta.dirname,
     "../sql_dumps/daisuki",
 );
 
@@ -279,25 +279,28 @@ export const SELECTION_WEIGHT_VALUES_EASY = [
 export const EPHEMERAL_MESSAGE_FLAG = 64;
 
 export const DataFiles = {
-    PRIMARY_COOKIE: path.join(__dirname, "../data/primary"),
-    NEWS: path.join(__dirname, "../data/news.md"),
+    PRIMARY_COOKIE: path.join(import.meta.dirname, "../data/primary"),
+    NEWS: path.join(import.meta.dirname, "../data/news.md"),
     FROZEN_TABLE_SCHEMA: path.join(
-        __dirname,
+        import.meta.dirname,
         "../data/frozen_table_schema.json",
     ),
-    GROUP_LIST: path.join(__dirname, "../data/group_list.txt"),
+    GROUP_LIST: path.join(import.meta.dirname, "../data/group_list.txt"),
     FEATURE_SWITCH_CONFIG: path.join(
-        __dirname,
+        import.meta.dirname,
         "../data/feature_switch_config.json",
     ),
-    CACHED_APP_CMD_IDS: path.join(__dirname, "../data/cached_app_cmd_ids.json"),
-    PROXY_FILE: path.join(__dirname, "../data/proxies.txt"),
+    CACHED_APP_CMD_IDS: path.join(
+        import.meta.dirname,
+        "../data/cached_app_cmd_ids.json",
+    ),
+    PROXY_FILE: path.join(import.meta.dirname, "../data/proxies.txt"),
 };
 
 // ephemeral to the docker container, not mounted from host
-export const STANDBY_COOKIE = path.join(__dirname, "../standby");
-export const PROMOTED_COOKIE = path.join(__dirname, "../promoted");
-export const STATUS_COOKIE = path.join(__dirname, "../status");
+export const STANDBY_COOKIE = path.join(import.meta.dirname, "../standby");
+export const PROMOTED_COOKIE = path.join(import.meta.dirname, "../promoted");
+export const STATUS_COOKIE = path.join(import.meta.dirname, "../status");
 
 export const PERMISSIONS_LINK = "https://www.youtube.com/watch?v=87GW0SmF5LI";
 export const SPOTIFY_BASE_URL = "https://open.spotify.com/playlist/";
@@ -318,7 +321,7 @@ export enum OptionAction {
 }
 
 export const TEST_DB_CACHED_EXPORT = path.join(
-    __dirname,
+    import.meta.dirname,
     "../sql_dumps/kmq-test-cached.sql",
 );
 
@@ -358,15 +361,19 @@ export const DiscordPreferredLocaleToInternal: {
 };
 
 export const KMQ_EMOJI = "<:kmq:761624775843905546>";
-export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
+export const YT_DLP_LOCATION = path.resolve(
+    import.meta.dirname,
+    "../bin",
+    "yt-dlp",
+);
 
 export const YOUTUBE_SESSION_COOKIE_PATH = path.join(
-    __dirname,
+    import.meta.dirname,
     "../data/yt_session.cookie",
 );
 
 export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
-    __dirname,
+    import.meta.dirname,
     "../data/yt_session.cookie.tmp",
 );
 

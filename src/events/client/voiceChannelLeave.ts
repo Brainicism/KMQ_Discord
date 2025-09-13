@@ -1,6 +1,6 @@
-import { IPCLogger } from "../../logger";
-import { checkBotIsAlone } from "../../helpers/discord_utils";
-import Session from "../../structures/session";
+import { IPCLogger } from "../../logger.js";
+import { checkBotIsAlone } from "../../helpers/discord_utils.js";
+import Session from "../../structures/session.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("voiceChannelLeave");

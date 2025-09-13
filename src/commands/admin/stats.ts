@@ -1,29 +1,29 @@
-import { IPCLogger } from "../../logger";
-import { KmqImages, LATEST_DAISUKI_DUMP } from "../../constants";
+import { IPCLogger } from "../../logger.js";
+import { KmqImages, LATEST_DAISUKI_DUMP } from "../../constants.js";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
     pathExists,
-} from "../../helpers/utils";
+} from "../../helpers/utils.js";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
+} from "../../helpers/discord_utils.js";
 import { sql } from "kysely";
-import { userIsAdmin } from "../../helpers/game_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import dbContext from "../../database_context";
+import { userIsAdmin } from "../../helpers/game_utils.js";
+import * as Eris from "eris";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
+import dbContext from "../../database_context.js";
 import fs from "fs";
-import i18n from "../../helpers/localization_manager";
+import i18n from "../../helpers/localization_manager.js";
 import os from "os";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "stats";
 const logger = new IPCLogger(COMMAND_NAME);

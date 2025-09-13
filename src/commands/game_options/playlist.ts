@@ -1,9 +1,9 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 import {
     SPOTIFY_BASE_URL,
     SPOTIFY_SHORTHAND_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
-} from "../../constants";
+} from "../../constants.js";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -15,27 +15,27 @@ import {
     sendInfoMessage,
     sendMessage,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
+} from "../../helpers/discord_utils.js";
 import {
     friendlyFormattedNumber,
     isValidURL,
     italicize,
     standardDateFormat,
-} from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LimitCommand from "./limit";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import * as Eris from "eris";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import LimitCommand from "./limit.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "playlist";
 const logger = new IPCLogger(COMMAND_NAME);

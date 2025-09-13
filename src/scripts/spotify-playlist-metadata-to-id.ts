@@ -1,9 +1,9 @@
-import dbContext from "../database_context";
-import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import dbContext from "../database_context.js";
+import type { PlaylistMetadata } from "../interfaces/playlist_metadata.js";
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         {
             const metadataList = await dbContext.kmq
                 .selectFrom("game_options")

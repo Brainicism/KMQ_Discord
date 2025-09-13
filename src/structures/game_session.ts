@@ -1,6 +1,6 @@
 /* eslint-disable no-return-assign */
 import * as uuid from "uuid";
-import Eris from "eris";
+import * as Eris from "eris";
 import _ from "lodash";
 
 import {
@@ -10,7 +10,7 @@ import {
     delay,
     getOrdinalNum,
     setDifference,
-} from "../helpers/utils";
+} from "../helpers/utils.js";
 import {
     clickableSlashCommand,
     fetchUser,
@@ -25,14 +25,14 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
-} from "../helpers/discord_utils";
+} from "../helpers/discord_utils.js";
 import {
     getMultipleChoiceOptions,
     isFirstGameOfDay,
     userBonusIsActive,
-} from "../helpers/game_utils";
-import State from "../state";
-import dbContext from "../database_context";
+} from "../helpers/game_utils.js";
+import State from "../state.js";
+import dbContext from "../database_context.js";
 
 import {
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -48,34 +48,34 @@ import {
     REVIEW_LINK,
     SKIP_BUTTON_PREFIX,
     VOTE_LINK,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import { sql } from "kysely";
-import AnswerType from "../enums/option_types/answer_type";
-import ClipAction from "../enums/clip_action";
-import ClipGameRound from "./clip_game_round";
-import EliminationPlayer from "./elimination_player";
-import EliminationScoreboard from "./elimination_scoreboard";
-import ExpCommand from "../commands/game_commands/exp";
-import GameRound from "./game_round";
-import GameType from "../enums/game_type";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import GuildPreference from "./guild_preference";
-import KmqMember from "./kmq_member";
-import MessageContext from "./message_context";
-import MultiGuessType from "../enums/option_types/multiguess_type";
-import Player from "./player";
-import ProfileCommand from "../commands/game_commands/profile";
-import Scoreboard from "./scoreboard";
-import Session from "./session";
-import SkipCommand from "../commands/game_commands/skip";
-import TeamScoreboard from "./team_scoreboard";
-import i18n from "../helpers/localization_manager";
-import type { ButtonActionRow, GuildTextableMessage } from "../types";
+import AnswerType from "../enums/option_types/answer_type.js";
+import ClipAction from "../enums/clip_action.js";
+import ClipGameRound from "./clip_game_round.js";
+import EliminationPlayer from "./elimination_player.js";
+import EliminationScoreboard from "./elimination_scoreboard.js";
+import ExpCommand from "../commands/game_commands/exp.js";
+import GameRound from "./game_round.js";
+import GameType from "../enums/game_type.js";
+import GuessModeType from "../enums/option_types/guess_mode_type.js";
+import GuildPreference from "./guild_preference.js";
+import KmqMember from "./kmq_member.js";
+import MessageContext from "./message_context.js";
+import MultiGuessType from "../enums/option_types/multiguess_type.js";
+import Player from "./player.js";
+import ProfileCommand from "../commands/game_commands/profile.js";
+import Scoreboard from "./scoreboard.js";
+import Session from "./session.js";
+import SkipCommand from "../commands/game_commands/skip.js";
+import TeamScoreboard from "./team_scoreboard.js";
+import i18n from "../helpers/localization_manager.js";
+import type { ButtonActionRow, GuildTextableMessage } from "../types.js";
 import type { CommandInteraction } from "eris";
-import type QueriedSong from "./queried_song";
-import type Round from "./round";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import type QueriedSong from "./queried_song.js";
+import type Round from "./round.js";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result.js";
 
 const HIDDEN_UPDATE_INTERVAL = 2000;
 

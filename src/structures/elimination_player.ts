@@ -1,5 +1,5 @@
-import { ELIMINATION_DEFAULT_LIVES } from "../constants";
-import Player from "./player";
+import { ELIMINATION_DEFAULT_LIVES } from "../constants.js";
+import Player from "./player.js";
 import type Eris from "eris";
 
 export default class EliminationPlayer extends Player {

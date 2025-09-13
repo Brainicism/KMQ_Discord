@@ -1,5 +1,5 @@
-import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
+import { EMBED_ERROR_COLOR, KmqImages } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     generateOptionsMessage,
@@ -7,23 +7,23 @@ import {
     notifyOptionsGenerationError,
     sendErrorMessage,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
+} from "../../helpers/discord_utils.js";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
-} from "../../helpers/game_utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
+} from "../../helpers/game_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import MessageContext from "../../structures/message_context.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type EmbedPayload from "../../interfaces/embed_payload.js";
 import type Eris from "eris";
-import type MatchedArtist from "../../interfaces/matched_artist";
+import type MatchedArtist from "../../interfaces/matched_artist.js";
 
 const COMMAND_NAME = "remove";
 const logger = new IPCLogger(COMMAND_NAME);

@@ -1,16 +1,16 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 import {
     sendDmMessage,
     sendErrorMessage,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import i18n from "../../helpers/localization_manager";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import i18n from "../../helpers/localization_manager.js";
 import type { TextableChannel } from "eris";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("privatemessage");

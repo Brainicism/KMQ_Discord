@@ -1,9 +1,9 @@
-import GameOption from "../../../enums/game_option_name";
-import GuildPreference from "../../../structures/guild_preference";
-import Player from "../../../structures/player";
-import TeamScoreboard from "../../../structures/team_scoreboard";
+import GameOption from "../../../enums/game_option_name.js";
+import GuildPreference from "../../../structures/guild_preference.js";
+import Player from "../../../structures/player.js";
+import TeamScoreboard from "../../../structures/team_scoreboard.js";
 import assert from "assert";
-import type Team from "../../../structures/team";
+import type Team from "../../../structures/team.js";
 
 const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";

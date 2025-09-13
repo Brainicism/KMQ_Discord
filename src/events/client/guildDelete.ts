@@ -1,7 +1,7 @@
-import { IPCLogger } from "../../logger";
-import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils";
-import Eris from "eris";
-import Session from "../../structures/session";
+import { IPCLogger } from "../../logger.js";
+import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils.js";
+import * as Eris from "eris";
+import Session from "../../structures/session.js";
 
 const logger = new IPCLogger("guildDelete");
 

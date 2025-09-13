@@ -1,11 +1,11 @@
 /* eslint-disable tsdoc/syntax */
 import * as uuid from "uuid";
-import { DataFiles } from "../constants";
-import { IPCLogger } from "../logger";
+import { DataFiles } from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
-import i18n from "./localization_manager";
+import i18n from "./localization_manager.js";
 import moment from "moment-timezone";
 
 const logger = new IPCLogger("utils");

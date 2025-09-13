@@ -1,4 +1,4 @@
-import LocaleType from "../enums/locale_type";
+import LocaleType from "../enums/locale_type.js";
 
 export default class BaseArtistInfo {
     artistName: string;

@@ -1,18 +1,18 @@
-import { DataFiles, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
+import { DataFiles, KmqImages } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
+} from "../../helpers/discord_utils.js";
+import * as Eris from "eris";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
 import fs from "fs";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "botnews";
 const logger = new IPCLogger(COMMAND_NAME);

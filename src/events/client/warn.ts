@@ -1,5 +1,5 @@
-import { IGNORED_WARNING_SUBSTRINGS } from "../../constants";
-import { IPCLogger } from "../../logger";
+import { IGNORED_WARNING_SUBSTRINGS } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 
 const logger = new IPCLogger("warn");
 

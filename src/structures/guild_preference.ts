@@ -17,36 +17,36 @@ import {
     DEFAULT_SUBUNIT_PREFERENCE,
     GameOptionInternal,
     NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import { Mutex } from "async-mutex";
-import { extractErrorString, mapTo } from "../helpers/utils";
-import AdvancedCommandActionName from "../enums/advanced_setting_action_name";
-import AnswerType from "../enums/option_types/answer_type";
-import EnvType from "../enums/env_type";
-import GameOption from "../enums/game_option_name";
-import Session from "./session";
-import SongSelector from "./song_selector";
+import { extractErrorString, mapTo } from "../helpers/utils.js";
+import AdvancedCommandActionName from "../enums/advanced_setting_action_name.js";
+import AnswerType from "../enums/option_types/answer_type.js";
+import EnvType from "../enums/env_type.js";
+import GameOption from "../enums/game_option_name.js";
+import Session from "./session.js";
+import SongSelector from "./song_selector.js";
 import _ from "lodash";
-import dbContext from "../database_context";
-import type { AdvancedSettings } from "../types";
-import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db";
-import type { GenderModeOptions } from "../enums/option_types/gender";
+import dbContext from "../database_context.js";
+import type { AdvancedSettings } from "../types.js";
+import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db.js";
+import type { GenderModeOptions } from "../enums/option_types/gender.js";
 import type { Insertable } from "kysely";
 import type { MutexInterface } from "async-mutex";
-import type AdvancedCommandAction from "../enums/advanced_setting_action_name";
-import type ArtistType from "../enums/option_types/artist_type";
-import type GameOptions from "../interfaces/game_options";
-import type GuessModeType from "../enums/option_types/guess_mode_type";
-import type LanguageType from "../enums/option_types/language_type";
-import type MatchedArtist from "../interfaces/matched_artist";
-import type MultiGuessType from "../enums/option_types/multiguess_type";
-import type OstPreference from "../enums/option_types/ost_preference";
-import type ReleaseType from "../enums/option_types/release_type";
-import type SeekType from "../enums/option_types/seek_type";
-import type ShuffleType from "../enums/option_types/shuffle_type";
-import type SpecialType from "../enums/option_types/special_type";
-import type SubunitsPreference from "../enums/option_types/subunit_preference";
+import type AdvancedCommandAction from "../enums/advanced_setting_action_name.js";
+import type ArtistType from "../enums/option_types/artist_type.js";
+import type GameOptions from "../interfaces/game_options.js";
+import type GuessModeType from "../enums/option_types/guess_mode_type.js";
+import type LanguageType from "../enums/option_types/language_type.js";
+import type MatchedArtist from "../interfaces/matched_artist.js";
+import type MultiGuessType from "../enums/option_types/multiguess_type.js";
+import type OstPreference from "../enums/option_types/ost_preference.js";
+import type ReleaseType from "../enums/option_types/release_type.js";
+import type SeekType from "../enums/option_types/seek_type.js";
+import type ShuffleType from "../enums/option_types/shuffle_type.js";
+import type SpecialType from "../enums/option_types/special_type.js";
+import type SubunitsPreference from "../enums/option_types/subunit_preference.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");

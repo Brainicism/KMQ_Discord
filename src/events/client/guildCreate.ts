@@ -1,7 +1,7 @@
-import { DiscordPreferredLocaleToInternal } from "../../constants";
-import { IPCLogger } from "../../logger";
-import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils";
-import LocaleTypeCommand from "../../commands/misc_commands/locale";
+import { DiscordPreferredLocaleToInternal } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
+import { sendInfoEmbedsWebhook } from "../../helpers/discord_utils.js";
+import LocaleTypeCommand from "../../commands/misc_commands/locale.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("guildCreate");

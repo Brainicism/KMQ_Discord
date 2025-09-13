@@ -1,16 +1,16 @@
-import { IPCLogger } from "../logger";
-import { SKIP_BUTTON_PREFIX } from "../constants";
-import { codeLine, friendlyFormattedNumber } from "../helpers/utils";
-import Eris from "eris";
-import SeekType from "../enums/option_types/seek_type";
-import State from "../state";
-import i18n from "../helpers/localization_manager";
-import type { ButtonActionRow } from "../types";
-import type ClipAction from "../enums/clip_action";
-import type MessageContext from "./message_context";
-import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "./queried_song";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { IPCLogger } from "../logger.js";
+import { SKIP_BUTTON_PREFIX } from "../constants.js";
+import { codeLine, friendlyFormattedNumber } from "../helpers/utils.js";
+import * as Eris from "eris";
+import SeekType from "../enums/option_types/seek_type.js";
+import State from "../state.js";
+import i18n from "../helpers/localization_manager.js";
+import type { ButtonActionRow } from "../types.js";
+import type ClipAction from "../enums/clip_action.js";
+import type MessageContext from "./message_context.js";
+import type PlayerRoundResult from "../interfaces/player_round_result.js";
+import type QueriedSong from "./queried_song.js";
+import type UniqueSongCounter from "../interfaces/unique_song_counter.js";
 
 const logger = new IPCLogger("round");
 

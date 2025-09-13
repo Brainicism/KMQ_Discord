@@ -1,10 +1,10 @@
-import { IPCLogger } from "../../logger";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger.js";
+import { sendInfoMessage } from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("eval");

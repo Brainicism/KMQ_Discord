@@ -1,7 +1,7 @@
-import { ExpBonusModifierValues } from "../constants";
-import { bold, escapedFormatting, getMention } from "../helpers/utils";
-import ExpBonusModifier from "../enums/exp_bonus_modifier";
-import State from "../state";
+import { ExpBonusModifierValues } from "../constants.js";
+import { bold, escapedFormatting, getMention } from "../helpers/utils.js";
+import ExpBonusModifier from "../enums/exp_bonus_modifier.js";
+import State from "../state.js";
 import type Eris from "eris";
 
 export default class Player {

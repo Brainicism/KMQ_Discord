@@ -1,26 +1,26 @@
-import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
-import { IPCLogger } from "../../logger";
+import { EMBED_ERROR_COLOR, OptionAction } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
-import ArtistType from "../../enums/option_types/artist_type";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import ArtistType from "../../enums/option_types/artist_type.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import * as Eris from "eris";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import Session from "../../structures/session.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type EmbedPayload from "../../interfaces/embed_payload.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "artisttype";
 const logger = new IPCLogger(COMMAND_NAME);

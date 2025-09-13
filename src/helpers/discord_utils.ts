@@ -4,7 +4,7 @@ import {
     ConflictingGameOptions,
     GameOptionCommand,
     PriorityGameOption,
-} from "../types";
+} from "../types.js";
 import {
     DataFiles,
     EMBED_DESCRIPTION_MAX_LENGTH,
@@ -18,8 +18,8 @@ import {
     PROFILE_COMMAND_NAME,
     SPOTIFY_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import {
     bold,
     chooseWeightedRandom,
@@ -36,34 +36,35 @@ import {
     strikethrough,
     truncatedString,
     underline,
-} from "./utils";
+} from "./utils.js";
 import { exec } from "child_process";
-import { userBonusIsActive } from "./game_utils";
-import AppCommandsAction from "../enums/app_command_action";
+import { userBonusIsActive } from "./game_utils.js";
+import AppCommandsAction from "../enums/app_command_action.js";
 import EmbedPaginator from "eris-pagination";
-import EnvType from "../enums/env_type";
-import Eris, { DiscordHTTPError, DiscordRESTError } from "eris";
-import GameOption from "../enums/game_option_name";
-import GameRound from "../structures/game_round";
-import GameType from "../enums/game_type";
-import LocaleType from "../enums/locale_type";
-import MessageContext from "../structures/message_context";
-import State from "../state";
+import EnvType from "../enums/env_type.js";
+import { DiscordHTTPError, DiscordRESTError } from "eris";
+import * as Eris from "eris";
+import GameOption from "../enums/game_option_name.js";
+import GameRound from "../structures/game_round.js";
+import GameType from "../enums/game_type.js";
+import LocaleType from "../enums/locale_type.js";
+import MessageContext from "../structures/message_context.js";
+import State from "../state.js";
 import _ from "lodash";
 import axios from "axios";
-import dbContext from "../database_context";
+import dbContext from "../database_context.js";
 import fs from "fs";
-import i18n from "./localization_manager";
-import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import i18n from "./localization_manager.js";
+import type { EmbedGenerator, GuildTextableMessage } from "../types.js";
 import type { GuildTextableChannel } from "eris";
-import type AutocompleteEntry from "../interfaces/autocomplete_entry";
-import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type EmbedPayload from "../interfaces/embed_payload";
-import type GameInfoMessage from "../interfaces/game_info_message";
-import type GameOptions from "../interfaces/game_options";
-import type GuildPreference from "../structures/guild_preference";
-import type MatchedArtist from "../interfaces/matched_artist";
-import type Session from "../structures/session";
+import type AutocompleteEntry from "../interfaces/autocomplete_entry.js";
+import type BookmarkedSong from "../interfaces/bookmarked_song.js";
+import type EmbedPayload from "../interfaces/embed_payload.js";
+import type GameInfoMessage from "../interfaces/game_info_message.js";
+import type GameOptions from "../interfaces/game_options.js";
+import type GuildPreference from "../structures/guild_preference.js";
+import type MatchedArtist from "../interfaces/matched_artist.js";
+import type Session from "../structures/session.js";
 
 const logger = new IPCLogger("discord_utils");
 

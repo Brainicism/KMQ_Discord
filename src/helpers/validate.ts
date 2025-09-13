@@ -1,17 +1,17 @@
 /* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../logger";
-import { arrayToString } from "./utils";
+import { IPCLogger } from "../logger.js";
+import { arrayToString } from "./utils.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendErrorMessage,
-} from "./discord_utils";
-import MessageContext from "../structures/message_context";
-import i18n from "./localization_manager";
-import type { GuildTextableMessage } from "../types";
-import type CommandValidations from "../interfaces/command_validations";
+} from "./discord_utils.js";
+import MessageContext from "../structures/message_context.js";
+import i18n from "./localization_manager.js";
+import type { GuildTextableMessage } from "../types.js";
+import type CommandValidations from "../interfaces/command_validations.js";
 import type Eris from "eris";
-import type ParsedMessage from "../interfaces/parsed_message";
+import type ParsedMessage from "../interfaces/parsed_message.js";
 
 const logger = new IPCLogger("validate");
 

@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     BOOKMARK_BUTTON_PREFIX,
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -8,8 +9,8 @@ import {
     KmqImages,
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -22,7 +23,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
-} from "../helpers/discord_utils";
+} from "../helpers/discord_utils.js";
 import {
     delay,
     extractErrorString,
@@ -30,33 +31,32 @@ import {
     getMention,
     truncatedString,
     underline,
-} from "../helpers/utils";
+} from "../helpers/utils.js";
 import { sql } from "kysely";
-import ClipAction from "../enums/clip_action";
-import EnvVariableManager from "../env_variable_manager";
-import Eris from "eris";
-import FactGenerator from "../fact_generator";
-import GameRound from "./game_round";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import KmqConfiguration from "../kmq_configuration";
-import ListeningRound from "./listening_round";
-import LocaleType from "../enums/locale_type";
-import MessageContext from "./message_context";
-import SeekType from "../enums/option_types/seek_type";
-import SongSelector from "./song_selector";
-import State from "../state";
-import dbContext from "../database_context";
-import i18n from "../helpers/localization_manager";
+import ClipAction from "../enums/clip_action.js";
+import EnvVariableManager from "../env_variable_manager.js";
+import FactGenerator from "../fact_generator.js";
+import GameRound from "./game_round.js";
+import GuessModeType from "../enums/option_types/guess_mode_type.js";
+import KmqConfiguration from "../kmq_configuration.js";
+import ListeningRound from "./listening_round.js";
+import LocaleType from "../enums/locale_type.js";
+import MessageContext from "./message_context.js";
+import SeekType from "../enums/option_types/seek_type.js";
+import SongSelector from "./song_selector.js";
+import State from "../state.js";
+import dbContext from "../database_context.js";
+import i18n from "../helpers/localization_manager.js";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type ClipGameRound from "./clip_game_round";
-import type EmbedPayload from "../interfaces/embed_payload";
-import type GameSession from "./game_session";
-import type GuildPreference from "./guild_preference";
-import type KmqClient from "../kmq_client";
-import type KmqMember from "./kmq_member";
-import type ListeningSession from "./listening_session";
-import type QueriedSong from "./queried_song";
-import type Round from "./round";
+import type ClipGameRound from "./clip_game_round.js";
+import type EmbedPayload from "../interfaces/embed_payload.js";
+import type GameSession from "./game_session.js";
+import type GuildPreference from "./guild_preference.js";
+import type KmqClient from "../kmq_client.js";
+import type KmqMember from "./kmq_member.js";
+import type ListeningSession from "./listening_session.js";
+import type QueriedSong from "./queried_song.js";
+import type Round from "./round.js";
 
 const logger = new IPCLogger("session");
 

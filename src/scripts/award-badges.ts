@@ -1,6 +1,6 @@
-import { IPCLogger } from "../logger";
+import { IPCLogger } from "../logger.js";
 import { createInterface } from "readline";
-import dbContext from "../database_context";
+import dbContext from "../database_context.js";
 
 const logger = new IPCLogger("award-badges");
 
@@ -108,7 +108,7 @@ async function awardBadges(): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         await awardBadges();
         process.exit(0);
     }

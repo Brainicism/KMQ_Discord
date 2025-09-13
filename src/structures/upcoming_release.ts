@@ -1,4 +1,4 @@
-import BaseArtistInfo from "./base_artist_info";
+import BaseArtistInfo from "./base_artist_info.js";
 
 export default class UpcomingRelease extends BaseArtistInfo {
     name: string;

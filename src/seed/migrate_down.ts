@@ -2,11 +2,11 @@
 
 import * as readline from "readline";
 import { FileMigrationProvider, Migrator } from "kysely";
-import { IPCLogger } from "../logger";
+import { IPCLogger } from "../logger.js";
 import { promises as fsp } from "fs";
-import { getNewConnection } from "../database_context";
+import { getNewConnection } from "../database_context.js";
 import path from "path";
-import type { DatabaseContext } from "../database_context";
+import type { DatabaseContext } from "../database_context.js";
 
 const logger = new IPCLogger("migrate_down");
 
@@ -32,7 +32,7 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
             fs: fsp,
             path,
             // This needs to be an absolute path.
-            migrationFolder: path.join(__dirname, "../migrations"),
+            migrationFolder: path.join(import.meta.dirname, "../migrations"),
         }),
     });
 
@@ -95,7 +95,7 @@ async function performMigrationDown(db: DatabaseContext): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         const db = getNewConnection();
         await performMigrationDown(db);
         await db.destroy();

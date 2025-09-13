@@ -1,5 +1,5 @@
 import { Constants, type Context, YT } from "youtubei.js";
-import { IPCLogger } from "./logger";
+import { IPCLogger } from "./logger.js";
 import GoogleVideo, { PART, Protos, QUALITY, base64ToU8 } from "googlevideo";
 import Innertube, { UniversalCache } from "youtubei.js";
 

@@ -1,16 +1,16 @@
-import * as discord_utils from "../../../helpers/discord_utils";
-import * as management_utils from "../../../helpers/management_utils";
-import AnswerType from "../../../enums/option_types/answer_type";
-import CommandPrechecks from "../../../command_prechecks";
-import GameSession from "../../../structures/game_session";
-import GameType from "../../../enums/game_type";
-import GuildPreference from "../../../structures/guild_preference";
-import KmqConfiguration from "../../../kmq_configuration";
-import KmqMember from "../../../structures/kmq_member";
-import ListeningSession from "../../../structures/listening_session";
-import MessageContext from "../../../structures/message_context";
+import * as discord_utils from "../../../helpers/discord_utils.js";
+import * as management_utils from "../../../helpers/management_utils.js";
+import AnswerType from "../../../enums/option_types/answer_type.js";
+import CommandPrechecks from "../../../command_prechecks.js";
+import GameSession from "../../../structures/game_session.js";
+import GameType from "../../../enums/game_type.js";
+import GuildPreference from "../../../structures/guild_preference.js";
+import KmqConfiguration from "../../../kmq_configuration.js";
+import KmqMember from "../../../structures/kmq_member.js";
+import ListeningSession from "../../../structures/listening_session.js";
+import MessageContext from "../../../structures/message_context.js";
 import assert from "assert";
-import dbContext from "../../../database_context";
+import dbContext from "../../../database_context.js";
 import sinon from "sinon";
 
 describe("command prechecks", () => {

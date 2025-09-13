@@ -1,9 +1,9 @@
 /* eslint-disable no-await-in-loop */
-import { IPCLogger } from "./logger";
-import Eris from "eris";
+import * as Eris from "eris";
+import { IPCLogger } from "./logger.js";
 import fs from "fs";
 import path from "path";
-import type BaseCommand from "./commands/interfaces/base_command";
+import type BaseCommand from "./commands/interfaces/base_command.js";
 
 const logger = new IPCLogger("kmq_client");
 
@@ -19,14 +19,14 @@ export default class KmqClient extends Eris.Client {
         this.commandsHandlers = {};
         this.aliases = {};
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
-        this.registerCommands(true);
+        this.registerCommands();
     }
 
     /**
      * @param shouldReload - Whether to reload the commands
      * @returns a mapping of command name to command source file
      * */
-    public static async getCommandFiles(shouldReload: boolean): Promise<{
+    public static async getCommandFiles(): Promise<{
         [commandName: string]: BaseCommand;
     }> {
         const commandMap: { [commandName: string]: any } = {};
@@ -41,37 +41,34 @@ export default class KmqClient extends Eris.Client {
                 files = files.concat(
                     (
                         await fs.promises.readdir(
-                            path.resolve(__dirname, "./commands", category),
+                            path.resolve(
+                                import.meta.dirname,
+                                "./commands",
+                                category,
+                            ),
                         )
                     )
                         .filter((x) => x.endsWith(".ts") || x.endsWith(".js"))
                         .map((x) =>
-                            path.resolve(__dirname, "./commands", category, x),
+                            path.resolve(
+                                import.meta.dirname,
+                                "./commands",
+                                category,
+                                x,
+                            ),
                         ),
                 );
             }
 
             for (const commandFile of files) {
-                const commandFilePath = path.resolve(
-                    __dirname,
-                    "./commands",
-                    commandFile,
-                );
-
-                if (shouldReload) {
-                    // invalidate require cache
-                    delete require.cache[require.resolve(commandFilePath)];
-                }
-
                 try {
-                    // eslint-disable-next-line global-require,import/no-dynamic-require
-                    const command = require(commandFilePath);
+                    // ESM dynamic import
+                    const command = await import(commandFile);
                     const commandName = path.parse(commandFile).name;
-                    // eslint-disable-next-line new-cap
-                    commandMap[commandName] = new command.default();
+                    commandMap[commandName] = new command.default(); // ESM default export
                 } catch (e) {
                     throw new Error(
-                        `Failed to load file: ${commandFilePath}. ${e}`,
+                        `Failed to load file: ${commandFile}. ${e}`,
                     );
                 }
             }
@@ -86,7 +83,7 @@ export default class KmqClient extends Eris.Client {
     /** Reloads commands */
     public async reloadCommands(): Promise<void> {
         logger.info("Reloading KMQ commands");
-        await this.registerCommands(false);
+        await this.registerCommands();
         logger.info("Reload KMQ commands complete");
     }
 
@@ -94,10 +91,10 @@ export default class KmqClient extends Eris.Client {
      *  Registers commands
      * @param initialLoad - Whether this is the initial load
      * */
-    private async registerCommands(initialLoad: boolean): Promise<void> {
+    private async registerCommands(): Promise<void> {
         // load commands
         this.commands = {};
-        const commandFiles = await KmqClient.getCommandFiles(!initialLoad);
+        const commandFiles = await KmqClient.getCommandFiles();
         let successfulCommands = 0;
         for (const [commandName, command] of Object.entries(commandFiles)) {
             if (this.registerCommand(command, commandName))

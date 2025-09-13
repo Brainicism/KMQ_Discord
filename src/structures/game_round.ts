@@ -10,27 +10,27 @@ import {
     QUICK_GUESS_MS,
     ROUND_MAX_RUNNERS_UP,
     SKIP_BUTTON_PREFIX,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import {
     codeLine,
     friendlyFormattedNumber,
     getMention,
-} from "../helpers/utils";
-import Eris from "eris";
-import ExpBonusModifier from "../enums/exp_bonus_modifier";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import KmqMember from "./kmq_member";
-import LocaleType from "../enums/locale_type";
-import Round from "./round";
-import State from "../state";
+} from "../helpers/utils.js";
+import * as Eris from "eris";
+import ExpBonusModifier from "../enums/exp_bonus_modifier.js";
+import GuessModeType from "../enums/option_types/guess_mode_type.js";
+import KmqMember from "./kmq_member.js";
+import LocaleType from "../enums/locale_type.js";
+import Round from "./round.js";
+import State from "../state.js";
 import _ from "lodash";
-import i18n from "../helpers/localization_manager";
+import i18n from "../helpers/localization_manager.js";
 import levenshtien from "damerau-levenshtein";
-import type MessageContext from "./message_context";
-import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "./queried_song";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import type MessageContext from "./message_context.js";
+import type PlayerRoundResult from "../interfaces/player_round_result.js";
+import type QueriedSong from "./queried_song.js";
+import type UniqueSongCounter from "../interfaces/unique_song_counter.js";
 
 const logger = new IPCLogger("game_round");
 

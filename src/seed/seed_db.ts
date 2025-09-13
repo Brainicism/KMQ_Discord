@@ -10,8 +10,8 @@ import {
     KMQ_USER_AGENT,
     KmqImages,
     LATEST_DAISUKI_DUMP,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import { config } from "dotenv";
 import {
     discordDateFormat,
@@ -19,25 +19,25 @@ import {
     pathExists,
     standardDateFormat,
     truncatedString,
-} from "../helpers/utils";
-import { getNewConnection } from "../database_context";
+} from "../helpers/utils.js";
+import { getNewConnection } from "../database_context.js";
 import {
     sendDebugAlertFileWebhook,
     sendInfoWebhook,
-} from "../helpers/discord_utils";
+} from "../helpers/discord_utils.js";
 import { sql } from "kysely";
 import Axios from "axios";
-import EnvType from "../enums/env_type";
-import KmqSongDownloader from "../helpers/kmq_song_downloader";
+import EnvType from "../enums/env_type.js";
+import KmqSongDownloader from "../helpers/kmq_song_downloader.js";
 import _ from "lodash";
 import fs from "fs";
 import path from "path";
 import util from "util";
-import type { DatabaseContext } from "../database_context";
+import type { DatabaseContext } from "../database_context.js";
 
 const exec = util.promisify(cp.exec);
 
-config({ path: path.resolve(__dirname, "../../.env") });
+config({ path: path.resolve(import.meta.dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
 const daisukiDbDownloadUrl =
     "https://soridata.com/en/download.php?pass=$PASSWORD";
@@ -203,9 +203,11 @@ export async function generateExpectedAvailableSongs(
  */
 export async function loadStoredProcedures(): Promise<void> {
     const storedProcedureDefinitions = (
-        await fs.promises.readdir(path.join(__dirname, "../../sql/procedures"))
+        await fs.promises.readdir(
+            path.join(import.meta.dirname, "../../sql/procedures"),
+        )
     )
-        .map((x) => path.join(__dirname, "../../sql/procedures", x))
+        .map((x) => path.join(import.meta.dirname, "../../sql/procedures", x))
         .sort();
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
@@ -218,9 +220,11 @@ export async function loadStoredProcedures(): Promise<void> {
 
 async function loadStoredProceduresForValidation(): Promise<void> {
     const storedProcedureDefinitions = (
-        await fs.promises.readdir(path.join(__dirname, "../../sql/procedures"))
+        await fs.promises.readdir(
+            path.join(import.meta.dirname, "../../sql/procedures"),
+        )
     )
-        .map((x) => path.join(__dirname, "../../sql/procedures", x))
+        .map((x) => path.join(import.meta.dirname, "../../sql/procedures", x))
         .sort();
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {
@@ -256,7 +260,7 @@ async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
 
     await exec(
         `bash ${path.resolve(
-            __dirname,
+            import.meta.dirname,
             "../scripts/prepare-kysely-schema.sh",
         )}`,
     );
@@ -762,7 +766,7 @@ async function reloadAutocompleteData(): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         logger.info(JSON.stringify(options));
         const db = getNewConnection();
         const availableSongsBefore = await db.kmq
