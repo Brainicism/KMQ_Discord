@@ -1,7 +1,32 @@
-import { Constants, type Context, YT } from "youtubei.js";
+/* eslint-disable node/no-sync */
+/* eslint-disable @typescript-eslint/explicit-function-return-type */
+/* eslint-disable valid-jsdoc */
 import { IPCLogger } from "./logger";
-import GoogleVideo, { PART, Protos, QUALITY, base64ToU8 } from "googlevideo";
-import Innertube, { UniversalCache } from "youtubei.js";
+import Innertube, {
+    Constants,
+    type Context,
+    Platform,
+    UniversalCache,
+    YT,
+} from "youtubei.js";
+import type { Types } from "youtubei.js";
+
+const {
+    UMPPartId,
+    OnesieInnertubeRequest,
+    OnesieHeader,
+    SabrError,
+    OnesieProxyStatus,
+    OnesieInnertubeResponse,
+    OnesieRequest,
+    CompressionType,
+    OnesieHeaderType,
+} = require("googlevideo/protos");
+
+const { base64ToU8 } = require("googlevideo/utils");
+
+const { UmpReader, CompositeBuffer } = require("googlevideo/ump");
+const { Part } = require("googlevideo/shared-types");
 
 /** Copied mostly from https://github.com/LuanRT/googlevideo/blob/main/examples/onesie-request/main.ts */
 const logger = new IPCLogger("onesie-provider");
@@ -20,9 +45,26 @@ type OnesieRequestArgs = {
     innertube: Innertube;
 };
 
-type OnesieRequest = {
-    body: Uint8Array;
-    encodedVideoId: string;
+type UmpPartHandler = (part: typeof Part) => void;
+
+Platform.shim.eval = async (
+    data: Types.BuildScriptResult,
+    env: Record<string, Types.VMPrimative>,
+    // eslint-disable-next-line @typescript-eslint/require-await
+) => {
+    const properties = [];
+
+    if (env.n) {
+        properties.push(`n: exportedVars.nFunction("${env.n}")`);
+    }
+
+    if (env.sig) {
+        properties.push(`sig: exportedVars.sigFunction("${env.sig}")`);
+    }
+
+    const code = `${data.output}\nreturn { ${properties.join(", ")} }`;
+
+    return new Function(code)();
 };
 
 type Encrypted = {
@@ -31,6 +73,7 @@ type Encrypted = {
     iv: Uint8Array;
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export default class YoutubeOnesieProvider {
     cachedClientConfig: ClientConfig | undefined;
     innerTube: Innertube | undefined;
@@ -48,7 +91,7 @@ export default class YoutubeOnesieProvider {
             type: "audio",
         }).content_length;
 
-        const url = `${videoInfo
+        const url = `${await videoInfo
             .chooseFormat({ format: "mp4", quality: "best", type: "audio" })
             .decipher(this.innerTube.session.player)}&range=0-${length}`;
 
@@ -104,9 +147,8 @@ export default class YoutubeOnesieProvider {
         };
     }
 
-    private async prepareOnesieRequest(
-        args: OnesieRequestArgs,
-    ): Promise<OnesieRequest> {
+    // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
+    private async prepareOnesieRequest(args: OnesieRequestArgs) {
         const { videoId, poToken, clientConfig, innertube } = args;
         const { clientKeyData, encryptedClientKey, onesieUstreamerConfig } =
             clientConfig;
@@ -126,7 +168,8 @@ export default class YoutubeOnesieProvider {
                     vis: 0,
                     splay: false,
                     lactMilliseconds: "-1",
-                    signatureTimestamp: innertube.session.player?.sts,
+                    signatureTimestamp: (innertube.session.player as any)
+                        .signature_timestamp,
                 },
             },
             videoId,
@@ -149,55 +192,56 @@ export default class YoutubeOnesieProvider {
             },
             {
                 name: "User-Agent",
-                value: innertube.session.context.client.userAgent,
+                value: clonedInnerTubeContext.client.userAgent,
             },
             {
                 name: "X-Goog-Visitor-Id",
-                value: innertube.session.context.client.visitorData,
+                value: clonedInnerTubeContext.client.visitorData,
             },
         ];
 
-        const onesieRequest = Protos.OnesiePlayerRequest.encode({
-            url: "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8",
+        const onesieInnertubeRequest = OnesieInnertubeRequest.encode({
+            url: "https://youtubei.googleapis.com/youtubei/v1/player?key=AIzaSyDCU8hByM-4DrUqRUYnGn-3llEO78bcxq8&$fields=playerConfig,captions,playabilityStatus,streamingData,responseContext.mainAppWebResponseContext.datasyncId,videoDetails,playbackTracking",
             headers,
             body: JSON.stringify(playerRequestJson),
             proxiedByTrustedBandaid: true,
-            field6: false,
+            skipResponseEncryption: true,
         }).finish();
 
         const { encrypted, hmac, iv } = await this.encryptRequest(
             clientKeyData,
-            onesieRequest,
+            onesieInnertubeRequest,
         );
 
-        const body = Protos.OnesieRequest.encode({
+        const body = OnesieRequest.encode({
             urls: [],
-            playerRequest: {
+            innertubeRequest: {
+                enableCompression: true,
                 encryptedClientKey,
-                encryptedOnesiePlayerRequest: encrypted,
-                enableCompression: false,
+                encryptedOnesieInnertubeRequest: encrypted,
+                /*
+                 * If you want to use an unencrypted player request:
+                 * unencryptedOnesieInnertubeRequest: onesieInnertubeRequest,
+                 */
                 hmac,
                 iv,
-                TQ: true,
-                YP: true,
-            },
-            clientAbrState: {
-                timeSinceLastManualFormatSelectionMs: 0,
-                lastManualDirection: 0,
-                quality: QUALITY.HD720,
-                selectedQualityHeight: QUALITY.HD720,
-                startTimeMs: 0,
-                visibility: 0,
+                useJsonformatterToParsePlayerResponse: false,
+                serializeResponseAsJson: true, // If false, the response will be serialized as protobuf.
             },
             streamerContext: {
-                field5: [],
-                field6: [],
+                sabrContexts: [],
+                unsentSabrContexts: [],
                 poToken: poToken ? base64ToU8(poToken) : undefined,
                 playbackCookie: undefined,
                 clientInfo: {
-                    clientName: 7,
-                    clientVersion:
-                        innertube.session.context.client.clientVersion,
+                    clientName: parseInt(
+                        Constants.CLIENT_NAME_IDS[
+                            clonedInnerTubeContext.client
+                                .clientName as keyof typeof Constants.CLIENT_NAME_IDS
+                        ],
+                        10,
+                    ),
+                    clientVersion: clonedInnerTubeContext.client.clientVersion,
                 },
             },
             bufferedRanges: [],
@@ -216,41 +260,49 @@ export default class YoutubeOnesieProvider {
         return { body, encodedVideoId };
     }
 
+    /**
+     * Fetches basic video info (streaming data, video details, etc.) using a Onesie request (/initplayback).
+     */
     private async getBasicInfo(
         innertube: Innertube,
         videoId: string,
     ): Promise<YT.VideoInfo> {
         const redirectorResponse = await fetch(
-            `https://redirector.googlevideo.com/initplayback?source=youtube&itag=0&pvi=0&pai=0&owc=yes&id=${Math.round(Math.random() * 1e5)}`,
-            {
-                method: "GET",
-                redirect: "manual",
-            },
+            `https://redirector.googlevideo.com/initplayback?source=youtube&itag=0&pvi=0&pai=0&owc=yes&cmo:sensitive_content=yes&alr=yes&id=${Math.round(Math.random() * 1e5)}`,
+            { method: "GET" },
         );
 
-        const redirectorResponseUrl =
-            redirectorResponse.headers.get("location");
+        const redirectorResponseUrl = await redirectorResponse.text();
 
-        if (!redirectorResponseUrl)
+        if (!redirectorResponseUrl.startsWith("https://"))
             throw new Error("Invalid redirector response");
 
-        if (!this.cachedClientConfig) {
-            this.cachedClientConfig = await this.getYouTubeTVClientConfig();
-        }
-
+        const clientConfig = await this.getYouTubeTVClientConfig();
         const onesieRequest = await this.prepareOnesieRequest({
             videoId,
-            clientConfig: this.cachedClientConfig,
+            /* If needed - poToken, */ clientConfig,
             innertube,
         });
 
-        let url = `${redirectorResponseUrl.split("/initplayback")[0]}${this.cachedClientConfig.baseUrl}`;
+        let url = `${redirectorResponseUrl.split("/initplayback")[0]}${clientConfig.baseUrl}`;
 
         const queryParams = [];
         queryParams.push(`id=${onesieRequest.encodedVideoId}`);
-        queryParams.push("&opr=1");
-        queryParams.push("&por=1");
-        queryParams.push("rn=1");
+        queryParams.push("cmo:sensitive_content=yes");
+        queryParams.push("opr=1"); // Onesie Playback Request.
+        queryParams.push("osts=0"); // Onesie Start Time Seconds.
+        queryParams.push("por=1");
+        queryParams.push("rn=0");
+
+        /**
+         * Add the following search params to get media data parts along with the onesie player response.
+         * NOTE: The `osts` is what determines which segment to start playback from.
+         *
+         * const preferredVideoItags = [ ... ]; // Add your preferred video itags here.
+         * const preferredAudioItags = [ ... ];
+         * searchParams.push(`pvi=${preferredVideoItags.join(',')}`);
+         * searchParams.push(`pai=${preferredAudioItags.join(',')}`);
+         */
 
         url += `&${queryParams.join("&")}`;
 
@@ -258,40 +310,54 @@ export default class YoutubeOnesieProvider {
             method: "POST",
             headers: {
                 accept: "*/*",
-                "content-type": "text/plain",
+                "content-type": "application/octet-stream",
             },
             referrer: "https://www.youtube.com/",
             body: onesieRequest.body,
         });
 
         const arrayBuffer = await response.arrayBuffer();
-        const googUmp = new GoogleVideo.UMP(
-            new GoogleVideo.ChunkedDataBuffer([new Uint8Array(arrayBuffer)]),
+        const googUmp = new UmpReader(
+            new CompositeBuffer([new Uint8Array(arrayBuffer)]),
         );
 
-        const onesie: (Protos.OnesieHeader & { data?: Uint8Array })[] = [];
+        const onesie: (typeof OnesieHeader & { data?: Uint8Array })[] = [];
 
-        googUmp.parse((part) => {
+        function handleSabrError(part: typeof Part) {
             const data = part.data.chunks[0];
-            switch (part.type) {
-                case PART.SABR_ERROR:
-                    logger.warn(
-                        `[SABR_ERROR]: ${Protos.SabrError.decode(data!)}`,
-                    );
-                    break;
-                case PART.ONESIE_HEADER:
-                    onesie.push(Protos.OnesieHeader.decode(data!));
-                    break;
-                case PART.ONESIE_DATA:
-                    onesie[onesie.length - 1]!.data = data;
-                    break;
-                default:
-                    break;
+            const error = SabrError.decode(data);
+            console.error("[SABR_ERROR]:", error);
+        }
+
+        function handleOnesieHeader(part: typeof Part) {
+            const data = part.data.chunks[0];
+            onesie.push(OnesieHeader.decode(data));
+        }
+
+        function handleOnesieData(part: typeof Part) {
+            const data = part.data.chunks[0];
+            if (onesie.length > 0) {
+                onesie[onesie.length - 1].data = data;
+            } else {
+                logger.warn(
+                    "Received ONESIE_DATA without a preceding ONESIE_HEADER",
+                );
             }
+        }
+
+        const umpPartHandlers = new Map<typeof UMPPartId, UmpPartHandler>([
+            [UMPPartId.SABR_ERROR, handleSabrError],
+            [UMPPartId.ONESIE_HEADER, handleOnesieHeader],
+            [UMPPartId.ONESIE_DATA, handleOnesieData],
+        ]);
+
+        googUmp.read((part: any) => {
+            const handler = umpPartHandlers.get(part.type);
+            if (handler) handler(part);
         });
 
         const onesiePlayerResponse = onesie.find(
-            (header) => header.type === Protos.OnesieHeaderType.PLAYER_RESPONSE,
+            (header) => header.type === OnesieHeaderType.ONESIE_PLAYER_RESPONSE,
         );
 
         if (onesiePlayerResponse) {
@@ -300,28 +366,58 @@ export default class YoutubeOnesieProvider {
 
             const iv = onesiePlayerResponse.cryptoParams.iv;
             const hmac = onesiePlayerResponse.cryptoParams.hmac;
-            const encrypted = onesiePlayerResponse.data;
 
-            const decryptedData = await this.decryptResponse(
-                iv,
-                hmac,
-                encrypted,
-                this.cachedClientConfig.clientKeyData,
-            );
+            let responseData = onesiePlayerResponse.data;
 
-            const onesieResponse =
-                Protos.OnesiePlayerResponse.decode(decryptedData);
+            // Decompress the response data if compression is enabled.
+            if (
+                responseData &&
+                onesiePlayerResponse.cryptoParams.compressionType ===
+                    CompressionType.GZIP
+            ) {
+                if (typeof window === "undefined") {
+                    const zlib = await import("node:zlib");
+                    responseData = new Uint8Array(
+                        zlib.gunzipSync(responseData),
+                    );
+                } else {
+                    const ds = new DecompressionStream("gzip");
+                    const stream = new Blob([responseData])
+                        .stream()
+                        .pipeThrough(ds);
 
-            if (onesieResponse.onesieProxyStatus !== 1)
-                throw new Error("Proxy status not OK");
+                    responseData = await new Response(stream)
+                        .arrayBuffer()
+                        .then((buf) => new Uint8Array(buf));
+                }
+            }
 
-            if (onesieResponse.httpStatus !== 200)
-                throw new Error("Status not OK");
+            // If skipResponseEncryption is set to true in the request, the response will not be encrypted.
+            const decryptedData =
+                hmac?.length && iv?.length
+                    ? await this.decryptResponse(
+                          iv,
+                          hmac,
+                          responseData,
+                          clientConfig.clientKeyData,
+                      )
+                    : responseData!;
+
+            const innerTubeResponse =
+                OnesieInnertubeResponse.decode(decryptedData);
+
+            if (innerTubeResponse.onesieProxyStatus !== OnesieProxyStatus.OK)
+                throw new Error("Onesie proxy status not OK");
+
+            if (innerTubeResponse.httpStatus !== 200)
+                throw new Error("Http status not OK");
 
             const playerResponse = {
                 success: true,
                 status_code: 200,
-                data: JSON.parse(new TextDecoder().decode(onesieResponse.body)),
+                data: JSON.parse(
+                    new TextDecoder().decode(innerTubeResponse.body),
+                ),
             };
 
             return new YT.VideoInfo([playerResponse], innertube.actions, "");

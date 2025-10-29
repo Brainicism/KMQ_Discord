@@ -3,7 +3,7 @@
     "version": "9.7.7",
     "main": "src/kmq.js",
     "scripts": {
-        "seed": ". ./.env && ts-node --swc src/seed/seed_db",
+        "seed": ". ./.env && ts-node src/seed/seed_db",
         "bootstrap": "ts-node --swc src/seed/bootstrap.ts",
         "start": "./start.sh native",
         "dry-run": "NODE_ENV=dry-run npm run start",
@@ -53,6 +53,7 @@
         "@types/i18next-fs-backend": "^1.1.5",
         "@types/lodash": "^4.17.7",
         "@types/mocha": "^10.0.7",
+        "@types/node": "^24.9.2",
         "@types/node-schedule": "^2.1.7",
         "@types/sinon": "^17.0.3",
         "@types/tiny-async-pool": "^2.0.3",
@@ -73,7 +74,7 @@
         "fastify": "^4.28.1",
         "fluent-ffmpeg": "^2.1.3",
         "googleapis": "^142.0.0",
-        "googlevideo": "^1.1.0",
+        "googlevideo": "^4.0.4",
         "i18next": "^23.14.0",
         "i18next-fs-backend": "^2.3.2",
         "jsdom": "^24.1.1",
@@ -92,7 +93,7 @@
         "uuid": "^10.0.0",
         "winston": "^3.14.2",
         "winston-daily-rotate-file": "^5.0.0",
-        "youtubei.js": "^13.4.0"
+        "youtubei.js": "^16.0.1"
     },
     "devDependencies": {
         "@types/jsdom": "^21.1.7",
