@@ -47,9 +47,13 @@ export default class ScoreCommand implements BaseCommand {
     static async showScore(
         messageOrInteraction: GuildTextableMessage | CommandInteraction,
     ): Promise<void> {
-        const gameSession = Session.getSession(
-            messageOrInteraction.guildID as string,
-        ) as GameSession;
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
+        const gameSession = Session.getSession(guildID) as GameSession;
 
         await gameSession.sendScoreboardMessage(messageOrInteraction);
         logger.info(

@@ -4,7 +4,6 @@ import {
     CLIP_MAX_REPLAY_COUNT,
     CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
-    KMQ_EMOJI,
     KmqImages,
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
@@ -278,18 +277,19 @@ export default abstract class Session {
         // join voice channel and start round
         try {
             await this.ensureVoiceConnection(State.client);
-            if (!voiceChannel.status) {
-                try {
-                    await State.client.setVoiceChannelStatus(
-                        this.voiceChannelID,
-                        KMQ_EMOJI,
-                    );
-                } catch (e) {
-                    logger.debug(
-                        `${getDebugLogHeader(messageContext)} Couldn't set voice channel status for ${voiceChannel.id}. e = ${e}`,
-                    );
-                }
-            }
+            // TODO: fix status update
+            // if (!voiceChannel.status) {
+            //     try {
+            //         await State.client.setVoiceChannelStatus(
+            //             this.voiceChannelID,
+            //             KMQ_EMOJI,
+            //         );
+            //     } catch (e) {
+            //         logger.debug(
+            //             `${getDebugLogHeader(messageContext)} Couldn't set voice channel status for ${voiceChannel.id}. e = ${e}`,
+            //         );
+            //     }
+            // }
         } catch (err) {
             await this.endSession("Unable to obtain voice connection", true);
             if (err instanceof Error) {
@@ -409,18 +409,19 @@ export default abstract class Session {
             ) as Eris.VoiceChannel | null;
 
             if (voiceChannel) {
-                if (voiceChannel.status === KMQ_EMOJI) {
-                    try {
-                        await State.client.setVoiceChannelStatus(
-                            this.voiceChannelID,
-                            "",
-                        );
-                    } catch (e) {
-                        logger.debug(
-                            `Couldn't reset voice channel status for ${voiceChannel.id}. e = ${e}`,
-                        );
-                    }
-                }
+                // TODO: fix status update
+                // if (voiceChannel.status === KMQ_EMOJI) {
+                //     try {
+                //         await State.client.setVoiceChannelStatus(
+                //             this.voiceChannelID,
+                //             "",
+                //         );
+                //     } catch (e) {
+                //         logger.debug(
+                //             `Couldn't reset voice channel status for ${voiceChannel.id}. e = ${e}`,
+                //         );
+                //     }
+                // }
 
                 try {
                     voiceChannel.leave();
@@ -872,7 +873,7 @@ export default abstract class Session {
                     x[0],
                     x[1].join(","),
                 ]),
-                opusPassthrough: specialType === null && !isClipMode,
+                // opusPassthrough: specialType === null && !isClipMode,
                 voiceDataTimeout,
             });
         } catch (e) {
@@ -1052,7 +1053,6 @@ export default abstract class Session {
             label: i18n.translate(locale, "misc.bookmark"),
             custom_id: `${BOOKMARK_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             emoji: {
-                id: null,
                 name: "🔖",
             },
         };
@@ -1074,7 +1074,6 @@ export default abstract class Session {
             custom_id: `${SKIP_BUTTON_PREFIX}:${round.song.youtubeLink}`,
             label: i18n.translate(locale, "misc.skip"),
             emoji: {
-                id: null,
                 name: "⏩",
             },
         };

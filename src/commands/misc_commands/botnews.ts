@@ -76,7 +76,7 @@ export default class BotNewsCommand implements BaseCommand {
                                 style: 5,
                                 url: "https://discord.gg/gDdVXvqVUr",
                                 type: 2,
-                                emoji: { name: "🎵", id: null },
+                                emoji: { name: "🎵" },
                                 label: i18n.translate(
                                     messageContext.guildID,
                                     "misc.interaction.officialKmqServer",

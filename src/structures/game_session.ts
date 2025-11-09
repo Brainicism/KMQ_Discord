@@ -693,7 +693,7 @@ export default class GameSession extends Session {
     }
 
     async handleComponentInteraction(
-        interaction: Eris.ComponentInteraction<Eris.TextableChannel>,
+        interaction: Eris.ComponentInteraction,
         messageContext: MessageContext,
     ): Promise<boolean> {
         const interactionHandled = await super.handleComponentInteraction(
@@ -717,7 +717,7 @@ export default class GameSession extends Session {
         if (!this.round) return false;
         const round = this.round;
         if (interaction.data.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
-            const guildID = interaction.guildID as string;
+            const guildID = interaction.guild?.id as string;
             round.userSkipped(interaction.member!.id);
             if (SkipCommand.isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
@@ -909,8 +909,13 @@ export default class GameSession extends Session {
             EMBED_FIELDS_PER_PAGE,
         );
 
+        const guildId =
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID;
+
         let footerText = i18n.translate(
-            messageOrInteraction.guildID as string,
+            guildId as string,
             "misc.classic.yourScore",
             {
                 score: String(
@@ -927,7 +932,7 @@ export default class GameSession extends Session {
                 .scoreboard as EliminationScoreboard;
 
             footerText = i18n.translate(
-                messageOrInteraction.guildID as string,
+                guildId as string,
                 "misc.elimination.yourLives",
                 {
                     lives: String(
@@ -940,7 +945,7 @@ export default class GameSession extends Session {
         } else if (this.gameType === GameType.TEAMS) {
             const teamScoreboard = this.scoreboard as TeamScoreboard;
             footerText = i18n.translate(
-                messageOrInteraction.guildID as string,
+                guildId as string,
                 "misc.team.yourTeamScore",
                 {
                     teamScore: String(
@@ -952,7 +957,7 @@ export default class GameSession extends Session {
             );
             footerText += "\n";
             footerText += i18n.translate(
-                messageOrInteraction.guildID as string,
+                guildId as string,
                 "misc.team.yourScore",
                 {
                     score: String(
@@ -968,7 +973,7 @@ export default class GameSession extends Session {
             (winnersFieldSubset) => ({
                 color: EMBED_SUCCESS_COLOR,
                 title: i18n.translate(
-                    messageOrInteraction.guildID as string,
+                    guildId as string,
                     "command.score.scoreboardTitle",
                 ),
                 fields: winnersFieldSubset,
@@ -1077,7 +1082,7 @@ export default class GameSession extends Session {
                                     style: Eris.Constants.ButtonStyles.LINK,
                                     url: VOTE_LINK,
                                     type: Eris.Constants.ComponentTypes.BUTTON,
-                                    emoji: { name: "✅", id: null },
+                                    emoji: { name: "✅" },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.vote",
@@ -1087,7 +1092,7 @@ export default class GameSession extends Session {
                                     style: Eris.Constants.ButtonStyles.LINK,
                                     url: REVIEW_LINK,
                                     type: Eris.Constants.ComponentTypes.BUTTON,
-                                    emoji: { name: "📖", id: null },
+                                    emoji: { name: "📖" },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.leaveReview",
@@ -1097,7 +1102,7 @@ export default class GameSession extends Session {
                                     style: Eris.Constants.ButtonStyles.LINK,
                                     url: "https://discord.gg/RCuzwYV",
                                     type: Eris.Constants.ComponentTypes.BUTTON,
-                                    emoji: { name: "🎵", id: null },
+                                    emoji: { name: "🎵" },
                                     label: i18n.translate(
                                         this.guildID,
                                         "misc.interaction.officialKmqServer",

@@ -90,7 +90,7 @@ export default class GuessCommand implements BaseCommand {
         messageContext: MessageContext,
     ): Promise<void> {
         const interactionData = getInteractionValue(interaction);
-        const session = Session.getSession(interaction.guildID as string);
+        const session = Session.getSession(interaction.guild?.id as string);
         if (!session) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,

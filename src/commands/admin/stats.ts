@@ -342,7 +342,7 @@ export default class StatsCommand implements BaseCommand {
     ): Promise<void> {
         await StatsCommand.sendStatsMessage(
             messageContext,
-            interaction.guildID as string,
+            interaction.guild?.id as string,
             interaction,
         );
     }

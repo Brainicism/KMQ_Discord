@@ -103,10 +103,16 @@ export default class UpcomingReleasesCommand implements BaseCommand {
         messageOrInteraction: GuildTextableMessage | CommandInteraction,
         releaseType?: ReleaseType,
     ): Promise<void> {
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const messageContext = new MessageContext(
-            messageOrInteraction.channel.id,
+            messageOrInteraction.channel!.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string,
+            guildID,
         );
 
         const upcomingReleases: Array<UpcomingRelease> = (

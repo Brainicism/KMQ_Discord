@@ -181,7 +181,7 @@ export default class VoteCommand implements BaseCommand {
                             type: Eris.Constants.ComponentTypes.BUTTON,
                             style: Eris.Constants.ButtonStyles.LINK,
                             url: VOTE_LINK,
-                            emoji: { name: "✅", id: null },
+                            emoji: { name: "✅" },
                             label: i18n.translate(
                                 messageContext.guildID,
                                 "misc.interaction.vote",
@@ -191,7 +191,7 @@ export default class VoteCommand implements BaseCommand {
                             type: Eris.Constants.ComponentTypes.BUTTON,
                             style: Eris.Constants.ButtonStyles.LINK,
                             url: REVIEW_LINK,
-                            emoji: { name: "📖", id: null },
+                            emoji: { name: "📖" },
                             label: i18n.translate(
                                 messageContext.guildID,
                                 "misc.interaction.leaveReview",
