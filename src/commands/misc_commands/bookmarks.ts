@@ -141,7 +141,7 @@ export default class BookmarksCommand implements BaseCommand {
         songName?: string,
         artistID?: number,
     ): Promise<void> {
-        const guildID = interaction.guildID!;
+        const guildID = interaction.guild?.id!;
         const locale = State.getGuildLocale(guildID);
         let bookmarkedSongQuery = dbContext.kmq
             .selectFrom("bookmarked_songs")
@@ -286,7 +286,7 @@ export default class BookmarksCommand implements BaseCommand {
 
         const showHangul =
             containsHangul(lowercaseUserInput) ||
-            (State.getGuildLocale(interaction.guildID as string) ===
+            (State.getGuildLocale(interaction.guild?.id as string) ===
                 LocaleType.KO &&
                 lowercaseUserInput.length === 0);
 

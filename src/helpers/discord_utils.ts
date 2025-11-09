@@ -117,7 +117,7 @@ export function getDebugLogHeader(
         context instanceof Eris.CommandInteraction ||
         context instanceof Eris.AutocompleteInteraction
     ) {
-        header = `gid: ${context.guildID}, uid: ${context.member?.id}, tid: ${context.channel.id}`;
+        header = `gid: ${context.guild?.id}, uid: ${context.member?.id}, tid: ${context.channel!.id}`;
     } else {
         header = `gid: ${context.guildID}, tid: ${context.textChannelID}`;
     }
@@ -324,7 +324,7 @@ async function sendMessageExceptionHandler(
     channelID: string,
     guildID: string | undefined,
     authorID: string | undefined,
-    messageContent: Eris.AdvancedMessageContent | undefined,
+    messageContent: Eris.AdvancedMessageContent<"hasNonce"> | undefined,
     messageOrInteraction:
         | GuildTextableMessage
         | Eris.CommandInteraction
@@ -479,7 +479,7 @@ async function sendMessageExceptionHandler(
  */
 export async function sendMessage(
     textChannelID: string | null,
-    messageContent: Eris.AdvancedMessageContent,
+    messageContent: Eris.AdvancedMessageContent<"hasNonce">,
     authorID?: string,
     interaction?: Eris.ComponentInteraction | Eris.CommandInteraction,
 ): Promise<Eris.Message | null> {
@@ -629,7 +629,7 @@ export async function sendMessage(
  */
 export async function sendDmMessage(
     userID: string,
-    messageContent: Eris.AdvancedMessageContent,
+    messageContent: Eris.AdvancedMessageContent<"hasNonce">,
 ): Promise<Eris.Message | null> {
     const { client } = State;
     let dmChannel: Eris.PrivateChannel;
@@ -1420,11 +1420,16 @@ export async function sendPaginationedEmbed(
         return null;
     }
 
+    const guildId =
+        messageOrInteraction instanceof Eris.CommandInteraction
+            ? messageOrInteraction.guild?.id
+            : messageOrInteraction.guildID;
+
     if (embeds.length > 1) {
         if (
             await textPermissionsCheck(
-                messageOrInteraction.channel.id,
-                messageOrInteraction.guildID as string,
+                messageOrInteraction.channel!.id,
+                guildId as string,
                 messageOrInteraction.member!.id,
                 [...REQUIRED_TEXT_PERMISSIONS, "readMessageHistory"],
             )
@@ -1443,8 +1448,8 @@ export async function sendPaginationedEmbed(
             } catch (e) {
                 await sendMessageExceptionHandler(
                     e,
-                    messageOrInteraction.channel.id,
-                    messageOrInteraction.guildID,
+                    messageOrInteraction.channel!.id,
+                    guildId,
                     messageOrInteraction.member?.id,
                     undefined,
                     messageOrInteraction,
@@ -1463,7 +1468,7 @@ export async function sendPaginationedEmbed(
     }
 
     return sendMessage(
-        messageOrInteraction.channel.id,
+        messageOrInteraction.channel!.id,
         {
             embeds: [embed],
             components,
@@ -2051,7 +2056,7 @@ export async function tryCreateInteractionErrorAcknowledgement(
                     title:
                         title ||
                         i18n.translate(
-                            interaction.guildID as string,
+                            interaction.guild?.id as string,
                             "misc.interaction.title.failure",
                         ),
                     description,
@@ -2250,7 +2255,7 @@ export async function processGroupAutocompleteInteraction(
 
     const showHangul =
         containsHangul(lowercaseUserInput) ||
-        State.getGuildLocale(interaction.guildID as string) === LocaleType.KO;
+        State.getGuildLocale(interaction.guild?.id as string) === LocaleType.KO;
 
     await tryAutocompleteInteractionAcknowledge(
         interaction,

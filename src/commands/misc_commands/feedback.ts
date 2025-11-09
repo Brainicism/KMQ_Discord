@@ -71,7 +71,7 @@ export default class FeedbackCommand implements BaseCommand {
     ): Promise<void> => {
         await interaction.createModal({
             title: i18n.translate(
-                interaction.guildID as string,
+                interaction.guild?.id as string,
                 "command.feedback.questions.title",
             ),
             custom_id: "feedback",
@@ -84,11 +84,11 @@ export default class FeedbackCommand implements BaseCommand {
                             style: Eris.Constants.TextInputStyles.PARAGRAPH,
                             custom_id: uuid.v4() as string,
                             label: i18n.translate(
-                                interaction.guildID as string,
+                                interaction.guild?.id as string,
                                 feedbackQuestion.question,
                             ),
                             placeholder: i18n.translate(
-                                interaction.guildID as string,
+                                interaction.guild?.id as string,
                                 feedbackQuestion.placeholder,
                             ),
                             required: feedbackQuestion.required,
@@ -126,10 +126,20 @@ export default class FeedbackCommand implements BaseCommand {
             const questionIndex = parseInt(idx, 10);
             feedbackResponse += "--------------------------------\n";
             feedbackResponse += `Q${questionIndex + 1}. ${i18n.translate(
-                interaction.guildID as string,
+                interaction.guild?.id as string,
                 FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex]!.question,
             )}\n`;
-            feedbackResponse += `${modalComponent.components[0]!.value}\n`;
+
+            if (
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                modalComponent.type === Eris.Constants.ComponentTypes.ACTION_ROW
+            ) {
+                feedbackResponse += `${modalComponent.components[0]!.value}\n`;
+            } else {
+                logger.error(
+                    `Unexpected modal component type in feedback: ${modalComponent.type}`,
+                );
+            }
         }
 
         if (!process.env.ALERT_WEBHOOK_URL) {

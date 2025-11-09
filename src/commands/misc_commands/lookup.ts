@@ -240,14 +240,19 @@ export default class LookupCommand implements BaseCommand {
             linkOrName = `https://${linkOrName}`;
         }
 
-        const guildID = messageOrInteraction.guildID as string;
+        const guildId = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const messageContext = new MessageContext(
-            messageOrInteraction.channel.id,
+            messageOrInteraction.channel!.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string,
+            guildId,
         );
 
-        const locale = State.getGuildLocale(guildID as string);
+        const locale = State.getGuildLocale(guildId);
 
         // attempt to look up by video ID
         if (isValidURL(linkOrName) || validateYouTubeID(linkOrName)) {
@@ -259,7 +264,7 @@ export default class LookupCommand implements BaseCommand {
                 await sendValidationErrorMessage(
                     messageContext,
                     i18n.translate(
-                        guildID,
+                        guildId,
                         "command.lookup.validation.invalidYouTubeID",
                     ),
                     arg,
@@ -285,11 +290,11 @@ export default class LookupCommand implements BaseCommand {
                     messageContext,
                     {
                         title: i18n.translate(
-                            guildID,
+                            guildId,
                             "command.lookup.notFound.title",
                         ),
                         description: i18n.translate(
-                            guildID,
+                            guildId,
                             "command.lookup.notFound.description",
                         ),
                         thumbnailUrl: KmqImages.DEAD,
@@ -318,11 +323,11 @@ export default class LookupCommand implements BaseCommand {
                 messageContext,
                 {
                     title: i18n.translate(
-                        guildID,
+                        guildId,
                         "command.lookup.songNameSearchResult.title",
                     ),
                     description: i18n.translate(
-                        guildID,
+                        guildId,
                         "command.lookup.songNameSearchResult.notFoundDescription",
                     ),
                 },
@@ -390,7 +395,12 @@ export default class LookupCommand implements BaseCommand {
         videoID: string,
         locale: LocaleType,
     ): Promise<boolean> {
-        const guildID = messageOrInteraction.guildID as string;
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const kmqSongEntry = await SongSelector.getSongByLink(videoID);
         const daisukiEntry = await dbContext.kpopVideos
             .selectFrom("app_kpop")
@@ -624,9 +634,9 @@ export default class LookupCommand implements BaseCommand {
         }
 
         const messageContext = new MessageContext(
-            messageOrInteraction.channel.id,
+            messageOrInteraction.channel!.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string,
+            guildID,
         );
 
         await sendInfoMessage(
@@ -729,14 +739,20 @@ export default class LookupCommand implements BaseCommand {
             LookupCommand.ENTRIES_PER_PAGE,
         );
 
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const embeds: Array<EmbedOptions> = embedFieldSubsets.map(
             (embedFieldsSubset) => ({
                 title: i18n.translate(
-                    messageOrInteraction.guildID as string,
+                    guildID,
                     "command.lookup.songNameSearchResult.title",
                 ),
                 description: i18n.translate(
-                    messageOrInteraction.guildID as string,
+                    guildID as string,
                     "command.lookup.songNameSearchResult.successDescription",
                 ),
                 fields: embedFieldsSubset,
@@ -772,7 +788,7 @@ export default class LookupCommand implements BaseCommand {
         const showPopular = lowercaseUserInput.length < 2;
         const showHangul =
             containsHangul(lowercaseUserInput) ||
-            (State.getGuildLocale(interaction.guildID as string) ===
+            (State.getGuildLocale(interaction.guild?.id as string) ===
                 LocaleType.KO &&
                 showPopular);
 

@@ -67,10 +67,16 @@ export default class RecentlyAddedCommand implements BaseCommand {
     static async showRecentlyAddedSongs(
         messageOrInteraction: GuildTextableMessage | CommandInteraction,
     ): Promise<void> {
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const messageContext = new MessageContext(
-            messageOrInteraction.channel.id,
+            messageOrInteraction.channel!.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string,
+            guildID as string,
         );
 
         const newSongs: Array<QueriedSong> = (

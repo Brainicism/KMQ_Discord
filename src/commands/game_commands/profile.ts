@@ -285,11 +285,11 @@ export default class ProfileCommand implements BaseCommand {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID as string,
+                    interaction.guild?.id as string,
                     "command.profile.failure.notFound.title",
                 ),
                 i18n.translate(
-                    interaction.guildID as string,
+                    interaction.guild?.id as string,
                     "misc.interaction.profile.inaccessible",
                     {
                         profileUserID: `${clickableSlashCommand(
@@ -309,18 +309,18 @@ export default class ProfileCommand implements BaseCommand {
 
         const fields = await ProfileCommand.getProfileFields(
             user,
-            interaction.guildID as string,
+            interaction.guild?.id as string,
         );
 
         if (fields.length === 0) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID as string,
+                    interaction.guild?.id as string,
                     "command.profile.failure.notFound.title",
                 ),
                 i18n.translate(
-                    interaction.guildID as string,
+                    interaction.guild?.id as string,
                     "misc.interaction.profile.noStats",
                 ),
             );
