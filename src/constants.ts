@@ -357,6 +357,7 @@ export const DiscordPreferredLocaleToInternal: {
     hi: LocaleType.HI,
 };
 
+// eslint-disable-next-line import/no-unused-modules
 export const KMQ_EMOJI = "<:kmq:761624775843905546>";
 export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
 
