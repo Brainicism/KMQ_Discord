@@ -104,7 +104,7 @@ jobs:
                   # fi
 
                   # # temporarily (?) mock audio until we have a longer term solution
-                  # echo "MOCK_AUDIO=true" >> $GITHUB_ENV
+                  echo "MOCK_AUDIO=true" >> $GITHUB_ENV
 
               env:
                   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

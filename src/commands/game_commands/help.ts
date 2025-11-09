@@ -98,10 +98,16 @@ export default class HelpCommand implements BaseCommand {
             delete commandFiles[command];
         }
 
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
         const messageContext = new MessageContext(
-            messageOrInteraction.channel.id,
+            messageOrInteraction.channel!.id,
             new KmqMember(messageOrInteraction.member!.id),
-            messageOrInteraction.guildID as string,
+            guildID,
         );
 
         const commandFilesWithAliases: { [commandName: string]: BaseCommand } =
@@ -373,7 +379,7 @@ export default class HelpCommand implements BaseCommand {
         const lowercaseUserInput = focusedVal.toLowerCase();
         const commands = Object.values(State.client.commands)
             .filter((x) => x.help)
-            .map((x) => x.help!(interaction.guildID as string))
+            .map((x) => x.help!(interaction.guild?.id as string))
             .filter((x) => !HelpCommand.excludedCommands.includes(x.name))
             .sort((a, b) => b.priority - a.priority);
 

@@ -1250,7 +1250,7 @@ export default class PresetCommand implements BaseCommand {
         interaction: Eris.AutocompleteInteraction,
     ): Promise<void> {
         const guildPreference = await GuildPreference.getGuildPreference(
-            interaction.guildID as string,
+            interaction.guild?.id as string,
         );
 
         const presets = await guildPreference.listPresets();

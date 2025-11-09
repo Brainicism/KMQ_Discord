@@ -66,7 +66,7 @@ export default async function interactionCreateHandler(
         | Eris.ModalSubmitInteraction,
 ): Promise<void> {
     const hrstart = process.hrtime();
-    if (!interaction.guildID) {
+    if (!interaction.guild?.id) {
         if (
             interaction instanceof Eris.ComponentInteraction ||
             interaction instanceof Eris.CommandInteraction
@@ -84,9 +84,9 @@ export default async function interactionCreateHandler(
         return;
     }
 
-    if (State.bannedServers.has(interaction.guildID)) {
+    if (State.bannedServers.has(interaction.guild.id)) {
         logger.warn(
-            `Banned server attempted to execute interaction. id = ${interaction.guildID}`,
+            `Banned server attempted to execute interaction. id = ${interaction.guild.id}`,
         );
 
         if (
@@ -96,11 +96,11 @@ export default async function interactionCreateHandler(
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guild.id,
                     "misc.interaction.title.failure",
                 ),
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guild.id,
                     "misc.failure.interaction.guildBanned",
                     {
                         supportServer: "https://discord.gg/RCuzwYV",
@@ -126,11 +126,11 @@ export default async function interactionCreateHandler(
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guild.id,
                     "misc.interaction.title.failure",
                 ),
                 i18n.translate(
-                    interaction.guildID,
+                    interaction.guild.id,
                     "misc.failure.interaction.playerBanned",
                     {
                         supportServer: "https://discord.gg/RCuzwYV",
@@ -144,12 +144,12 @@ export default async function interactionCreateHandler(
 
     const member = new KmqMember(interaction.member!.id);
     const messageContext = new MessageContext(
-        interaction.channel.id,
+        interaction.channel!.id,
         member,
-        interaction.guildID as string,
+        interaction.guild.id as string,
     );
 
-    const session = Session.getSession(interaction.guildID as string);
+    const session = Session.getSession(interaction.guild.id as string);
     let interactionName: string | null = null;
     try {
         if (interaction instanceof Eris.ComponentInteraction) {
@@ -163,7 +163,7 @@ export default async function interactionCreateHandler(
                         interaction,
                         null,
                         i18n.translate(
-                            interaction.guildID as string,
+                            interaction.guild.id as string,
                             "misc.failure.interaction.bookmarkOutsideGame",
                         ),
                     );

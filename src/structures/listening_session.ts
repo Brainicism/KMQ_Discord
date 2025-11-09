@@ -160,7 +160,7 @@ export default class ListeningSession extends Session {
         }
 
         const round = this.round;
-        const guildID = interaction.guildID as string;
+        const guildID = interaction.guild?.id as string;
         if (interaction.data.custom_id.startsWith(BOOKMARK_BUTTON_PREFIX)) {
             await this.handleBookmarkInteraction(interaction);
             return true;

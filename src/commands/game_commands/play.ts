@@ -584,7 +584,7 @@ export default class PlayCommand implements BaseCommand {
             return;
         }
 
-        const gameSession = Session.getSession(interaction.guildID!) as
+        const gameSession = Session.getSession(interaction.guild?.id!) as
             | GameSession
             | undefined;
 
