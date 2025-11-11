@@ -1,15 +1,15 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import MessageContext from "../../structures/message_context.js";
+import Session from "../../structures/session.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 
 const logger = new IPCLogger("forceplay");
 

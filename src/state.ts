@@ -1,15 +1,15 @@
-import { DEFAULT_LOCALE } from "./constants";
-import RateLimiter from "./rate_limiter";
+import { DEFAULT_LOCALE } from "./constants.js";
+import RateLimiter from "./rate_limiter.js";
 import type { IPC } from "eris-fleet";
-import type { RedditClient } from "./helpers/reddit_client";
-import type GameSession from "./structures/game_session";
-import type GeminiClient from "./helpers/gemini_client";
-import type KmqClient from "./kmq_client";
-import type ListeningSession from "./structures/listening_session";
-import type LocaleType from "./enums/locale_type";
-import type MatchedArtist from "./interfaces/matched_artist";
-import type PlaylistManager from "./helpers/playlist_manager";
-import type RestartNotification from "./interfaces/restart_notification";
+import type { RedditClient } from "./helpers/reddit_client.js";
+import type GameSession from "./structures/game_session.js";
+import type GeminiClient from "./helpers/gemini_client.js";
+import type KmqClient from "./kmq_client.js";
+import type ListeningSession from "./structures/listening_session.js";
+import type LocaleType from "./enums/locale_type.js";
+import type MatchedArtist from "./interfaces/matched_artist.js";
+import type PlaylistManager from "./helpers/playlist_manager.js";
+import type RestartNotification from "./interfaces/restart_notification.js";
 
 export default class State {
     static version: string;

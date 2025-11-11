@@ -1,6 +1,6 @@
-import { IPCLogger } from "../logger";
-import { KMQ_USER_AGENT } from "../constants";
-import NewsRange from "../enums/news_range";
+import { IPCLogger } from "../logger.js";
+import { KMQ_USER_AGENT } from "../constants.js";
+import NewsRange from "../enums/news_range.js";
 import Snoowrap from "snoowrap";
 
 const logger = new IPCLogger("reddit_client");

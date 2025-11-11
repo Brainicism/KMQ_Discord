@@ -1,22 +1,22 @@
 import * as schedule from "node-schedule";
 import { BaseServiceWorker } from "eris-fleet";
-import { IPCLogger } from "./logger";
-import { RedditClient } from "./helpers/reddit_client";
-import { chooseRandom, retryJob } from "./helpers/utils";
-import BotListingManager from "./helpers/bot_listing_manager";
-import EnvType from "./enums/env_type";
-import EnvVariableManager from "./env_variable_manager";
-import FactGenerator from "./fact_generator";
-import GeminiClient from "./helpers/gemini_client";
-import KmqConfiguration from "./kmq_configuration";
-import LocaleType from "./enums/locale_type";
-import NewsRange from "./enums/news_range";
-import dbContext from "./database_context";
+import { IPCLogger } from "./logger.js";
+import { RedditClient } from "./helpers/reddit_client.js";
+import { chooseRandom, retryJob } from "./helpers/utils.js";
+import BotListingManager from "./helpers/bot_listing_manager.js";
+import EnvType from "./enums/env_type.js";
+import EnvVariableManager from "./env_variable_manager.js";
+import FactGenerator from "./fact_generator.js";
+import GeminiClient from "./helpers/gemini_client.js";
+import KmqConfiguration from "./kmq_configuration.js";
+import LocaleType from "./enums/locale_type.js";
+import NewsRange from "./enums/news_range.js";
+import dbContext from "./database_context.js";
 import type { Insertable } from "kysely";
-import type { KpopNewsRedditPost } from "./helpers/reddit_client";
-import type { News } from "./typings/kmq_db";
+import type { KpopNewsRedditPost } from "./helpers/reddit_client.js";
+import type { News } from "./typings/kmq_db.js";
 import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
-import type FactCache from "./interfaces/fact_cache";
+import type FactCache from "./interfaces/fact_cache.js";
 
 const logger = new IPCLogger("kmq_service");
 

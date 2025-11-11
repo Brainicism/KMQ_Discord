@@ -1,7 +1,7 @@
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
-import EnvType from "../../enums/env_type";
-import State from "../../state";
+import { IPCLogger } from "../../logger.js";
+import { extractErrorString } from "../../helpers/utils.js";
+import EnvType from "../../enums/env_type.js";
+import State from "../../state.js";
 
 const logger = new IPCLogger("unhandledRejection");
 

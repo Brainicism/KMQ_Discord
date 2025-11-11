@@ -4,7 +4,7 @@
 import { BG } from "bgutils-js";
 import { JSDOM } from "jsdom";
 import { ProtoUtils } from "youtubei.js";
-import { YOUTUBE_SESSION_TMP_COOKIE_PATH } from "../constants";
+import { YOUTUBE_SESSION_TMP_COOKIE_PATH } from "../constants.js";
 import fs from "fs";
 
 // mostly copied from https://github.com/LuanRT/BgUtils/tree/main/examples/node

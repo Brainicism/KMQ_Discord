@@ -1,24 +1,24 @@
-import { DEFAULT_SEEK, OptionAction } from "../../constants";
-import { IPCLogger } from "../../logger";
+import * as Eris from "eris";
+import { DEFAULT_SEEK, OptionAction } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import SeekType from "../../enums/option_types/seek_type";
-import Session from "../../structures/session";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import SeekType from "../../enums/option_types/seek_type.js";
+import Session from "../../structures/session.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "seek";
 const logger = new IPCLogger(COMMAND_NAME);
