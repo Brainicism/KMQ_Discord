@@ -1438,6 +1438,7 @@ export async function sendPaginationedEmbed(
                 return await EmbedPaginator.createPaginationEmbed(
                     messageOrInteraction.channel as GuildTextableChannel,
                     messageOrInteraction.member!.id,
+                    process.env.BOT_CLIENT_ID!,
                     embeds,
                     { timeout: 60000, startPage, cycling: true },
                     components,
