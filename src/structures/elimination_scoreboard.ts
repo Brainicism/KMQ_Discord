@@ -1,6 +1,6 @@
-import Scoreboard from "./scoreboard";
-import type EliminationPlayer from "./elimination_player";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import Scoreboard from "./scoreboard.js";
+import type EliminationPlayer from "./elimination_player.js";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result.js";
 
 export default class EliminationScoreboard extends Scoreboard {
     /** The amount of lives each player starts with */

@@ -1,7 +1,7 @@
-import GameOption from "../../../enums/game_option_name";
-import GuildPreference from "../../../structures/guild_preference";
-import Player from "../../../structures/player";
-import Scoreboard from "../../../structures/scoreboard";
+import GameOption from "../../../enums/game_option_name.js";
+import GuildPreference from "../../../structures/guild_preference.js";
+import Player from "../../../structures/player.js";
+import Scoreboard from "../../../structures/scoreboard.js";
 import assert from "assert";
 
 const userIDs = ["12345", "23456", "34567"];

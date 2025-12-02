@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { KmqResponseType } from "./test_suite";
-import type ParsedGameOptionValues from "../parsed_game_options_value";
-import type TestSuite from "./test_suite";
+import { KmqResponseType } from "./test_suite.js";
+import type ParsedGameOptionValues from "../parsed_game_options_value.js";
+import type TestSuite from "./test_suite.js";
 
 // basic tests to validate most popular user facing options
 const BASIC_OPTIONS_TEST_SUITE: TestSuite = {

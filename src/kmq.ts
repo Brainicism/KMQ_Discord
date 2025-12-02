@@ -1,39 +1,39 @@
 /* eslint-disable no-await-in-loop */
+import * as Eris from "eris";
 import {
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
     KmqImages,
     STANDBY_COOKIE,
     STATUS_COOKIE,
-} from "./constants";
+} from "./constants.js";
 import { Fleet } from "eris-fleet";
-import { clearRestartNotification } from "./helpers/management_utils";
+import { clearRestartNotification } from "./helpers/management_utils.js";
 import { config } from "dotenv";
 import {
     delay,
     extractErrorString,
     isPrimaryInstance,
     pathExists,
-} from "./helpers/utils";
-import { getInternalLogger } from "./logger";
-import EnvType from "./enums/env_type";
-import Eris from "eris";
-import KmqClient from "./kmq_client";
-import backupKmqDatabase from "./scripts/backup-kmq-database";
+} from "./helpers/utils.js";
+import { getInternalLogger } from "./logger.js";
+import EnvType from "./enums/env_type.js";
+import KmqClient from "./kmq_client.js";
+import backupKmqDatabase from "./scripts/backup-kmq-database.js";
 import cluster from "cluster";
-import dbContext from "./database_context";
+import dbContext from "./database_context.js";
 import fs from "fs";
 
-import { sendInfoWebhook } from "./helpers/discord_utils";
-import KmqWebServer from "./kmq_web_server";
+import { sendInfoWebhook } from "./helpers/discord_utils.js";
+import KmqWebServer from "./kmq_web_server.js";
 import path from "path";
 import schedule from "node-schedule";
-import storeDailyStats from "./scripts/store-daily-stats";
+import storeDailyStats from "./scripts/store-daily-stats.js";
 import type { Options } from "eris-fleet";
 
 const logger = getInternalLogger();
 
-config({ path: path.resolve(__dirname, "../.env") });
+config({ path: path.resolve(import.meta.dirname, "../.env") });
 
 const ERIS_INTENTS = Eris.Constants.Intents;
 const options: Options = {
@@ -44,7 +44,7 @@ const options: Options = {
         {
             name: "kmq_service",
             path: path.join(
-                __dirname,
+                import.meta.dirname,
                 process.env.NODE_ENV === EnvType.DEV_TS_NODE
                     ? "./kmq_service.ts"
                     : "./kmq_service.js",
@@ -52,7 +52,7 @@ const options: Options = {
         },
     ],
     path: path.join(
-        __dirname,
+        import.meta.dirname,
         process.env.NODE_ENV === EnvType.DEV_TS_NODE
             ? "./kmq_worker.ts"
             : "./kmq_worker.js",

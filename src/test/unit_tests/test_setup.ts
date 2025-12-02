@@ -1,16 +1,16 @@
 /* eslint-disable no-await-in-loop */
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
-import { DATABASE_DOWNLOAD_DIR } from "../../constants";
-import { IPCLogger } from "../../logger";
+import { DATABASE_DOWNLOAD_DIR } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     importCachedDump,
     performMigrationDown,
     performMigrations,
-} from "../../seed/bootstrap";
+} from "../../seed/bootstrap.js";
 import { sql } from "kysely";
-import EnvType from "../../enums/env_type";
-import dbContext, { getNewConnection } from "../../database_context";
+import EnvType from "../../enums/env_type.js";
+import dbContext, { getNewConnection } from "../../database_context.js";
 import fs from "fs";
 import path from "path";
 import sinon from "sinon";
@@ -21,10 +21,12 @@ const sandbox = sinon.createSandbox();
 async function loadStoredProceduresForTest(): Promise<void> {
     const storedProcedureDefinitions = (
         await fs.promises.readdir(
-            path.join(__dirname, "../../../sql/procedures"),
+            path.join(import.meta.dirname, "../../../sql/procedures"),
         )
     )
-        .map((x) => path.join(__dirname, "../../../sql/procedures", x))
+        .map((x) =>
+            path.join(import.meta.dirname, "../../../sql/procedures", x),
+        )
         .sort();
 
     for (const storedProcedureDefinition of storedProcedureDefinitions) {

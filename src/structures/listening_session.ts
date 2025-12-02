@@ -1,23 +1,23 @@
-import { BOOKMARK_BUTTON_PREFIX, SKIP_BUTTON_PREFIX } from "../constants";
-import { IPCLogger } from "../logger";
-import { chooseRandom } from "../helpers/utils";
+import { BOOKMARK_BUTTON_PREFIX, SKIP_BUTTON_PREFIX } from "../constants.js";
+import { IPCLogger } from "../logger.js";
+import { chooseRandom } from "../helpers/utils.js";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
     getMajorityCount,
     tryCreateInteractionSuccessAcknowledgement,
-} from "../helpers/discord_utils";
-import { userBonusIsActive } from "../helpers/game_utils";
-import KmqMember from "./kmq_member";
-import ListeningRound from "./listening_round";
-import Session from "./session";
-import SkipCommand from "../commands/game_commands/skip";
-import i18n from "../helpers/localization_manager";
+} from "../helpers/discord_utils.js";
+import { userBonusIsActive } from "../helpers/game_utils.js";
+import KmqMember from "./kmq_member.js";
+import ListeningRound from "./listening_round.js";
+import Session from "./session.js";
+import SkipCommand from "../commands/game_commands/skip.js";
+import i18n from "../helpers/localization_manager.js";
 import type Eris from "eris";
-import type GuildPreference from "./guild_preference";
-import type MessageContext from "./message_context";
-import type QueriedSong from "./queried_song";
-import type Round from "./round";
+import type GuildPreference from "./guild_preference.js";
+import type MessageContext from "./message_context.js";
+import type QueriedSong from "./queried_song.js";
+import type Round from "./round.js";
 
 const logger = new IPCLogger("listening_session");
 

@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
@@ -5,23 +6,22 @@ import {
     VOTE_BONUS_DURATION,
     VOTE_LINK,
     VOTE_RESET_DURATION,
-} from "../../constants";
-import { IPCLogger } from "../../logger";
-import { bold } from "../../helpers/utils";
+} from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
+import { bold } from "../../helpers/utils.js";
 import {
     getDebugLogHeader,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import { userBonusIsActive } from "../../helpers/game_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import { userBonusIsActive } from "../../helpers/game_utils.js";
+import MessageContext from "../../structures/message_context.js";
+import dbContext from "../../database_context.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type EmbedPayload from "../../interfaces/embed_payload.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "vote";
 const logger = new IPCLogger(COMMAND_NAME);

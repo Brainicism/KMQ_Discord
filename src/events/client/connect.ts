@@ -1,4 +1,4 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 
 const logger = new IPCLogger("connect");
 

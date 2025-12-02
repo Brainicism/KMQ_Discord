@@ -1,11 +1,12 @@
+import * as Eris from "eris";
 import {
     EMBED_ERROR_COLOR,
     GROUP_LIST_URL,
     GroupAction,
     KmqImages,
     OptionAction,
-} from "../../constants";
-import { IPCLogger } from "../../logger";
+} from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     generateOptionsMessage,
@@ -16,29 +17,28 @@ import {
     sendErrorMessage,
     sendInfoMessage,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
+} from "../../helpers/discord_utils.js";
 import {
     getMatchingGroupNames,
     getSimilarGroupNames,
-} from "../../helpers/game_utils";
-import { getOrdinalNum } from "../../helpers/utils";
-import AddCommand, { AddType } from "./add";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import RemoveCommand, { RemoveType } from "./remove";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type HelpDocumentation from "../../interfaces/help";
-import type MatchedArtist from "../../interfaces/matched_artist";
+} from "../../helpers/game_utils.js";
+import { getOrdinalNum } from "../../helpers/utils.js";
+import AddCommand, { AddType } from "./add.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameOption from "../../enums/game_option_name.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import RemoveCommand, { RemoveType } from "./remove.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type EmbedPayload from "../../interfaces/embed_payload.js";
+import type HelpDocumentation from "../../interfaces/help.js";
+import type MatchedArtist from "../../interfaces/matched_artist.js";
 
 const COMMAND_NAME = "include";
 const logger = new IPCLogger(COMMAND_NAME);

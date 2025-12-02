@@ -4,7 +4,7 @@
  */
 
 import { SelectQueryNode } from "kysely";
-import EmptyWhereInTransformer from "./transformer";
+import EmptyWhereInTransformer from "./transformer.js";
 import type {
     KyselyPlugin,
     PluginTransformQueryArgs,

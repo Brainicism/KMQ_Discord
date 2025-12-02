@@ -6,7 +6,7 @@ import isMaster from "cluster";
 import path, { resolve } from "path";
 import winston from "winston";
 
-config({ path: resolve(__dirname, "../.env") });
+config({ path: resolve(import.meta.dirname, "../.env") });
 
 type LoggerArg = string | number | Object | Array<string | number | Object>;
 
@@ -36,7 +36,10 @@ export function getInternalLogger(): winston.Logger {
                 format: format.combine(format.timestamp(), consoleFormat),
             }),
             new DailyRotateFile({
-                filename: path.join(__dirname, "../logs/kmq-%DATE%.log"),
+                filename: path.join(
+                    import.meta.dirname,
+                    "../logs/kmq-%DATE%.log",
+                ),
                 maxFiles: "14d",
             }),
         ],
