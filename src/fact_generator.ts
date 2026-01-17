@@ -836,6 +836,7 @@ export default class FactGenerator {
             .select((eb) => eb.fn("MONTH", ["date_birth"]).as("birth_month"))
             .select(sql`DATE_FORMAT(date_birth, '%M %e')`.as("formatted_bday"))
             .where("date_birth", "is not", null)
+            .where("is_deceased", "=", "n")
             .where(sql<boolean>`MONTH(date_birth) = MONTH(CURRENT_DATE())`)
             .limit(10)
             .execute();
