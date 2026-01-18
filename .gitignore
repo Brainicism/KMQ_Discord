@@ -17,4 +17,4 @@ data/
 .eslintcache
 *.bak
 .DS_Store
-bin/yt-dlp
+bin/
