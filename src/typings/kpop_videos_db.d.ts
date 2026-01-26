@@ -24,14 +24,11 @@ export interface AppKpop {
     publishedon: Date;
     recentlikes: Generated<number>;
     recentviews: Generated<number>;
-    regionlocked: Generated<string>;
     releasedate: Date;
     tags: Generated<string>;
     views: Generated<number>;
     vlink: Generated<string>;
     vtype: Generated<"alternate" | "duplicate" | "main">;
-    youtubeadviews: Generated<number>;
-    youtubecharts: string;
 }
 
 export interface AppKpopAgrelation {
@@ -82,8 +79,6 @@ export interface AppKpopGroup {
     gaondigital_firsts: Generated<number>;
     gaondigital_times: Generated<number>;
     id: number;
-    id_company: Generated<number>;
-    id_country: Generated<number>;
     id_debut: Generated<number | null>;
     id_parentgroup: Generated<number>;
     is_collab: Generated<"n" | "y">;
@@ -118,8 +113,6 @@ export interface AppKpopGroupSafe {
     gaondigital_times: Generated<number>;
     has_songs: Generated<number | null>;
     id: number;
-    id_company: Generated<number>;
-    id_country: Generated<number>;
     id_debut: Generated<number | null>;
     id_parentgroup: Generated<number>;
     is_collab: Generated<"n" | "y">;
