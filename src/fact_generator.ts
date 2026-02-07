@@ -60,8 +60,6 @@ export default class FactGenerator {
             FactGenerator.recentCircleDigitalWeekly,
             FactGenerator.fanclubName,
             FactGenerator.closeBirthdays,
-            FactGenerator.mostArtistsEntertainmentCompany,
-            FactGenerator.mostViewedEntertainmentCompany,
             FactGenerator.songReleaseAnniversaries,
             FactGenerator.mostAnnualAwardShowWins,
             FactGenerator.latestPak,
@@ -444,70 +442,6 @@ export default class FactGenerator {
                     lng,
                 }),
                 likes: friendlyFormattedNumber(x["likes"]),
-                lng,
-            }),
-        );
-    }
-
-    static async mostViewedEntertainmentCompany(
-        lng: LocaleType,
-    ): Promise<string[]> {
-        const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop")
-            .innerJoin(
-                "app_kpop_group_safe",
-                "app_kpop.id_artist",
-                "app_kpop_group_safe.id",
-            )
-            .innerJoin(
-                "app_kpop_company",
-                "app_kpop_company.id",
-                "app_kpop_group_safe.id_company",
-            )
-            .select(["app_kpop_company.name as name"])
-            .groupBy("app_kpop_group_safe.id_company")
-            .select((eb) => eb.fn.sum<number>("app_kpop.views").as("views"))
-            .orderBy("views", "desc")
-            .limit(15)
-            .execute();
-
-        return result.map((x, idx) =>
-            i18n.internalLocalizer.t("fact.fun.companyByArtistViews", {
-                name: x["name"],
-                ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
-                    lng,
-                }),
-                views: friendlyFormattedNumber(x["views"]),
-                lng,
-            }),
-        );
-    }
-
-    static async mostArtistsEntertainmentCompany(
-        lng: LocaleType,
-    ): Promise<string[]> {
-        const result = await dbContext.kpopVideos
-            .selectFrom("app_kpop_group_safe")
-            .innerJoin(
-                "app_kpop_company",
-                "app_kpop_company.id",
-                "app_kpop_group_safe.id_company",
-            )
-            .select(["app_kpop_company.name as name"])
-            .where("app_kpop_group_safe.is_collab", "=", "n")
-            .groupBy("app_kpop_group_safe.id_company")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .orderBy("count", "desc")
-            .limit(15)
-            .execute();
-
-        return result.map((x, idx) =>
-            i18n.internalLocalizer.t("fact.fun.companyByArtistCount", {
-                company: x["name"],
-                ordinalNum: i18n.internalLocalizer.t(getOrdinalNum(idx + 1), {
-                    lng,
-                }),
-                num: friendlyFormattedNumber(x["count"]),
                 lng,
             }),
         );
