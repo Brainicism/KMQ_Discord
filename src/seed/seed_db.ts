@@ -39,8 +39,7 @@ const exec = util.promisify(cp.exec);
 
 config({ path: path.resolve(__dirname, "../../.env") });
 const SQL_DUMP_EXPIRY = 10;
-const daisukiDbDownloadUrl =
-    "https://soridata.com/download.php?password=$PASSWORD";
+const daisukiDbDownloadUrl = "https://soridata.com/download.php?pass=$PASSWORD";
 
 const logger = new IPCLogger("seed_db");
 
