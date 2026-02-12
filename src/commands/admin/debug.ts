@@ -1,18 +1,18 @@
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
+import { IPCLogger } from "../../logger.js";
+import { KmqImages } from "../../constants.js";
 import {
     getDebugLogHeader,
     getUserVoiceChannel,
     sendInfoEmbedsWebhook,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+} from "../../helpers/discord_utils.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("debug");

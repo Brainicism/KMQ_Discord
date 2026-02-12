@@ -1,7 +1,7 @@
-import { IPCLogger } from "../logger";
-import { VOTE_BONUS_DURATION } from "../constants";
+import { IPCLogger } from "../logger.js";
+import { VOTE_BONUS_DURATION } from "../constants.js";
 import Axios from "axios";
-import dbContext from "../database_context";
+import dbContext from "../database_context.js";
 import type { IPC } from "eris-fleet";
 
 const logger = new IPCLogger("bot_stats_poster");

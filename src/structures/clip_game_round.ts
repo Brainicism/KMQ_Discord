@@ -1,7 +1,7 @@
-import ClipAction from "../enums/clip_action";
-import GameRound from "./game_round";
-import type QueriedSong from "./queried_song";
-import type SeekType from "../enums/option_types/seek_type";
+import ClipAction from "../enums/clip_action.js";
+import GameRound from "./game_round.js";
+import type QueriedSong from "./queried_song.js";
+import type SeekType from "../enums/option_types/seek_type.js";
 
 export default class ClipGameRound extends GameRound {
     /** The location of where the song was started */

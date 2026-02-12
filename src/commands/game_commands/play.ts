@@ -1,3 +1,4 @@
+import * as Eris from "eris";
 import {
     CLIP_DEFAULT_DURATION_SEC,
     CLIP_MAX_DURATION_SEC,
@@ -10,14 +11,19 @@ import {
     HIDDEN_DEFAULT_TIMER,
     KmqImages,
     MAX_AUTOCOMPLETE_FIELDS,
-} from "../../constants";
-import { IPCLogger } from "../../logger";
+} from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     activeBonusUsers,
     isFirstGameOfDay,
     isPowerHour,
-} from "../../helpers/game_utils";
-import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
+} from "../../helpers/game_utils.js";
+import {
+    bold,
+    durationDays,
+    getMention,
+    isWeekend,
+} from "../../helpers/utils.js";
 import {
     clickableSlashCommand,
     fetchChannel,
@@ -35,28 +41,27 @@ import {
     tryAutocompleteInteractionAcknowledge,
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
-} from "../../helpers/discord_utils";
-import AnswerCommand from "../game_options/answer";
-import AnswerType from "../../enums/option_types/answer_type";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameSession from "../../structures/game_session";
-import GameType from "../../enums/game_type";
-import GuildPreference from "../../structures/guild_preference";
-import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Player from "../../structures/player";
-import Session from "../../structures/session";
-import State from "../../state";
-import dbContext from "../../database_context";
+} from "../../helpers/discord_utils.js";
+import AnswerCommand from "../game_options/answer.js";
+import AnswerType from "../../enums/option_types/answer_type.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameSession from "../../structures/game_session.js";
+import GameType from "../../enums/game_type.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import KmqMember from "../../structures/kmq_member.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import Player from "../../structures/player.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import dbContext from "../../database_context.js";
 import fs from "fs";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import type TeamScoreboard from "../../structures/team_scoreboard";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
+import type TeamScoreboard from "../../structures/team_scoreboard.js";
 
 const COMMAND_NAME = "play";
 const logger = new IPCLogger(COMMAND_NAME);

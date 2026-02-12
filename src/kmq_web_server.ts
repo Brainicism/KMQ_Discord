@@ -1,13 +1,13 @@
-import { IPCLogger } from "./logger";
-import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { IPCLogger } from "./logger.js";
+import { measureExecutionTime, standardDateFormat } from "./helpers/utils.js";
 import { sql } from "kysely";
-import { userVoted } from "./helpers/bot_listing_manager";
+import { userVoted } from "./helpers/bot_listing_manager.js";
 import _ from "lodash";
 import ejs from "ejs";
 import fastify from "fastify";
 import fastifyView from "@fastify/view";
 import os from "os";
-import type { DatabaseContext } from "./database_context";
+import type { DatabaseContext } from "./database_context.js";
 import type { Fleet, Stats } from "eris-fleet";
 
 const logger = new IPCLogger("web_server");
