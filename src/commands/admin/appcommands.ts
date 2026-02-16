@@ -1,13 +1,13 @@
 /* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../../logger";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import AppCommandsAction from "../../enums/app_command_action";
-import CommandPrechecks from "../../command_prechecks";
-import EnvType from "../../enums/env_type";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger.js";
+import { sendInfoMessage } from "../../helpers/discord_utils.js";
+import AppCommandsAction from "../../enums/app_command_action.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import EnvType from "../../enums/env_type.js";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 
 const logger = new IPCLogger("app_commands");
 

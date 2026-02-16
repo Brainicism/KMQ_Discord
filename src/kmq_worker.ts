@@ -1,61 +1,61 @@
 /* eslint-disable node/no-sync */
 import { BaseClusterWorker } from "eris-fleet";
-import { IPCLogger } from "./logger";
-import { RedditClient } from "./helpers/reddit_client";
+import { IPCLogger } from "./logger.js";
+import { RedditClient } from "./helpers/reddit_client.js";
 import { config } from "dotenv";
-import { durationSeconds } from "./helpers/utils";
+import { durationSeconds } from "./helpers/utils.js";
 import {
     getCachedAppCommandIds,
     updateAppCommands,
-} from "./helpers/discord_utils";
+} from "./helpers/discord_utils.js";
 import {
     registerIntervals,
     reloadArtists,
     reloadCaches,
     reloadSongs,
     updateBotStatus,
-} from "./helpers/management_utils";
-import AppCommandsAction from "./enums/app_command_action";
-import EnvType from "./enums/env_type";
-import EnvVariableManager from "./env_variable_manager";
-import EvalCommand from "./commands/admin/eval";
-import GeminiClient from "./helpers/gemini_client";
-import KmqConfiguration from "./kmq_configuration";
-import PlaylistManager from "./helpers/playlist_manager";
-import ReloadCommand from "./commands/admin/reload";
-import SIGINTHandler from "./events/process/SIGINT";
-import Session from "./structures/session";
-import State from "./state";
-import channelDeleteHandler from "./events/client/channelDelete";
-import connectHandler from "./events/client/connect";
-import dbContext from "./database_context";
-import debugHandler from "./events/client/debug";
-import disconnectHandler from "./events/client/disconnect";
-import errorHandler from "./events/client/error";
+} from "./helpers/management_utils.js";
+import AppCommandsAction from "./enums/app_command_action.js";
+import EnvType from "./enums/env_type.js";
+import EnvVariableManager from "./env_variable_manager.js";
+import EvalCommand from "./commands/admin/eval.js";
+import GeminiClient from "./helpers/gemini_client.js";
+import KmqConfiguration from "./kmq_configuration.js";
+import PlaylistManager from "./helpers/playlist_manager.js";
+import ReloadCommand from "./commands/admin/reload.js";
+import SIGINTHandler from "./events/process/SIGINT.js";
+import Session from "./structures/session.js";
+import State from "./state.js";
+import channelDeleteHandler from "./events/client/channelDelete.js";
+import connectHandler from "./events/client/connect.js";
+import dbContext from "./database_context.js";
+import debugHandler from "./events/client/debug.js";
+import disconnectHandler from "./events/client/disconnect.js";
+import errorHandler from "./events/client/error.js";
 import fs from "fs";
-import guildAvailableHandler from "./events/client/guildAvailable";
-import guildCreateHandler from "./events/client/guildCreate";
-import guildDeleteHandler from "./events/client/guildDelete";
-import interactionCreateHandler from "./events/client/interactionCreate";
-import messageCreateHandler from "./events/client/messageCreate";
+import guildAvailableHandler from "./events/client/guildAvailable.js";
+import guildCreateHandler from "./events/client/guildCreate.js";
+import guildDeleteHandler from "./events/client/guildDelete.js";
+import interactionCreateHandler from "./events/client/interactionCreate.js";
+import messageCreateHandler from "./events/client/messageCreate.js";
 import path from "path";
 import schedule from "node-schedule";
-import shardDisconnectHandler from "./events/client/shardDisconnect";
-import shardReadyHandler from "./events/client/shardReady";
-import shardResumeHandler from "./events/client/shardResume";
-import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate";
-import uncaughtExceptionHandler from "./events/process/uncaughtException";
-import unhandledRejectionHandler from "./events/process/unhandledRejection";
-import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
-import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
-import warnHandler from "./events/client/warn";
+import shardDisconnectHandler from "./events/client/shardDisconnect.js";
+import shardReadyHandler from "./events/client/shardReady.js";
+import shardResumeHandler from "./events/client/shardResume.js";
+import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate.js";
+import uncaughtExceptionHandler from "./events/process/uncaughtException.js";
+import unhandledRejectionHandler from "./events/process/unhandledRejection.js";
+import voiceChannelJoinHandler from "./events/client/voiceChannelJoin.js";
+import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave.js";
+import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch.js";
+import warnHandler from "./events/client/warn.js";
 import type * as Eris from "eris";
 import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
-import type KmqClient from "./kmq_client";
+import type KmqClient from "./kmq_client.js";
 
 const logger = new IPCLogger("kmq");
-config({ path: path.resolve(__dirname, "../.env") });
+config({ path: path.resolve(import.meta.dirname, "../.env") });
 
 // eslint-disable-next-line import/no-unused-modules
 export default class BotWorker extends BaseClusterWorker {
@@ -271,7 +271,9 @@ export default class BotWorker extends BaseClusterWorker {
         State.version = `v${
             JSON.parse(
                 fs
-                    .readFileSync(path.resolve(__dirname, "../package.json"))
+                    .readFileSync(
+                        path.resolve(import.meta.dirname, "../package.json"),
+                    )
                     .toString(),
             )["version"]
         }`;

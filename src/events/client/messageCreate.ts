@@ -1,26 +1,26 @@
+import * as Eris from "eris";
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
+import { IPCLogger } from "../../logger.js";
+import { extractErrorString } from "../../helpers/utils.js";
 import {
     fetchChannel,
     getAllClickableSlashCommands,
     getDebugLogHeader,
     sendErrorMessage,
     sendOptionsMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import KmqConfiguration from "../../kmq_configuration";
-import MessageContext from "../../structures/message_context";
-import PrivateMessageCommand from "../../commands/admin/privatemessage";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import validate from "../../helpers/validate";
-import type { GuildTextableMessage } from "../../types";
-import type ParsedMessage from "../../interfaces/parsed_message";
-import type PrecheckArgs from "../../interfaces/precheck_args";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import KmqConfiguration from "../../kmq_configuration.js";
+import MessageContext from "../../structures/message_context.js";
+import PrivateMessageCommand from "../../commands/admin/privatemessage.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import validate from "../../helpers/validate.js";
+import type { GuildTextableMessage } from "../../types.js";
+import type ParsedMessage from "../../interfaces/parsed_message.js";
+import type PrecheckArgs from "../../interfaces/precheck_args.js";
 
 const logger = new IPCLogger("messageCreate");
 

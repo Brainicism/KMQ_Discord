@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../logger";
-import { PLAYLIST_CACHE_TTL_HOURS } from "../constants";
+import { IPCLogger } from "../logger.js";
+import { PLAYLIST_CACHE_TTL_HOURS } from "../constants.js";
 import {
     extractErrorString,
     parseKmqPlaylistIdentifier,
@@ -9,40 +9,40 @@ import {
     retryWithExponentialBackoff,
     standardDateFormat,
     visualProgressBar,
-} from "./utils";
+} from "./utils.js";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
-} from "./discord_utils";
+} from "./discord_utils.js";
 import { sql } from "kysely";
 import { youtube_v3 } from "googleapis";
 import Axios from "axios";
-import EnvVariableManager from "../env_variable_manager";
-import GameRound from "../structures/game_round";
-import KmqConfiguration from "../kmq_configuration";
-import QueriedSong from "../structures/queried_song";
-import SongSelector from "../structures/song_selector";
-import State from "../state";
+import EnvVariableManager from "../env_variable_manager.js";
+import GameRound from "../structures/game_round.js";
+import KmqConfiguration from "../kmq_configuration.js";
+import QueriedSong from "../structures/queried_song.js";
+import SongSelector from "../structures/song_selector.js";
+import State from "../state.js";
 import _ from "lodash";
 import asyncPool from "tiny-async-pool";
-import dbContext from "../database_context";
+import dbContext from "../database_context.js";
 import fs from "fs";
-import i18n from "./localization_manager";
+import i18n from "./localization_manager.js";
 import path from "path";
 import type { AxiosResponse } from "axios";
-import type { MatchedPlaylist } from "../interfaces/matched_playlist";
-import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist.js";
+import type { PlaylistMetadata } from "../interfaces/playlist_metadata.js";
 import type Eris from "eris";
-import type MessageContext from "../structures/message_context";
-import type SpotifyTrack from "../interfaces/spotify_track";
+import type MessageContext from "../structures/message_context.js";
+import type SpotifyTrack from "../interfaces/spotify_track.js";
 
 const logger = new IPCLogger("playlist_manager");
 
 const BASE_URL = "https://api.spotify.com/v1";
 
 const PLAYLIST_UNMATCHED_SONGS_DIR = path.join(
-    __dirname,
+    import.meta.dirname,
     "../../data/spotify_unmatched_playlists",
 );
 
@@ -472,7 +472,7 @@ export default class PlaylistManager {
             }
 
             const playlistUnmatchedSongsPath = path.resolve(
-                __dirname,
+                import.meta.dirname,
                 PLAYLIST_UNMATCHED_SONGS_DIR,
                 `${playlistId}-${standardDateFormat(new Date())}.txt`,
             );
@@ -780,7 +780,7 @@ export default class PlaylistManager {
             }
 
             const playlistUnmatchedSongsPath = path.resolve(
-                __dirname,
+                import.meta.dirname,
                 PLAYLIST_UNMATCHED_SONGS_DIR,
                 `${playlistId}-${standardDateFormat(new Date())}.txt`,
             );

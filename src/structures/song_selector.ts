@@ -5,37 +5,37 @@ import {
     SELECTION_WEIGHT_VALUES_EASY,
     SELECTION_WEIGHT_VALUES_HARD,
     SHADOW_BANNED_ARTIST_IDS,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import {
     chooseWeightedRandom,
     parseKmqPlaylistIdentifier,
     setDifference,
     shufflePartitionedArray,
-} from "../helpers/utils";
-import { getDebugLogHeader } from "../helpers/discord_utils";
-import ArtistType from "../enums/option_types/artist_type";
-import EnvVariableManager from "../env_variable_manager";
-import GameOption from "../enums/game_option_name";
-import GameRound from "./game_round";
-import LanguageType from "../enums/option_types/language_type";
-import OstPreference from "../enums/option_types/ost_preference";
-import QueriedSong from "./queried_song";
-import ReleaseType from "../enums/option_types/release_type";
-import ShuffleType from "../enums/option_types/shuffle_type";
-import State from "../state";
-import SubunitsPreference from "../enums/option_types/subunit_preference";
-import dbContext from "../database_context";
+} from "../helpers/utils.js";
+import { getDebugLogHeader } from "../helpers/discord_utils.js";
+import ArtistType from "../enums/option_types/artist_type.js";
+import EnvVariableManager from "../env_variable_manager.js";
+import GameOption from "../enums/game_option_name.js";
+import GameRound from "./game_round.js";
+import LanguageType from "../enums/option_types/language_type.js";
+import OstPreference from "../enums/option_types/ost_preference.js";
+import QueriedSong from "./queried_song.js";
+import ReleaseType from "../enums/option_types/release_type.js";
+import ShuffleType from "../enums/option_types/shuffle_type.js";
+import State from "../state.js";
+import SubunitsPreference from "../enums/option_types/subunit_preference.js";
+import dbContext from "../database_context.js";
 import type {
     AvailableGenders,
     GenderModeOptions,
-} from "../enums/option_types/gender";
+} from "../enums/option_types/gender.js";
 import type { Expression, SqlBool } from "kysely";
-import type { MatchedPlaylist } from "../interfaces/matched_playlist";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist.js";
 import type Eris from "eris";
-import type GuildPreference from "./guild_preference";
-import type MessageContext from "./message_context";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import type GuildPreference from "./guild_preference.js";
+import type MessageContext from "./message_context.js";
+import type UniqueSongCounter from "../interfaces/unique_song_counter.js";
 
 const logger = new IPCLogger("song_selector");
 
