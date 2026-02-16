@@ -40,6 +40,9 @@ jobs:
               with:
                   mysql-version: "mariadb-10.6"
                   root-password: ${{ env.DB_PASS_CI }}
+                  my-cnf: |
+                      character_set_server=utf8mb4
+                      collation_server=utf8mb4_general_ci
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py
             - name: Setup Node.js environment
