@@ -29,7 +29,7 @@ const INITIAL_HOUR = 6;
 const INITIAL_MINUTE = 35;
 const INITIAL_SECONDS = 3;
 const date = new Date(
-    new Date().getFullYear(),
+    2025,
     INITIAL_MONTH,
     INITIAL_DAY,
     INITIAL_HOUR,
@@ -475,13 +475,6 @@ describe("leaderboard command", () => {
                     {
                         player_id: "0",
                         date,
-                        songs_guessed: 1,
-                        exp_gained: 1,
-                        levels_gained: 1,
-                    },
-                    {
-                        player_id: "0",
-                        date: secondAgo,
                         songs_guessed: 1,
                         exp_gained: 1,
                         levels_gained: 1,

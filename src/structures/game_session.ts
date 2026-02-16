@@ -1331,6 +1331,7 @@ export default class GameSession extends Session {
                 first_play: currentDateString,
                 last_active: currentDateString,
                 last_game_started_at: new Date(this.startedAt),
+                exp: 0,
             })
             .ignore()
             .execute();

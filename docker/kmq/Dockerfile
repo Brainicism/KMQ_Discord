@@ -40,6 +40,11 @@ RUN apt-get update && apt-get install -y default-mysql-client \
   jq \
   && rm -rf /var/lib/apt/lists/*
 
+
+ENV DENO_INSTALL=/usr/local
+RUN curl -fsSL https://deno.land/install.sh | sh
+ENV PATH="$DENO_INSTALL/bin:$PATH"
+
 COPY --from=build /app /app
 WORKDIR /app
 
