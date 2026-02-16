@@ -36,10 +36,13 @@ jobs:
               with:
                   python-version: "3.10"
             - name: Setup MariaDB
-              uses: getong/mariadb-action@v1.1
+              uses: shogo82148/actions-setup-mysql@v1
               with:
-                  mariadb version: "10.6.17"
-                  mysql root password: "$DB_PASS_CI"
+                  mysql-version: "mariadb-10.6"
+                  root-password: ${{ env.DB_PASS_CI }}
+                  my-cnf: |
+                      character_set_server=utf8mb4
+                      collation_server=utf8mb4_general_ci
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py
             - name: Setup Node.js environment
