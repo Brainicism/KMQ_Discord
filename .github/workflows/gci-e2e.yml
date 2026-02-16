@@ -28,7 +28,7 @@ jobs:
     build:
         runs-on: ubuntu-latest
         timeout-minutes: 15
-        if: ${{!github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test')}}
+        if: ${{ !github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test') || github.actor == 'dependabot[bot]' }}
         env:
             DB_PASS_CI: kmq_ci_password
             DB_USER_CI: root
