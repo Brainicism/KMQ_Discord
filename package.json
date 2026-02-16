@@ -70,7 +70,7 @@
         "eris": "https://github.com/Brainicism/eris#0114e58",
         "eris-fleet": "https://github.com/Brainicism/eris-fleet#9916334",
         "eris-pagination": "https://github.com/Brainicism/eris-pagination#e2c01f2",
-        "fastify": "^4.28.1",
+        "fastify": "^5.7.3",
         "fluent-ffmpeg": "^2.1.3",
         "googleapis": "^142.0.0",
         "googlevideo": "^1.1.0",
