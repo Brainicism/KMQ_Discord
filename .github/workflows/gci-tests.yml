@@ -39,7 +39,7 @@ jobs:
               uses: shogo82148/actions-setup-mysql@v1
               with:
                   mysql-version: "mariadb-10.6"
-                  root-password: "$DB_PASS_CI"
+                  root-password: ${{ env.DB_PASS_CI }}
             - name: Check for newly introduced environment variables
               run: python src/ci_checks/check_env_var.py
             - name: Setup Node.js environment
