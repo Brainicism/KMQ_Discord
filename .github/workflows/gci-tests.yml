@@ -50,7 +50,7 @@ jobs:
               with:
                   node-version: 22
             - name: Install protobuf compiler
-              run: sudo apt install -y protobuf-compiler
+              run: sudo apt update && sudo apt install -y protobuf-compiler
             - name: Install node dependencies
               run: yarn install --frozen-lockfile
             - name: Prettier
