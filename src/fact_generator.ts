@@ -1072,7 +1072,10 @@ export default class FactGenerator {
             .execute();
 
         const parsedResults = result.map((x) =>
-            FactGenerator.parseGaonWeeklyRankList(x["ranklist"], x["year"]),
+            FactGenerator.parseGaonWeeklyRankList(
+                x["ranklist"] as string,
+                x["year"],
+            ),
         );
 
         return parsedResults.map((x) =>
@@ -1100,7 +1103,7 @@ export default class FactGenerator {
             .execute();
 
         const parsedResult = FactGenerator.parseGaonWeeklyRankList(
-            result[0]!.ranklist,
+            result[0]!.ranklist as string,
             result[0]!.year,
         );
 

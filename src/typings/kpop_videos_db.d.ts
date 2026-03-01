@@ -50,8 +50,8 @@ export interface AppKpopAlbums {
 }
 
 export interface AppKpopBillboard {
-    data: Date;
-    ranklist: string;
+    date: Date;
+    ranklist: Generated<string | null>;
 }
 
 export interface AppKpopCompany {
@@ -61,14 +61,15 @@ export interface AppKpopCompany {
 }
 
 export interface AppKpopGaondigi {
-    aranklist: string;
-    ranklist: string;
+    aranklist: Generated<string | null>;
+    ranklist: Generated<string | null>;
     week: number;
     year: number;
 }
 
 export interface AppKpopGroup {
     alias: Generated<string>;
+    artiststyle: Generated<"global" | "kpop" | "kpoplike">;
     awards: Generated<number>;
     date_birth: Generated<Date | null>;
     debut_date: Generated<Date | null>;
@@ -137,7 +138,7 @@ export interface AppKpopGroupSafe {
 export interface AppKpopMs {
     date: Date;
     id_artist: number;
-    id_musicvideo: Generated<number>;
+    id_musicvideo: number;
     musicname: Generated<string>;
     musicshow:
         | "countdown"

@@ -666,7 +666,26 @@ async function updateGroupList(db: DatabaseContext): Promise<void> {
 /**
  * @param db - The database context
  */
-async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
+/**
+ * Perform a full seed of the Daisuki database and download any new songs.
+ *
+ * @param db - database context to perform operations against
+ * @param limit - optional cap on number of songs to download (undefined for
+ *   no limit)
+ * @param songs - optional explicit list of YouTube IDs to fetch; when provided
+ *   the limit is ignored
+ * @param checkSongDurations - if true, downloaded tracks will be validated
+ *   against any cached duration entries
+ * @param skipDownload - if true, the seed steps will run but the download
+ *   stage will be skipped (used for testing)
+ */
+export async function seedAndDownloadNewSongs(
+    db: DatabaseContext,
+    limit?: number,
+    songs?: string[],
+    checkSongDurations?: boolean,
+    skipDownload?: boolean,
+): Promise<void> {
     logger.info("Performing regularly scheduled Daisuki database seed");
     try {
         await pruneSqlDumps();
@@ -697,10 +716,10 @@ async function seedAndDownloadNewSongs(db: DatabaseContext): Promise<void> {
 
         const songDownloader = new KmqSongDownloader();
         const result = await songDownloader.downloadNewSongs(
-            options.limit,
-            options.songs,
-            options.checkSongDurations,
-            options.skipDownload,
+            limit,
+            songs,
+            checkSongDurations,
+            skipDownload,
         );
 
         const songsDownloaded = result.songsDownloaded;
@@ -778,7 +797,13 @@ async function reloadAutocompleteData(): Promise<void> {
 
         try {
             await loadStoredProcedures();
-            await seedAndDownloadNewSongs(db);
+            await seedAndDownloadNewSongs(
+                db,
+                options.limit,
+                options.songs,
+                options.checkSongDurations,
+                options.skipDownload,
+            );
             try {
                 await reloadAutocompleteData();
             } catch (e) {
