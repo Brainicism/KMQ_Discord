@@ -1,4 +1,4 @@
-import QueriedSong from "./queried_song";
+import QueriedSong from "./queried_song.js";
 
 export default class QueriedSongWithBookmarkDate extends QueriedSong {
     bookmarkedAt: Date;

@@ -1,8 +1,8 @@
-import CommandPrechecks from "../../command_prechecks";
-import MessageContext from "../../structures/message_context";
-import PlayCommand from "./play";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+import CommandPrechecks from "../../command_prechecks.js";
+import MessageContext from "../../structures/message_context.js";
+import PlayCommand from "./play.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 
 // eslint-disable-next-line import/no-unused-modules
 export default class BeginCommand implements BaseCommand {

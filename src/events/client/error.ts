@@ -1,5 +1,5 @@
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
+import { IPCLogger } from "../../logger.js";
+import { extractErrorString } from "../../helpers/utils.js";
 
 const logger = new IPCLogger("error");
 

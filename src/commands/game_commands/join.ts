@@ -1,16 +1,16 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendErrorMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameType from "../../enums/game_type";
-import MessageContext from "../../structures/message_context";
-import PlayCommand, { PlayTeamsAction } from "./play";
-import i18n from "../../helpers/localization_manager";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameType from "../../enums/game_type.js";
+import MessageContext from "../../structures/message_context.js";
+import PlayCommand, { PlayTeamsAction } from "./play.js";
+import i18n from "../../helpers/localization_manager.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
 
 const COMMAND_NAME = "join";
 const logger = new IPCLogger(COMMAND_NAME);

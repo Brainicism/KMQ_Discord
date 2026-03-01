@@ -1,7 +1,7 @@
 /* eslint-disable no-template-curly-in-string */
 /* eslint-disable @typescript-eslint/quotes */
 
-import { IPCLogger } from "../logger";
+import { IPCLogger } from "../logger.js";
 // eslint-disable-next-line import/no-extraneous-dependencies
 import {
     ModuleKind,

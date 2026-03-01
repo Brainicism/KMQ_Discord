@@ -1,6 +1,6 @@
-import BaseArtistInfo from "./base_artist_info";
-import LocaleType from "../enums/locale_type";
-import type { AvailableGenders } from "../enums/option_types/gender";
+import BaseArtistInfo from "./base_artist_info.js";
+import LocaleType from "../enums/locale_type.js";
+import type { AvailableGenders } from "../enums/option_types/gender.js";
 
 export default class QueriedSong extends BaseArtistInfo {
     songName: string;

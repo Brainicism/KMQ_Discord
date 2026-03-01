@@ -1,19 +1,19 @@
-import * as game_utils from "../../../helpers/game_utils";
-import * as utils from "../../../helpers/utils";
+import * as game_utils from "../../../helpers/game_utils.js";
+import * as utils from "../../../helpers/utils.js";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../../constants";
 
-import AnswerType from "../../../enums/option_types/answer_type";
-import ExpBonusModifier from "../../../enums/exp_bonus_modifier";
-import ExpCommand from "../../../commands/game_commands/exp";
-import GameRound from "../../../structures/game_round";
-import GuessModeType from "../../../enums/option_types/guess_mode_type";
-import GuildPreference from "../../../structures/guild_preference";
-import QueriedSong from "../../../structures/queried_song";
-import ShuffleType from "../../../enums/option_types/shuffle_type";
+import AnswerType from "../../../enums/option_types/answer_type.js";
+import ExpBonusModifier from "../../../enums/exp_bonus_modifier.js";
+import ExpCommand from "../../../commands/game_commands/exp.js";
+import GameRound from "../../../structures/game_round.js";
+import GuessModeType from "../../../enums/option_types/guess_mode_type.js";
+import GuildPreference from "../../../structures/guild_preference.js";
+import QueriedSong from "../../../structures/queried_song.js";
+import ShuffleType from "../../../enums/option_types/shuffle_type.js";
 import assert from "assert";
 import sinon from "sinon";
 

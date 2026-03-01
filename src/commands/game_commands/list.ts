@@ -1,4 +1,5 @@
-import { IPCLogger } from "../../logger";
+import * as Eris from "eris";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
@@ -6,17 +7,16 @@ import {
     sendErrorMessage,
     sendInfoMessage,
     sendMessage,
-} from "../../helpers/discord_utils";
-import { standardDateFormat } from "../../helpers/utils";
-import Eris from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import { standardDateFormat } from "../../helpers/utils.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "list";
 const logger = new IPCLogger(COMMAND_NAME);

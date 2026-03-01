@@ -1,9 +1,9 @@
-import { DEFAULT_LOCALE } from "../constants";
-import { IPCLogger } from "../logger";
+import { DEFAULT_LOCALE } from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import Backend from "i18next-fs-backend";
-import EnvType from "../enums/env_type";
-import LocaleType from "../enums/locale_type";
-import State from "../state";
+import EnvType from "../enums/env_type.js";
+import LocaleType from "../enums/locale_type.js";
+import State from "../state.js";
 import i18next from "i18next";
 import path from "path";
 
@@ -25,7 +25,10 @@ class LocalizationManager {
                 escapeValue: false,
             },
             backend: {
-                loadPath: path.join(__dirname, "../../i18n/{{lng}}.json"),
+                loadPath: path.join(
+                    import.meta.dirname,
+                    "../../i18n/{{lng}}.json",
+                ),
             },
         });
     }

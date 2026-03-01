@@ -1,26 +1,26 @@
-import { IPCLogger } from "../../logger";
-import { KmqImages } from "../../constants";
+import * as Eris from "eris";
+import { IPCLogger } from "../../logger.js";
+import { KmqImages } from "../../constants.js";
 import {
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameType from "../../enums/game_type";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type GameSession from "../../structures/game_session";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import GameType from "../../enums/game_type.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import MessageContext from "../../structures/message_context.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type EliminationScoreboard from "../../structures/elimination_scoreboard.js";
+import type EmbedPayload from "../../interfaces/embed_payload.js";
+import type GameSession from "../../structures/game_session.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "hint";
 const logger = new IPCLogger(COMMAND_NAME);

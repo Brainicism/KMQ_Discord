@@ -1,21 +1,21 @@
-import { DEFAULT_LOCALE, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
+import * as Eris from "eris";
+import { DEFAULT_LOCALE, KmqImages } from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
-import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/discord_utils.js";
+import LocaleType from "../../enums/locale_type.js";
+import MessageContext from "../../structures/message_context.js";
+import State from "../../state.js";
+import dbContext from "../../database_context.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "locale";
 const logger = new IPCLogger(COMMAND_NAME);

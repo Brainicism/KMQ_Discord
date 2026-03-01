@@ -1,6 +1,6 @@
-import { DataFiles } from "./constants";
-import { IPCLogger } from "./logger";
-import { parseJsonFileSync, pathExistsSync } from "./helpers/utils";
+import { DataFiles } from "./constants.js";
+import { IPCLogger } from "./logger.js";
+import { parseJsonFileSync, pathExistsSync } from "./helpers/utils.js";
 
 const logger = new IPCLogger("kmq_feature_switch");
 

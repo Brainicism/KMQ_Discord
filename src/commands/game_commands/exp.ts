@@ -1,36 +1,36 @@
 /* eslint-disable @typescript-eslint/dot-notation */
+import * as Eris from "eris";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     KmqImages,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
     QUICK_GUESS_MS,
-} from "../../constants";
-import { IPCLogger } from "../../logger";
+} from "../../constants.js";
+import { IPCLogger } from "../../logger.js";
 import {
     getDebugLogHeader,
     sendInfoMessage,
-} from "../../helpers/discord_utils";
+} from "../../helpers/discord_utils.js";
 import {
     isFirstGameOfDay,
     isPowerHour,
     userBonusIsActive,
-} from "../../helpers/game_utils";
-import { isWeekend } from "../../helpers/utils";
-import AnswerType from "../../enums/option_types/answer_type";
-import Eris from "eris";
-import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import GuessModeType from "../../enums/option_types/guess_mode_type";
-import GuildPreference from "../../structures/guild_preference";
-import MessageContext from "../../structures/message_context";
-import ShuffleType from "../../enums/option_types/shuffle_type";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type GameRound from "../../structures/game_round";
-import type HelpDocumentation from "../../interfaces/help";
+} from "../../helpers/game_utils.js";
+import { isWeekend } from "../../helpers/utils.js";
+import AnswerType from "../../enums/option_types/answer_type.js";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier.js";
+import GuessModeType from "../../enums/option_types/guess_mode_type.js";
+import GuildPreference from "../../structures/guild_preference.js";
+import MessageContext from "../../structures/message_context.js";
+import ShuffleType from "../../enums/option_types/shuffle_type.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type { DefaultSlashCommand } from "../interfaces/base_command.js";
+import type BaseCommand from "../interfaces/base_command.js";
+import type CommandArgs from "../../interfaces/command_args.js";
+import type GameRound from "../../structures/game_round.js";
+import type HelpDocumentation from "../../interfaces/help.js";
 
 const COMMAND_NAME = "exp";
 const logger = new IPCLogger(COMMAND_NAME);

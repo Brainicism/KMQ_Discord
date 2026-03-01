@@ -1,27 +1,27 @@
 /* eslint-disable global-require */
-import Eris from "eris";
+import * as Eris from "eris";
 /* eslint-disable import/no-dynamic-require */
-import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
+import { IPCLogger } from "../logger.js";
+import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils.js";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
     isPowerHour,
-} from "./game_utils";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
+} from "./game_utils.js";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils.js";
 import { sql } from "kysely";
-import GameRound from "../structures/game_round";
-import KmqConfiguration from "../kmq_configuration";
-import MessageContext from "../structures/message_context";
-import NewsCommand from "../commands/misc_commands/news";
-import NewsRange from "../enums/news_range";
-import State from "../state";
+import GameRound from "../structures/game_round.js";
+import KmqConfiguration from "../kmq_configuration.js";
+import MessageContext from "../structures/message_context.js";
+import NewsCommand from "../commands/misc_commands/news.js";
+import NewsRange from "../enums/news_range.js";
+import State from "../state.js";
 import _ from "lodash";
-import dbContext from "../database_context";
-import i18n from "./localization_manager";
+import dbContext from "../database_context.js";
+import i18n from "./localization_manager.js";
 import schedule from "node-schedule";
-import type LocaleType from "../enums/locale_type";
-import type MatchedArtist from "../interfaces/matched_artist";
+import type LocaleType from "../enums/locale_type.js";
+import type MatchedArtist from "../interfaces/matched_artist.js";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);

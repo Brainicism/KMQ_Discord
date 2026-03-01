@@ -1,5 +1,5 @@
-import { IPCLogger } from "../../logger";
-import Session from "../../structures/session";
+import { IPCLogger } from "../../logger.js";
+import Session from "../../structures/session.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("voiceChannelJoin");

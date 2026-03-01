@@ -1,5 +1,5 @@
-import KmqMember from "./kmq_member";
-import State from "../state";
+import KmqMember from "./kmq_member.js";
+import State from "../state.js";
 import type Eris from "eris";
 
 export default class MessageContext {

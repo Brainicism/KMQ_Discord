@@ -1,6 +1,6 @@
-import { reloadAliases } from "../../../helpers/management_utils";
-import { setIntersection } from "../../../helpers/utils";
-import State from "../../../state";
+import { reloadAliases } from "../../../helpers/management_utils.js";
+import { setIntersection } from "../../../helpers/utils.js";
+import State from "../../../state.js";
 import assert from "assert";
 
 describe("management utils", () => {

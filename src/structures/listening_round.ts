@@ -1,14 +1,14 @@
+import * as Eris from "eris";
 import {
     BOOKMARK_BUTTON_PREFIX,
     EMBED_SUCCESS_BONUS_COLOR,
     SKIP_BUTTON_PREFIX,
-} from "../constants";
-import { IPCLogger } from "../logger";
-import Eris from "eris";
-import Round from "./round";
-import type MessageContext from "./message_context";
-import type PlayerRoundResult from "../interfaces/player_round_result";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
+import Round from "./round.js";
+import type MessageContext from "./message_context.js";
+import type PlayerRoundResult from "../interfaces/player_round_result.js";
+import type UniqueSongCounter from "../interfaces/unique_song_counter.js";
 
 const logger = new IPCLogger("listening_round");
 

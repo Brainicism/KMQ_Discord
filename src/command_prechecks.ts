@@ -1,5 +1,5 @@
-import { IPCLogger } from "./logger";
-import { OptionAction } from "./constants";
+import { IPCLogger } from "./logger.js";
+import { OptionAction } from "./constants.js";
 import {
     areUserAndBotInSameVoiceChannel,
     clickableSlashCommand,
@@ -7,17 +7,17 @@ import {
     getInteractionValue,
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
-} from "./helpers/discord_utils";
-import { getTimeUntilRestart } from "./helpers/management_utils";
-import { userIsAdmin } from "./helpers/game_utils";
-import GameType from "./enums/game_type";
-import GuildPreference from "./structures/guild_preference";
-import KmqConfiguration from "./kmq_configuration";
-import dbContext from "./database_context";
-import i18n from "./helpers/localization_manager";
-import type EmbedPayload from "./interfaces/embed_payload";
-import type GameSession from "./structures/game_session";
-import type PrecheckArgs from "./interfaces/precheck_args";
+} from "./helpers/discord_utils.js";
+import { getTimeUntilRestart } from "./helpers/management_utils.js";
+import { userIsAdmin } from "./helpers/game_utils.js";
+import GameType from "./enums/game_type.js";
+import GuildPreference from "./structures/guild_preference.js";
+import KmqConfiguration from "./kmq_configuration.js";
+import dbContext from "./database_context.js";
+import i18n from "./helpers/localization_manager.js";
+import type EmbedPayload from "./interfaces/embed_payload.js";
+import type GameSession from "./structures/game_session.js";
+import type PrecheckArgs from "./interfaces/precheck_args.js";
 
 const logger = new IPCLogger("command_prechecks");
 

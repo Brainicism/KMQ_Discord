@@ -1,33 +1,37 @@
+import * as Eris from "eris";
 import * as uuid from "uuid";
-import { BOOKMARK_BUTTON_PREFIX, PROFILE_COMMAND_NAME } from "../../constants";
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
+import {
+    BOOKMARK_BUTTON_PREFIX,
+    PROFILE_COMMAND_NAME,
+} from "../../constants.js";
+import { CommandInteraction } from "eris";
+import { IPCLogger } from "../../logger.js";
+import { extractErrorString } from "../../helpers/utils.js";
 import {
     getDebugLogHeader,
     getInteractionValue,
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
-} from "../../helpers/discord_utils";
-import BookmarksCommand from "../../commands/misc_commands/bookmarks";
-import CommandPrechecks from "../../command_prechecks";
-import Eris, { CommandInteraction } from "eris";
-import ExcludeCommand from "../../commands/game_options/exclude";
-import FeedbackCommand from "../../commands/misc_commands/feedback";
-import GroupsCommand from "../../commands/game_options/groups";
-import HelpCommand from "../../commands/game_commands/help";
-import IncludeCommand from "../../commands/game_options/include";
-import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import LookupCommand from "../../commands/misc_commands/lookup";
-import MessageContext from "../../structures/message_context";
-import PlayCommand from "../../commands/game_commands/play";
-import PresetCommand from "../../commands/game_commands/preset";
-import ProfileCommand from "../../commands/game_commands/profile";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type PrecheckArgs from "../../interfaces/precheck_args";
+} from "../../helpers/discord_utils.js";
+import BookmarksCommand from "../../commands/misc_commands/bookmarks.js";
+import CommandPrechecks from "../../command_prechecks.js";
+import ExcludeCommand from "../../commands/game_options/exclude.js";
+import FeedbackCommand from "../../commands/misc_commands/feedback.js";
+import GroupsCommand from "../../commands/game_options/groups.js";
+import HelpCommand from "../../commands/game_commands/help.js";
+import IncludeCommand from "../../commands/game_options/include.js";
+import KmqMember from "../../structures/kmq_member.js";
+import LocaleType from "../../enums/locale_type.js";
+import LookupCommand from "../../commands/misc_commands/lookup.js";
+import MessageContext from "../../structures/message_context.js";
+import PlayCommand from "../../commands/game_commands/play.js";
+import PresetCommand from "../../commands/game_commands/preset.js";
+import ProfileCommand from "../../commands/game_commands/profile.js";
+import Session from "../../structures/session.js";
+import State from "../../state.js";
+import i18n from "../../helpers/localization_manager.js";
+import type PrecheckArgs from "../../interfaces/precheck_args.js";
 
 const logger = new IPCLogger("interactionCreate");
 
