@@ -1,9 +1,9 @@
-import { IPCLogger } from "../logger";
-import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
-import Scoreboard from "./scoreboard";
-import Team from "./team";
-import type Player from "./player";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { IPCLogger } from "../logger.js";
+import { SCOREBOARD_FIELD_CUTOFF } from "../constants.js";
+import Scoreboard from "./scoreboard.js";
+import Team from "./team.js";
+import type Player from "./player.js";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result.js";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");

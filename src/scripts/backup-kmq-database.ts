@@ -1,7 +1,7 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
 import { Command } from "@commander-js/extra-typings";
-import { IPCLogger } from "../logger";
+import { IPCLogger } from "../logger.js";
 import { join } from "path";
 import fs from "fs";
 import util from "util";
@@ -10,7 +10,10 @@ const exec = util.promisify(cp.exec);
 
 const BACKUP_TTL = 30;
 
-const databaseBackupDir = join(__dirname, "../../sql_dumps/kmq_backup");
+const databaseBackupDir = join(
+    import.meta.dirname,
+    "../../sql_dumps/kmq_backup",
+);
 
 const logger = new IPCLogger("backup-kmq");
 const program = new Command().option(
@@ -75,7 +78,7 @@ function importKmqDatabase(fileWithPath: string): void {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         if (options.import) {
             importKmqDatabase(options.import);
         } else {

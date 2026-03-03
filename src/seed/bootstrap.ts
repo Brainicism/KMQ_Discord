@@ -1,13 +1,13 @@
 import * as cp from "child_process";
 import { FileMigrationProvider, Migrator, NO_MIGRATIONS, sql } from "kysely";
-import { IPCLogger } from "../logger";
+import { IPCLogger } from "../logger.js";
 import {
     PROMOTED_COOKIE,
     STANDBY_COOKIE,
     STATUS_COOKIE,
     TEST_DB_CACHED_EXPORT,
     YT_DLP_LOCATION,
-} from "../constants";
+} from "../constants.js";
 import { config } from "dotenv";
 import {
     databaseExists,
@@ -16,17 +16,17 @@ import {
     loadStoredProcedures,
     tableExists,
     updateKpopDatabase,
-} from "./seed_db";
-import { getNewConnection } from "../database_context";
-import { pathExists } from "../helpers/utils";
-import EnvType from "../enums/env_type";
-import EnvVariableManager from "../env_variable_manager";
-import KmqConfiguration from "../kmq_configuration";
-import KmqSongDownloader from "../helpers/kmq_song_downloader";
+} from "./seed_db.js";
+import { getNewConnection } from "../database_context.js";
+import { pathExists } from "../helpers/utils.js";
+import EnvType from "../enums/env_type.js";
+import EnvVariableManager from "../env_variable_manager.js";
+import KmqConfiguration from "../kmq_configuration.js";
+import KmqSongDownloader from "../helpers/kmq_song_downloader.js";
 import fs, { promises as fsp } from "fs";
 import path from "path";
 import util from "util";
-import type { DatabaseContext } from "../database_context";
+import type { DatabaseContext } from "../database_context.js";
 
 const exec = util.promisify(cp.exec);
 
@@ -34,7 +34,7 @@ const logger = new IPCLogger("bootstrap");
 
 const SONG_DOWNLOAD_THRESHOLD = 6;
 
-config({ path: path.resolve(__dirname, "../../.env") });
+config({ path: path.resolve(import.meta.dirname, "../../.env") });
 
 function hasRequiredEnvironmentVariables(): boolean {
     const requiredEnvVariables = [
@@ -114,7 +114,7 @@ export async function performMigrations(db: DatabaseContext): Promise<void> {
             fs: fsp,
             path,
             // This needs to be an absolute path.
-            migrationFolder: path.join(__dirname, "../migrations"),
+            migrationFolder: path.join(import.meta.dirname, "../migrations"),
         }),
     });
 
@@ -163,7 +163,7 @@ export async function performMigrationDown(db: DatabaseContext): Promise<void> {
             fs: fsp,
             path,
             // This needs to be an absolute path.
-            migrationFolder: path.join(__dirname, "../migrations"),
+            migrationFolder: path.join(import.meta.dirname, "../migrations"),
         }),
     });
 
@@ -254,7 +254,7 @@ async function ensureYtDlpBinary(): Promise<void> {
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         if (process.env.NODE_ENV === EnvType.CI) return;
         KmqConfiguration.reload();
         if (!hasRequiredEnvironmentVariables()) {
@@ -272,7 +272,7 @@ async function ensureYtDlpBinary(): Promise<void> {
 
         await fs.promises.writeFile(STATUS_COOKIE, "starting");
 
-        const dataDir = path.join(__dirname, "../../data");
+        const dataDir = path.join(import.meta.dirname, "../../data");
 
         try {
             await fs.promises.mkdir(dataDir);

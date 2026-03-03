@@ -4,25 +4,25 @@ import {
     DataFiles,
     YOUTUBE_SESSION_COOKIE_PATH,
     YT_DLP_LOCATION,
-} from "../constants";
-import { IPCLogger } from "../logger";
+} from "../constants.js";
+import { IPCLogger } from "../logger.js";
 import {
     extractErrorString,
     parseJsonFile,
     pathExists,
     pathExistsSync,
     validateYouTubeID,
-} from "./utils";
-import { getAverageVolume } from "./discord_utils";
-import { getNewConnection } from "../database_context";
+} from "./utils.js";
+import { getAverageVolume } from "./discord_utils.js";
+import { getNewConnection } from "../database_context.js";
 import Axios from "axios";
-import KmqConfiguration from "../kmq_configuration";
-import YoutubeOnesieProvider from "../youtube_onesie_provider";
+import KmqConfiguration from "../kmq_configuration.js";
+import YoutubeOnesieProvider from "../youtube_onesie_provider.js";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import util from "util";
-import type { DatabaseContext } from "../database_context";
+import type { DatabaseContext } from "../database_context.js";
 
 const exec = util.promisify(cp.exec);
 
@@ -32,7 +32,7 @@ export default class KmqSongDownloader {
     TARGET_AVERAGE_VOLUME = -30;
 
     YOUTUBE_SESSION_TOKENS_PATH = path.join(
-        __dirname,
+        import.meta.dirname,
         "../../data/yt_session.json",
     );
 
@@ -238,7 +238,10 @@ export default class KmqSongDownloader {
                             );
 
                             await fs.promises.copyFile(
-                                path.resolve(__dirname, "../test/silence.m4a"),
+                                path.resolve(
+                                    import.meta.dirname,
+                                    "../test/silence.m4a",
+                                ),
                                 cachedSongLocation,
                             );
                         } else {

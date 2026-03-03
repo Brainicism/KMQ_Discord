@@ -1,17 +1,17 @@
 /* eslint-disable node/no-sync */
 import * as cp from "child_process";
-import { IPCLogger } from "../logger";
-import { TEST_DB_CACHED_EXPORT } from "../constants";
-import { getNewConnection } from "../database_context";
-import { importCachedDump, performMigrations } from "../seed/bootstrap";
+import { IPCLogger } from "../logger.js";
+import { TEST_DB_CACHED_EXPORT } from "../constants.js";
+import { getNewConnection } from "../database_context.js";
+import { importCachedDump, performMigrations } from "../seed/bootstrap.js";
 import { sql } from "kysely";
-import EnvType from "../enums/env_type";
+import EnvType from "../enums/env_type.js";
 
 const logger = new IPCLogger("regenerate-test-db-dump");
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
-    if (require.main === module) {
+    if (import.meta.main) {
         if (process.env.NODE_ENV !== EnvType.TEST) {
             logger.error("Must be running with NODE_ENV=EnvType.TEST");
             process.exit(1);

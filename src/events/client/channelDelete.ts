@@ -1,4 +1,4 @@
-import { IPCLogger } from "../../logger";
+import { IPCLogger } from "../../logger.js";
 import type Eris from "eris";
 
 const logger = new IPCLogger("channelDelete");

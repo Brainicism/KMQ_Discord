@@ -5,24 +5,24 @@ import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
     LAST_PLAYED_SONG_QUEUE_SIZE,
-} from "../../../constants";
-import { getMatchingGroupNames } from "../../../helpers/game_utils";
-import ArtistType from "../../../enums/option_types/artist_type";
-import GuildPreference from "../../../structures/guild_preference";
-import LanguageType from "../../../enums/option_types/language_type";
-import OstPreference from "../../../enums/option_types/ost_preference";
-import ReleaseType from "../../../enums/option_types/release_type";
-import ShuffleType from "../../../enums/option_types/shuffle_type";
-import SongSelector from "../../../structures/song_selector";
-import State from "../../../state";
-import SubunitsPreference from "../../../enums/option_types/subunit_preference";
+} from "../../../constants.js";
+import { getMatchingGroupNames } from "../../../helpers/game_utils.js";
+import ArtistType from "../../../enums/option_types/artist_type.js";
+import GuildPreference from "../../../structures/guild_preference.js";
+import LanguageType from "../../../enums/option_types/language_type.js";
+import OstPreference from "../../../enums/option_types/ost_preference.js";
+import ReleaseType from "../../../enums/option_types/release_type.js";
+import ShuffleType from "../../../enums/option_types/shuffle_type.js";
+import SongSelector from "../../../structures/song_selector.js";
+import State from "../../../state.js";
+import SubunitsPreference from "../../../enums/option_types/subunit_preference.js";
 import _ from "lodash";
 import fs from "fs";
 import assert from "assert";
 import sinon from "sinon";
-import type { GenderModeOptions } from "../../../enums/option_types/gender";
-import type QueriedSong from "../../../structures/queried_song";
-import { parseJsonFile, pathExistsSync } from "../../../helpers/utils";
+import type { GenderModeOptions } from "../../../enums/option_types/gender.js";
+import type QueriedSong from "../../../structures/queried_song.js";
+import { parseJsonFile, pathExistsSync } from "../../../helpers/utils.js";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");
