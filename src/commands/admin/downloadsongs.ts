@@ -3,7 +3,6 @@ import { getNewConnection } from "../../database_context";
 import { seedAndDownloadNewSongs } from "../../seed/seed_db";
 import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
-import KmqSongDownloader from "../../helpers/kmq_song_downloader";
 import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
@@ -62,52 +61,40 @@ export default class DownloadSongsCommand implements BaseCommand {
             }
         }
 
-        if (modeArg === DownloadMode.SEED) {
-            await sendInfoMessage(messageContext, {
-                title: "Seeding and downloading songs",
-                description:
-                    "Starting full seed followed by downloading any new songs. This may take several minutes...",
-            });
-
-            try {
-                const db = getNewConnection();
-                await seedAndDownloadNewSongs(db, downloadCount);
-                await sendInfoMessage(messageContext, {
-                    title: "Seed Complete",
-                    description:
-                        "Database seeding and song downloads finished.",
-                });
-
-                logger.info(`Manual seed requested by ${message.author.id}`);
-            } catch (err) {
-                logger.error(`Error while seeding/downloading songs: ${err}`);
-                await sendErrorMessage(messageContext, {
-                    title: "Seed Error",
-                    description: `Failed to seed and download songs: ${err}`,
-                });
-            }
-
-            return;
-        }
-
+        const db = getNewConnection();
+        const isSeedMode = modeArg === DownloadMode.SEED;
         await sendInfoMessage(messageContext, {
-            title: "Downloading songs",
-            description: `Attempting to download ${downloadCount} song(s)...`,
+            title: isSeedMode
+                ? "Seeding and downloading songs"
+                : "Downloading songs",
+            description: isSeedMode
+                ? "Starting full seed followed by downloading any new songs. This may take several minutes..."
+                : `Attempting to download ${downloadCount} song(s), this may take several minutes...`,
         });
 
         try {
-            const downloader = new KmqSongDownloader();
             const { songsDownloaded, songsFailed } =
-                await downloader.downloadNewSongs(downloadCount);
+                await seedAndDownloadNewSongs(
+                    db,
+                    downloadCount,
+                    undefined,
+                    undefined,
+                    false,
+                    !isSeedMode,
+                );
 
             await sendInfoMessage(messageContext, {
                 title: "Download Complete",
                 description: `${songsDownloaded} song(s) downloaded, ${songsFailed} failed.`,
             });
 
-            logger.info(
-                `Manual song download requested by ${message.author.id}; downloaded=${songsDownloaded} failed=${songsFailed}`,
-            );
+            if (isSeedMode) {
+                logger.info(`Manual seed requested by ${message.author.id}`);
+            } else {
+                logger.info(
+                    `Manual song download requested by ${message.author.id}; downloaded=${songsDownloaded} failed=${songsFailed}`,
+                );
+            }
         } catch (err) {
             logger.error(`Error while downloading songs: ${err}`);
             await sendErrorMessage(messageContext, {

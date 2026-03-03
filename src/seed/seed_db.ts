@@ -678,6 +678,8 @@ async function updateGroupList(db: DatabaseContext): Promise<void> {
  *   against any cached duration entries
  * @param skipDownload - if true, the seed steps will run but the download
  *   stage will be skipped (used for testing)
+ * @param skipDatabaseUpdate - if true, skip Daisuki DB update/reseed and
+ *   proceed directly to the download stage
  */
 export async function seedAndDownloadNewSongs(
     db: DatabaseContext,
@@ -685,15 +687,24 @@ export async function seedAndDownloadNewSongs(
     songs?: string[],
     checkSongDurations?: boolean,
     skipDownload?: boolean,
-): Promise<void> {
+    skipDatabaseUpdate = false,
+): Promise<{ songsDownloaded: number; songsFailed: number }> {
     logger.info("Performing regularly scheduled Daisuki database seed");
+    let songsDownloaded = 0;
+    let songsFailed = 0;
     try {
-        await pruneSqlDumps();
-        try {
-            await updateKpopDatabase(db);
-        } catch (e) {
-            logger.error(`Failed to update kpop_videos database. ${e}`);
-            throw e;
+        if (!skipDatabaseUpdate) {
+            await pruneSqlDumps();
+            try {
+                await updateKpopDatabase(db);
+            } catch (e) {
+                logger.error(`Failed to update kpop_videos database. ${e}`);
+                throw e;
+            }
+        } else {
+            logger.info(
+                "Skipping kpop_videos database update and reseed; running download stage only",
+            );
         }
 
         const timer = setTimeout(
@@ -722,8 +733,9 @@ export async function seedAndDownloadNewSongs(
             skipDownload,
         );
 
-        const songsDownloaded = result.songsDownloaded;
+        songsDownloaded = result.songsDownloaded;
         const songsDownloadFailures = result.songsFailed;
+        songsFailed = songsDownloadFailures;
 
         if (songsDownloadFailures > 0) {
             await sendInfoWebhook(
@@ -763,6 +775,8 @@ export async function seedAndDownloadNewSongs(
             "Kimiqo",
         );
     }
+
+    return { songsDownloaded, songsFailed };
 }
 
 async function reloadAutocompleteData(): Promise<void> {
