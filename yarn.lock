@@ -3435,10 +3435,10 @@ kysely-codegen@^0.15.0:
     micromatch "^4.0.5"
     minimist "^1.2.8"
 
-kysely@^0.27.4:
-  version "0.27.4"
-  resolved "https://registry.yarnpkg.com/kysely/-/kysely-0.27.4.tgz#96a0285467b380948b4de03b20d87e82d797449b"
-  integrity sha512-dyNKv2KRvYOQPLCAOCjjQuCk4YFd33BvGdf/o5bC7FiW+BB6snA81Zt+2wT9QDFzKqxKa5rrOmvlK/anehCcgA==
+kysely@^0.28.11:
+  version "0.28.11"
+  resolved "https://registry.yarnpkg.com/kysely/-/kysely-0.28.11.tgz#23b0d027cf59401e66d516eb23ed5e8e945fd4fd"
+  integrity sha512-zpGIFg0HuoC893rIjYX1BETkVWdDnzTzF5e0kWXJFg5lE0k1/LfNWBejrcnOFu8Q2Rfq/hTDTU7XLUM8QOrpzg==
 
 levn@^0.4.1:
   version "0.4.1"
