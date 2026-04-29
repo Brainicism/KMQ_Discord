@@ -360,11 +360,8 @@ export const DiscordPreferredLocaleToInternal: {
 // eslint-disable-next-line import/no-unused-modules
 export const KMQ_EMOJI = "<:kmq:761624775843905546>";
 export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
-
-export const YOUTUBE_SESSION_COOKIE_PATH = path.join(
-    __dirname,
-    "../data/yt_session.cookie",
-);
+export const BGUTIL_PROVIDER_URL =
+    process.env.BGUTIL_PROVIDER_URL ?? "http://127.0.0.1:4416";
 
 export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
     __dirname,
