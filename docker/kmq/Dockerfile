@@ -45,6 +45,10 @@ ENV DENO_INSTALL=/usr/local
 RUN curl -fsSL https://deno.land/install.sh | sh
 ENV PATH="$DENO_INSTALL/bin:$PATH"
 
+RUN mkdir -p /root/.config/yt-dlp/plugins \
+    && curl -L https://github.com/Brainicism/bgutil-ytdlp-pot-provider/releases/latest/download/bgutil-ytdlp-pot-provider.zip \
+       -o /root/.config/yt-dlp/plugins/bgutil-ytdlp-pot-provider.zip
+
 COPY --from=build /app /app
 WORKDIR /app
 

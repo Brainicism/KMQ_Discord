@@ -80,12 +80,12 @@ export default class KmqConfiguration {
         return this.config["ytdlpUpdatesEnabled"] ?? true;
     }
 
-    ytdlpDownloadWithPoToken(): boolean {
-        return this.config["ytdlpDownloadWithPoToken"] ?? false;
-    }
-
     ytdlpDownloadWithProxy(): boolean {
         return this.config["ytdlpDownloadWithProxy"] ?? false;
+    }
+
+    ytdlpUseBgutilProvider(): boolean {
+        return this.config["ytdlpUseBgutilProvider"] ?? false;
     }
 
     downloadWithOnesieRequest(): boolean {
