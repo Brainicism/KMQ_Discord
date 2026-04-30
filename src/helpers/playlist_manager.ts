@@ -854,7 +854,7 @@ export default class PlaylistManager {
                 try {
                     response = await spotifyRequest(requestURL);
                 } catch (err) {
-                    if (err.responseCode === 429) {
+                    if (err.response?.status === 429) {
                         const rateLimit =
                             Number(err.response.headers["retry-after"]) ||
                             DEFAULT_RATE_LIMIT_SECS;

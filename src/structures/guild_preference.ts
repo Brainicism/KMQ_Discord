@@ -256,7 +256,7 @@ export default class GuildPreference {
     }
 
     static async getGuildPreference(guildID: string): Promise<GuildPreference> {
-        if (!(guildID in this.locks)) {
+        if (!this.locks.has(guildID)) {
             this.locks.set(guildID, new Mutex());
         }
 
