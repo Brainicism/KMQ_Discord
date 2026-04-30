@@ -1,18 +1,8 @@
-import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
-import type Session from "./session";
-
-const logger = new IPCLogger("session_registry");
 
 /**
  * Global registry of active sessions, with per-guild creation locks.
- * Wraps the existing State.gameSessions / State.listeningSessions maps
- * with atomic create-or-get semantics.
- *
- * Phase 1: Provides read-only convenience methods alongside existing State maps.
- * Phase 8 will replace State maps entirely.
- *
- * See session-redesign-proposal.md §4.4 for full design rationale.
+ * Provides per-guild creation locks to prevent TOCTOU double-creation.
  */
 export class SessionRegistry {
     private creationLocks = new Map<string, Mutex>();
@@ -32,8 +22,8 @@ export class SessionRegistry {
     }
 
     /**
-     * Clean up the creation lock for a guild (optional, prevents memory leak
-     * for guilds that only play once). Called from endSession.
+     * Clean up the creation lock for a guild.
+     * Prevents memory leak for guilds that only play once.
      */
     releaseLock(guildID: string): void {
         const lock = this.creationLocks.get(guildID);
