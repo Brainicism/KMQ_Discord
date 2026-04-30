@@ -625,12 +625,34 @@ export default class SongSelector {
 
             // Kyseley does not like it when you provide an empty array or array of size 1 to OR/AND
             const finalExpressions: Expression<SqlBool>[] = [];
+
+            // Apply includes filter, but also enforce excludes on included artists
             if (includesInnerArtistFilterExpressions.length === 1) {
-                finalExpressions.push(includesInnerArtistFilterExpressions[0]!);
+                if (excludesGroupIDs.length > 0) {
+                    finalExpressions.push(
+                        and([
+                            includesInnerArtistFilterExpressions[0]!,
+                            eb("id_artist", "not in", excludesGroupIDs),
+                        ]),
+                    );
+                } else {
+                    finalExpressions.push(
+                        includesInnerArtistFilterExpressions[0]!,
+                    );
+                }
             } else if (includesInnerArtistFilterExpressions.length > 1) {
-                finalExpressions.push(
-                    and(includesInnerArtistFilterExpressions),
-                );
+                if (excludesGroupIDs.length > 0) {
+                    finalExpressions.push(
+                        and([
+                            ...includesInnerArtistFilterExpressions,
+                            eb("id_artist", "not in", excludesGroupIDs),
+                        ]),
+                    );
+                } else {
+                    finalExpressions.push(
+                        and(includesInnerArtistFilterExpressions),
+                    );
+                }
             }
 
             if (mainArtistFilterExpressions.length === 1) {

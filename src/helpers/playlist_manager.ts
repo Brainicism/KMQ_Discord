@@ -823,7 +823,7 @@ export default class PlaylistManager {
     cleanupPlaylistParsingLocks(): void {
         for (const guildID of Object.keys(this.guildsParseInProgress)) {
             const guildParse = this.guildsParseInProgress[guildID];
-            if (!guildParse) return;
+            if (!guildParse) continue;
             if (guildParse < new Date(Date.now() - 1000 * 60 * 10)) {
                 logger.warn(
                     `Guild ${guildID} got stuck parsing Playlist at ${guildParse}`,
