@@ -361,7 +361,7 @@ export default abstract class Session {
         );
 
         if (voiceConnectionSuccess) {
-            if (!this.stateMachine.canTransition(SessionState.ROUND_ACTIVE)) {
+            if (this.stateMachine.state === SessionState.INITIALIZING) {
                 this.stateMachine.transition(SessionState.ROUND_STARTING);
             }
 
