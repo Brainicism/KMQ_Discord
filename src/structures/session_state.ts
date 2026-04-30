@@ -98,7 +98,7 @@ export class SessionStateMachine {
         const from = this.currentState;
 
         if (!isValid) {
-            logger.warn(
+            logger.error(
                 `gid: ${this.guildID} | Invalid state transition: ${from} → ${to}`,
             );
         }
