@@ -96,7 +96,7 @@ export default abstract class Session {
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
     protected lifecycleMutex = new Mutex();
 
-    /** State machine tracking session lifecycle (Phase 1: logging only, not enforced) */
+    /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
     /** The guild preference */
@@ -361,11 +361,7 @@ export default abstract class Session {
         );
 
         if (voiceConnectionSuccess) {
-            // Song is now playing — transition to ROUND_ACTIVE
-            // (for first round, this covers INITIALIZING → ROUND_STARTING → ROUND_ACTIVE;
-            //  the ROUND_STARTING was set above for subsequent rounds)
             if (!this.stateMachine.canTransition(SessionState.ROUND_ACTIVE)) {
-                // If we're still in INITIALIZING, go through ROUND_STARTING first
                 this.stateMachine.transition(SessionState.ROUND_STARTING);
             }
 
@@ -385,11 +381,12 @@ export default abstract class Session {
         isError: boolean,
         _messageContext?: MessageContext,
     ): Promise<void> {
-        this.stateMachine.transition(SessionState.ROUND_ENDING);
         logger.info(`gid: ${this.guildID} | Round ending`);
         if (this.round === null) {
             return;
         }
+
+        this.stateMachine.transition(SessionState.ROUND_ENDING);
 
         this.round = null;
 
@@ -398,8 +395,6 @@ export default abstract class Session {
 
         if (this.finished) return;
         this.roundsPlayed++;
-
-        // Transition to BETWEEN_ROUNDS (next round will transition to ROUND_STARTING)
         this.stateMachine.transition(SessionState.BETWEEN_ROUNDS);
         // check if duration has been reached
         const remainingDuration = this.getRemainingDuration(

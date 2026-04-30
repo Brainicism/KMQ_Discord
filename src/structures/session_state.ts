@@ -5,8 +5,6 @@ const logger = new IPCLogger("session_state");
 /**
  * Explicit session lifecycle states, replacing scattered boolean flags
  * (`finished`, `sessionInitialized`, `round !== null`, `round.finished`).
- *
- * See session-redesign-proposal.md §3 for full design rationale.
  */
 export enum SessionState {
     /** Session object created, not yet registered */
@@ -33,7 +31,7 @@ export enum SessionState {
     /** Session ending: persisting stats, sending end-game message */
     ENDING = "ENDING",
 
-    /** Terminal: all cleanup complete, session is garbage */
+    /** Terminal: all cleanup complete */
     ENDED = "ENDED",
 }
 
@@ -42,6 +40,7 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
     [SessionState.CREATED]: new Set([SessionState.INITIALIZING]),
     [SessionState.INITIALIZING]: new Set([
         SessionState.LOBBY,
+        SessionState.ROUND_STARTING,
         SessionState.BETWEEN_ROUNDS,
         SessionState.ENDING,
     ]),
@@ -71,8 +70,8 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
 
 /**
  * Manages session state transitions with validation and logging.
- * Invalid transitions are logged as warnings but not enforced (Phase 1).
- * Phase 2 will enforce transitions by rejecting invalid ones.
+ * Invalid transitions are logged as warnings but still applied
+ * to avoid breaking existing behavior during rollout.
  */
 export class SessionStateMachine {
     private _state: SessionState = SessionState.CREATED;
@@ -87,11 +86,9 @@ export class SessionStateMachine {
     }
 
     /**
-     * Attempt a state transition. Returns true if the transition was valid
-     * and applied. In Phase 1 (foundation), invalid transitions are logged
-     * as warnings but still applied to avoid breaking existing behavior.
-     *
-     * Must be called while holding the lifecycle mutex for write safety.
+     * Attempt a state transition. Returns true if the transition was valid.
+     * Invalid transitions are logged as warnings but still applied to avoid
+     * breaking existing behavior during rollout.
      */
     transition(to: SessionState): boolean {
         const allowed = VALID_TRANSITIONS[this._state];
@@ -102,8 +99,6 @@ export class SessionStateMachine {
             logger.warn(
                 `gid: ${this.guildID} | Invalid state transition: ${from} → ${to}`,
             );
-            // Phase 1: Apply anyway to avoid breaking existing behavior.
-            // Phase 2 will enforce by returning false here.
         }
 
         this._state = to;
