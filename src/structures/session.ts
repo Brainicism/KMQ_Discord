@@ -23,6 +23,7 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
+    getMajorityCount,
 } from "../helpers/discord_utils";
 import {
     delay,
@@ -60,6 +61,11 @@ import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 import { SessionState, SessionStateMachine } from "./session_state";
+import {
+    actionFail,
+    actionOkVoid,
+    type SessionActionResult,
+} from "./session_action_result";
 
 const logger = new IPCLogger("session");
 
@@ -649,6 +655,53 @@ export default abstract class Session extends EventEmitter {
             clearTimeout(this.guessTimeoutFunc);
         }
     }
+
+    // ── Session API: actions that commands call ─────────────────────────
+
+    /**
+     * Process a skip vote from a user. Returns a result indicating
+     * whether the vote was counted and whether skip threshold was reached.
+     */
+    processSkipVote(
+        userID: string,
+        messageContext: MessageContext,
+    ): SessionActionResult<{ skipAchieved: boolean; skipCount: number; skipThreshold: number }> {
+        if (!this.round || this.round.finished || this.round.skipAchieved) {
+            return actionFail("no_active_round");
+        }
+
+        if (!this.stateMachine.isAcceptingInput) {
+            return actionFail("not_accepting_input");
+        }
+
+        this.round.userSkipped(userID);
+
+        const skipCount = this.round.getSkipCount();
+        const skipThreshold = getMajorityCount(this.guildID);
+        const skipAchieved = skipCount >= skipThreshold;
+
+        return {
+            ok: true,
+            value: { skipAchieved, skipCount, skipThreshold },
+        };
+    }
+
+    /**
+     * Force-skip the current song (end round + start new one).
+     * Called when skip majority is reached.
+     */
+    async forceSkip(messageContext: MessageContext): Promise<SessionActionResult> {
+        if (!this.round) {
+            return actionFail("no_active_round");
+        }
+
+        this.round.skipAchieved = true;
+        await this.endRound(false, messageContext);
+        await this.startRound(messageContext);
+        return actionOkVoid();
+    }
+
+    // ── End Session API ───────────────────────────────────────────────
 
     /**
      * Updates the Session's lastActive timestamp and it's value in the data store
