@@ -221,7 +221,6 @@ export default class GameSession extends Session {
         );
     }
 
-
     /**
      * Ends an active GameRound (mutex-protected entry point).
      * Serialized with startRound/endSession to prevent concurrent lifecycle transitions.
@@ -239,7 +238,6 @@ export default class GameSession extends Session {
         );
     }
 
-
     /**
      * Ends the current GameSession (mutex-protected entry point).
      * Serialized with startRound/endRound to prevent concurrent lifecycle transitions.
@@ -251,7 +249,6 @@ export default class GameSession extends Session {
             this.endSessionCore(reason, endedDueToError),
         );
     }
-
 
     /**
      * Process a message to see if it is a valid and correct guess
