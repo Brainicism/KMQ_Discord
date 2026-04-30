@@ -1211,7 +1211,7 @@ export default abstract class Session {
         timeRemaining: number | null,
         nonEmptyFooter: boolean,
     ): string {
-        if (timeRemaining == null) {
+        if (!timeRemaining) {
             return "";
         }
 

@@ -1690,7 +1690,7 @@ export function getMajorityCount(guildID: string): number {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
     }
 
-    return Number.MAX_SAFE_INTEGER;
+    return 1;
 }
 
 /**

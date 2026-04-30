@@ -335,7 +335,7 @@ export default class Scoreboard {
                 value: players
                     .slice(0, Math.ceil(players.length / 3))
                     .join("\n"),
-                inline: true,
+                inline: false,
             },
             {
                 name: ZERO_WIDTH_SPACE,
