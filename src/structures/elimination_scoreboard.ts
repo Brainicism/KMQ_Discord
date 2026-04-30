@@ -33,13 +33,17 @@ export default class EliminationScoreboard extends Scoreboard {
         }
 
         const guesserIDs = guessResults.map((x) => x.userID);
-        let maxLives = -1;
         for (const player of Object.values(this.players)) {
             // guessers don't have lives decremented
             if (!guesserIDs.includes(player.id)) {
                 player.decrementLives();
             }
+        }
 
+        // Recompute firstPlace based on lives (most lives = first place)
+        let maxLives = -1;
+        this.firstPlace = [];
+        for (const player of Object.values(this.players)) {
             if (player.getLives() === maxLives) {
                 this.firstPlace.push(player);
             } else if (player.getLives() > maxLives) {
@@ -103,14 +107,18 @@ export default class EliminationScoreboard extends Scoreboard {
 
     /** @returns the number of lives of the player with the least amount of lives (who isn't dead) */
     getLivesOfWeakestPlayer(): number {
-        const minimumLives = Object.values(this.players)
-            .filter((x) => x.getLives() > 0)
-            .reduce((prev, curr) =>
-                prev.getLives() < curr.getLives() ? prev : curr,
-            )
-            .getLives();
+        const alivePlayers = Object.values(this.players).filter(
+            (x) => x.getLives() > 0,
+        );
 
-        return minimumLives;
+        if (alivePlayers.length === 0) {
+            // No alive players — return startingLives as a safe fallback
+            return this.startingLives;
+        }
+
+        return alivePlayers.reduce((prev, curr) =>
+            prev.getLives() < curr.getLives() ? prev : curr,
+        ).getLives();
     }
 
     /** @returns the number of players that are alive */

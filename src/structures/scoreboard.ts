@@ -39,6 +39,7 @@ export default class Scoreboard {
      * @param player - The player to add
      */
     addPlayer(player: Player): void {
+        // No-op if player already tracked (prevents RACE-04/RACE-12 duplicate adds)
         if (player.id in this.players) {
             return;
         }
@@ -115,15 +116,26 @@ export default class Scoreboard {
 
             player.incrementCorrectGuessCount();
             player.incrementExp(guessResult.expGain);
+        }
 
-            const winnerScore = player.getScore();
-            if (winnerScore === this.highestScore) {
-                // If user is tied for first, add them to the first place array
-                this.firstPlace.push(player);
-            } else if (winnerScore > this.highestScore) {
-                // If user is first, reset first place array and add them
-                this.highestScore = winnerScore;
+        // Recompute from scratch — immune to interleaving / stale state (RACE-11)
+        this.recomputeFirstPlace();
+    }
+
+    /**
+     * Recompute highestScore and firstPlace from scratch by iterating all players.
+     * Called after every mutation to ensure consistency regardless of interleaving.
+     */
+    protected recomputeFirstPlace(): void {
+        this.highestScore = 0;
+        this.firstPlace = [];
+        for (const player of Object.values(this.players)) {
+            const score = player.getScore();
+            if (score > this.highestScore) {
+                this.highestScore = score;
                 this.firstPlace = [player];
+            } else if (score === this.highestScore && score > 0) {
+                this.firstPlace.push(player);
             }
         }
     }
