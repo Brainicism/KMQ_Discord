@@ -671,31 +671,61 @@ function BookmarkStar({
     );
 }
 
-function GuessTicker({
-    guesses,
+function SessionWinnerBanner({
     scoreboard,
+    t,
 }: {
-    guesses: UiState["recentGuesses"];
     scoreboard: ActivityScoreboardSnapshot | null;
+    t: Translator;
 }) {
-    if (guesses.length === 0) return null;
-    const nameByID = new Map(
-        (scoreboard?.players ?? []).map((p) => [p.id, p.username]),
+    // Scoreboard.winnerIDs and highestScore are populated by the server after
+    // the final roundEnd, so we can surface the same tie-aware "who won" logic
+    // the bot uses in its channel embeds without any additional state.
+    if (!scoreboard || scoreboard.winnerIDs.length === 0) {
+        return (
+            <div className="banner winner-banner">{t("sessionWinnerNone")}</div>
+        );
+    }
+
+    if (scoreboard.highestScore === 0) {
+        return (
+            <div className="banner winner-banner">{t("sessionWinnerNone")}</div>
+        );
+    }
+
+    const nameByID = new Map(scoreboard.players.map((p) => [p.id, p.username]));
+
+    const winnerNames = scoreboard.winnerIDs.map(
+        (id) => nameByID.get(id) ?? id,
     );
+
+    const message =
+        winnerNames.length === 1
+            ? t("sessionWinnerSolo", {
+                  username: winnerNames[0]!,
+                  score: scoreboard.highestScore,
+              })
+            : t("sessionWinnerTie", {
+                  names: winnerNames.join(", "),
+                  score: scoreboard.highestScore,
+              });
+
+    return <div className="banner winner-banner">{message}</div>;
+}
+
+function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
+    if (guesses.length === 0) return null;
 
     return (
         <ul className="guess-ticker">
-            {guesses.slice(-RECENT_GUESS_DISPLAY_LIMIT).map((g) => {
-                const name = nameByID.get(g.userID) ?? g.userID;
-                return (
-                    <li
-                        key={`${g.userID}-${g.ts}`}
-                        className={g.isCorrect ? "correct" : "incorrect"}
-                    >
-                        {g.isCorrect ? "✓" : "·"} {name}
-                    </li>
-                );
-            })}
+            {guesses.slice(-RECENT_GUESS_DISPLAY_LIMIT).map((g) => (
+                <li
+                    key={`${g.userID}-${g.ts}`}
+                    className={g.isCorrect ? "correct" : "incorrect"}
+                >
+                    {g.isCorrect ? "✓" : "·"} {g.username}
+                </li>
+            ))}
         </ul>
     );
 }
@@ -875,9 +905,12 @@ export default function App() {
             )}
 
             {ui.sessionEnded && (
-                <div className="banner">
-                    {t("sessionEndedBanner", { playSlash: "/play" })}
-                </div>
+                <>
+                    <SessionWinnerBanner scoreboard={ui.scoreboard} t={t} />
+                    <div className="banner">
+                        {t("sessionEndedBanner", { playSlash: "/play" })}
+                    </div>
+                </>
             )}
 
             <CurrentRound
@@ -984,10 +1017,7 @@ export default function App() {
                 )}
             </section>
 
-            <GuessTicker
-                guesses={ui.recentGuesses}
-                scoreboard={ui.scoreboard}
-            />
+            <GuessTicker guesses={ui.recentGuesses} />
         </div>
     );
 }
@@ -1089,6 +1119,7 @@ function reduce(
                     ...prev.recentGuesses.slice(-RECENT_GUESS_BUFFER_LIMIT),
                     {
                         userID: msg.userID,
+                        username: msg.username,
                         isCorrect: msg.isCorrect,
                         ts: msg.ts,
                     },

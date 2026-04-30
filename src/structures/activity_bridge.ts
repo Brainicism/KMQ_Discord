@@ -697,30 +697,29 @@ export function attachActivityBridge(session: GameSession): void {
         });
     });
 
-    session.on("roundEnd", (payload: RoundEndPayload) => {
-        // KmqMember instances on round results are bare (id only) — names come
-        // from the scoreboard's Player objects, which were populated when each
-        // user joined the VC.
-        const playersById = new Map(
-            session.scoreboard.getPlayers().map((p) => [p.id, p]),
-        );
+    // Shared identity lookup. KmqMember instances on round results are bare
+    // (id only); names come from the scoreboard's Player objects (populated
+    // when each user joined VC) with a fall-back to the Eris user cache.
+    const lookupName = (
+        userID: string,
+    ): { username: string; avatarUrl: string | null } => {
+        const sbPlayer = session.scoreboard
+            .getPlayers()
+            .find((p) => p.id === userID);
 
-        const lookupName = (
-            userID: string,
-        ): { username: string; avatarUrl: string | null } => {
-            const sbPlayer = playersById.get(userID);
-            const cachedUser = State.client.users.get(userID);
-            return {
-                username:
-                    sbPlayer?.getName() ||
-                    sbPlayer?.username ||
-                    cachedUser?.username ||
-                    userID,
-                avatarUrl:
-                    sbPlayer?.getAvatarURL() || cachedUser?.avatarURL || null,
-            };
+        const cachedUser = State.client.users.get(userID);
+        return {
+            username:
+                sbPlayer?.getName() ||
+                sbPlayer?.username ||
+                cachedUser?.username ||
+                userID,
+            avatarUrl:
+                sbPlayer?.getAvatarURL() || cachedUser?.avatarURL || null,
         };
+    };
 
+    session.on("roundEnd", (payload: RoundEndPayload) => {
         const correctGuessers: ActivityCorrectGuesser[] =
             payload.playerRoundResults.map((r) => {
                 const { username, avatarUrl } = lookupName(r.player.id);
@@ -773,9 +772,12 @@ export function attachActivityBridge(session: GameSession): void {
     });
 
     session.on("guessReceived", (payload: GuessReceivedPayload) => {
+        const { username, avatarUrl } = lookupName(payload.userID);
         pushEvent(guildID, {
             type: "guessReceived",
             userID: payload.userID,
+            username,
+            avatarUrl,
             isCorrect: payload.isCorrect,
             ts: payload.ts,
         });

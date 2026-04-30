@@ -20,6 +20,8 @@ type ActivityEvent =
     | {
           type: "guessReceived";
           userID: string;
+          username: string;
+          avatarUrl: string | null;
           isCorrect: boolean;
           ts: number;
       }

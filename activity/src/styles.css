@@ -327,6 +327,13 @@ body {
     border-radius: 4px;
 }
 
+.banner.winner-banner {
+    background: #3a3622;
+    border-left-color: #fbb03b;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
 .current-round,
 .last-reveal,
 .round-area {
