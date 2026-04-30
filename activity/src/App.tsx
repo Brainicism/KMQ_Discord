@@ -389,10 +389,12 @@ function GuessInput({
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     // Refocus when the input transitions back to enabled (new round) so the
-    // user can keep typing without clicking back into the box.
+    // user can keep typing without clicking back into the box. preventScroll
+    // because the input lives below the fold on short viewports — the
+    // default focus() behavior would scroll past the round reveal.
     useEffect(() => {
         if (enabled) {
-            inputRef.current?.focus();
+            inputRef.current?.focus({ preventScroll: true });
         }
     }, [enabled]);
 
@@ -417,7 +419,7 @@ function GuessInput({
             setBusy(false);
             // Refocus after every submit (the disabled-while-busy flicker can
             // drop focus on some browsers).
-            inputRef.current?.focus();
+            inputRef.current?.focus({ preventScroll: true });
         }
     };
 
@@ -434,7 +436,6 @@ function GuessInput({
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={!enabled || busy}
-                autoFocus
                 maxLength={MAX_GUESS_LENGTH}
             />
             <button type="submit" disabled={!enabled || busy || !text.trim()}>
