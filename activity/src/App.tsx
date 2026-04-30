@@ -189,11 +189,15 @@ function CurrentRound({
     round,
     reveal,
     bookmarkSlot,
+    winnerText,
     t,
 }: {
     round: ActivityRoundMeta | null;
     reveal: UiState["lastReveal"];
     bookmarkSlot: React.ReactNode;
+    /** If non-null, the round-area idle state renders the session-end winner
+     *  line in place of "Waiting for next round". */
+    winnerText: string | null;
     t: Translator;
 }) {
     return (
@@ -300,7 +304,11 @@ function CurrentRound({
             ) : (
                 <div className="round-area-body idle">
                     <div className="round-area-text">
-                        <p className="empty">{t("waitingForNextRound")}</p>
+                        {winnerText ? (
+                            <p className="session-winner">{winnerText}</p>
+                        ) : (
+                            <p className="empty">{t("waitingForNextRound")}</p>
+                        )}
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
                         <span>🎵</span>
@@ -673,46 +681,53 @@ function BookmarkStar({
     );
 }
 
-function SessionWinnerBanner({
-    scoreboard,
-    t,
-}: {
-    scoreboard: ActivityScoreboardSnapshot | null;
-    t: Translator;
-}) {
-    // Scoreboard.winnerIDs and highestScore are populated by the server after
-    // the final roundEnd, so we can surface the same tie-aware "who won" logic
-    // the bot uses in its channel embeds without any additional state.
-    if (!scoreboard || scoreboard.winnerIDs.length === 0) {
-        return (
-            <div className="banner winner-banner">{t("sessionWinnerNone")}</div>
-        );
+function resolveWinnerText(
+    t: Translator,
+    scoreboard: ActivityScoreboardSnapshot | null,
+    viewerUserID: string | null,
+): string {
+    // scoreboard.winnerIDs / highestScore are populated by the server after
+    // the final roundEnd, so we can reuse the same tie-aware logic the bot
+    // uses in channel embeds without any additional state.
+    if (
+        !scoreboard ||
+        scoreboard.winnerIDs.length === 0 ||
+        scoreboard.highestScore === 0
+    ) {
+        return t("sessionWinnerNone");
     }
 
-    if (scoreboard.highestScore === 0) {
-        return (
-            <div className="banner winner-banner">{t("sessionWinnerNone")}</div>
+    const isOnePoint = scoreboard.highestScore === 1;
+
+    if (scoreboard.winnerIDs.length === 1) {
+        const winnerID = scoreboard.winnerIDs[0]!;
+        const isViewer = viewerUserID !== null && winnerID === viewerUserID;
+        if (isViewer) {
+            return t(
+                isOnePoint
+                    ? "sessionWinnerSoloYouOne"
+                    : "sessionWinnerSoloYouMany",
+                { score: scoreboard.highestScore },
+            );
+        }
+        const username =
+            scoreboard.players.find((p) => p.id === winnerID)?.username ??
+            winnerID;
+        return t(
+            isOnePoint ? "sessionWinnerSoloOne" : "sessionWinnerSoloMany",
+            { username, score: scoreboard.highestScore },
         );
     }
 
     const nameByID = new Map(scoreboard.players.map((p) => [p.id, p.username]));
-
     const winnerNames = scoreboard.winnerIDs.map(
         (id) => nameByID.get(id) ?? id,
     );
 
-    const message =
-        winnerNames.length === 1
-            ? t("sessionWinnerSolo", {
-                  username: winnerNames[0]!,
-                  score: scoreboard.highestScore,
-              })
-            : t("sessionWinnerTie", {
-                  names: winnerNames.join(", "),
-                  score: scoreboard.highestScore,
-              });
-
-    return <div className="banner winner-banner">{message}</div>;
+    return t(isOnePoint ? "sessionWinnerTieOne" : "sessionWinnerTieMany", {
+        names: winnerNames.join(", "),
+        score: scoreboard.highestScore,
+    });
 }
 
 function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
@@ -739,6 +754,7 @@ export default function App() {
     const [authState, setAuthState] = useState<{
         accessToken: string;
         instanceId: string;
+        userID: string;
     } | null>(null);
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
 
@@ -777,7 +793,11 @@ export default function App() {
                 if (cancelled) return;
                 setBundle(initialBundle.strings);
                 setUi((prev) => applySnapshot(prev, snapshot));
-                setAuthState({ accessToken: auth.accessToken, instanceId });
+                setAuthState({
+                    accessToken: auth.accessToken,
+                    instanceId,
+                    userID: auth.user.id,
+                });
                 setReady(true);
 
                 // The SDK exposes the live Discord client locale, which can
@@ -907,20 +927,24 @@ export default function App() {
             )}
 
             {ui.sessionEnded && (
-                <>
-                    {ui.hadSession && (
-                        <SessionWinnerBanner scoreboard={ui.scoreboard} t={t} />
-                    )}
-                    <div className="banner">
-                        {t("sessionEndedBanner", { playSlash: "/play" })}
-                    </div>
-                </>
+                <div className="banner">
+                    {t("sessionEndedBanner", { playSlash: "/play" })}
+                </div>
             )}
 
             <CurrentRound
                 round={ui.currentRound}
                 reveal={ui.lastReveal}
                 t={t}
+                winnerText={
+                    ui.sessionEnded && ui.hadSession && !ui.lastReveal
+                        ? resolveWinnerText(
+                              t,
+                              ui.scoreboard,
+                              authState?.userID ?? null,
+                          )
+                        : null
+                }
                 bookmarkSlot={
                     authState && (ui.currentRound || ui.lastReveal) ? (
                         <BookmarkStar

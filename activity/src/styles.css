@@ -327,11 +327,14 @@ body {
     border-radius: 4px;
 }
 
-.banner.winner-banner {
-    background: #3a3622;
-    border-left-color: #fbb03b;
-    font-size: 1.05rem;
+.session-winner {
+    margin: 0;
+    font-size: 1.4rem;
     font-weight: 600;
+    color: #fbb03b;
+    text-align: center;
+    padding: 24px 12px;
+    line-height: 1.4;
 }
 
 .current-round,
