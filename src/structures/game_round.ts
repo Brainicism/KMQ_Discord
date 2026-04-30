@@ -292,7 +292,7 @@ export default class GameRound extends Round {
                 break;
             case GuessModeType.BOTH:
                 if (isSongGuessCorrect) pointReward = 1;
-                if (isArtistGuessCorrect) pointReward = 0.2;
+                else if (isArtistGuessCorrect) pointReward = 0.2;
                 break;
             default:
                 logger.error(`Unexpected guessModeType: ${guessModeType}`);

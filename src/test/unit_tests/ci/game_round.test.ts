@@ -610,6 +610,41 @@ describe("game round", () => {
                         );
                     });
                 });
+
+                describe("guess matches both song name and artist name", () => {
+                    it("should return 1 point (song takes priority over artist)", () => {
+                        const sharedName = "samename";
+                        const roundWithIdenticalSongArtist = new GameRound(
+                            new QueriedSong({
+                                songName: sharedName,
+                                cleanSongName: sharedName,
+                                hangulSongName: null,
+                                artistName: sharedName,
+                                hangulArtistName: null,
+                                youtubeLink: "shared",
+                                betterAudioLink: null,
+                                publishDate: new Date(),
+                                members: "female",
+                                artistID: 99,
+                                isSolo: "y",
+                                views: 1,
+                                tags: "",
+                                vtype: "main",
+                                selectionWeight: 1,
+                            }),
+                            5,
+                            guildID,
+                        );
+
+                        assert.strictEqual(
+                            roundWithIdenticalSongArtist.checkGuess(
+                                sharedName,
+                                GuessModeType.BOTH,
+                            ),
+                            1,
+                        );
+                    });
+                });
             });
         });
     });
