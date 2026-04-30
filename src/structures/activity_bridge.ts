@@ -162,6 +162,8 @@ function runLocked(guildID: string, fn: () => Promise<void>): void {
 }
 
 function pushEvent(guildID: string, event: ActivityEvent): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!State.ipc) return;
     try {
         State.ipc.sendToAdmiral(ACTIVITY_IPC_EVENT, { guildID, event });
     } catch (e) {
@@ -205,10 +207,17 @@ interface SessionEndPayload {
 
 /**
  * Registers a single worker-wide IPC listener for admiral→worker activity
- * requests. Idempotent: subsequent calls are a no-op.
+ * requests. Idempotent: subsequent calls are a no-op. No-op when running
+ * outside the eris-fleet worker (e.g. the test harness), where State.ipc
+ * isn't populated.
  */
 function ensureWorkerHandlerRegistered(): void {
     if (workerHandlerRegistered) {
+        return;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!State.ipc) {
         return;
     }
 
