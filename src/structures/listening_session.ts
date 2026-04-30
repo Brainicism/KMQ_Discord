@@ -155,9 +155,7 @@ export default class ListeningSession extends Session {
             `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`,
         );
 
-        // End the current round before base cleanup, since Session.endSession
-        // no longer calls this.endRound() to avoid polymorphic mutex re-entry.
-        // Call endRoundCore directly since we already hold the lifecycle lock.
+        // Use endRoundCore directly — we already hold the lifecycle lock
         await this.endRoundCore(
             false,
             new MessageContext(this.textChannelID, null, this.guildID),

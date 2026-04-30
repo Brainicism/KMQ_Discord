@@ -23,8 +23,6 @@ export function delay(delayDuration: number): Promise<void> {
 /**
  * Like delay(), but can be cancelled via an AbortSignal.
  * Resolves normally if the signal fires (does NOT reject/throw).
- * @param delayDuration - Duration in ms
- * @param signal - Optional AbortSignal to cancel the delay
  */
 export function cancellableDelay(
     delayDuration: number,
@@ -32,15 +30,17 @@ export function cancellableDelay(
 ): Promise<void> {
     if (signal?.aborted) return Promise.resolve();
     return new Promise((resolve) => {
-        const timer = setTimeout(resolve, delayDuration);
-        signal?.addEventListener(
-            "abort",
-            () => {
-                clearTimeout(timer);
-                resolve();
-            },
-            { once: true },
-        );
+        const onAbort = (): void => {
+            clearTimeout(timer);
+            resolve();
+        };
+
+        const timer = setTimeout(() => {
+            signal?.removeEventListener("abort", onAbort);
+            resolve();
+        }, delayDuration);
+
+        signal?.addEventListener("abort", onAbort, { once: true });
     });
 }
 

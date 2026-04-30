@@ -958,8 +958,6 @@ export default class GameSession extends Session {
             : this.guildPreference.getSongStartDelay() * 1000;
 
         if (this.isSessionActive) {
-            // Only add a delay if the game has already started
-            // Uses cancellableDelay so /end can abort without waiting
             await cancellableDelay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? Math.max(songStartDelayMs - multiGuessDelayMs, 0)
@@ -1002,7 +1000,7 @@ export default class GameSession extends Session {
             round = this.round;
         }
 
-        // wait and accept multiguess results (cancellable on session end)
+        // wait and accept multiguess results
         await cancellableDelay(
             this.multiguessDelayIsActive(this.guildPreference)
                 ? this.guildPreference.getMultiGuessDelay() * 1000

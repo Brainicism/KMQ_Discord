@@ -94,13 +94,9 @@ export default abstract class Session extends EventEmitter {
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
-    /**
-     * AbortController for cancelling in-flight operations when the session ends.
-     * Signal this in endSession to unblock cancellableDelay() calls.
-     */
+    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
     protected sessionAbortController = new AbortController();
 
-    /** Shorthand for the abort signal */
     protected get abortSignal(): AbortSignal {
         return this.sessionAbortController.signal;
     }
@@ -172,11 +168,7 @@ export default abstract class Session extends EventEmitter {
         );
     }
 
-    /**
-     * Run a callback while holding the lifecycle mutex.
-     * All lifecycle operations (startRound, endRound, endSession) should
-     * be wrapped in this to prevent concurrent state transitions.
-     */
+    /** Run fn while holding the lifecycle mutex. */
     protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T> {
         return this.lifecycleMutex.runExclusive(fn);
     }
@@ -477,8 +469,6 @@ export default abstract class Session extends EventEmitter {
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         this.stateMachine.transition(SessionState.ENDING);
-
-        // Cancel any in-flight cancellable delays (e.g., between-round timer)
         this.sessionAbortController.abort();
 
         logger.info(
