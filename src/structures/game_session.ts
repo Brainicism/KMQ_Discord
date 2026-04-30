@@ -477,9 +477,7 @@ export default class GameSession extends Session {
             const levelUpMessages = leveledUpPlayers
                 .sort((a, b) => {
                     const levelsGainedDiff =
-                        b.endLevel -
-                        b.startLevel -
-                        (a.endLevel - a.startLevel);
+                        b.endLevel - b.startLevel - (a.endLevel - a.startLevel);
                     return levelsGainedDiff !== 0
                         ? levelsGainedDiff
                         : b.endLevel - a.endLevel;
