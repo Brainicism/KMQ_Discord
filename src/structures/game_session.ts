@@ -1308,7 +1308,7 @@ export default class GameSession extends Session {
                 guild_id: this.guildID,
                 num_participants: this.scoreboard
                     .getPlayers()
-                    .map((x) => x.inVC).length,
+                    .filter((x) => x.inVC).length,
                 avg_guess_time: averageGuessTime,
                 session_length: sessionLength,
                 rounds_played: this.roundsPlayed,
