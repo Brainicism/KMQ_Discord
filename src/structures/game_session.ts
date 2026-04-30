@@ -1750,6 +1750,7 @@ export default class GameSession extends Session {
     private async stopHiddenUpdateTimer(): Promise<void> {
         if (this.hiddenUpdateTimer) {
             clearInterval(this.hiddenUpdateTimer);
+            this.hiddenUpdateTimer = null;
             const round = this.round;
             try {
                 await round?.interactionMessage?.delete();
