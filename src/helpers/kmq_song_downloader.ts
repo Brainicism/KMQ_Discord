@@ -508,6 +508,7 @@ export default class KmqSongDownloader {
                     outputFile,
                     proxy,
                 );
+                return;
             } catch (e) {
                 logger.warn(
                     `Failed to download better audio link ${videoIdBetterAudio}, falling back to main link ${videoId}. err = ${e}`,

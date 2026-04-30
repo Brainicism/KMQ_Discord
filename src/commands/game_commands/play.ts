@@ -1247,7 +1247,7 @@ export default class PlayCommand implements BaseCommand {
                     lives = ELIMINATION_DEFAULT_LIVES;
                 } else {
                     lives = parseInt(livesOrClipDurationArg, 10);
-                    if (lives < ELIMINATION_MAX_LIVES) {
+                    if (lives < ELIMINATION_MIN_LIVES) {
                         lives = ELIMINATION_MIN_LIVES;
                     } else if (lives > ELIMINATION_MAX_LIVES) {
                         lives = ELIMINATION_MAX_LIVES;
