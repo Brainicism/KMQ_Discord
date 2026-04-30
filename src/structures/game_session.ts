@@ -7,6 +7,7 @@ import {
     bold,
     chunkArray,
     codeLine,
+    cancellableDelay,
     delay,
     getOrdinalNum,
     setDifference,
@@ -216,7 +217,7 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        return this.lifecycleMutex.runExclusive(() =>
+        return this.withLifecycleLock(() =>
             this.startRoundCore(messageContext),
         );
     }
@@ -233,7 +234,7 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         gameRound?: GameRound,
     ): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
+        return this.withLifecycleLock(() =>
             this.endRoundCore(isError, messageContext, gameRound),
         );
     }
@@ -245,7 +246,7 @@ export default class GameSession extends Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
+        return this.withLifecycleLock(() =>
             this.endSessionCore(reason, endedDueToError),
         );
     }
@@ -910,11 +911,11 @@ export default class GameSession extends Session {
             : this.guildPreference.getSongStartDelay() * 1000;
 
         if (this.isSessionActive) {
-            // Only add a delay if the game has already started
-            await delay(
+            await cancellableDelay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? Math.max(songStartDelayMs - multiGuessDelayMs, 0)
                     : songStartDelayMs,
+                this.abortSignal,
             );
         }
 
@@ -952,10 +953,11 @@ export default class GameSession extends Session {
         }
 
         // wait and accept multiguess results
-        await delay(
+        await cancellableDelay(
             this.multiguessDelayIsActive(this.guildPreference)
                 ? this.guildPreference.getMultiGuessDelay() * 1000
                 : 0,
+            this.abortSignal,
         );
 
         // ensure that only one invocation can proceed
@@ -1110,7 +1112,7 @@ export default class GameSession extends Session {
                 );
 
                 if (playSuccess) {
-                    await delay(songStartDelay * 1000);
+                    await cancellableDelay(songStartDelay * 1000, this.abortSignal);
                 }
             }
         }

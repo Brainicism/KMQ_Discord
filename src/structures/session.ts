@@ -96,6 +96,13 @@ export default abstract class Session {
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
     protected lifecycleMutex = new Mutex();
 
+    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
+    protected sessionAbortController = new AbortController();
+
+    protected get abortSignal(): AbortSignal {
+        return this.sessionAbortController.signal;
+    }
+
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
@@ -155,6 +162,21 @@ export default abstract class Session {
             this.stateMachine.state !== SessionState.CREATED &&
             this.stateMachine.state !== SessionState.INITIALIZING
         );
+    }
+
+    /** Run fn while holding the lifecycle mutex. Returns null if session is ending/ended. */
+    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
+        if (!this.stateMachine.isAlive) {
+            return Promise.resolve(null);
+        }
+
+        return this.lifecycleMutex.runExclusive(async () => {
+            if (!this.stateMachine.isAlive) {
+                return null;
+            }
+
+            return fn();
+        });
     }
 
     static getSession(guildID: string): Session | undefined {
@@ -380,7 +402,7 @@ export default abstract class Session {
         );
 
         if (voiceConnectionSuccess) {
-            if (!this.stateMachine.canTransition(SessionState.ROUND_ACTIVE)) {
+            if (this.stateMachine.state === SessionState.INITIALIZING) {
                 this.stateMachine.transition(SessionState.ROUND_STARTING);
             }
 
@@ -433,6 +455,8 @@ export default abstract class Session {
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         this.stateMachine.transition(SessionState.ENDING);
+        this.sessionAbortController.abort();
+
         logger.info(
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
