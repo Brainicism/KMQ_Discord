@@ -38,6 +38,7 @@ import {
 } from "../../helpers/discord_utils";
 import AnswerCommand from "../game_options/answer";
 import AnswerType from "../../enums/option_types/answer_type";
+import { Mutex } from "async-mutex";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -60,6 +61,9 @@ import type TeamScoreboard from "../../structures/team_scoreboard";
 
 const COMMAND_NAME = "play";
 const logger = new IPCLogger(COMMAND_NAME);
+
+/** Per-guild mutex to prevent concurrent /play commands from creating duplicate sessions */
+const guildStartGameLocks = new Map<string, Mutex>();
 
 export const enum PlayTeamsAction {
     CREATE = "create",
@@ -991,6 +995,38 @@ export default class PlayCommand implements BaseCommand {
     }
 
     static async startGame(
+        messageContext: MessageContext,
+        gameType: GameType,
+        livesOrClipDurationArg: string | null,
+        hiddenMode: boolean,
+        newClip: boolean,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<void> {
+        const guildID = messageContext.guildID;
+
+        // Acquire per-guild lock to prevent concurrent /play commands from
+        // creating duplicate game sessions (TOCTOU race on State.gameSessions).
+        if (!guildStartGameLocks.has(guildID)) {
+            guildStartGameLocks.set(guildID, new Mutex());
+        }
+
+        const guildLock = guildStartGameLocks.get(guildID)!;
+        await guildLock.runExclusive(async () => {
+            await PlayCommand.startGameLocked(
+                messageContext,
+                gameType,
+                livesOrClipDurationArg,
+                hiddenMode,
+                newClip,
+                interaction,
+            );
+        });
+    }
+
+    /**
+     * Internal startGame logic, called while holding the per-guild lock.
+     */
+    private static async startGameLocked(
         messageContext: MessageContext,
         gameType: GameType,
         livesOrClipDurationArg: string | null,

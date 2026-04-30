@@ -211,10 +211,22 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Starting a new GameRound
+     * Starting a new GameRound (mutex-protected entry point).
+     * Serialized with endRound/endSession to prevent concurrent lifecycle transitions.
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
+        return this.lifecycleMutex.runExclusive(() =>
+            this.startRoundCore(messageContext),
+        );
+    }
+
+    /**
+     * Internal startRound logic. Must only be called while holding lifecycleMutex.
+     */
+    private async startRoundCore(
+        messageContext: MessageContext,
+    ): Promise<Round | null> {
         const isEndToEndBotRun =
             messageContext.author.id === process.env.END_TO_END_TEST_BOT_CLIENT;
 
@@ -251,12 +263,26 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Ends an active GameRound
+     * Ends an active GameRound (mutex-protected entry point).
+     * Serialized with startRound/endSession to prevent concurrent lifecycle transitions.
      * @param isError - Whether the round ended due to an error
      * @param messageContext - An object containing relevant parts of Eris.Message
      * @param gameRound - The round to end
      */
     async endRound(
+        isError: boolean,
+        messageContext: MessageContext,
+        gameRound?: GameRound,
+    ): Promise<void> {
+        return this.lifecycleMutex.runExclusive(() =>
+            this.endRoundCore(isError, messageContext, gameRound),
+        );
+    }
+
+    /**
+     * Internal endRound logic. Must only be called while holding lifecycleMutex.
+     */
+    private async endRoundCore(
         isError: boolean,
         messageContext: MessageContext,
         gameRound?: GameRound,
@@ -433,20 +459,36 @@ export default class GameSession extends Session {
         }
 
         if (gameFinishedDueToGameOptions) {
-            await this.endSession("Game finished due to game options", false);
+            await this.endSessionCore(
+                "Game finished due to game options",
+                false,
+            );
         } else if (gameFinishedDueToSuddenDeath) {
-            await this.endSession("Sudden death game ended", false);
+            await this.endSessionCore("Sudden death game ended", false);
         }
 
-        await this.startRound(messageContext);
+        await this.startRoundCore(messageContext);
     }
 
     /**
-     * Ends the current GameSession
+     * Ends the current GameSession (mutex-protected entry point).
+     * Serialized with startRound/endRound to prevent concurrent lifecycle transitions.
      * @param reason - The reason for the game session end
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
+        return this.lifecycleMutex.runExclusive(() =>
+            this.endSessionCore(reason, endedDueToError),
+        );
+    }
+
+    /**
+     * Internal endSession logic. Must only be called while holding lifecycleMutex.
+     */
+    private async endSessionCore(
+        reason: string,
+        endedDueToError: boolean,
+    ): Promise<void> {
         if (this.finished) {
             return;
         }

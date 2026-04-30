@@ -33,9 +33,16 @@ export default class Scoreboard {
     }
 
     /**
-     * @param player - Adds the given player to the scoreboard
+     * Adds the given player to the scoreboard.
+     * Skips if the player already exists to prevent overwriting accumulated scores
+     * (e.g., when syncAllVoiceMembers re-processes existing players after a bot channel move).
+     * @param player - The player to add
      */
     addPlayer(player: Player): void {
+        if (player.id in this.players) {
+            return;
+        }
+
         this.players[player.id] = player;
     }
 
