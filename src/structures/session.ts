@@ -186,11 +186,12 @@ export default abstract class Session {
             return null;
         }
 
+        const isFirstRound = !this.sessionInitialized;
         this.sessionInitialized = true;
         if (this.guildPreference.songSelector.getSongs().songs.size === 0) {
             try {
                 await this.guildPreference.songSelector.reloadSongs(
-                    !this.sessionInitialized,
+                    isFirstRound,
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
