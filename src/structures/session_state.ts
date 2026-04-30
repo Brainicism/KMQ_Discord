@@ -66,8 +66,7 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
 
 /**
  * Manages session state transitions with validation and logging.
- * Invalid transitions are logged as warnings but still applied
- * to avoid breaking existing behavior during rollout.
+ * Invalid transitions are rejected and logged as warnings.
  */
 export class SessionStateMachine {
     private currentState: SessionState = SessionState.CREATED;
@@ -82,11 +81,10 @@ export class SessionStateMachine {
     }
 
     /**
-     * Attempt a state transition. Returns true if the transition was valid.
-     * Invalid transitions are logged as warnings but still applied to avoid
-     * breaking existing behavior during rollout.
+     * Attempt a state transition. Returns true if valid and applied,
+     * false if rejected (invalid transition).
      * @param to - The target state to transition to
-     * @returns whether the transition was valid
+     * @returns whether the transition was valid and applied
      */
     transition(to: SessionState): boolean {
         const allowed = VALID_TRANSITIONS[this.currentState];
@@ -94,9 +92,10 @@ export class SessionStateMachine {
         const from = this.currentState;
 
         if (!isValid) {
-            logger.error(
-                `gid: ${this.guildID} | Invalid state transition: ${from} → ${to}`,
+            logger.warn(
+                `gid: ${this.guildID} | Invalid state transition rejected: ${from} → ${to}`,
             );
+            return false;
         }
 
         this.currentState = to;

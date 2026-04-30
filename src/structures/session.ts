@@ -142,6 +142,26 @@ export default abstract class Session extends EventEmitter {
 
     abstract sessionName(): string;
 
+    /**
+     * Whether the session is in a terminal state (ending or ended).
+     * Prefer this over reading `this.finished` directly.
+     */
+    get isFinished(): boolean {
+        return !this.stateMachine.isAlive;
+    }
+
+    /**
+     * Whether the session has completed initialization (first round started).
+     * Prefer this over reading `this.sessionInitialized` directly.
+     */
+    get isSessionActive(): boolean {
+        return (
+            this.stateMachine.state !== SessionState.CREATED &&
+            this.stateMachine.state !== SessionState.INITIALIZING &&
+            this.stateMachine.state !== SessionState.LOBBY
+        );
+    }
+
     static getSession(guildID: string): Session | undefined {
         return State.gameSessions[guildID] ?? State.listeningSessions[guildID];
     }

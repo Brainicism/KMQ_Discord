@@ -335,6 +335,8 @@ export default class GameSession extends Session {
         guess: string,
         createdAt: number,
     ): Promise<void> {
+        if (!this.stateMachine.isAcceptingInput) return;
+
         // Allow clip mode guesses in between clip replays
         if (!this.isClipMode()) {
             if (!this.connection) return;
@@ -452,7 +454,7 @@ export default class GameSession extends Session {
 
     /** Updates owner to the first player to join the game that didn't leave VC */
     async updateOwner(): Promise<void> {
-        if (this.finished) {
+        if (this.isFinished) {
             return;
         }
 
@@ -1018,7 +1020,7 @@ export default class GameSession extends Session {
             ? 0
             : this.guildPreference.getSongStartDelay() * 1000;
 
-        if (this.sessionInitialized) {
+        if (this.isSessionActive) {
             // Only add a delay if the game has already started
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
@@ -1027,7 +1029,7 @@ export default class GameSession extends Session {
             );
         }
 
-        if (this.finished || this.round || this.pendingEndSession) {
+        if (this.isFinished || this.round || this.pendingEndSession) {
             return null;
         }
 
@@ -1068,7 +1070,7 @@ export default class GameSession extends Session {
         );
 
         // ensure that only one invocation can proceed
-        if (!round || round.finished) {
+        if (!round || round.finished || this.isFinished) {
             return;
         }
 
@@ -1261,7 +1263,7 @@ export default class GameSession extends Session {
         reason: string,
         endedDueToError: boolean,
     ): Promise<void> {
-        if (this.finished) {
+        if (this.isFinished) {
             return;
         }
 
