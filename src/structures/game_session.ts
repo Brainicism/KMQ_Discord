@@ -1451,9 +1451,10 @@ export default class GameSession extends Session {
             return null;
         }
 
+        // Read current level before update (for level-up detection)
         const playerStats = await dbContext.kmq
             .selectFrom("player_stats")
-            .select(["exp", "level"])
+            .select(["level"])
             .where("player_id", "=", userID)
             .executeTakeFirst();
 
@@ -1462,9 +1463,28 @@ export default class GameSession extends Session {
             return null;
         }
 
-        const { exp: currentExp, level } = playerStats;
+        const { level } = playerStats;
 
-        const newExp = currentExp + expGain;
+        // Atomically increment EXP in SQL to avoid read-modify-write races
+        // when the same player is in multiple concurrent games
+        await dbContext.kmq
+            .updateTable("player_stats")
+            .set({ exp: sql`exp + ${expGain}` })
+            .where("player_id", "=", userID)
+            .execute();
+
+        // Read back new EXP to compute level-up
+        const updatedStats = await dbContext.kmq
+            .selectFrom("player_stats")
+            .select(["exp"])
+            .where("player_id", "=", userID)
+            .executeTakeFirst();
+
+        if (!updatedStats) {
+            return null;
+        }
+
+        const newExp = updatedStats.exp;
         let newLevel = level;
 
         // check for level up
@@ -1472,14 +1492,14 @@ export default class GameSession extends Session {
             newLevel++;
         }
 
-        // persist exp and level to data store
-        await dbContext.kmq
-            .updateTable("player_stats")
-            .set({ exp: newExp, level: newLevel })
-            .where("player_id", "=", userID)
-            .execute();
-
+        // persist level if it changed
         if (level !== newLevel) {
+            await dbContext.kmq
+                .updateTable("player_stats")
+                .set({ level: newLevel })
+                .where("player_id", "=", userID)
+                .execute();
+
             logger.info(`${userID} has leveled from ${level} to ${newLevel}`);
             return {
                 userID,

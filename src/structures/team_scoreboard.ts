@@ -170,6 +170,8 @@ export default class TeamScoreboard extends Scoreboard {
     /**
      * Removes the given player from the team they are in (if they are in one)
      * If removing this player causes the team to have 0 members, destroy the team
+     * Always recalculates highestScore and firstPlace to prevent stale values
+     * when the removed player was a top scorer on their team.
      * @param userID - The unique identifier of the player to be deleted
      */
     removePlayer(userID: string): void {
@@ -177,22 +179,26 @@ export default class TeamScoreboard extends Scoreboard {
         if (!team) return;
         team.removePlayer(userID);
         if (team.getNumPlayers() === 0) {
-            this.firstPlace = this.firstPlace.filter((t) => t !== team);
             delete this.players[team.getName()];
-            // If the removed team was the only team in first, first place is now second place
-            if (this.firstPlace.length === 0) {
-                const highestScore = Math.max(
-                    ...Object.values(this.players).map((x: Team) =>
-                        x.getScore(),
-                    ),
-                    0,
-                );
+        }
 
-                if (highestScore === 0) return;
-                this.firstPlace = Object.values(this.players).filter(
-                    (t: Team) => t.getScore() === highestScore,
-                );
-            }
+        // Recalculate highestScore and firstPlace from scratch.
+        // Team scores are dynamic (sum of member scores), so removing a player
+        // can drop a team's score below the cached highestScore, making it
+        // permanently stale if we only track increases.
+        const teams = Object.values(this.players);
+        const newHighestScore = Math.max(
+            ...teams.map((x: Team) => x.getScore()),
+            0,
+        );
+
+        this.highestScore = newHighestScore;
+        if (newHighestScore === 0) {
+            this.firstPlace = [];
+        } else {
+            this.firstPlace = teams.filter(
+                (t: Team) => t.getScore() === newHighestScore,
+            );
         }
     }
 

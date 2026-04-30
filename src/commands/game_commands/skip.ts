@@ -2,6 +2,7 @@ import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
+    getCurrentVoiceMembers,
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
@@ -12,6 +13,7 @@ import Eris from "eris";
 import GameType from "../../enums/game_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
+import State from "../../state";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
@@ -115,17 +117,18 @@ export default class SkipCommand implements BaseCommand {
         if (session.isGameSession()) {
             if (session.gameType === GameType.ELIMINATION) {
                 if (
-                    !(
+                    (
                         session.scoreboard as EliminationScoreboard
                     ).isPlayerEliminated(messageContext.author.id)
                 ) {
-                    logger.info(
-                        `${getDebugLogHeader(
-                            messageContext,
-                        )} | User skipped, elimination mode`,
-                    );
-                    session.round.userSkipped(messageContext.author.id);
+                    return;
                 }
+
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | User skipped, elimination mode`,
+                );
             }
         }
 
@@ -239,6 +242,24 @@ export default class SkipCommand implements BaseCommand {
     static isSkipMajority(guildID: string, session: Session): boolean {
         if (!session.round) {
             return false;
+        }
+
+        // Prune stale skip votes from players who have left the voice channel.
+        // Without this, votes persist while the VC membership (and thus the
+        // threshold denominator) shrinks, causing stuck or premature skips.
+        const voiceChannelID =
+            State.client.voiceConnections.get(guildID)?.channelID;
+
+        if (voiceChannelID) {
+            const currentMemberIds = new Set(
+                getCurrentVoiceMembers(voiceChannelID).map((m) => m.id),
+            );
+
+            for (const skipper of session.round.skippers) {
+                if (!currentMemberIds.has(skipper)) {
+                    session.round.skippers.delete(skipper);
+                }
+            }
         }
 
         if (session.isGameSession()) {

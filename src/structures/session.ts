@@ -398,6 +398,15 @@ export default abstract class Session {
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
 
+        // Guard against re-entrant cleanup: if the session was already removed
+        // from the State map (by a prior endSession call), skip redundant cleanup.
+        // Subclasses (GameSession, ListeningSession) have their own this.finished
+        // guards that run before calling super.endSession(), but this protects
+        // against any path that reaches the base class directly.
+        if (!Session.getSession(this.guildID)) {
+            return;
+        }
+
         Session.deleteSession(this.guildID);
 
         // Inline base round cleanup instead of polymorphic this.endRound() call.
