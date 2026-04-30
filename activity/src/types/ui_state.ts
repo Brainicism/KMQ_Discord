@@ -24,4 +24,8 @@ export default interface UiState {
     bookmarkedLinks: Set<string>;
     /** True after a successful bookmark in the current round (before reveal). */
     currentRoundBookmarked: boolean;
+    /** True once the viewer has observed an active session at any point; used
+     *  to decide whether the "session ended" splash should render a winner
+     *  banner. A fresh open with no active session should NOT show it. */
+    hadSession: boolean;
 }

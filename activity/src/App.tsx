@@ -65,6 +65,7 @@ const initialUi: UiState = {
     skip: initialSkip,
     bookmarkedLinks: new Set(),
     currentRoundBookmarked: false,
+    hadSession: false,
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -74,6 +75,7 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
         scoreboard: snapshot.scoreboard ?? null,
         currentRound: snapshot.currentRound ?? null,
         sessionEnded: !snapshot.hasSession,
+        hadSession: prev.hadSession || snapshot.hasSession,
     };
 }
 
@@ -906,7 +908,9 @@ export default function App() {
 
             {ui.sessionEnded && (
                 <>
-                    <SessionWinnerBanner scoreboard={ui.scoreboard} t={t} />
+                    {ui.hadSession && (
+                        <SessionWinnerBanner scoreboard={ui.scoreboard} t={t} />
+                    )}
                     <div className="banner">
                         {t("sessionEndedBanner", { playSlash: "/play" })}
                     </div>
@@ -1048,6 +1052,7 @@ function reduce(
                 skip: initialSkip,
                 bookmarkedLinks: new Set(),
                 currentRoundBookmarked: false,
+                hadSession: true,
             };
         case "roundStart":
             return {
@@ -1119,7 +1124,10 @@ function reduce(
                     ...prev.recentGuesses.slice(-RECENT_GUESS_BUFFER_LIMIT),
                     {
                         userID: msg.userID,
-                        username: msg.username,
+                        // Guard against an older server build that doesn't
+                        // yet emit username on guessReceived — render the
+                        // raw ID rather than an empty string.
+                        username: msg.username || msg.userID,
                         isCorrect: msg.isCorrect,
                         ts: msg.ts,
                     },
