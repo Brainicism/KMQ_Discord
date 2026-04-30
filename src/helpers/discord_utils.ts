@@ -679,12 +679,10 @@ export async function sendErrorMessage(
             embeds: [
                 {
                     color: embedPayload.color || EMBED_ERROR_COLOR,
-                    author: author
-                        ? {
-                              name: author.username,
-                              icon_url: author.avatarUrl,
-                          }
-                        : undefined,
+                    author: {
+                        name: author.username,
+                        icon_url: author.avatarUrl,
+                    },
                     title: embedPayload.title,
                     description: embedPayload.description,
                     footer: embedPayload.footerText
@@ -722,12 +720,10 @@ export function generateEmbed(
 
     return {
         color: embedPayload.color,
-        author: author
-            ? {
-                  name: author.username,
-                  icon_url: author.avatarUrl,
-              }
-            : undefined,
+        author: {
+            name: author.username,
+            icon_url: author.avatarUrl,
+        },
         title: embedPayload.title,
         url: embedPayload.url,
         description: embedPayload.description,
