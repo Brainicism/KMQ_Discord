@@ -102,8 +102,9 @@ export default class EliminationScoreboard extends Scoreboard {
 
     /** @returns the number of lives of the player with the least amount of lives (who isn't dead) */
     getLivesOfWeakestPlayer(): number {
-        const alivePlayers = Object.values(this.players)
-            .filter((x) => x.getLives() > 0);
+        const alivePlayers = Object.values(this.players).filter(
+            (x) => x.getLives() > 0,
+        );
 
         if (alivePlayers.length === 0) {
             return 0;
