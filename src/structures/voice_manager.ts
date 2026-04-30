@@ -115,6 +115,7 @@ export class VoiceManager {
         onError: (err: Error) => Promise<void>,
     ): void {
         this.currentRoundId = roundId;
+        this._state = VoiceState.PLAYING;
 
         if (!this._connection) return;
 
