@@ -401,8 +401,6 @@ function ensureWorkerHandlerRegistered(): void {
                             session.guildID,
                         );
 
-                        const wasSkipped = originalRound.skipAchieved;
-
                         try {
                             await SkipCommand.executeSkip(messageContext);
 
@@ -411,25 +409,23 @@ function ensureWorkerHandlerRegistered(): void {
                             const currentRound = session.round;
                             const threshold = getMajorityCount(session.guildID);
 
-                            if (currentRound !== originalRound) {
-                                pushEvent(session.guildID, {
-                                    type: "skipped",
-                                });
-                            } else {
-                                // currentRound === originalRound here, which we
-                                // verified non-null earlier.
+                            if (currentRound === originalRound) {
                                 pushEvent(session.guildID, {
                                     type: "skipProgress",
                                     requesters: currentRound!.getSkipCount(),
                                     threshold,
                                 });
-
-                                if (currentRound!.skipAchieved && !wasSkipped) {
-                                    pushEvent(session.guildID, {
-                                        type: "skipped",
-                                    });
-                                }
                             }
+
+                            // Don't emit a `skipped` event here. When the skip
+                            // threshold is reached, executeSkip ->
+                            // SkipCommand.skipSong awaits endRound + startRound
+                            // synchronously, so by the time we resume the
+                            // bridge has already pushed roundEnd + roundStart
+                            // on the wire. A trailing `skipped` would arrive
+                            // after the next round's roundStart and re-set
+                            // skip.achieved=true on the new round, leaving the
+                            // skip button stuck in the "Skipped" state.
 
                             reply({ ok: true });
                         } catch (e) {
