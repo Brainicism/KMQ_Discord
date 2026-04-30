@@ -564,15 +564,14 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Add all players in VC that aren't tracked to the scoreboard, and update those who left.
-     * Uses sequential iteration to prevent concurrent addPlayer/setPlayerInVC interleaving (RACE-10).
+     * Sync scoreboard with current VC members.
+     * Sequential iteration prevents concurrent addPlayer/setPlayerInVC interleaving.
      */
     async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMemberIds = getCurrentVoiceMembers(
             this.voiceChannelID,
         ).map((x) => x.id);
 
-        // Mark departed players sequentially to avoid interleaving
         const departedPlayers = this.scoreboard
             .getPlayerIDs()
             .filter((x) => !currentVoiceMemberIds.includes(x));
@@ -583,11 +582,9 @@ export default class GameSession extends Session {
         }
 
         if (this.gameType === GameType.TEAMS) {
-            // Players join teams manually with /join
             return;
         }
 
-        // Add newcomers sequentially to avoid concurrent addPlayer calls
         const newPlayers = currentVoiceMemberIds.filter(
             (x) => x !== process.env.BOT_CLIENT_ID,
         );

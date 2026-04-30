@@ -40,7 +40,7 @@ export default class EliminationScoreboard extends Scoreboard {
             }
         }
 
-        // Recompute firstPlace based on lives (most lives = first place)
+        // Recompute firstPlace based on lives
         let maxLives = -1;
         this.firstPlace = [];
         for (const player of Object.values(this.players)) {

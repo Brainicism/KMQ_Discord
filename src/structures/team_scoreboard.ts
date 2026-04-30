@@ -57,7 +57,6 @@ export default class TeamScoreboard extends Scoreboard {
         );
 
         if (correctGuesserTeam) {
-            // Recompute firstPlace from scratch for team mode
             this.recomputeFirstPlace();
         }
     }

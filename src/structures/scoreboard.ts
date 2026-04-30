@@ -39,7 +39,6 @@ export default class Scoreboard {
      * @param player - The player to add
      */
     addPlayer(player: Player): void {
-        // No-op if player already tracked (prevents RACE-04/RACE-12 duplicate adds)
         if (player.id in this.players) {
             return;
         }
@@ -118,7 +117,6 @@ export default class Scoreboard {
             player.incrementExp(guessResult.expGain);
         }
 
-        // Recompute from scratch — immune to interleaving / stale state (RACE-11)
         this.recomputeFirstPlace();
     }
 
