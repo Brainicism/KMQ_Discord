@@ -44,8 +44,6 @@ const en: Strings = {
     hintTitle: "Vote for a hint",
     hintVoteFallback: "vote",
 
-    bookmarkButton: "Bookmark",
-    bookmarkBookmarked: "Bookmarked",
     bookmarkTitleActive: "Bookmark this song",
     bookmarkTitleDone: "Bookmarked — DM'd at end of session",
 

@@ -6,7 +6,6 @@ import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
 import type HintState from "./hint_state";
 import type RecentGuess from "./recent_guess";
-import type RoundBookmarkState from "./round_bookmark_state";
 import type SkipState from "./skip_state";
 
 export default interface UiState {
@@ -23,5 +22,6 @@ export default interface UiState {
     hint: HintState;
     skip: SkipState;
     bookmarkedLinks: Set<string>;
-    roundBookmark: RoundBookmarkState;
+    /** True after a successful bookmark in the current round (before reveal). */
+    currentRoundBookmarked: boolean;
 }

@@ -1,9 +1,6 @@
 :root {
     color-scheme: dark;
-    font-family:
-        ui-sans-serif,
-        system-ui,
-        sans-serif;
+    font-family: ui-sans-serif, system-ui, sans-serif;
 }
 
 html,
@@ -197,6 +194,11 @@ body {
 
 .skip-button {
     border-color: #3f4147;
+}
+
+.skip-button.voted {
+    background: #4a2628;
+    border-color: #dc323c;
 }
 
 .skip-bar {

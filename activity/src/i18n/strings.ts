@@ -44,8 +44,6 @@ export default interface Strings {
     hintTitle: string;
     hintVoteFallback: string;
 
-    bookmarkButton: string;
-    bookmarkBookmarked: string;
     bookmarkTitleActive: string;
     bookmarkTitleDone: string;
 

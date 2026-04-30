@@ -29,7 +29,6 @@ import type GuessRejectReason from "./types/guess_reject_reason";
 import type HintState from "./types/hint_state";
 import type Locale from "./i18n/locale";
 import type SkipState from "./types/skip_state";
-import type RoundBookmarkState from "./types/round_bookmark_state";
 import type Strings from "./i18n/strings";
 import type UiState from "./types/ui_state";
 
@@ -43,6 +42,7 @@ const initialSkip: SkipState = {
     requesters: 0,
     threshold: 0,
     achieved: false,
+    userVoted: false,
 };
 
 const initialUi: UiState = {
@@ -55,7 +55,7 @@ const initialUi: UiState = {
     hint: initialHint,
     skip: initialSkip,
     bookmarkedLinks: new Set(),
-    roundBookmark: { pending: false, bookmarked: false },
+    currentRoundBookmarked: false,
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -193,7 +193,10 @@ function CurrentRound({
             {round ? (
                 <div className="round-area-body in-round">
                     <div className="round-area-text">
-                        <h3>{strings.roundLabel(round.roundIndex + 1)}</h3>
+                        <div className="reveal-header">
+                            <h3>{strings.roundLabel(round.roundIndex + 1)}</h3>
+                            {bookmarkSlot}
+                        </div>
                         <RoundTimer startedAt={round.songStartedAt} />
                         {round.guessTimeoutSec && (
                             <span className="timeout">
@@ -448,24 +451,29 @@ function SkipControl({
     skip,
     enabled,
     strings,
+    onVoted,
 }: {
     accessToken: string;
     instanceId: string;
     skip: SkipState;
     enabled: boolean;
     strings: Strings;
+    onVoted: () => void;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
 
     const onClick = async () => {
-        if (busy || !enabled) return;
+        if (busy || !enabled || skip.userVoted) return;
         setBusy(true);
         setFeedback(null);
         try {
             const result = await apiSkipVote(accessToken, instanceId);
-            if (!result.ok)
+            if (result.ok) {
+                onVoted();
+            } else {
                 setFeedback(rejectReasonText(strings, result.reason));
+            }
         } catch (err) {
             setFeedback(
                 err instanceof Error ? err.message : strings.networkError,
@@ -485,13 +493,19 @@ function SkipControl({
             ? Math.min(100, (skip.requesters / skip.threshold) * 100)
             : 0;
 
+    const stateClass = skip.achieved
+        ? "revealed"
+        : skip.userVoted
+          ? "voted"
+          : "";
+
     return (
         <div className="hint-control">
             <button
                 type="button"
                 onClick={onClick}
-                disabled={busy || !enabled || skip.achieved}
-                className={`skip-button ${skip.achieved ? "revealed" : ""}`}
+                disabled={busy || !enabled || skip.achieved || skip.userVoted}
+                className={`skip-button ${stateClass}`}
                 title={strings.skipTitle}
             >
                 <span className="hint-icon">⏭️</span>
@@ -576,74 +590,6 @@ function HintControl({
     );
 }
 
-function RoundBookmarkButton({
-    accessToken,
-    instanceId,
-    state,
-    enabled,
-    onResult,
-    strings,
-}: {
-    accessToken: string;
-    instanceId: string;
-    state: RoundBookmarkState;
-    enabled: boolean;
-    onResult: (link: string | undefined, ok: boolean) => void;
-    strings: Strings;
-}) {
-    const [feedback, setFeedback] = useState<string | null>(null);
-
-    const onClick = async () => {
-        if (state.pending || state.bookmarked || !enabled) return;
-        setFeedback(null);
-        onResult(undefined, true); // optimistic: mark pending
-        try {
-            const result = await bookmarkSong(accessToken, instanceId);
-            if (!result.ok) {
-                setFeedback(rejectReasonText(strings, result.reason));
-                onResult(undefined, false);
-            } else {
-                onResult(result.youtubeLink, true);
-            }
-        } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
-            onResult(undefined, false);
-        }
-    };
-
-    return (
-        <div className="hint-control">
-            <button
-                type="button"
-                onClick={onClick}
-                disabled={!enabled || state.pending || state.bookmarked}
-                className={
-                    state.bookmarked
-                        ? "revealed bookmark-button"
-                        : "bookmark-button"
-                }
-                title={
-                    state.bookmarked
-                        ? strings.bookmarkTitleDone
-                        : strings.bookmarkTitleActive
-                }
-            >
-                <span className="hint-icon">
-                    {state.bookmarked ? "🔖" : "🏷️"}
-                </span>
-                <span className="hint-label">
-                    {state.bookmarked
-                        ? strings.bookmarkBookmarked
-                        : strings.bookmarkButton}
-                </span>
-            </button>
-            {feedback && <span className="hint-feedback">{feedback}</span>}
-        </div>
-    );
-}
-
 function BookmarkStar({
     accessToken,
     instanceId,
@@ -654,33 +600,52 @@ function BookmarkStar({
 }: {
     accessToken: string;
     instanceId: string;
-    youtubeLink: string;
+    /**
+     * Known song link (after the reveal). Pass `null` during the active round
+     * to bookmark whatever song is currently playing without exposing the
+     * link to the iframe.
+     */
+    youtubeLink: string | null;
     isBookmarked: boolean;
     onBookmarked: (link: string) => void;
     strings: Strings;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
+    // Optimistic flip so the icon doesn't lag the click. Cleared once the
+    // parent's `isBookmarked` catches up.
+    const [optimistic, setOptimistic] = useState(false);
+
+    useEffect(() => {
+        if (isBookmarked) setOptimistic(false);
+    }, [isBookmarked]);
+
+    const showFilled = isBookmarked || optimistic;
 
     const onClick = async () => {
-        if (busy || isBookmarked) return;
+        if (busy || showFilled) return;
         setBusy(true);
         setFeedback(null);
-        // Optimistic
-        onBookmarked(youtubeLink);
+        setOptimistic(true);
         try {
             const result = await bookmarkSong(
                 accessToken,
                 instanceId,
-                youtubeLink,
+                youtubeLink ?? undefined,
             );
 
-            if (!result.ok)
+            if (result.ok) {
+                const resolved = result.youtubeLink ?? youtubeLink;
+                if (resolved) onBookmarked(resolved);
+            } else {
                 setFeedback(rejectReasonText(strings, result.reason));
+                setOptimistic(false);
+            }
         } catch (err) {
             setFeedback(
                 err instanceof Error ? err.message : strings.networkError,
             );
+            setOptimistic(false);
         } finally {
             setBusy(false);
         }
@@ -689,16 +654,16 @@ function BookmarkStar({
     return (
         <button
             type="button"
-            className={`bookmark-star ${isBookmarked ? "filled" : ""}`}
+            className={`bookmark-star ${showFilled ? "filled" : ""}`}
             onClick={onClick}
-            disabled={busy || isBookmarked}
+            disabled={busy || showFilled}
             title={
-                isBookmarked
+                showFilled
                     ? strings.bookmarkTitleDone
                     : strings.bookmarkTitleActive
             }
         >
-            {isBookmarked ? "🔖" : "🏷️"}
+            {showFilled ? "🔖" : "🏷️"}
             {feedback && <span className="bookmark-feedback">{feedback}</span>}
         </button>
     );
@@ -889,14 +854,28 @@ export default function App() {
                 reveal={ui.lastReveal}
                 strings={strings}
                 bookmarkSlot={
-                    authState && ui.lastReveal ? (
+                    authState && (ui.currentRound || ui.lastReveal) ? (
                         <BookmarkStar
+                            // Force a fresh component (and its optimistic
+                            // state) on every round transition so the icon
+                            // resets cleanly.
+                            key={
+                                ui.currentRound
+                                    ? `round-${ui.currentRound.roundIndex}`
+                                    : `reveal-${ui.lastReveal?.song.youtubeLink}`
+                            }
                             accessToken={authState.accessToken}
                             instanceId={authState.instanceId}
-                            youtubeLink={ui.lastReveal.song.youtubeLink}
-                            isBookmarked={ui.bookmarkedLinks.has(
-                                ui.lastReveal.song.youtubeLink,
-                            )}
+                            youtubeLink={
+                                ui.lastReveal?.song.youtubeLink ?? null
+                            }
+                            isBookmarked={
+                                ui.lastReveal
+                                    ? ui.bookmarkedLinks.has(
+                                          ui.lastReveal.song.youtubeLink,
+                                      )
+                                    : ui.currentRoundBookmarked
+                            }
                             strings={strings}
                             onBookmarked={(link) =>
                                 setUi((prev) => ({
@@ -905,6 +884,7 @@ export default function App() {
                                         ...prev.bookmarkedLinks,
                                         link,
                                     ]),
+                                    currentRoundBookmarked: true,
                                 }))
                             }
                         />
@@ -936,42 +916,12 @@ export default function App() {
                         skip={ui.skip}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
                         strings={strings}
-                    />
-                    <RoundBookmarkButton
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        state={ui.roundBookmark}
-                        enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        strings={strings}
-                        onResult={(link, ok) => {
-                            setUi((prev) => {
-                                if (!ok) {
-                                    return {
-                                        ...prev,
-                                        roundBookmark: {
-                                            pending: false,
-                                            bookmarked: false,
-                                        },
-                                    };
-                                }
-                                const next: UiState = {
-                                    ...prev,
-                                    roundBookmark: {
-                                        pending: link === undefined,
-                                        bookmarked: link !== undefined,
-                                    },
-                                };
-
-                                if (link) {
-                                    next.bookmarkedLinks = new Set([
-                                        ...prev.bookmarkedLinks,
-                                        link,
-                                    ]);
-                                }
-
-                                return next;
-                            });
-                        }}
+                        onVoted={() =>
+                            setUi((prev) => ({
+                                ...prev,
+                                skip: { ...prev.skip, userVoted: true },
+                            }))
+                        }
                     />
                 </div>
             )}
@@ -1018,7 +968,7 @@ function reduce(
                 hint: initialHint,
                 skip: initialSkip,
                 bookmarkedLinks: new Set(),
-                roundBookmark: { pending: false, bookmarked: false },
+                currentRoundBookmarked: false,
             };
         case "roundStart":
             return {
@@ -1028,7 +978,7 @@ function reduce(
                 recentGuesses: [],
                 hint: initialHint,
                 skip: initialSkip,
-                roundBookmark: { pending: false, bookmarked: false },
+                currentRoundBookmarked: false,
             };
         case "roundEnd":
             return {
@@ -1040,6 +990,18 @@ function reduce(
                     allGuesses: msg.allGuesses,
                 },
                 scoreboard: msg.scoreboard,
+                // Bump the local session counters so the header advances. The
+                // server doesn't re-broadcast session metadata after each
+                // round, so we mirror Session.getRoundsPlayed here.
+                session: prev.session
+                    ? {
+                          ...prev.session,
+                          roundsPlayed: prev.session.roundsPlayed + 1,
+                          correctGuesses:
+                              prev.session.correctGuesses +
+                              (msg.isCorrectGuess ? 1 : 0),
+                      }
+                    : prev.session,
             };
         case "hintProgress":
             return {
@@ -1093,7 +1055,6 @@ function reduce(
                 currentRound: null,
                 hint: initialHint,
                 skip: initialSkip,
-                roundBookmark: { pending: false, bookmarked: false },
             };
         default:
             return prev;
