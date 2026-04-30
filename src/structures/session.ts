@@ -664,7 +664,7 @@ export default abstract class Session extends EventEmitter {
      */
     processSkipVote(
         userID: string,
-        messageContext: MessageContext,
+        _messageContext: MessageContext,
     ): SessionActionResult<{ skipAchieved: boolean; skipCount: number; skipThreshold: number }> {
         if (!this.round || this.round.finished || this.round.skipAchieved) {
             return actionFail("no_active_round");
@@ -686,10 +686,7 @@ export default abstract class Session extends EventEmitter {
         };
     }
 
-    /**
-     * Force-skip the current song (end round + start new one).
-     * Called when skip majority is reached.
-     */
+    /** Force-skip the current song (end round + start new one). */
     async forceSkip(messageContext: MessageContext): Promise<SessionActionResult> {
         if (!this.round) {
             return actionFail("no_active_round");
