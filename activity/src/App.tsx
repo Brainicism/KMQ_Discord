@@ -1,5 +1,13 @@
-import { useEffect, useRef, useState } from "react";
-import { authenticate, openExternalUrl } from "./discordSdk";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+    EXTERNAL_YOUTUBE_PROXY_PREFIX,
+    MAX_GUESS_LENGTH,
+    RECENT_GUESS_BUFFER_LIMIT,
+    RECENT_GUESS_DISPLAY_LIMIT,
+    ROUND_TIMER_TICK_MS,
+    YOUTUBE_IMAGE_HOST_PATTERN,
+    YOUTUBE_WATCH_URL_PREFIX,
+} from "./constants";
 import {
     bookmarkSong,
     endGame as apiEndGame,
@@ -9,57 +17,21 @@ import {
     skipVote as apiSkipVote,
     startGame as apiStartGame,
     submitGuess,
-    type GuessRejectReason,
 } from "./api";
-import type {
-    ActivityCorrectGuesser,
-    ActivityRoundGuess,
-    ActivityRoundMeta,
-    ActivityRoundReveal,
-    ActivityScoreboardSnapshot,
-    ActivitySessionMeta,
-    ActivitySnapshot,
-} from "./types";
-
-interface RecentGuess {
-    userID: string;
-    isCorrect: boolean;
-    ts: number;
-}
-
-interface HintState {
-    requesters: number;
-    threshold: number;
-    revealed: string | null;
-}
-
-interface SkipState {
-    requesters: number;
-    threshold: number;
-    achieved: boolean;
-}
-
-interface RoundBookmarkState {
-    pending: boolean;
-    bookmarked: boolean;
-}
-
-interface UiState {
-    session: ActivitySessionMeta | null;
-    scoreboard: ActivityScoreboardSnapshot | null;
-    currentRound: ActivityRoundMeta | null;
-    lastReveal: {
-        song: ActivityRoundReveal;
-        correctGuessers: ActivityCorrectGuesser[];
-        allGuesses: ActivityRoundGuess[];
-    } | null;
-    recentGuesses: RecentGuess[];
-    sessionEnded: boolean;
-    hint: HintState;
-    skip: SkipState;
-    bookmarkedLinks: Set<string>;
-    roundBookmark: RoundBookmarkState;
-}
+import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
+import getStrings from "./i18n/messages";
+import resolveLocale from "./i18n/resolve_locale";
+import type ActivityEvent from "./types/activity_event";
+import type ActivityRoundMeta from "./types/activity_round_meta";
+import type ActivityScoreboardSnapshot from "./types/activity_scoreboard_snapshot";
+import type ActivitySnapshot from "./types/activity_snapshot";
+import type GuessRejectReason from "./types/guess_reject_reason";
+import type HintState from "./types/hint_state";
+import type Locale from "./i18n/locale";
+import type SkipState from "./types/skip_state";
+import type RoundBookmarkState from "./types/round_bookmark_state";
+import type Strings from "./i18n/strings";
+import type UiState from "./types/ui_state";
 
 const initialHint: HintState = {
     requesters: 0,
@@ -100,17 +72,49 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
 // Mappings in the developer portal can be reached. Rewrite YouTube image
 // hosts to a /external/yt/ prefix that the dev portal maps to i.ytimg.com.
 function proxyImageUrl(url: string): string {
-    return url
-        .replace(/^https?:\/\/img\.youtube\.com\//, "/external/yt/")
-        .replace(/^https?:\/\/i\.ytimg\.com\//, "/external/yt/");
+    return url.replace(
+        YOUTUBE_IMAGE_HOST_PATTERN,
+        EXTERNAL_YOUTUBE_PROXY_PREFIX,
+    );
+}
+
+function rejectReasonText(
+    strings: Strings,
+    reason: GuessRejectReason | undefined,
+): string {
+    switch (reason) {
+        case "no_session":
+            return strings.rejectNoSession;
+        case "maintenance":
+            return strings.rejectMaintenance;
+        case "banned":
+            return strings.rejectBanned;
+        case "rate_limit":
+            return strings.rejectRateLimit;
+        case "not_in_vc":
+            return strings.rejectNotInVC;
+        case "unauthorized":
+            return strings.rejectUnauthorized;
+        case "forbidden":
+            return strings.rejectForbidden;
+        case "bad_request":
+            return strings.rejectBadRequest;
+        case "session_already_running":
+            return strings.rejectSessionAlreadyRunning;
+        case "no_round":
+            return strings.rejectNoRound;
+        default:
+            return strings.rejectGeneric;
+    }
 }
 
 function RoundTimer({ startedAt }: { startedAt: number }) {
     const [elapsedMs, setElapsedMs] = useState(Date.now() - startedAt);
     useEffect(() => {
-        // Display rounds to whole seconds, so a 1s tick is enough — a 250ms
-        // interval would re-render four times per visible change.
-        const t = setInterval(() => setElapsedMs(Date.now() - startedAt), 1000);
+        const t = setInterval(
+            () => setElapsedMs(Date.now() - startedAt),
+            ROUND_TIMER_TICK_MS,
+        );
         return () => clearInterval(t);
     }, [startedAt]);
 
@@ -118,13 +122,19 @@ function RoundTimer({ startedAt }: { startedAt: number }) {
     return <span className="round-timer">{seconds}s</span>;
 }
 
-function Scoreboard({ scoreboard }: { scoreboard: ActivityScoreboardSnapshot }) {
+function Scoreboard({
+    scoreboard,
+    strings,
+}: {
+    scoreboard: ActivityScoreboardSnapshot;
+    strings: Strings;
+}) {
     const sorted = [...scoreboard.players]
         .filter((p) => p.score > 0 || p.inVC)
         .sort((a, b) => b.score - a.score);
 
     if (sorted.length === 0) {
-        return <p className="empty">No players yet — join the voice channel.</p>;
+        return <p className="empty">{strings.scoreboardEmptyJoinVC}</p>;
     }
 
     return (
@@ -148,11 +158,18 @@ function Scoreboard({ scoreboard }: { scoreboard: ActivityScoreboardSnapshot }) 
                     )}
                     <span className="name">
                         {p.username}
-                        {!p.inVC && <span className="afk"> (left)</span>}
+                        {!p.inVC && (
+                            <span className="afk">
+                                {" "}
+                                {strings.scoreboardLeft}
+                            </span>
+                        )}
                     </span>
                     <span className="score">{p.score}</span>
                     {p.expGain > 0 && (
-                        <span className="exp">+{p.expGain} EXP</span>
+                        <span className="exp">
+                            {strings.scoreboardExpGain(p.expGain)}
+                        </span>
                     )}
                 </li>
             ))}
@@ -164,21 +181,25 @@ function CurrentRound({
     round,
     reveal,
     bookmarkSlot,
+    strings,
 }: {
     round: ActivityRoundMeta | null;
     reveal: UiState["lastReveal"];
     bookmarkSlot: React.ReactNode;
+    strings: Strings;
 }) {
     return (
         <section className="round-area">
             {round ? (
                 <div className="round-area-body in-round">
                     <div className="round-area-text">
-                        <h3>Round {round.roundIndex + 1}</h3>
+                        <h3>{strings.roundLabel(round.roundIndex + 1)}</h3>
                         <RoundTimer startedAt={round.songStartedAt} />
                         {round.guessTimeoutSec && (
                             <span className="timeout">
-                                timeout {round.guessTimeoutSec}s
+                                {strings.roundTimeoutLabel(
+                                    round.guessTimeoutSec,
+                                )}
                             </span>
                         )}
                     </div>
@@ -194,21 +215,25 @@ function CurrentRound({
                             {bookmarkSlot}
                         </div>
                         <p className="artist-line">
-                            {reveal.song.artistName} ({reveal.song.publishYear}
-                            )
+                            {reveal.song.artistName} ({reveal.song.publishYear})
                         </p>
                         <ul className="winners">
                             {reveal.correctGuessers.map((g) => (
                                 <li key={g.id}>
-                                    {g.username}: +{g.pointsEarned} pts, +
-                                    {g.expGain} EXP
+                                    {strings.revealWinners(
+                                        g.username,
+                                        g.pointsEarned,
+                                        g.expGain,
+                                    )}
                                 </li>
                             ))}
                         </ul>
                         {reveal.allGuesses.length > 0 && (
                             <details className="all-guesses" open>
                                 <summary>
-                                    All guesses ({reveal.allGuesses.length})
+                                    {strings.revealAllGuessesSummary(
+                                        reveal.allGuesses.length,
+                                    )}
                                 </summary>
                                 <ul>
                                     {reveal.allGuesses
@@ -244,17 +269,17 @@ function CurrentRound({
                             className="thumbnail-link"
                             onClick={() =>
                                 openExternalUrl(
-                                    `https://youtu.be/${reveal.song.youtubeLink}`,
+                                    `${YOUTUBE_WATCH_URL_PREFIX}${reveal.song.youtubeLink}`,
                                 )
                             }
-                            title="Open on YouTube"
+                            title={strings.openOnYouTube}
                         >
                             <img
                                 src={proxyImageUrl(reveal.song.thumbnailUrl)}
                                 alt=""
                             />
                             <span className="thumbnail-overlay">
-                                ▶ YouTube
+                                {strings.youtubePlayLabel}
                             </span>
                         </button>
                     </div>
@@ -262,7 +287,7 @@ function CurrentRound({
             ) : (
                 <div className="round-area-body idle">
                     <div className="round-area-text">
-                        <p className="empty">Waiting for the next round...</p>
+                        <p className="empty">{strings.waitingForNextRound}</p>
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
                         <span>🎵</span>
@@ -273,41 +298,16 @@ function CurrentRound({
     );
 }
 
-function rejectReasonText(reason: GuessRejectReason | undefined): string {
-    switch (reason) {
-        case "no_session":
-            return "No active game.";
-        case "maintenance":
-            return "Maintenance mode is on.";
-        case "banned":
-            return "You are banned from KMQ.";
-        case "rate_limit":
-            return "Slow down — too many requests.";
-        case "not_in_vc":
-            return "Join the voice channel first.";
-        case "unauthorized":
-            return "Session expired — refresh.";
-        case "forbidden":
-            return "You're not a participant of this Activity.";
-        case "bad_request":
-            return "Bad request.";
-        case "session_already_running":
-            return "A game is already running.";
-        case "no_round":
-            return "No round in progress.";
-        default:
-            return "Action failed.";
-    }
-}
-
 function ControlButtons({
     accessToken,
     instanceId,
     hasSession,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     hasSession: boolean;
+    strings: Strings;
 }) {
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -321,9 +321,12 @@ function ControlButtons({
         setFeedback(null);
         try {
             const result = await fn();
-            if (!result.ok) setFeedback(rejectReasonText(result.reason));
+            if (!result.ok)
+                setFeedback(rejectReasonText(strings, result.reason));
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
         } finally {
             setBusy(null);
         }
@@ -342,7 +345,9 @@ function ControlButtons({
                         )
                     }
                 >
-                    {busy === "start" ? "Starting..." : "Start game"}
+                    {busy === "start"
+                        ? strings.startGameBusy
+                        : strings.startGameButton}
                 </button>
             )}
             {hasSession && (
@@ -354,7 +359,9 @@ function ControlButtons({
                         run("end", () => apiEndGame(accessToken, instanceId))
                     }
                 >
-                    {busy === "end" ? "Ending..." : "End game"}
+                    {busy === "end"
+                        ? strings.endGameBusy
+                        : strings.endGameButton}
                 </button>
             )}
             {feedback && <span className="control-feedback">{feedback}</span>}
@@ -366,10 +373,12 @@ function GuessInput({
     accessToken,
     instanceId,
     enabled,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     enabled: boolean;
+    strings: Strings;
 }) {
     const [text, setText] = useState("");
     const [busy, setBusy] = useState(false);
@@ -395,10 +404,12 @@ function GuessInput({
             if (result.ok) {
                 setText("");
             } else {
-                setFeedback(rejectReasonText(result.reason));
+                setFeedback(rejectReasonText(strings, result.reason));
             }
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
         } finally {
             setBusy(false);
             // Refocus after every submit (the disabled-while-busy flicker can
@@ -412,15 +423,19 @@ function GuessInput({
             <input
                 ref={inputRef}
                 type="text"
-                placeholder={enabled ? "Type your guess..." : "Waiting for round..."}
+                placeholder={
+                    enabled
+                        ? strings.guessPlaceholderActive
+                        : strings.guessPlaceholderWaiting
+                }
                 value={text}
                 onChange={(e) => setText(e.target.value)}
                 disabled={!enabled || busy}
                 autoFocus
-                maxLength={500}
+                maxLength={MAX_GUESS_LENGTH}
             />
             <button type="submit" disabled={!enabled || busy || !text.trim()}>
-                Guess
+                {strings.guessButton}
             </button>
             {feedback && <span className="guess-feedback">{feedback}</span>}
         </form>
@@ -432,11 +447,13 @@ function SkipControl({
     instanceId,
     skip,
     enabled,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     skip: SkipState;
     enabled: boolean;
+    strings: Strings;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -447,16 +464,21 @@ function SkipControl({
         setFeedback(null);
         try {
             const result = await apiSkipVote(accessToken, instanceId);
-            if (!result.ok) setFeedback(rejectReasonText(result.reason));
+            if (!result.ok)
+                setFeedback(rejectReasonText(strings, result.reason));
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
         } finally {
             setBusy(false);
         }
     };
 
     const tally =
-        skip.threshold > 0 ? `${skip.requesters}/${skip.threshold}` : "vote";
+        skip.threshold > 0
+            ? `${skip.requesters}/${skip.threshold}`
+            : strings.skipVoteFallback;
 
     const pct =
         skip.threshold > 0
@@ -470,11 +492,13 @@ function SkipControl({
                 onClick={onClick}
                 disabled={busy || !enabled || skip.achieved}
                 className={`skip-button ${skip.achieved ? "revealed" : ""}`}
-                title="Vote to skip this song"
+                title={strings.skipTitle}
             >
                 <span className="hint-icon">⏭️</span>
                 <span className="hint-label">
-                    {skip.achieved ? "Skipped" : `Skip (${tally})`}
+                    {skip.achieved
+                        ? strings.skipDone
+                        : strings.skipButton(tally)}
                 </span>
                 <span
                     className="hint-progress skip-bar"
@@ -491,11 +515,13 @@ function HintControl({
     instanceId,
     hint,
     enabled,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     hint: HintState;
     enabled: boolean;
+    strings: Strings;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -506,16 +532,21 @@ function HintControl({
         setFeedback(null);
         try {
             const result = await apiHintVote(accessToken, instanceId);
-            if (!result.ok) setFeedback(rejectReasonText(result.reason));
+            if (!result.ok)
+                setFeedback(rejectReasonText(strings, result.reason));
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
         } finally {
             setBusy(false);
         }
     };
 
     const tally =
-        hint.threshold > 0 ? `${hint.requesters}/${hint.threshold}` : "vote";
+        hint.threshold > 0
+            ? `${hint.requesters}/${hint.threshold}`
+            : strings.hintVoteFallback;
 
     const pct =
         hint.threshold > 0
@@ -529,22 +560,17 @@ function HintControl({
                 onClick={onClick}
                 disabled={busy || !enabled}
                 className={hint.revealed ? "revealed" : ""}
-                title="Vote for a hint"
+                title={strings.hintTitle}
             >
                 <span className="hint-icon">💡</span>
                 <span className="hint-label">
                     {hint.revealed
-                        ? "Hint revealed"
-                        : `Hint (${tally})`}
+                        ? strings.hintRevealed
+                        : strings.hintButton(tally)}
                 </span>
-                <span
-                    className="hint-progress"
-                    style={{ width: `${pct}%` }}
-                />
+                <span className="hint-progress" style={{ width: `${pct}%` }} />
             </button>
-            {hint.revealed && (
-                <div className="hint-text">{hint.revealed}</div>
-            )}
+            {hint.revealed && <div className="hint-text">{hint.revealed}</div>}
             {feedback && <span className="hint-feedback">{feedback}</span>}
         </div>
     );
@@ -556,12 +582,14 @@ function RoundBookmarkButton({
     state,
     enabled,
     onResult,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     state: RoundBookmarkState;
     enabled: boolean;
     onResult: (link: string | undefined, ok: boolean) => void;
+    strings: Strings;
 }) {
     const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -572,13 +600,15 @@ function RoundBookmarkButton({
         try {
             const result = await bookmarkSong(accessToken, instanceId);
             if (!result.ok) {
-                setFeedback(rejectReasonText(result.reason));
+                setFeedback(rejectReasonText(strings, result.reason));
                 onResult(undefined, false);
             } else {
                 onResult(result.youtubeLink, true);
             }
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
             onResult(undefined, false);
         }
     };
@@ -589,18 +619,24 @@ function RoundBookmarkButton({
                 type="button"
                 onClick={onClick}
                 disabled={!enabled || state.pending || state.bookmarked}
-                className={state.bookmarked ? "revealed bookmark-button" : "bookmark-button"}
+                className={
+                    state.bookmarked
+                        ? "revealed bookmark-button"
+                        : "bookmark-button"
+                }
                 title={
                     state.bookmarked
-                        ? "Bookmarked — DM'd at end of session"
-                        : "Bookmark this song"
+                        ? strings.bookmarkTitleDone
+                        : strings.bookmarkTitleActive
                 }
             >
                 <span className="hint-icon">
                     {state.bookmarked ? "🔖" : "🏷️"}
                 </span>
                 <span className="hint-label">
-                    {state.bookmarked ? "Bookmarked" : "Bookmark"}
+                    {state.bookmarked
+                        ? strings.bookmarkBookmarked
+                        : strings.bookmarkButton}
                 </span>
             </button>
             {feedback && <span className="hint-feedback">{feedback}</span>}
@@ -614,12 +650,14 @@ function BookmarkStar({
     youtubeLink,
     isBookmarked,
     onBookmarked,
+    strings,
 }: {
     accessToken: string;
     instanceId: string;
     youtubeLink: string;
     isBookmarked: boolean;
     onBookmarked: (link: string) => void;
+    strings: Strings;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -637,9 +675,12 @@ function BookmarkStar({
                 youtubeLink,
             );
 
-            if (!result.ok) setFeedback(rejectReasonText(result.reason));
+            if (!result.ok)
+                setFeedback(rejectReasonText(strings, result.reason));
         } catch (err) {
-            setFeedback(err instanceof Error ? err.message : "Network error");
+            setFeedback(
+                err instanceof Error ? err.message : strings.networkError,
+            );
         } finally {
             setBusy(false);
         }
@@ -653,8 +694,8 @@ function BookmarkStar({
             disabled={busy || isBookmarked}
             title={
                 isBookmarked
-                    ? "Bookmarked — DM'd at end of session"
-                    : "Bookmark this song"
+                    ? strings.bookmarkTitleDone
+                    : strings.bookmarkTitleActive
             }
         >
             {isBookmarked ? "🔖" : "🏷️"}
@@ -667,7 +708,7 @@ function GuessTicker({
     guesses,
     scoreboard,
 }: {
-    guesses: RecentGuess[];
+    guesses: UiState["recentGuesses"];
     scoreboard: ActivityScoreboardSnapshot | null;
 }) {
     if (guesses.length === 0) return null;
@@ -677,7 +718,7 @@ function GuessTicker({
 
     return (
         <ul className="guess-ticker">
-            {guesses.slice(-8).map((g) => {
+            {guesses.slice(-RECENT_GUESS_DISPLAY_LIMIT).map((g) => {
                 const name = nameByID.get(g.userID) ?? g.userID;
                 return (
                     <li
@@ -700,8 +741,13 @@ export default function App() {
         accessToken: string;
         instanceId: string;
     } | null>(null);
+    const [locale, setLocale] = useState<Locale | null>(null);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
+    const strings = useMemo(
+        () => getStrings(locale ?? resolveLocale(null)),
+        [locale],
+    );
 
     useEffect(() => {
         let cancelled = false;
@@ -718,7 +764,16 @@ export default function App() {
                 if (cancelled) return;
                 setUi((prev) => applySnapshot(prev, snapshot));
                 setAuthState({ accessToken: auth.accessToken, instanceId });
+                // Seed locale from the OAuth-supplied user.locale (cheap; comes
+                // back with the snapshot). Override below with the live SDK
+                // value if Discord supplies one.
+                setLocale(resolveLocale(snapshot.viewerLocale));
                 setReady(true);
+
+                const sdkLocale = await readSdkLocale();
+                if (!cancelled && sdkLocale) {
+                    setLocale(resolveLocale(sdkLocale));
+                }
 
                 const stream = await openActivityStream(
                     auth.accessToken,
@@ -728,7 +783,7 @@ export default function App() {
                     },
                     () => {
                         // socket closed — show banner; phase 2 can add reconnect
-                        setError("Disconnected from KMQ. Refresh to retry.");
+                        setError(strings.statusDisconnected);
                     },
                 );
 
@@ -741,9 +796,7 @@ export default function App() {
             } catch (e) {
                 console.error(e);
                 if (!cancelled) {
-                    setError(
-                        e instanceof Error ? e.message : "Unknown error",
-                    );
+                    setError(e instanceof Error ? e.message : "Unknown error");
                 }
             }
         })();
@@ -752,12 +805,15 @@ export default function App() {
             cancelled = true;
             streamRef.current?.close();
         };
+        // strings.statusDisconnected is captured at first run; subsequent
+        // locale flips don't re-open the WS.
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (error) {
         return (
             <div className="kmq-app error">
-                <h2>KMQ</h2>
+                <h2>{strings.appTitle}</h2>
                 <p>{error}</p>
             </div>
         );
@@ -766,8 +822,8 @@ export default function App() {
     if (!ready) {
         return (
             <div className="kmq-app loading">
-                <h2>KMQ</h2>
-                <p>Connecting...</p>
+                <h2>{strings.appTitle}</h2>
+                <p>{strings.statusConnecting}</p>
             </div>
         );
     }
@@ -775,12 +831,14 @@ export default function App() {
     return (
         <div className="kmq-app">
             <header>
-                <h1>KMQ</h1>
+                <h1>{strings.appTitle}</h1>
                 {ui.session &&
                     (() => {
                         const completed = ui.session.roundsPlayed;
                         const inProgress = ui.currentRound !== null;
-                        const displayed = inProgress ? completed + 1 : completed;
+                        const displayed = inProgress
+                            ? completed + 1
+                            : completed;
                         const showRatio = completed > 0;
                         if (displayed === 0 && ui.bookmarkedLinks.size === 0) {
                             return null;
@@ -789,12 +847,14 @@ export default function App() {
                             <span className="meta">
                                 {displayed > 0 && (
                                     <>
-                                        Round {displayed}
+                                        {strings.headerRound(displayed)}
                                         {showRatio && (
                                             <>
-                                                {" · Correct "}
-                                                {ui.session.correctGuesses}/
-                                                {completed}
+                                                {" · "}
+                                                {strings.headerCorrectRatio(
+                                                    ui.session.correctGuesses,
+                                                    completed,
+                                                )}
                                             </>
                                         )}
                                     </>
@@ -814,19 +874,20 @@ export default function App() {
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}
                     hasSession={ui.session !== null && !ui.sessionEnded}
+                    strings={strings}
                 />
             )}
 
             {ui.sessionEnded && (
                 <div className="banner">
-                    No active game — start one with the button above (or{" "}
-                    <code>/play</code> in this channel).
+                    {strings.sessionEndedBanner("/play")}
                 </div>
             )}
 
             <CurrentRound
                 round={ui.currentRound}
                 reveal={ui.lastReveal}
+                strings={strings}
                 bookmarkSlot={
                     authState && ui.lastReveal ? (
                         <BookmarkStar
@@ -836,6 +897,7 @@ export default function App() {
                             isBookmarked={ui.bookmarkedLinks.has(
                                 ui.lastReveal.song.youtubeLink,
                             )}
+                            strings={strings}
                             onBookmarked={(link) =>
                                 setUi((prev) => ({
                                     ...prev,
@@ -855,6 +917,7 @@ export default function App() {
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}
                     enabled={ui.currentRound !== null && !ui.sessionEnded}
+                    strings={strings}
                 />
             )}
 
@@ -865,20 +928,21 @@ export default function App() {
                         instanceId={authState.instanceId}
                         hint={ui.hint}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
+                        strings={strings}
                     />
                     <SkipControl
                         accessToken={authState.accessToken}
                         instanceId={authState.instanceId}
                         skip={ui.skip}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
+                        strings={strings}
                     />
                     <RoundBookmarkButton
                         accessToken={authState.accessToken}
                         instanceId={authState.instanceId}
                         state={ui.roundBookmark}
-                        enabled={
-                            ui.currentRound !== null && !ui.sessionEnded
-                        }
+                        enabled={ui.currentRound !== null && !ui.sessionEnded}
+                        strings={strings}
                         onResult={(link, ok) => {
                             setUi((prev) => {
                                 if (!ok) {
@@ -913,11 +977,11 @@ export default function App() {
             )}
 
             <section className="scoreboard-section">
-                <h3>Scoreboard</h3>
+                <h3>{strings.scoreboardHeading}</h3>
                 {ui.scoreboard ? (
-                    <Scoreboard scoreboard={ui.scoreboard} />
+                    <Scoreboard scoreboard={ui.scoreboard} strings={strings} />
                 ) : (
-                    <p className="empty">No scoreboard yet.</p>
+                    <p className="empty">{strings.scoreboardEmpty}</p>
                 )}
             </section>
 
@@ -931,9 +995,7 @@ export default function App() {
 
 function reduce(
     prev: UiState,
-    msg:
-        | { type: "snapshot"; snapshot: ActivitySnapshot }
-        | import("./types").ActivityEvent,
+    msg: { type: "snapshot"; snapshot: ActivitySnapshot } | ActivityEvent,
 ): UiState {
     switch (msg.type) {
         case "snapshot":
@@ -1013,7 +1075,7 @@ function reduce(
             return {
                 ...prev,
                 recentGuesses: [
-                    ...prev.recentGuesses.slice(-15),
+                    ...prev.recentGuesses.slice(-RECENT_GUESS_BUFFER_LIMIT),
                     {
                         userID: msg.userID,
                         isCorrect: msg.isCorrect,

@@ -7,7 +7,8 @@ import {
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
-} from "./activity_types";
+    youtubeThumbnailUrl,
+} from "../constants";
 import { IPCLogger } from "../logger";
 import {
     getCurrentVoiceMembers,
@@ -25,22 +26,20 @@ import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
-import type {
-    ActivityBookmarkArgs,
-    ActivityBookmarkResponse,
-    ActivityCorrectGuesser,
-    ActivityEvent,
-    ActivityGuessArgs,
-    ActivityGuessResponse,
-    ActivityRequestMessage,
-    ActivityScoreboardPlayer,
-    ActivityScoreboardSnapshot,
-    ActivitySessionMeta,
-    ActivitySnapshot,
-    ActivitySnapshotArgs,
-    ActivityStartGameArgs,
-    ActivityUserActionArgs,
-} from "./activity_types";
+import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
+import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
+import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
+import type ActivityEvent from "../interfaces/activity_event";
+import type ActivityGuessArgs from "../interfaces/activity_guess_args";
+import type ActivityGuessResponse from "../interfaces/activity_guess_response";
+import type ActivityRequestMessage from "../interfaces/activity_request_message";
+import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
+import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
+import type ActivitySessionMeta from "../interfaces/activity_session_meta";
+import type ActivitySnapshot from "../interfaces/activity_snapshot";
+import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
+import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
+import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
 import type GameSession from "./game_session";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
@@ -86,7 +85,7 @@ function snapshotSong(song: QueriedSong): {
         artistName: song.artistName,
         youtubeLink: song.youtubeLink,
         publishYear: song.publishDate.getFullYear(),
-        thumbnailUrl: `https://i.ytimg.com/vi/${song.youtubeLink}/hqdefault.jpg`,
+        thumbnailUrl: youtubeThumbnailUrl(song.youtubeLink),
     };
 }
 

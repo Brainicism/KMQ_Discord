@@ -3,25 +3,22 @@ import {
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
-} from "./structures/activity_types";
+    ACTIVITY_REQUEST_TIMEOUT_MS,
+} from "./constants";
 import { IPCLogger } from "./logger";
-import type {
-    ActivityBookmarkArgs,
-    ActivityBookmarkResponse,
-    ActivityGuessArgs,
-    ActivityGuessResponse,
-    ActivityReplyMessage,
-    ActivityRequestOp,
-    ActivitySnapshot,
-    ActivityStartGameArgs,
-    ActivityUserActionArgs,
-    ActivityWorkerEventMessage,
-} from "./structures/activity_types";
 import type { Fleet } from "eris-fleet";
+import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
+import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
+import type ActivityGuessArgs from "./interfaces/activity_guess_args";
+import type ActivityGuessResponse from "./interfaces/activity_guess_response";
+import type ActivityReplyMessage from "./interfaces/activity_reply_message";
+import type ActivityRequestOp from "./enums/activity_request_op";
+import type ActivitySnapshot from "./interfaces/activity_snapshot";
+import type ActivityStartGameArgs from "./interfaces/activity_start_game_args";
+import type ActivityUserActionArgs from "./interfaces/activity_user_action_args";
+import type ActivityWorkerEventMessage from "./interfaces/activity_worker_event_message";
 
 const logger = new IPCLogger("activity_hub");
-
-const REQUEST_TIMEOUT_MS = 10_000;
 
 export interface ActivitySubscriber {
     id: string;
@@ -338,7 +335,7 @@ export default class ActivityHub {
                         `Activity request timed out (cid=${cid}, op=${op})`,
                     ),
                 );
-            }, REQUEST_TIMEOUT_MS);
+            }, ACTIVITY_REQUEST_TIMEOUT_MS);
 
             this.pending.set(cid, {
                 resolve: (p) => resolve(p as T),

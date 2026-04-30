@@ -1,12 +1,17 @@
-import type { ActivityEvent, ActivitySnapshot } from "./types";
-
-const PROXY_BASE = "/.proxy/api/activity";
+import { ACTIVITY_PROXY_BASE, ACTIVITY_WS_PATH } from "./constants";
+import type ActivityEvent from "./types/activity_event";
+import type ActivitySessionResponse from "./types/activity_session_response";
+import type ActivitySnapshot from "./types/activity_snapshot";
+import type ActivityStreamHandle from "./types/activity_stream_handle";
+import type BookmarkResult from "./types/bookmark_result";
+import type GuessRejectReason from "./types/guess_reject_reason";
+import type GuessResult from "./types/guess_result";
 
 export async function fetchSnapshot(
     accessToken: string,
     instanceId: string,
-): Promise<ActivitySnapshot> {
-    const url = `${PROXY_BASE}/session?instance_id=${encodeURIComponent(
+): Promise<ActivitySessionResponse> {
+    const url = `${ACTIVITY_PROXY_BASE}/session?instance_id=${encodeURIComponent(
         instanceId,
     )}`;
 
@@ -21,32 +26,12 @@ export async function fetchSnapshot(
     return resp.json();
 }
 
-export type GuessRejectReason =
-    | "no_session"
-    | "maintenance"
-    | "banned"
-    | "rate_limit"
-    | "not_in_vc"
-    | "internal"
-    | "unauthorized"
-    | "forbidden"
-    | "bad_request"
-    | "session_already_running"
-    | "no_round"
-    | "hint_unavailable"
-    | "song_not_found";
-
-export interface GuessResult {
-    ok: boolean;
-    reason?: GuessRejectReason;
-}
-
 async function postAction(
     accessToken: string,
     instanceId: string,
     path: "start" | "skip" | "end" | "hint",
 ): Promise<GuessResult> {
-    const resp = await fetch(`${PROXY_BASE}/${path}`, {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/${path}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -82,14 +67,6 @@ export const endGame = (accessToken: string, instanceId: string) =>
 export const hintVote = (accessToken: string, instanceId: string) =>
     postAction(accessToken, instanceId, "hint");
 
-export interface BookmarkResult {
-    ok: boolean;
-    reason?: GuessRejectReason;
-    songName?: string;
-    artistName?: string;
-    youtubeLink?: string;
-}
-
 /**
  * Bookmark a song. If `youtubeLink` is omitted, the server bookmarks whatever
  * song is currently playing — used by the in-round bookmark button so the
@@ -100,7 +77,7 @@ export async function bookmarkSong(
     instanceId: string,
     youtubeLink?: string,
 ): Promise<BookmarkResult> {
-    const resp = await fetch(`${PROXY_BASE}/bookmark`, {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/bookmark`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -140,7 +117,7 @@ export async function submitGuess(
     instanceId: string,
     guess: string,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${PROXY_BASE}/guess`, {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/guess`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -167,10 +144,6 @@ export async function submitGuess(
     return { ok: false, reason: parsed.error ?? "internal" };
 }
 
-export interface ActivityStreamHandle {
-    close: () => void;
-}
-
 /**
  * Exchanges the OAuth bearer token for a short-lived single-use ticket so the
  * token never appears in the WebSocket URL (logs, dev tools, history).
@@ -179,7 +152,7 @@ async function requestWsTicket(
     accessToken: string,
     instanceId: string,
 ): Promise<string> {
-    const resp = await fetch(`${PROXY_BASE}/ws-ticket`, {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/ws-ticket`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -206,7 +179,7 @@ export async function openActivityStream(
 ): Promise<ActivityStreamHandle> {
     const ticket = await requestWsTicket(accessToken, instanceId);
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const url = `${proto}//${window.location.host}/.proxy/ws/activity?ticket=${encodeURIComponent(ticket)}`;
+    const url = `${proto}//${window.location.host}${ACTIVITY_WS_PATH}?ticket=${encodeURIComponent(ticket)}`;
 
     const ws = new WebSocket(url);
     ws.addEventListener("message", (e) => {

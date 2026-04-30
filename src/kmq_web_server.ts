@@ -1,4 +1,20 @@
 import * as uuid from "uuid";
+import {
+    ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+    ACTIVITY_GUESS_MAX_LENGTH,
+    ACTIVITY_HTTP_TIMEOUT_MS,
+    ACTIVITY_INSTANCE_CACHE_TTL_MS,
+    ACTIVITY_RATE_LIMIT_ACTION,
+    ACTIVITY_RATE_LIMIT_GUESS,
+    ACTIVITY_RATE_LIMIT_LIFECYCLE,
+    ACTIVITY_RATE_LIMIT_READ,
+    ACTIVITY_RATE_LIMIT_TOKEN,
+    ACTIVITY_WS_HEARTBEAT_INTERVAL_MS,
+    ACTIVITY_WS_TICKET_TTL_MS,
+    DISCORD_ACTIVITY_INSTANCE_URL,
+    DISCORD_OAUTH_TOKEN_URL,
+    DISCORD_USERS_ME_URL,
+} from "./constants";
 import { IPCLogger } from "./logger";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
@@ -53,13 +69,10 @@ interface ShardData {
 interface CachedDiscordUser {
     id: string;
     username: string;
+    /** Discord user locale (e.g. "en-US"). Empty if Discord didn't return one. */
+    locale: string;
     cachedAt: number;
 }
-
-const ACCESS_TOKEN_TTL_MS = 60_000;
-const ACTIVITY_INSTANCE_TTL_MS = 5_000;
-const WS_HEARTBEAT_INTERVAL_MS = 30_000;
-const WS_TICKET_TTL_MS = 10_000;
 
 export default class KmqWebServer {
     private dbContext: DatabaseContext;
@@ -510,7 +523,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/token",
-            limit(30),
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
             async (request, reply) => {
                 const code = (request.body as any)?.code as string | undefined;
                 if (!code) {
@@ -543,14 +556,14 @@ export default class KmqWebServer {
                     params.set("code", code);
 
                     const response = await axios.post(
-                        "https://discord.com/api/oauth2/token",
+                        DISCORD_OAUTH_TOKEN_URL,
                         params.toString(),
                         {
                             headers: {
                                 "Content-Type":
                                     "application/x-www-form-urlencoded",
                             },
-                            timeout: 5000,
+                            timeout: ACTIVITY_HTTP_TIMEOUT_MS,
                         },
                     );
 
@@ -588,7 +601,7 @@ export default class KmqWebServer {
 
         httpServer.get(
             "/api/activity/session",
-            limit(60),
+            limit(ACTIVITY_RATE_LIMIT_READ),
             async (request, reply) => {
                 if (!this.activityHub) {
                     await reply
@@ -639,7 +652,11 @@ export default class KmqWebServer {
                         instance.guildID,
                     );
 
-                    await reply.code(200).send(snapshot);
+                    // Echo the user's Discord locale so the client can hydrate
+                    // i18n without a second SDK round-trip.
+                    await reply
+                        .code(200)
+                        .send({ ...snapshot, viewerLocale: user.locale });
                 } catch (e) {
                     logger.warn(
                         `Failed to fetch activity snapshot. gid=${
@@ -691,7 +708,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/start",
-            limit(30),
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -726,7 +743,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/skip",
-            limit(60),
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -754,7 +771,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/hint",
-            limit(60),
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -782,7 +799,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/bookmark",
-            limit(60),
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -822,7 +839,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/end",
-            limit(30),
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -850,7 +867,7 @@ export default class KmqWebServer {
 
         httpServer.post(
             "/api/activity/guess",
-            limit(120),
+            limit(ACTIVITY_RATE_LIMIT_GUESS),
             async (request, reply) => {
                 if (!this.activityHub) {
                     await reply
@@ -886,7 +903,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                if (guess.length > 500) {
+                if (guess.length > ACTIVITY_GUESS_MAX_LENGTH) {
                     await reply.code(400).send({ error: "Guess too long" });
                     return;
                 }
@@ -926,7 +943,7 @@ export default class KmqWebServer {
         // WS query string. Tokens never appear in URLs or server access logs.
         httpServer.post(
             "/api/activity/ws-ticket",
-            limit(60),
+            limit(ACTIVITY_RATE_LIMIT_READ),
             async (request, reply) => {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
@@ -945,7 +962,7 @@ export default class KmqWebServer {
                     userID: ctx.user.id,
                     instanceId,
                     guildID: ctx.instance.guildID,
-                    expiresAt: Date.now() + WS_TICKET_TTL_MS,
+                    expiresAt: Date.now() + ACTIVITY_WS_TICKET_TTL_MS,
                 });
 
                 await reply.code(200).send({ ticket });
@@ -1023,7 +1040,7 @@ export default class KmqWebServer {
                     } catch {
                         // ignore
                     }
-                }, WS_HEARTBEAT_INTERVAL_MS);
+                }, ACTIVITY_WS_HEARTBEAT_INTERVAL_MS);
 
                 socket.on("pong", () => {
                     alive = true;
@@ -1078,23 +1095,24 @@ export default class KmqWebServer {
         }
 
         try {
-            const response = await axios.get(
-                "https://discord.com/api/users/@me",
-                {
-                    headers: { Authorization: `Bearer ${token}` },
-                    timeout: 5000,
-                },
-            );
+            const response = await axios.get(DISCORD_USERS_ME_URL, {
+                headers: { Authorization: `Bearer ${token}` },
+                timeout: ACTIVITY_HTTP_TIMEOUT_MS,
+            });
 
             const user: CachedDiscordUser = {
                 id: response.data.id,
                 username: response.data.username,
+                locale:
+                    typeof response.data.locale === "string"
+                        ? response.data.locale
+                        : "",
                 cachedAt: now,
             };
 
             this.accessTokenCache.set(token, {
                 user,
-                expiresAt: now + ACCESS_TOKEN_TTL_MS,
+                expiresAt: now + ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
             });
 
             return user;
@@ -1125,12 +1143,15 @@ export default class KmqWebServer {
 
         try {
             const response = await axios.get(
-                `https://discord.com/api/applications/${process.env.BOT_CLIENT_ID}/activity-instances/${instanceId}`,
+                DISCORD_ACTIVITY_INSTANCE_URL(
+                    process.env.BOT_CLIENT_ID!,
+                    instanceId,
+                ),
                 {
                     headers: {
                         Authorization: `Bot ${process.env.BOT_TOKEN}`,
                     },
-                    timeout: 5000,
+                    timeout: ACTIVITY_HTTP_TIMEOUT_MS,
                 },
             );
 
@@ -1163,7 +1184,7 @@ export default class KmqWebServer {
                 guildID,
                 channelID,
                 participantIDs,
-                expiresAt: now + ACTIVITY_INSTANCE_TTL_MS,
+                expiresAt: now + ACTIVITY_INSTANCE_CACHE_TTL_MS,
             });
 
             return { guildID, channelID, participantIDs };

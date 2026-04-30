@@ -369,3 +369,41 @@ export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
 );
 
 export const PLAYLIST_CACHE_TTL_HOURS = 12;
+
+// IPC channels for the Discord Activity bridge (admiral ↔ workers).
+export const ACTIVITY_IPC_EVENT = "activity:event";
+export const ACTIVITY_IPC_REQUEST = "activity:request";
+export const ACTIVITY_IPC_REPLY = "activity:reply";
+
+// Admiral-side caches and request budgets for `/api/activity/*` endpoints.
+export const ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS = 60_000;
+export const ACTIVITY_INSTANCE_CACHE_TTL_MS = 5_000;
+export const ACTIVITY_WS_HEARTBEAT_INTERVAL_MS = 30_000;
+export const ACTIVITY_WS_TICKET_TTL_MS = 10_000;
+export const ACTIVITY_REQUEST_TIMEOUT_MS = 10_000;
+export const ACTIVITY_HTTP_TIMEOUT_MS = 5_000;
+export const ACTIVITY_GUESS_MAX_LENGTH = 500;
+
+// Per-route rate limits (requests / minute / IP). Lifecycle endpoints (token,
+// start, end) get tighter limits because they touch Discord's OAuth quota or
+// create/destroy sessions; reads and per-click actions get higher limits.
+export const ACTIVITY_RATE_LIMIT_TOKEN = 30;
+export const ACTIVITY_RATE_LIMIT_LIFECYCLE = 30;
+export const ACTIVITY_RATE_LIMIT_READ = 60;
+export const ACTIVITY_RATE_LIMIT_ACTION = 60;
+export const ACTIVITY_RATE_LIMIT_GUESS = 120;
+
+// Discord OAuth + activity REST endpoints used by the admiral.
+const DISCORD_API_BASE = "https://discord.com/api";
+export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;
+export const DISCORD_USERS_ME_URL = `${DISCORD_API_BASE}/users/@me`;
+export const DISCORD_ACTIVITY_INSTANCE_URL = (
+    appId: string,
+    instanceId: string,
+): string =>
+    `${DISCORD_API_BASE}/applications/${appId}/activity-instances/${instanceId}`;
+
+// YouTube thumbnail URL builder for snapshot payloads.
+const YOUTUBE_THUMBNAIL_HOST = "https://i.ytimg.com";
+export const youtubeThumbnailUrl = (videoId: string): string =>
+    `${YOUTUBE_THUMBNAIL_HOST}/vi/${videoId}/hqdefault.jpg`;

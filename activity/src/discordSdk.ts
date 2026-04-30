@@ -1,3 +1,4 @@
+import { ACTIVITY_PROXY_BASE } from "./constants";
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 
 let sdkPromise: Promise<DiscordSDK> | null = null;
@@ -34,6 +35,22 @@ export async function openExternalUrl(url: string): Promise<void> {
     }
 }
 
+/**
+ * Reads the user's current Discord client locale (e.g. "en-US"). This is the
+ * live preference and supersedes the OAuth `users.@me.locale` echoed via the
+ * server snapshot. Returns null if the SDK can't supply it.
+ */
+export async function readSdkLocale(): Promise<string | null> {
+    try {
+        const sdk = await getDiscordSdk();
+        const result = await sdk.commands.userSettingsGetLocale();
+        return result?.locale ?? null;
+    } catch (e) {
+        console.warn("userSettingsGetLocale failed", e);
+        return null;
+    }
+}
+
 export async function authenticate(): Promise<AuthedSession> {
     const sdk = await getDiscordSdk();
 
@@ -45,7 +62,7 @@ export async function authenticate(): Promise<AuthedSession> {
         scope: ["identify", "guilds.members.read"],
     });
 
-    const tokenResp = await fetch("/.proxy/api/activity/token", {
+    const tokenResp = await fetch(`${ACTIVITY_PROXY_BASE}/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),
