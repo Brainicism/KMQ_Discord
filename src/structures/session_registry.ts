@@ -1,8 +1,8 @@
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
-import type Session from "./session";
 import type GameSession from "./game_session";
 import type ListeningSession from "./listening_session";
+import type Session from "./session";
 
 const logger = new IPCLogger("session_registry");
 
@@ -46,14 +46,14 @@ export class SessionRegistry {
     }
 
     getGameSessions(): GameSession[] {
-        return this.getAllSessions().filter(
-            (s): s is GameSession => s.isGameSession(),
+        return this.getAllSessions().filter((s): s is GameSession =>
+            s.isGameSession(),
         );
     }
 
     getListeningSessions(): ListeningSession[] {
-        return this.getAllSessions().filter(
-            (s): s is ListeningSession => s.isListeningSession(),
+        return this.getAllSessions().filter((s): s is ListeningSession =>
+            s.isListeningSession(),
         );
     }
 
@@ -77,6 +77,31 @@ export class SessionRegistry {
         }
 
         return lock;
+    }
+
+    /**
+     * Atomically check-and-create a session for a guild.
+     * The factory runs while holding the per-guild lock.
+     * Preferred over manual get + set for /play to avoid race conditions.
+     */
+    async getOrCreate(
+        guildID: string,
+        factory: () => Promise<Session>,
+    ): Promise<{ session: Session; created: boolean }> {
+        const lock = this.getOrCreateLock(guildID);
+        return lock.runExclusive(async () => {
+            const existing = this.sessions.get(guildID);
+            if (existing) {
+                return { session: existing, created: false };
+            }
+
+            const session = await factory();
+            this.sessions.set(guildID, session);
+            logger.info(
+                `gid: ${guildID} | Created ${session.sessionName()} session via getOrCreate`,
+            );
+            return { session, created: true };
+        });
     }
 
     /**

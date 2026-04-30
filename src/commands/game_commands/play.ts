@@ -1402,7 +1402,8 @@ export default class PlayCommand implements BaseCommand {
             // (1 and 2) CLASSIC, ELIMINATION, and COMPETITION game creation
             if (currentGameSession) {
                 // (2) Let the user know they're starting a non-teams game
-                const oldGameType = currentGameSession.gameType;
+                const oldGameType = (currentGameSession as GameSession)
+                    .gameType;
                 const ignoringOldGameTypeTitle = i18n.translate(
                     guildID,
                     "command.play.failure.overrideTeams.title",
