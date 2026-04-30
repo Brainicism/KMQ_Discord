@@ -124,7 +124,7 @@ export default class ListenCommand implements BaseCommand {
             gameOwner,
         );
 
-        State.listeningSessions[guildID] = listeningSession;
+        Session.registerSession(guildID, listeningSession);
 
         await ListenCommand.sendBeginListeningSessionMessage(
             textChannel.name,

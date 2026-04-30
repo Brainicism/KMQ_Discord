@@ -1247,7 +1247,7 @@ export default class PlayCommand implements BaseCommand {
         const guildPreference =
             await GuildPreference.getGuildPreference(guildID);
 
-        const currentGameSession = State.gameSessions[guildID];
+        const currentGameSession = Session.getSession(guildID);
         const voiceChannel = getUserVoiceChannel(messageContext);
 
         if (!voiceChannel) {
@@ -1536,7 +1536,7 @@ export default class PlayCommand implements BaseCommand {
             );
         }
 
-        State.gameSessions[guildID] = gameSession;
+        Session.registerSession(guildID, gameSession);
         // Attach the Activity bridge after registration so any sessionStart
         // event the bridge emits finds the session in State.gameSessions.
         // Kept out of the GameSession constructor to avoid a cyclic import

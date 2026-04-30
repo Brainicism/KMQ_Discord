@@ -60,6 +60,7 @@ import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 import { SessionState, SessionStateMachine } from "./session_state";
+import sessionRegistry from "./session_registry";
 
 const logger = new IPCLogger("session");
 
@@ -143,7 +144,16 @@ export default abstract class Session extends EventEmitter {
     abstract sessionName(): string;
 
     static getSession(guildID: string): Session | undefined {
-        return State.gameSessions[guildID] ?? State.listeningSessions[guildID];
+        return sessionRegistry.get(guildID);
+    }
+
+    static registerSession(guildID: string, session: Session): void {
+        sessionRegistry.set(guildID, session);
+        if (session.isGameSession()) {
+            State.gameSessions[guildID] = session;
+        } else {
+            State.listeningSessions[guildID] = session;
+        }
     }
 
     /**
@@ -151,18 +161,14 @@ export default abstract class Session extends EventEmitter {
      * @param guildID - The guild ID
      */
     static deleteSession(guildID: string): void {
-        const isGameSession = guildID in State.gameSessions;
-        const isListeningSession = guildID in State.listeningSessions;
-        if (!isGameSession && !isListeningSession) {
+        if (!sessionRegistry.has(guildID)) {
             logger.info(`gid: ${guildID} | Session already ended`);
             return;
         }
 
-        if (isGameSession) {
-            delete State.gameSessions[guildID];
-        } else if (isListeningSession) {
-            delete State.listeningSessions[guildID];
-        }
+        sessionRegistry.delete(guildID);
+        delete State.gameSessions[guildID];
+        delete State.listeningSessions[guildID];
     }
 
     isListeningSession(): this is ListeningSession {
