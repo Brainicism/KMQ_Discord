@@ -452,41 +452,46 @@ function SkipControl({
     enabled,
     roundKey,
     strings,
-    onVoted,
+    onVoteStart,
+    onVoteFailed,
 }: {
     accessToken: string;
     instanceId: string;
     skip: SkipState;
     enabled: boolean;
-    /** Identity of the round at render time; forwarded to `onVoted` so the
-     *  parent can ignore a stale success reply if the round has rolled over
-     *  (happens when this vote was the majority-reaching one — the server
-     *  awaits endRound/startRound before replying). */
+    /** Identity of the round at render time; forwarded to callbacks so the
+     *  parent can scope optimistic updates and rollbacks to the round the
+     *  user actually clicked on. When a vote hits the majority threshold the
+     *  server awaits endRound/startRound before replying, so the POST can
+     *  resolve after the next round has already started. */
     roundKey: number | null;
     strings: Strings;
-    onVoted: (roundKey: number | null) => void;
+    onVoteStart: () => void;
+    onVoteFailed: (roundKey: number | null) => void;
 }) {
-    const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
 
     const onClick = async () => {
-        if (busy || !enabled || skip.userVoted) return;
+        if (!enabled || skip.userVoted) return;
         const clickedRoundKey = roundKey;
-        setBusy(true);
         setFeedback(null);
+        // Optimistic: disable immediately so the UI doesn't stall for the
+        // full server round-trip (which blocks on endRound/startRound when
+        // the vote hits the majority threshold). The reducer clears
+        // userVoted on roundStart so the button re-enables as soon as the
+        // next round begins.
+        onVoteStart();
         try {
             const result = await apiSkipVote(accessToken, instanceId);
-            if (result.ok) {
-                onVoted(clickedRoundKey);
-            } else {
+            if (!result.ok) {
                 setFeedback(rejectReasonText(strings, result.reason));
+                onVoteFailed(clickedRoundKey);
             }
         } catch (err) {
             setFeedback(
                 err instanceof Error ? err.message : strings.networkError,
             );
-        } finally {
-            setBusy(false);
+            onVoteFailed(clickedRoundKey);
         }
     };
 
@@ -511,7 +516,7 @@ function SkipControl({
             <button
                 type="button"
                 onClick={onClick}
-                disabled={busy || !enabled || skip.achieved || skip.userVoted}
+                disabled={!enabled || skip.achieved || skip.userVoted}
                 className={`skip-button ${stateClass}`}
                 title={strings.skipTitle}
             >
@@ -924,12 +929,18 @@ export default function App() {
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
                         roundKey={ui.currentRound?.roundIndex ?? null}
                         strings={strings}
-                        onVoted={(clickedRoundKey) =>
+                        onVoteStart={() =>
+                            setUi((prev) => ({
+                                ...prev,
+                                skip: { ...prev.skip, userVoted: true },
+                            }))
+                        }
+                        onVoteFailed={(clickedRoundKey) =>
                             setUi((prev) => {
-                                // If the round rolled over between click and
-                                // reply (which happens when this vote was the
-                                // majority-reaching one), don't mark the new
-                                // round as already-voted.
+                                // Only roll back if we're still on the round
+                                // the user clicked — a roundStart between
+                                // click and reply has already reset userVoted
+                                // cleanly for the new round.
                                 const currentKey =
                                     prev.currentRound?.roundIndex ?? null;
                                 if (currentKey !== clickedRoundKey) {
@@ -937,7 +948,7 @@ export default function App() {
                                 }
                                 return {
                                     ...prev,
-                                    skip: { ...prev.skip, userVoted: true },
+                                    skip: { ...prev.skip, userVoted: false },
                                 };
                             })
                         }
