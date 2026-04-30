@@ -114,10 +114,52 @@ function buildSessionSnapshot(session: GameSession): ActivitySnapshot {
                 ? {
                       roundIndex: session.getRoundsPlayed(),
                       songStartedAt: round.songStartedAt,
-                      guessTimeoutSec: null,
+                      guessTimeoutSec: session.getGuessTimeoutSec(),
                   }
                 : undefined,
     };
+}
+
+/**
+ * Per-guild FIFO lock. Mutating IPC ops (start/skip/end/hint/bookmark) for the
+ * same guild are serialized so two concurrent requests can't both pass the
+ * "session exists / no session" check before either has actually run.
+ */
+const guildLocks = new Map<string, Promise<unknown>>();
+
+/**
+ * @param guildID - the guild whose work to serialize
+ * @param fn - the work to run inside the lock
+ * @returns the work's result
+ */
+function withGuildLock<T>(guildID: string, fn: () => Promise<T>): Promise<T> {
+    const prev = guildLocks.get(guildID) ?? Promise.resolve();
+    const next = prev.then(fn, fn);
+    const tracked = next
+        .catch(() => undefined)
+        .finally(() => {
+            if (guildLocks.get(guildID) === tracked) {
+                guildLocks.delete(guildID);
+            }
+        });
+
+    guildLocks.set(guildID, tracked);
+    return next;
+}
+
+/**
+ * Fire-and-forget wrapper around `withGuildLock` that logs unexpected escapes.
+ * Each handler already replies inside its callback, so callers don't need to
+ * await — they just need to make sure rejections aren't unhandled.
+ * @param guildID - the guild whose work to serialize
+ * @param fn - the work to run inside the lock
+ */
+function runLocked(guildID: string, fn: () => Promise<void>): void {
+    withGuildLock(guildID, fn).catch((e) => {
+        logger.error(
+            `Unhandled error in activity guild lock. gid=${guildID}. err=${e}`,
+        );
+    });
 }
 
 function pushEvent(guildID: string, event: ActivityEvent): void {
@@ -267,53 +309,59 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
-                        reply({ ok: false, reason: "maintenance" });
-                        return;
-                    }
+                    runLocked(startArgs.guildID, async () => {
+                        if (
+                            KmqConfiguration.Instance.maintenanceModeEnabled()
+                        ) {
+                            reply({ ok: false, reason: "maintenance" });
+                            return;
+                        }
 
-                    if (State.bannedPlayers.has(startArgs.userID)) {
-                        reply({ ok: false, reason: "banned" });
-                        return;
-                    }
+                        if (State.bannedPlayers.has(startArgs.userID)) {
+                            reply({ ok: false, reason: "banned" });
+                            return;
+                        }
 
-                    const existing = Session.getSession(startArgs.guildID);
-                    if (existing && existing.sessionInitialized) {
-                        reply({
-                            ok: false,
-                            reason: "session_already_running",
-                        });
-                        return;
-                    }
+                        const existing = Session.getSession(startArgs.guildID);
+                        if (existing && existing.sessionInitialized) {
+                            reply({
+                                ok: false,
+                                reason: "session_already_running",
+                            });
+                            return;
+                        }
 
-                    const inVC = getCurrentVoiceMembers(
-                        startArgs.voiceChannelID,
-                    ).some((m) => m.id === startArgs.userID);
+                        const inVC = getCurrentVoiceMembers(
+                            startArgs.voiceChannelID,
+                        ).some((m) => m.id === startArgs.userID);
 
-                    if (!inVC) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
-                    }
+                        if (!inVC) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
 
-                    const messageContext = new MessageContext(
-                        startArgs.textChannelID,
-                        new KmqMember(startArgs.userID),
-                        startArgs.guildID,
-                    );
-
-                    PlayCommand.startGame(
-                        messageContext,
-                        GameType.CLASSIC,
-                        null,
-                        false,
-                        false,
-                    ).catch((e) => {
-                        logger.error(
-                            `Error in activity startGame for gid=${startArgs.guildID}. err=${e}`,
+                        const messageContext = new MessageContext(
+                            startArgs.textChannelID,
+                            new KmqMember(startArgs.userID),
+                            startArgs.guildID,
                         );
-                    });
 
-                    reply({ ok: true });
+                        try {
+                            await PlayCommand.startGame(
+                                messageContext,
+                                GameType.CLASSIC,
+                                null,
+                                false,
+                                false,
+                            );
+                            reply({ ok: true });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity startGame for gid=${startArgs.guildID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
                     return;
                 }
 
@@ -326,63 +374,72 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    const session = Session.getSession(skipArgs.guildID);
-                    if (!session) {
-                        reply({ ok: false, reason: "no_session" });
-                        return;
-                    }
+                    runLocked(skipArgs.guildID, async () => {
+                        const session = Session.getSession(skipArgs.guildID);
+                        if (!session) {
+                            reply({ ok: false, reason: "no_session" });
+                            return;
+                        }
 
-                    if (!session.round || session.round.finished) {
-                        reply({ ok: false, reason: "no_round" });
-                        return;
-                    }
+                        const originalRound = session.round;
+                        if (!originalRound || originalRound.finished) {
+                            reply({ ok: false, reason: "no_round" });
+                            return;
+                        }
 
-                    const inVC = getCurrentVoiceMembers(
-                        session.voiceChannelID,
-                    ).some((m) => m.id === skipArgs.userID);
+                        const inVC = getCurrentVoiceMembers(
+                            session.voiceChannelID,
+                        ).some((m) => m.id === skipArgs.userID);
 
-                    if (!inVC) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
-                    }
+                        if (!inVC) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
 
-                    const messageContext = new MessageContext(
-                        session.textChannelID,
-                        new KmqMember(skipArgs.userID),
-                        session.guildID,
-                    );
+                        const messageContext = new MessageContext(
+                            session.textChannelID,
+                            new KmqMember(skipArgs.userID),
+                            session.guildID,
+                        );
 
-                    const wasSkipped = session.round.skipAchieved;
+                        const wasSkipped = originalRound.skipAchieved;
 
-                    SkipCommand.executeSkip(messageContext)
-                        .then(() => {
-                            const round = session.round;
+                        try {
+                            await SkipCommand.executeSkip(messageContext);
+
+                            // After the await, the round may have transitioned
+                            // (skipped or naturally ended). Compare by identity.
+                            const currentRound = session.round;
                             const threshold = getMajorityCount(session.guildID);
 
-                            // round becomes null after skipSong cleanup, so
-                            // if we lost it, we know the skip just achieved.
-                            if (!round) {
-                                pushEvent(session.guildID, { type: "skipped" });
-                                return;
+                            if (currentRound !== originalRound) {
+                                pushEvent(session.guildID, {
+                                    type: "skipped",
+                                });
+                            } else {
+                                // currentRound === originalRound here, which we
+                                // verified non-null earlier.
+                                pushEvent(session.guildID, {
+                                    type: "skipProgress",
+                                    requesters: currentRound!.getSkipCount(),
+                                    threshold,
+                                });
+
+                                if (currentRound!.skipAchieved && !wasSkipped) {
+                                    pushEvent(session.guildID, {
+                                        type: "skipped",
+                                    });
+                                }
                             }
 
-                            pushEvent(session.guildID, {
-                                type: "skipProgress",
-                                requesters: round.getSkipCount(),
-                                threshold,
-                            });
-
-                            if (round.skipAchieved && !wasSkipped) {
-                                pushEvent(session.guildID, { type: "skipped" });
-                            }
-                        })
-                        .catch((e) => {
+                            reply({ ok: true });
+                        } catch (e) {
                             logger.error(
                                 `Error in activity skipVote for gid=${skipArgs.guildID}. err=${e}`,
                             );
-                        });
-
-                    reply({ ok: true });
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
                     return;
                 }
 
@@ -395,39 +452,49 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    const session = Session.getSession(hintArgs.guildID);
-                    if (!session || !session.isGameSession()) {
-                        reply({ ok: false, reason: "no_session" });
-                        return;
-                    }
+                    runLocked(hintArgs.guildID, async () => {
+                        const session = Session.getSession(hintArgs.guildID);
+                        if (!session || !session.isGameSession()) {
+                            reply({ ok: false, reason: "no_session" });
+                            return;
+                        }
 
-                    if (!session.round || session.round.finished) {
-                        reply({ ok: false, reason: "no_round" });
-                        return;
-                    }
+                        const originalRound = session.round;
+                        if (!originalRound || originalRound.finished) {
+                            reply({ ok: false, reason: "no_round" });
+                            return;
+                        }
 
-                    const inVC = getCurrentVoiceMembers(
-                        session.voiceChannelID,
-                    ).some((m) => m.id === hintArgs.userID);
+                        const inVC = getCurrentVoiceMembers(
+                            session.voiceChannelID,
+                        ).some((m) => m.id === hintArgs.userID);
 
-                    if (!inVC) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
-                    }
+                        if (!inVC) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
 
-                    const wasHintUsed = session.round.hintUsed;
-                    const messageContext = new MessageContext(
-                        session.textChannelID,
-                        new KmqMember(hintArgs.userID),
-                        session.guildID,
-                    );
+                        const wasHintUsed = originalRound.hintUsed;
+                        const messageContext = new MessageContext(
+                            session.textChannelID,
+                            new KmqMember(hintArgs.userID),
+                            session.guildID,
+                        );
 
-                    HintCommand.sendHint(messageContext)
-                        .then(async () => {
-                            const round = session.round;
-                            if (!round) return;
+                        try {
+                            await HintCommand.sendHint(messageContext);
 
-                            const requesters = round.getHintRequests();
+                            // Re-check the round identity post-await.
+                            const currentRound = session.round;
+                            if (
+                                !currentRound ||
+                                currentRound !== originalRound
+                            ) {
+                                reply({ ok: true });
+                                return;
+                            }
+
+                            const requesters = currentRound.getHintRequests();
                             const threshold = getMajorityCount(session.guildID);
 
                             pushEvent(session.guildID, {
@@ -436,13 +503,13 @@ function ensureWorkerHandlerRegistered(): void {
                                 threshold,
                             });
 
-                            if (round.hintUsed && !wasHintUsed) {
+                            if (currentRound.hintUsed && !wasHintUsed) {
                                 const guildPreference =
                                     await GuildPreference.getGuildPreference(
                                         session.guildID,
                                     );
 
-                                const text = round.getHint(
+                                const text = currentRound.getHint(
                                     session.guildID,
                                     guildPreference.gameOptions.guessModeType,
                                     State.getGuildLocale(session.guildID),
@@ -453,14 +520,15 @@ function ensureWorkerHandlerRegistered(): void {
                                     text,
                                 });
                             }
-                        })
-                        .catch((e) => {
+
+                            reply({ ok: true });
+                        } catch (e) {
                             logger.error(
                                 `Error in activity hint for gid=${hintArgs.guildID}. err=${e}`,
                             );
-                        });
-
-                    reply({ ok: true });
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
                     return;
                 }
 
@@ -473,26 +541,33 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    const session = Session.getSession(bookmarkArgs.guildID);
-                    if (!session) {
-                        reply({ ok: false, reason: "no_session" });
-                        return;
-                    }
+                    runLocked(bookmarkArgs.guildID, async () => {
+                        const session = Session.getSession(
+                            bookmarkArgs.guildID,
+                        );
 
-                    // Resolve the link: prefer the explicit one, else fall back
-                    // to the current round's song (so users can bookmark while
-                    // the song plays without the iframe ever seeing the link).
-                    const resolvedLink =
-                        bookmarkArgs.youtubeLink ||
-                        session.round?.song.youtubeLink;
+                        if (!session) {
+                            reply({ ok: false, reason: "no_session" });
+                            return;
+                        }
 
-                    if (!resolvedLink) {
-                        reply({ ok: false, reason: "no_round" });
-                        return;
-                    }
+                        // Resolve the link: prefer the explicit one, else fall
+                        // back to the current round's song (so users can
+                        // bookmark while the song plays without the iframe
+                        // ever seeing the link).
+                        const resolvedLink =
+                            bookmarkArgs.youtubeLink ||
+                            session.round?.song.youtubeLink;
 
-                    SongSelector.getSongByLink(resolvedLink)
-                        .then((song) => {
+                        if (!resolvedLink) {
+                            reply({ ok: false, reason: "no_round" });
+                            return;
+                        }
+
+                        try {
+                            const song =
+                                await SongSelector.getSongByLink(resolvedLink);
+
                             if (!song) {
                                 reply({ ok: false, reason: "song_not_found" });
                                 return;
@@ -509,14 +584,13 @@ function ensureWorkerHandlerRegistered(): void {
                                 artistName: song.artistName,
                                 youtubeLink: song.youtubeLink,
                             });
-                        })
-                        .catch((e) => {
+                        } catch (e) {
                             logger.error(
                                 `Error in activity bookmark for gid=${bookmarkArgs.guildID}. err=${e}`,
                             );
                             reply({ ok: false, reason: "internal" });
-                        });
-
+                        }
+                    });
                     return;
                 }
 
@@ -529,37 +603,41 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    const session = Session.getSession(endArgs.guildID);
-                    if (!session) {
-                        reply({ ok: false, reason: "no_session" });
-                        return;
-                    }
+                    runLocked(endArgs.guildID, async () => {
+                        const session = Session.getSession(endArgs.guildID);
+                        if (!session) {
+                            reply({ ok: false, reason: "no_session" });
+                            return;
+                        }
 
-                    // Only the session owner (or someone in VC) can end —
-                    // matches the relaxed posture of the existing /end command,
-                    // which has no explicit owner check.
-                    const inVC = getCurrentVoiceMembers(
-                        session.voiceChannelID,
-                    ).some((m) => m.id === endArgs.userID);
+                        // Only the session owner (or someone in VC) can end —
+                        // matches the relaxed posture of the existing /end
+                        // command, which has no explicit owner check.
+                        const inVC = getCurrentVoiceMembers(
+                            session.voiceChannelID,
+                        ).some((m) => m.id === endArgs.userID);
 
-                    if (!inVC) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
-                    }
+                        if (!inVC) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
 
-                    const messageContext = new MessageContext(
-                        session.textChannelID,
-                        new KmqMember(endArgs.userID),
-                        session.guildID,
-                    );
-
-                    EndCommand.endGame(messageContext).catch((e) => {
-                        logger.error(
-                            `Error in activity endGame for gid=${endArgs.guildID}. err=${e}`,
+                        const messageContext = new MessageContext(
+                            session.textChannelID,
+                            new KmqMember(endArgs.userID),
+                            session.guildID,
                         );
-                    });
 
-                    reply({ ok: true });
+                        try {
+                            await EndCommand.endGame(messageContext);
+                            reply({ ok: true });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity endGame for gid=${endArgs.guildID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
                     return;
                 }
 
@@ -601,9 +679,16 @@ export function attachActivityBridge(session: GameSession): void {
     ensureWorkerHandlerRegistered();
     const { guildID } = session;
 
-    pushEvent(guildID, {
-        type: "sessionStart",
-        session: snapshotSessionMeta(session),
+    // Defer sessionStart to the next tick. The session is constructed BEFORE
+    // it's assigned to State.gameSessions, so a synchronous emit would arrive
+    // at admiral subscribers before the session is registered. setImmediate
+    // pushes after the current call stack unwinds, by which point the caller
+    // (PlayCommand.startGame) has already assigned it.
+    setImmediate(() => {
+        pushEvent(guildID, {
+            type: "sessionStart",
+            session: snapshotSessionMeta(session),
+        });
     });
 
     session.on("roundStart", (payload: RoundStartPayload) => {
@@ -706,5 +791,11 @@ export function attachActivityBridge(session: GameSession): void {
             type: "sessionEnd",
             reason: payload.reason,
         });
+
+        // Drop our listeners now that the session is over. The Session object
+        // becomes unreachable when State.gameSessions[guildID] is deleted; this
+        // just avoids holding extra references via the EventEmitter for the
+        // brief window before GC.
+        setImmediate(() => session.removeAllListeners());
     });
 }

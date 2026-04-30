@@ -171,18 +171,42 @@ export interface ActivityStreamHandle {
     close: () => void;
 }
 
-export function openActivityStream(
+/**
+ * Exchanges the OAuth bearer token for a short-lived single-use ticket so the
+ * token never appears in the WebSocket URL (logs, dev tools, history).
+ */
+async function requestWsTicket(
+    accessToken: string,
+    instanceId: string,
+): Promise<string> {
+    const resp = await fetch(`${PROXY_BASE}/ws-ticket`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId }),
+    });
+
+    if (!resp.ok) {
+        throw new Error(`ws-ticket failed: ${resp.status}`);
+    }
+
+    const body = (await resp.json()) as { ticket: string };
+    return body.ticket;
+}
+
+export async function openActivityStream(
     accessToken: string,
     instanceId: string,
     onEvent: (
         event: ActivityEvent | { type: "snapshot"; snapshot: ActivitySnapshot },
     ) => void,
     onClose: () => void,
-): ActivityStreamHandle {
+): Promise<ActivityStreamHandle> {
+    const ticket = await requestWsTicket(accessToken, instanceId);
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const url = `${proto}//${window.location.host}/.proxy/ws/activity?instance_id=${encodeURIComponent(
-        instanceId,
-    )}&access_token=${encodeURIComponent(accessToken)}`;
+    const url = `${proto}//${window.location.host}/.proxy/ws/activity?ticket=${encodeURIComponent(ticket)}`;
 
     const ws = new WebSocket(url);
     ws.addEventListener("message", (e) => {

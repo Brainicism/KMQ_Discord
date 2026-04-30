@@ -161,6 +161,13 @@ export default abstract class Session extends EventEmitter {
         return false;
     }
 
+    /** @returns the timer-mode timeout in seconds, or null if disabled */
+    getGuessTimeoutSec(): number | null {
+        return this.guildPreference.isGuessTimeoutSet()
+            ? this.guildPreference.gameOptions.guessTimeout
+            : null;
+    }
+
     /**
      * Starting a new Round
      * @param messageContext - An object containing relevant parts of Eris.Message

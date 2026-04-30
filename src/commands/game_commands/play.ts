@@ -40,6 +40,7 @@ import AnswerCommand from "../game_options/answer";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
+// eslint-disable-next-line import/no-cycle
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";

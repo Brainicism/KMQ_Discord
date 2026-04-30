@@ -108,7 +108,9 @@ function proxyImageUrl(url: string): string {
 function RoundTimer({ startedAt }: { startedAt: number }) {
     const [elapsedMs, setElapsedMs] = useState(Date.now() - startedAt);
     useEffect(() => {
-        const t = setInterval(() => setElapsedMs(Date.now() - startedAt), 250);
+        // Display rounds to whole seconds, so a 1s tick is enough — a 250ms
+        // interval would re-render four times per visible change.
+        const t = setInterval(() => setElapsedMs(Date.now() - startedAt), 1000);
         return () => clearInterval(t);
     }, [startedAt]);
 
@@ -718,7 +720,7 @@ export default function App() {
                 setAuthState({ accessToken: auth.accessToken, instanceId });
                 setReady(true);
 
-                streamRef.current = openActivityStream(
+                const stream = await openActivityStream(
                     auth.accessToken,
                     instanceId,
                     (event) => {
@@ -729,6 +731,13 @@ export default function App() {
                         setError("Disconnected from KMQ. Refresh to retry.");
                     },
                 );
+
+                if (cancelled) {
+                    stream.close();
+                    return;
+                }
+
+                streamRef.current = stream;
             } catch (e) {
                 console.error(e);
                 if (!cancelled) {
@@ -930,17 +939,24 @@ function reduce(
         case "snapshot":
             return applySnapshot(prev, msg.snapshot);
         case "sessionStart":
+            // Reset every per-session bit of state so an old session's
+            // bookmarks/reveals don't carry over.
             return {
                 ...prev,
                 session: msg.session,
-                scoreboard: prev.scoreboard ?? {
+                scoreboard: {
                     players: [],
                     winnerIDs: [],
                     highestScore: 0,
                 },
-                sessionEnded: false,
+                currentRound: null,
                 lastReveal: null,
                 recentGuesses: [],
+                sessionEnded: false,
+                hint: initialHint,
+                skip: initialSkip,
+                bookmarkedLinks: new Set(),
+                roundBookmark: { pending: false, bookmarked: false },
             };
         case "roundStart":
             return {
@@ -1006,10 +1022,16 @@ function reduce(
                 ],
             };
         case "sessionEnd":
+            // Clear stale per-session metadata so the header / vote bars don't
+            // show ghost state until the next /play.
             return {
                 ...prev,
                 sessionEnded: true,
+                session: null,
                 currentRound: null,
+                hint: initialHint,
+                skip: initialSkip,
+                roundBookmark: { pending: false, bookmarked: false },
             };
         default:
             return prev;

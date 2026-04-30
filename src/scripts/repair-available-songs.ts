@@ -28,13 +28,18 @@ async function main(): Promise<void> {
         "procedures",
     );
 
+    // Pass the password via MYSQL_PWD env var rather than -p<pass> so it
+    // doesn't show up in `ps` for other users on the host.
+    const mysqlEnv = { ...process.env, MYSQL_PWD: process.env.DB_PASS ?? "" };
+
     // eslint-disable-next-line no-await-in-loop
     for (const file of PROCEDURES) {
         const full = path.join(proceduresDir, file);
         console.log(`Loading ${file}...`);
         // eslint-disable-next-line no-await-in-loop
         await execAsync(
-            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${full}`,
+            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${full}`,
+            { env: mysqlEnv },
         );
     }
 
