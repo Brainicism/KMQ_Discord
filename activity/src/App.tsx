@@ -21,6 +21,7 @@ import {
 } from "./api";
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
+import kmqLogoUrl from "./assets/kmq_logo.png";
 import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
@@ -812,7 +813,11 @@ export default function App() {
     if (!ready) {
         return (
             <div className="kmq-app loading">
-                <h2>{t("appTitle")}</h2>
+                <img
+                    className="kmq-splash-logo"
+                    src={kmqLogoUrl}
+                    alt={t("appTitle")}
+                />
                 <p>{t("statusConnecting")}</p>
             </div>
         );

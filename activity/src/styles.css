@@ -573,3 +573,24 @@ body {
 .kmq-app.error p {
     color: #f23f42;
 }
+
+.kmq-splash-logo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: block;
+    animation: kmq-splash-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes kmq-splash-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.75;
+        transform: scale(0.96);
+    }
+}
