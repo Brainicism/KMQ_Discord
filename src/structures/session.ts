@@ -9,6 +9,7 @@ import {
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import { Mutex } from "async-mutex";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -30,7 +31,6 @@ import {
     truncatedString,
     underline,
 } from "../helpers/utils";
-import { Mutex } from "async-mutex";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";

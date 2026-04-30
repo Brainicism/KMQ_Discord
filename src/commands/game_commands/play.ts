@@ -12,6 +12,7 @@ import {
     MAX_AUTOCOMPLETE_FIELDS,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { Mutex } from "async-mutex";
 import {
     activeBonusUsers,
     isFirstGameOfDay,
@@ -38,7 +39,6 @@ import {
 } from "../../helpers/discord_utils";
 import AnswerCommand from "../game_options/answer";
 import AnswerType from "../../enums/option_types/answer_type";
-import { Mutex } from "async-mutex";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameSession from "../../structures/game_session";
@@ -1024,7 +1024,215 @@ export default class PlayCommand implements BaseCommand {
     }
 
     /**
+     * Sends the beginning of game session message
+     * @param textChannelName - The name of the text channel to send the message to
+     * @param voiceChannelName - The name of the voice channel to join
+     * @param messageContext - The original message that triggered the command
+     * @param participantIDs - The list of participants
+     * @param guildPreference - The guild's game preferences
+     * @param interaction - The interaction that started the game
+     */
+    static async sendBeginGameSessionMessage(
+        textChannelName: string,
+        voiceChannelName: string,
+        messageContext: MessageContext,
+        participantIDs: Array<string>,
+        guildPreference: GuildPreference,
+        interaction?: Eris.CommandInteraction,
+    ): Promise<void> {
+        const guildID = messageContext.guildID;
+        let gameInstructions = i18n.translate(
+            guildID,
+            "command.play.typeGuess",
+        );
+
+        const bonusUsers = await activeBonusUsers();
+        const bonusUserParticipantIDs = participantIDs.filter((x) =>
+            bonusUsers.has(x),
+        );
+
+        const isBonus = bonusUserParticipantIDs.length > 0;
+
+        if (isBonus) {
+            let bonusUserMentions = bonusUserParticipantIDs.map((x) =>
+                getMention(x),
+            );
+
+            if (bonusUserMentions.length > 10) {
+                bonusUserMentions = bonusUserMentions.slice(0, 10);
+                bonusUserMentions.push(
+                    i18n.translate(guildID, "misc.andManyOthers"),
+                );
+            }
+
+            gameInstructions += `\n\n${bonusUserMentions.join(", ")} `;
+            gameInstructions += i18n.translate(
+                guildID,
+                "command.play.exp.doubleExpForVoting",
+                {
+                    link: "https://top.gg/bot/508759831755096074/vote",
+                },
+            );
+
+            gameInstructions += " ";
+            gameInstructions += i18n.translate(
+                guildID,
+                "command.play.exp.howToVote",
+                { vote: clickableSlashCommand("vote") },
+            );
+        }
+
+        if (isWeekend()) {
+            gameInstructions += `\n\n**⬆️ ${i18n.translate(
+                guildID,
+                "command.play.exp.weekend",
+            )} ⬆️**`;
+        } else if (isPowerHour()) {
+            gameInstructions += `\n\n**⬆️ ${i18n.translate(
+                guildID,
+                "command.play.exp.powerHour",
+            )} ⬆️**`;
+        }
+
+        const startTitle = i18n.translate(
+            guildID,
+            "command.play.gameStarting",
+            {
+                textChannelName,
+                voiceChannelName,
+            },
+        );
+
+        const gameInfoMessage = await getGameInfoMessage(
+            messageContext.guildID,
+        );
+
+        const fields: Eris.EmbedField[] = [];
+        if (gameInfoMessage) {
+            fields.push({
+                name: gameInfoMessage.title,
+                value: gameInfoMessage.message,
+                inline: false,
+            });
+        }
+
+        const startGamePayload = {
+            title: startTitle,
+            description: gameInstructions,
+            color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : undefined,
+            thumbnailUrl: KmqImages.HAPPY,
+            fields,
+            footerText: `KMQ ${State.version}`,
+        };
+
+        const optionsEmbedPayload = await generateOptionsMessage(
+            Session.getSession(guildID),
+            messageContext,
+            guildPreference,
+            [],
+        );
+
+        const additionalPayloads = [];
+        if (optionsEmbedPayload) {
+            if (!isBonus && Math.random() < 0.5) {
+                optionsEmbedPayload.footerText = i18n.translate(
+                    messageContext.guildID,
+                    "command.play.voteReminder",
+                    {
+                        vote: "/vote",
+                    },
+                );
+            }
+
+            additionalPayloads.push(optionsEmbedPayload);
+        } else {
+            await notifyOptionsGenerationError(messageContext, COMMAND_NAME);
+        }
+
+        let newsFileContent: string | undefined;
+        try {
+            newsFileContent = (
+                await fs.promises.readFile(DataFiles.NEWS)
+            ).toString();
+        } catch (e) {
+            logger.warn(`News file does not exist or is empty. error = ${e}`);
+        }
+
+        if (newsFileContent) {
+            const staleUpdateThreshold = 30;
+            const newsData: Array<{ updateTime: Date; entry: string }> =
+                newsFileContent
+                    .split("\n\n")
+                    .filter((x) => x)
+                    .map((x) => ({
+                        updateTime: new Date(
+                            x.split("\n")[0]!.replaceAll("*", ""),
+                        ),
+                        entry: x,
+                    }))
+                    .filter((x) => {
+                        if (Number.isNaN(x.updateTime.getTime())) {
+                            logger.error(
+                                `Error parsing update time for ${x.entry}`,
+                            );
+                            return false;
+                        }
+
+                        const updateAge = durationDays(
+                            x.updateTime.getTime(),
+                            Date.now(),
+                        );
+
+                        if (updateAge > staleUpdateThreshold) {
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+            if (newsData.length > 0) {
+                const latestUpdate = durationDays(
+                    newsData[0]!.updateTime.getTime(),
+                    Date.now(),
+                );
+
+                const recencyShowUpdate =
+                    (staleUpdateThreshold - latestUpdate) /
+                    staleUpdateThreshold;
+
+                if (Math.random() < recencyShowUpdate) {
+                    const recentUpdatePayload = {
+                        title: clickableSlashCommand("botnews"),
+                        description: newsData.map((x) => x.entry).join("\n"),
+                        footerText: i18n.translate(
+                            guildID,
+                            "command.botnews.updates.footer",
+                        ),
+                    };
+
+                    additionalPayloads.push(recentUpdatePayload);
+                }
+            }
+        }
+
+        await sendInfoMessage(
+            messageContext,
+            startGamePayload,
+            false,
+            undefined,
+            additionalPayloads,
+            interaction,
+        );
+    }
+
+    /**
      * Internal startGame logic, called while holding the per-guild lock.
+     * @param messageContext - The message context of the invoking message
+     * @param gameType - The type of game to start
+     * @param livesOrClipDurationArg - The number of lives or clip duration argument
+     * @param hiddenMode - Whether hidden mode is enabled
+     * @param newClip - Whether to play a new clip
+     * @param interaction - The interaction that started the game
      */
     private static async startGameLocked(
         messageContext: MessageContext,
@@ -1346,207 +1554,5 @@ export default class PlayCommand implements BaseCommand {
 
             await gameSession.startRound(messageContext);
         }
-    }
-
-    /**
-     * Sends the beginning of game session message
-     * @param textChannelName - The name of the text channel to send the message to
-     * @param voiceChannelName - The name of the voice channel to join
-     * @param messageContext - The original message that triggered the command
-     * @param participantIDs - The list of participants
-     * @param guildPreference - The guild's game preferences
-     * @param interaction - The interaction that started the game
-     */
-    static async sendBeginGameSessionMessage(
-        textChannelName: string,
-        voiceChannelName: string,
-        messageContext: MessageContext,
-        participantIDs: Array<string>,
-        guildPreference: GuildPreference,
-        interaction?: Eris.CommandInteraction,
-    ): Promise<void> {
-        const guildID = messageContext.guildID;
-        let gameInstructions = i18n.translate(
-            guildID,
-            "command.play.typeGuess",
-        );
-
-        const bonusUsers = await activeBonusUsers();
-        const bonusUserParticipantIDs = participantIDs.filter((x) =>
-            bonusUsers.has(x),
-        );
-
-        const isBonus = bonusUserParticipantIDs.length > 0;
-
-        if (isBonus) {
-            let bonusUserMentions = bonusUserParticipantIDs.map((x) =>
-                getMention(x),
-            );
-
-            if (bonusUserMentions.length > 10) {
-                bonusUserMentions = bonusUserMentions.slice(0, 10);
-                bonusUserMentions.push(
-                    i18n.translate(guildID, "misc.andManyOthers"),
-                );
-            }
-
-            gameInstructions += `\n\n${bonusUserMentions.join(", ")} `;
-            gameInstructions += i18n.translate(
-                guildID,
-                "command.play.exp.doubleExpForVoting",
-                {
-                    link: "https://top.gg/bot/508759831755096074/vote",
-                },
-            );
-
-            gameInstructions += " ";
-            gameInstructions += i18n.translate(
-                guildID,
-                "command.play.exp.howToVote",
-                { vote: clickableSlashCommand("vote") },
-            );
-        }
-
-        if (isWeekend()) {
-            gameInstructions += `\n\n**⬆️ ${i18n.translate(
-                guildID,
-                "command.play.exp.weekend",
-            )} ⬆️**`;
-        } else if (isPowerHour()) {
-            gameInstructions += `\n\n**⬆️ ${i18n.translate(
-                guildID,
-                "command.play.exp.powerHour",
-            )} ⬆️**`;
-        }
-
-        const startTitle = i18n.translate(
-            guildID,
-            "command.play.gameStarting",
-            {
-                textChannelName,
-                voiceChannelName,
-            },
-        );
-
-        const gameInfoMessage = await getGameInfoMessage(
-            messageContext.guildID,
-        );
-
-        const fields: Eris.EmbedField[] = [];
-        if (gameInfoMessage) {
-            fields.push({
-                name: gameInfoMessage.title,
-                value: gameInfoMessage.message,
-                inline: false,
-            });
-        }
-
-        const startGamePayload = {
-            title: startTitle,
-            description: gameInstructions,
-            color: isBonus ? EMBED_SUCCESS_BONUS_COLOR : undefined,
-            thumbnailUrl: KmqImages.HAPPY,
-            fields,
-            footerText: `KMQ ${State.version}`,
-        };
-
-        const optionsEmbedPayload = await generateOptionsMessage(
-            Session.getSession(guildID),
-            messageContext,
-            guildPreference,
-            [],
-        );
-
-        const additionalPayloads = [];
-        if (optionsEmbedPayload) {
-            if (!isBonus && Math.random() < 0.5) {
-                optionsEmbedPayload.footerText = i18n.translate(
-                    messageContext.guildID,
-                    "command.play.voteReminder",
-                    {
-                        vote: "/vote",
-                    },
-                );
-            }
-
-            additionalPayloads.push(optionsEmbedPayload);
-        } else {
-            await notifyOptionsGenerationError(messageContext, COMMAND_NAME);
-        }
-
-        let newsFileContent: string | undefined;
-        try {
-            newsFileContent = (
-                await fs.promises.readFile(DataFiles.NEWS)
-            ).toString();
-        } catch (e) {
-            logger.warn(`News file does not exist or is empty. error = ${e}`);
-        }
-
-        if (newsFileContent) {
-            const staleUpdateThreshold = 30;
-            const newsData: Array<{ updateTime: Date; entry: string }> =
-                newsFileContent
-                    .split("\n\n")
-                    .filter((x) => x)
-                    .map((x) => ({
-                        updateTime: new Date(
-                            x.split("\n")[0]!.replaceAll("*", ""),
-                        ),
-                        entry: x,
-                    }))
-                    .filter((x) => {
-                        if (Number.isNaN(x.updateTime.getTime())) {
-                            logger.error(
-                                `Error parsing update time for ${x.entry}`,
-                            );
-                            return false;
-                        }
-
-                        const updateAge = durationDays(
-                            x.updateTime.getTime(),
-                            Date.now(),
-                        );
-
-                        if (updateAge > staleUpdateThreshold) {
-                            return false;
-                        }
-
-                        return true;
-                    });
-
-            if (newsData.length > 0) {
-                const latestUpdate = durationDays(
-                    newsData[0]!.updateTime.getTime(),
-                    Date.now(),
-                );
-
-                const recencyShowUpdate =
-                    (staleUpdateThreshold - latestUpdate) /
-                    staleUpdateThreshold;
-
-                if (Math.random() < recencyShowUpdate) {
-                    const recentUpdatePayload = {
-                        title: clickableSlashCommand("botnews"),
-                        description: newsData.map((x) => x.entry).join("\n"),
-                        footerText: i18n.translate(
-                            guildID,
-                            "command.botnews.updates.footer",
-                        ),
-                    };
-
-                    additionalPayloads.push(recentUpdatePayload);
-                }
-            }
-        }
-
-        await sendInfoMessage(
-            messageContext,
-            startGamePayload,
-            false,
-            undefined,
-            additionalPayloads,
-            interaction,
-        );
     }
 }
