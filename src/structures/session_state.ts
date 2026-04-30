@@ -74,7 +74,7 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
  * to avoid breaking existing behavior during rollout.
  */
 export class SessionStateMachine {
-    private _state: SessionState = SessionState.CREATED;
+    private currentState: SessionState = SessionState.CREATED;
     private readonly guildID: string;
 
     constructor(guildID: string) {
@@ -82,18 +82,20 @@ export class SessionStateMachine {
     }
 
     get state(): SessionState {
-        return this._state;
+        return this.currentState;
     }
 
     /**
      * Attempt a state transition. Returns true if the transition was valid.
      * Invalid transitions are logged as warnings but still applied to avoid
      * breaking existing behavior during rollout.
+     * @param to - The target state to transition to
+     * @returns whether the transition was valid
      */
     transition(to: SessionState): boolean {
-        const allowed = VALID_TRANSITIONS[this._state];
-        const isValid = allowed?.has(to) ?? false;
-        const from = this._state;
+        const allowed = VALID_TRANSITIONS[this.currentState];
+        const isValid = allowed.has(to);
+        const from = this.currentState;
 
         if (!isValid) {
             logger.warn(
@@ -101,35 +103,39 @@ export class SessionStateMachine {
             );
         }
 
-        this._state = to;
+        this.currentState = to;
         logger.info(`gid: ${this.guildID} | State: ${from} → ${to}`);
         return isValid;
     }
 
-    /** Check if a transition would be valid without performing it */
+    /**
+     * Check if a transition would be valid without performing it
+     * @param to - The target state to check
+     * @returns whether the transition would be valid
+     */
     canTransition(to: SessionState): boolean {
-        return VALID_TRANSITIONS[this._state]?.has(to) ?? false;
+        return VALID_TRANSITIONS[this.currentState].has(to);
     }
 
     /** Convenience: is the session in an "alive" (non-terminal) state? */
     get isAlive(): boolean {
         return (
-            this._state !== SessionState.ENDING &&
-            this._state !== SessionState.ENDED
+            this.currentState !== SessionState.ENDING &&
+            this.currentState !== SessionState.ENDED
         );
     }
 
     /** Is the session in a state where rounds can be active? */
     get isRoundCapable(): boolean {
         return (
-            this._state === SessionState.ROUND_STARTING ||
-            this._state === SessionState.ROUND_ACTIVE ||
-            this._state === SessionState.ROUND_ENDING
+            this.currentState === SessionState.ROUND_STARTING ||
+            this.currentState === SessionState.ROUND_ACTIVE ||
+            this.currentState === SessionState.ROUND_ENDING
         );
     }
 
     /** Is the session accepting commands (guesses, skips, hints)? */
     get isAcceptingInput(): boolean {
-        return this._state === SessionState.ROUND_ACTIVE;
+        return this.currentState === SessionState.ROUND_ACTIVE;
     }
 }

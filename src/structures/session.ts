@@ -93,11 +93,11 @@ export default abstract class Session {
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
-    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
-    protected lifecycleMutex = new Mutex();
-
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
+
+    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
+    protected lifecycleMutex = new Mutex();
 
     /** The guild preference */
     protected guildPreference: GuildPreference;
