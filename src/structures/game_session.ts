@@ -475,11 +475,15 @@ export default class GameSession extends Session {
         // send level up message
         if (leveledUpPlayers.length > 0) {
             const levelUpMessages = leveledUpPlayers
-                .sort((a, b) => b.endLevel - a.endLevel)
-                .sort(
-                    (a, b) =>
-                        b.endLevel - b.startLevel - (a.endLevel - a.startLevel),
-                )
+                .sort((a, b) => {
+                    const levelsGainedDiff =
+                        b.endLevel -
+                        b.startLevel -
+                        (a.endLevel - a.startLevel);
+                    return levelsGainedDiff !== 0
+                        ? levelsGainedDiff
+                        : b.endLevel - a.endLevel;
+                })
                 .map((leveledUpPlayer) =>
                     i18n.translate(this.guildID, "misc.levelUp.entry", {
                         user: this.scoreboard.getPlayerDisplayedName(
