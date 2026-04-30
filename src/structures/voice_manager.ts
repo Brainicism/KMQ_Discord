@@ -15,11 +15,7 @@ export enum VoiceState {
 
 /**
  * Manages the voice connection lifecycle for a session.
- * Extracted from Session to provide clean voice state tracking
- * and round-ID-tagged stream listeners.
- *
- * Phase 4: Created as standalone class. Not yet wired into Session
- * (Session still manages its own connection directly).
+ * Provides clean voice state tracking and round-ID-tagged stream listeners.
  */
 export class VoiceManager {
     private _connection: Eris.VoiceConnection | null = null;
@@ -40,17 +36,13 @@ export class VoiceManager {
         return this._state;
     }
 
-    /** Update the voice channel ID (e.g., when bot is moved) */
     updateVoiceChannelID(channelID: string): void {
         this.voiceChannelID = channelID;
     }
 
-    /**
-     * Ensure we have a ready voice connection. Joins if needed.
-     * Equivalent to the old ensureVoiceConnection + ensureConnectionReady.
-     */
+    /** Ensure we have a ready voice connection. Joins if needed. */
     async ensureConnected(): Promise<void> {
-        if (this._connection && this._connection.ready) {
+        if (this._connection?.ready) {
             return;
         }
 
@@ -68,18 +60,17 @@ export class VoiceManager {
             throw err;
         }
 
-        // Clear existing listeners and attach generic error handler
         this._connection.removeAllListeners();
         this._connection.on("error", (err) => {
             logger.warn(
-                `Error receiving from voice connection WS. ${extractErrorString(err)}`,
+                `gid: ${this.guildID} | Voice WS error: ${extractErrorString(err)}`,
             );
         });
     }
 
     /**
-     * Check if connection encoder is stale and wait for it to become idle.
-     * Replaces the old ensureConnectionReady delay hack with polling.
+     * Wait for the encoder to become idle if it's stuck in an encoding state.
+     * Replaces the old 1-second delay hack with bounded polling.
      */
     async ensureEncoderIdle(): Promise<void> {
         if (!this._connection) {
@@ -88,19 +79,18 @@ export class VoiceManager {
             );
         }
 
-        if (this._connection.channelID) {
-            return; // connection is valid
+        if (this._connection.ready) {
+            return;
         }
 
         if (!this._connection.piper?.encoding) {
-            return; // not in encoding state
+            return;
         }
 
         logger.warn(
-            `gid: ${this.guildID} | Connection is unexpectedly in encoding state. Waiting for idle...`,
+            `gid: ${this.guildID} | Connection in encoding state, waiting for idle...`,
         );
 
-        // Poll for encoder to become idle (up to 500ms), then force stop
         const deadline = Date.now() + 500;
         while (this._connection?.piper?.encoding && Date.now() < deadline) {
             // eslint-disable-next-line no-await-in-loop
@@ -109,7 +99,7 @@ export class VoiceManager {
 
         if (this._connection?.piper?.encoding) {
             logger.warn(
-                `gid: ${this.guildID} | Connection still encoding after timeout, force stopping.`,
+                `gid: ${this.guildID} | Encoder still busy after timeout, force stopping`,
             );
             this._connection.stopPlaying();
         }
@@ -117,13 +107,7 @@ export class VoiceManager {
 
     /**
      * Register a one-shot stream "end" handler tagged to a specific round.
-     * If the round ID has changed by the time the event fires, the handler
-     * is ignored. This prevents stale end-of-stream handlers from triggering
-     * on the wrong round (BANDAID-05).
-     *
-     * @param roundId - Unique identifier for the current round
-     * @param onEnd - Callback when stream ends for this round
-     * @param onError - Callback when stream errors for this round
+     * Stale events (from a previous round) are silently ignored.
      */
     onceStreamEnd(
         roundId: string,
@@ -134,14 +118,12 @@ export class VoiceManager {
 
         if (!this._connection) return;
 
-        // Remove previous listeners to avoid stacking
         this._connection.removeAllListeners("end");
         this._connection.removeAllListeners("error");
 
-        // Re-attach generic error handler
         this._connection.on("error", (err) => {
             logger.warn(
-                `Error receiving from voice connection WS. ${extractErrorString(err)}`,
+                `gid: ${this.guildID} | Voice WS error: ${extractErrorString(err)}`,
             );
         });
 
@@ -162,17 +144,14 @@ export class VoiceManager {
 
             this._state = VoiceState.ERROR;
             logger.error(
-                `Stream error for round ${roundId}: ${extractErrorString(err)}`,
+                `gid: ${this.guildID} | Stream error for round ${roundId}: ${extractErrorString(err)}`,
             );
             await onError(err as Error);
         });
     }
 
-    /** Stop playing audio. */
     stopPlaying(): void {
-        if (this._connection) {
-            this._connection.stopPlaying();
-        }
+        this._connection?.stopPlaying();
     }
 
     /** Disconnect from voice and clean up all listeners. */
@@ -185,12 +164,12 @@ export class VoiceManager {
                 if (this._connection.channelID) {
                     const voiceChannel = this.client.getChannel(
                         this._connection.channelID,
-                    ) as Eris.VoiceChannel | null;
+                    ) as Eris.VoiceChannel | undefined;
                     voiceChannel?.leave();
                 }
             } catch (e) {
                 logger.error(
-                    `Failed to disconnect voice for gid: ${this.guildID}. err = ${e}`,
+                    `gid: ${this.guildID} | Failed to disconnect voice: ${e}`,
                 );
             }
         }
