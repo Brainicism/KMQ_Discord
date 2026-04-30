@@ -314,7 +314,7 @@ export async function getMultipleChoiceOptions(
                             ...sameArtistSongs,
                             correctSongPayload.displayedName,
                         ])
-                        .where("id_artist", "=", artistID)
+                        .where("id_artist", "!=", artistID)
                         .orderBy(sql`RAND()`)
                         .execute()
                 )
