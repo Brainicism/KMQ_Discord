@@ -29,10 +29,7 @@ export default async function voiceChannelLeaveHandler(
             `gid: ${oldChannel.guild.id} | Bot was removed from voice channel, ending session`,
         );
 
-        await session.endSession(
-            "Bot was removed from voice channel",
-            false,
-        );
+        await session.endSession("Bot was removed from voice channel", false);
         return;
     }
 

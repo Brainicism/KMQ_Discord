@@ -1247,7 +1247,7 @@ export default class PlayCommand implements BaseCommand {
                     lives = ELIMINATION_DEFAULT_LIVES;
                 } else {
                     lives = parseInt(livesOrClipDurationArg, 10);
-                    if (isNaN(lives)) {
+                    if (Number.isNaN(lives)) {
                         lives = ELIMINATION_DEFAULT_LIVES;
                     } else if (lives < ELIMINATION_MIN_LIVES) {
                         lives = ELIMINATION_MIN_LIVES;
@@ -1263,7 +1263,7 @@ export default class PlayCommand implements BaseCommand {
                     clipDuration = CLIP_DEFAULT_DURATION_SEC;
                 } else {
                     clipDuration = parseFloat(livesOrClipDurationArg);
-                    if (isNaN(clipDuration)) {
+                    if (Number.isNaN(clipDuration)) {
                         clipDuration = CLIP_DEFAULT_DURATION_SEC;
                     } else {
                         clipDuration = Math.round(clipDuration! * 100) / 100;
