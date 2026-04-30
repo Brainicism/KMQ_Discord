@@ -450,6 +450,7 @@ function SkipControl({
     instanceId,
     skip,
     enabled,
+    roundKey,
     strings,
     onVoted,
 }: {
@@ -457,20 +458,26 @@ function SkipControl({
     instanceId: string;
     skip: SkipState;
     enabled: boolean;
+    /** Identity of the round at render time; forwarded to `onVoted` so the
+     *  parent can ignore a stale success reply if the round has rolled over
+     *  (happens when this vote was the majority-reaching one — the server
+     *  awaits endRound/startRound before replying). */
+    roundKey: number | null;
     strings: Strings;
-    onVoted: () => void;
+    onVoted: (roundKey: number | null) => void;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
 
     const onClick = async () => {
         if (busy || !enabled || skip.userVoted) return;
+        const clickedRoundKey = roundKey;
         setBusy(true);
         setFeedback(null);
         try {
             const result = await apiSkipVote(accessToken, instanceId);
             if (result.ok) {
-                onVoted();
+                onVoted(clickedRoundKey);
             } else {
                 setFeedback(rejectReasonText(strings, result.reason));
             }
@@ -915,12 +922,24 @@ export default function App() {
                         instanceId={authState.instanceId}
                         skip={ui.skip}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
+                        roundKey={ui.currentRound?.roundIndex ?? null}
                         strings={strings}
-                        onVoted={() =>
-                            setUi((prev) => ({
-                                ...prev,
-                                skip: { ...prev.skip, userVoted: true },
-                            }))
+                        onVoted={(clickedRoundKey) =>
+                            setUi((prev) => {
+                                // If the round rolled over between click and
+                                // reply (which happens when this vote was the
+                                // majority-reaching one), don't mark the new
+                                // round as already-voted.
+                                const currentKey =
+                                    prev.currentRound?.roundIndex ?? null;
+                                if (currentKey !== clickedRoundKey) {
+                                    return prev;
+                                }
+                                return {
+                                    ...prev,
+                                    skip: { ...prev.skip, userVoted: true },
+                                };
+                            })
                         }
                     />
                 </div>
