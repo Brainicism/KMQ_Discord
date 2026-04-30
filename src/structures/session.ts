@@ -9,6 +9,7 @@ import {
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import { Mutex } from "async-mutex";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -89,6 +90,9 @@ export default abstract class Session {
 
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
+
+    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
+    protected lifecycleMutex = new Mutex();
 
     /** The guild preference */
     protected guildPreference: GuildPreference;
@@ -395,10 +399,12 @@ export default abstract class Session {
         );
 
         Session.deleteSession(this.guildID);
-        await this.endRound(
-            false,
-            new MessageContext(this.textChannelID, null, this.guildID),
-        );
+
+        // Inline base round cleanup instead of polymorphic this.endRound() call.
+        // Subclasses handle full round ending (with scoring) before calling
+        // super.endSession() to avoid re-entering mutex-wrapped lifecycle methods.
+        this.stopGuessTimeout();
+        this.round = null;
 
         const voiceConnection = State.client.voiceConnections.get(this.guildID);
 
@@ -1211,7 +1217,7 @@ export default abstract class Session {
         timeRemaining: number | null,
         nonEmptyFooter: boolean,
     ): string {
-        if (!timeRemaining) {
+        if (timeRemaining == null) {
             return "";
         }
 
