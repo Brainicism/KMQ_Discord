@@ -5,9 +5,9 @@ import _ from "lodash";
 
 import {
     bold,
+    cancellableDelay,
     chunkArray,
     codeLine,
-    cancellableDelay,
     delay,
     getOrdinalNum,
     setDifference,
@@ -243,7 +243,7 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         gameRound?: GameRound,
     ): Promise<void> {
-        return this.withLifecycleLock(() =>
+        await this.withLifecycleLock(() =>
             this.endRoundCore(isError, messageContext, gameRound),
         );
     }
@@ -256,7 +256,7 @@ export default class GameSession extends Session {
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         this.pendingEndSession = true;
-        return this.withLifecycleLock(() =>
+        await this.withLifecycleLock(() =>
             this.endSessionCore(reason, endedDueToError),
         );
     }
@@ -1176,7 +1176,10 @@ export default class GameSession extends Session {
                 );
 
                 if (playSuccess) {
-                    await cancellableDelay(songStartDelay * 1000, this.abortSignal);
+                    await cancellableDelay(
+                        songStartDelay * 1000,
+                        this.abortSignal,
+                    );
                 }
             }
         }

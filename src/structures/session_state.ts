@@ -19,6 +19,9 @@ export enum SessionState {
     /** Between rounds: delay period, preparing next song */
     BETWEEN_ROUNDS = "BETWEEN_ROUNDS",
 
+    /** Round starting: joining VC, selecting song */
+    ROUND_STARTING = "ROUND_STARTING",
+
     /** Round active: song playing, accepting guesses/skips */
     ROUND_ACTIVE = "ROUND_ACTIVE",
 
@@ -40,6 +43,7 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
         SessionState.ENDING,
     ]),
     [SessionState.INITIALIZING]: new Set([
+        SessionState.ROUND_STARTING,
         SessionState.ROUND_ACTIVE,
         SessionState.BETWEEN_ROUNDS,
         SessionState.ENDING,
@@ -49,6 +53,11 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
         SessionState.ENDING,
     ]),
     [SessionState.BETWEEN_ROUNDS]: new Set([
+        SessionState.ROUND_STARTING,
+        SessionState.ROUND_ACTIVE,
+        SessionState.ENDING,
+    ]),
+    [SessionState.ROUND_STARTING]: new Set([
         SessionState.ROUND_ACTIVE,
         SessionState.ENDING,
     ]),

@@ -128,7 +128,7 @@ export default class ListeningSession extends Session {
         isError: boolean,
         messageContext?: MessageContext,
     ): Promise<void> {
-        return this.withLifecycleLock(() =>
+        await this.withLifecycleLock(() =>
             this.endRoundCore(isError, messageContext),
         );
     }
@@ -142,7 +142,7 @@ export default class ListeningSession extends Session {
     }
 
     async endSession(reason: string): Promise<void> {
-        return this.withLifecycleLock(() => this.endSessionCore(reason));
+        await this.withLifecycleLock(() => this.endSessionCore(reason));
     }
 
     private async endSessionCore(reason: string): Promise<void> {
