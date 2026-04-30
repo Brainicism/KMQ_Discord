@@ -4,20 +4,50 @@
 // definitions (typical after pulling code that adds a new column without a
 // full reseed).
 import { config } from "dotenv";
-import { exec } from "child_process";
-import { promisify } from "util";
+import { spawn } from "child_process";
 import { sql } from "kysely";
 import dbContext from "../database_context";
+import fs from "fs";
 import path from "path";
 
 config({ path: path.resolve(__dirname, "../../.env") });
-
-const execAsync = promisify(exec);
 
 const PROCEDURES = [
     "020-generate_expected_available_songs_procedure.sql",
     "030-create_kmq_data_tables_procedure.sql",
 ];
+
+function runMysqlFromFile(
+    sqlPath: string,
+    mysqlEnv: NodeJS.ProcessEnv,
+): Promise<void> {
+    // Use spawn with an argv array (no shell) and pipe the file contents to
+    // stdin, so the filename and env values can't be reinterpreted as shell
+    // syntax.
+    return new Promise((resolve, reject) => {
+        const child = spawn(
+            "mysql",
+            [
+                "--default-character-set=utf8mb4",
+                "-u",
+                process.env.DB_USER ?? "",
+                "-h",
+                process.env.DB_HOST ?? "",
+                "--port",
+                process.env.DB_PORT ?? "",
+                "kmq",
+            ],
+            { env: mysqlEnv, stdio: ["pipe", "inherit", "inherit"] },
+        );
+
+        child.on("error", reject);
+        child.on("close", (code) => {
+            if (code === 0) resolve();
+            else reject(new Error(`mysql exited with code ${code}`));
+        });
+        fs.createReadStream(sqlPath).pipe(child.stdin);
+    });
+}
 
 async function main(): Promise<void> {
     const proceduresDir = path.resolve(
@@ -37,10 +67,7 @@ async function main(): Promise<void> {
         const full = path.join(proceduresDir, file);
         console.log(`Loading ${file}...`);
         // eslint-disable-next-line no-await-in-loop
-        await execAsync(
-            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kmq < ${full}`,
-            { env: mysqlEnv },
-        );
+        await runMysqlFromFile(full, mysqlEnv);
     }
 
     console.log("Calling GenerateExpectedAvailableSongs()...");

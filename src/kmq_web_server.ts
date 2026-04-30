@@ -170,6 +170,17 @@ export default class KmqWebServer {
 
         await httpServer.register(fastifyWebsocket);
 
+        // Lower limits on token + lifecycle endpoints (these create or destroy
+        // sessions / hit Discord's OAuth which has its own quota); higher
+        // limits on read-only and high-frequency action endpoints.
+        const limit = (
+            max: number,
+        ): { config: { rateLimit: { max: number; timeWindow: string } } } => ({
+            config: {
+                rateLimit: { max, timeWindow: "1 minute" },
+            },
+        });
+
         const activityDistRoot = path.resolve(
             __dirname,
             "..",
@@ -197,23 +208,27 @@ export default class KmqWebServer {
             // there so the SPA can pick up the params from window.location.
             const activityIndexPath = path.join(activityDistRoot, "index.html");
 
-            httpServer.get("/", async (request, reply) => {
-                try {
-                    const html = await fs.promises.readFile(
-                        activityIndexPath,
-                        "utf8",
-                    );
+            httpServer.get(
+                "/",
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                async (request, reply) => {
+                    try {
+                        const html = await fs.promises.readFile(
+                            activityIndexPath,
+                            "utf8",
+                        );
 
-                    await reply.type("text/html").send(html);
-                } catch (e) {
-                    logger.warn(
-                        `Failed to serve activity index. err=${
-                            (e as Error).message
-                        }`,
-                    );
-                    await reply.code(500).send();
-                }
-            });
+                        await reply.type("text/html").send(html);
+                    } catch (e) {
+                        logger.warn(
+                            `Failed to serve activity index. err=${
+                                (e as Error).message
+                            }`,
+                        );
+                        await reply.code(500).send();
+                    }
+                },
+            );
         } else {
             logger.info(
                 `Activity dist not found at ${activityDistRoot}; skipping static handler. Build with 'npm run build:activity' to enable.`,
@@ -546,17 +561,6 @@ export default class KmqWebServer {
                 clusterData,
                 overallStatsData,
             });
-        });
-
-        // Lower limits on token + lifecycle endpoints (these create or destroy
-        // sessions / hit Discord's OAuth which has its own quota); higher
-        // limits on read-only and high-frequency action endpoints.
-        const limit = (
-            max: number,
-        ): { config: { rateLimit: { max: number; timeWindow: string } } } => ({
-            config: {
-                rateLimit: { max, timeWindow: "1 minute" },
-            },
         });
 
         httpServer.post(
@@ -1032,7 +1036,15 @@ export default class KmqWebServer {
 
         httpServer.get(
             "/ws/activity",
-            { websocket: true },
+            {
+                websocket: true,
+                config: {
+                    rateLimit: {
+                        max: ACTIVITY_RATE_LIMIT_READ,
+                        timeWindow: "1 minute",
+                    },
+                },
+            },
             async (socket, request) => {
                 if (!this.activityHub) {
                     socket.close(1011, "Activity not enabled");
@@ -1192,6 +1204,14 @@ export default class KmqWebServer {
         channelID: string | null;
         participantIDs: Set<string>;
     } | null> {
+        // SSRF guard: instanceId is user-controlled and gets interpolated into
+        // the Discord REST URL. Discord Activity instance IDs are opaque
+        // strings, but in practice are a short alphanumeric token. Reject
+        // anything outside that shape before making the upstream call.
+        if (!/^[A-Za-z0-9_-]{1,64}$/.test(instanceId)) {
+            return null;
+        }
+
         const now = Date.now();
         const cached = this.instanceCache.get(instanceId);
         if (cached && cached.expiresAt > now) {
