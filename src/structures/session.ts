@@ -854,6 +854,7 @@ export default abstract class Session {
             // Only set songStartedAt for clip mode at the start of the round
             if (!isClipMode || round.songStartedAt === null) {
                 round.songStartedAt = Date.now();
+                round.timerStartedAt = Date.now();
             }
 
             await this.ensureConnectionReady();
@@ -1210,7 +1211,7 @@ export default abstract class Session {
         timeRemaining: number | null,
         nonEmptyFooter: boolean,
     ): string {
-        if (!timeRemaining) {
+        if (timeRemaining == null) {
             return "";
         }
 

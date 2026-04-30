@@ -1375,6 +1375,7 @@ export async function getGameInfoMessage(
         logger.error(
             `Error parsing message's game info message content, invalid JSON? message = ${endGameMessage.message}`,
         );
+        return null;
     }
 
     try {
@@ -1397,6 +1398,7 @@ export async function getGameInfoMessage(
         logger.error(
             `Error parsing title's game info message content, invalid JSON? title = ${endGameMessage.title}`,
         );
+        return null;
     }
 
     return endGameMessage;
@@ -1688,7 +1690,7 @@ export function getMajorityCount(guildID: string): number {
         return Math.floor(getNumParticipants(voiceChannelID) * 0.5) + 1;
     }
 
-    return 0;
+    return Number.MAX_SAFE_INTEGER;
 }
 
 /**

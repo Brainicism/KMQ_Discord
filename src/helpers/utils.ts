@@ -303,8 +303,9 @@ export function retryWithExponentialBackoff<T>(
     maxRetries = 5,
     initialDelayMs = 1000,
 ): Promise<T> {
+    const operationId = uuid.v4();
     logger.info(
-        `Executing retry with exponential backoff for ${uuid.v4()}}. ${description}`,
+        `Executing retry with exponential backoff for ${operationId}}. ${description}`,
     );
     return new Promise(async (resolve, reject) => {
         let retryCount = 0;
@@ -313,7 +314,7 @@ export function retryWithExponentialBackoff<T>(
         async function attempt(): Promise<void> {
             try {
                 logger.info(
-                    `Executing retry with exponential backoff for ${uuid.v4()}}. Retries remaining: ${
+                    `Executing retry with exponential backoff for ${operationId}}. Retries remaining: ${
                         maxRetries - retryCount
                     }/${maxRetries}`,
                 );
@@ -322,7 +323,7 @@ export function retryWithExponentialBackoff<T>(
             } catch (error) {
                 if (retryCount >= maxRetries) {
                     logger.info(
-                        `Retry with exponential backoff for ${uuid.v4()}} failed. after ${maxRetries} retries`,
+                        `Retry with exponential backoff for ${operationId}} failed. after ${maxRetries} retries`,
                     );
                     reject(error);
                     return;
