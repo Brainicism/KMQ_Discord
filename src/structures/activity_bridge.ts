@@ -1,0 +1,710 @@
+// Cycle: game_session.ts imports attachActivityBridge from this module, and
+// the command imports below transitively import game_session.ts. The cycle is
+// runtime-safe because each side only references the other through function
+// calls that happen after both modules finish loading.
+/* eslint-disable import/no-cycle */
+import {
+    ACTIVITY_IPC_EVENT,
+    ACTIVITY_IPC_REPLY,
+    ACTIVITY_IPC_REQUEST,
+} from "./activity_types";
+import { IPCLogger } from "../logger";
+import {
+    getCurrentVoiceMembers,
+    getMajorityCount,
+} from "../helpers/discord_utils";
+import EndCommand from "../commands/game_commands/end";
+import GameType from "../enums/game_type";
+import GuildPreference from "./guild_preference";
+import HintCommand from "../commands/game_commands/hint";
+import KmqConfiguration from "../kmq_configuration";
+import KmqMember from "./kmq_member";
+import MessageContext from "./message_context";
+import PlayCommand from "../commands/game_commands/play";
+import Session from "./session";
+import SkipCommand from "../commands/game_commands/skip";
+import SongSelector from "./song_selector";
+import State from "../state";
+import type {
+    ActivityBookmarkArgs,
+    ActivityBookmarkResponse,
+    ActivityCorrectGuesser,
+    ActivityEvent,
+    ActivityGuessArgs,
+    ActivityGuessResponse,
+    ActivityRequestMessage,
+    ActivityScoreboardPlayer,
+    ActivityScoreboardSnapshot,
+    ActivitySessionMeta,
+    ActivitySnapshot,
+    ActivitySnapshotArgs,
+    ActivityStartGameArgs,
+    ActivityUserActionArgs,
+} from "./activity_types";
+import type GameSession from "./game_session";
+import type Player from "./player";
+import type PlayerRoundResult from "../interfaces/player_round_result";
+import type QueriedSong from "./queried_song";
+import type Scoreboard from "./scoreboard";
+
+const logger = new IPCLogger("activity_bridge");
+
+let workerHandlerRegistered = false;
+
+function snapshotPlayer(player: Player): ActivityScoreboardPlayer {
+    return {
+        id: player.id,
+        username: player.username,
+        avatarUrl: player.getAvatarURL() || null,
+        score: player.getScore(),
+        expGain: player.getExpGain(),
+        inVC: player.inVC,
+    };
+}
+
+function snapshotScoreboard(
+    scoreboard: Scoreboard,
+): ActivityScoreboardSnapshot {
+    const players = scoreboard.getPlayers().map(snapshotPlayer);
+    const winners = scoreboard.getWinners();
+    return {
+        players,
+        winnerIDs: winners.map((p) => p.id),
+        highestScore: winners[0]?.getScore() ?? 0,
+    };
+}
+
+function snapshotSong(song: QueriedSong): {
+    songName: string;
+    artistName: string;
+    youtubeLink: string;
+    publishYear: number;
+    thumbnailUrl: string;
+} {
+    return {
+        songName: song.songName,
+        artistName: song.artistName,
+        youtubeLink: song.youtubeLink,
+        publishYear: song.publishDate.getFullYear(),
+        thumbnailUrl: `https://i.ytimg.com/vi/${song.youtubeLink}/hqdefault.jpg`,
+    };
+}
+
+function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
+    return {
+        guildID: session.guildID,
+        voiceChannelID: session.voiceChannelID,
+        textChannelID: session.textChannelID,
+        startedAt: session.startedAt,
+        gameType: session.gameType,
+        roundsPlayed: session.getRoundsPlayed(),
+        correctGuesses: session.getCorrectGuesses(),
+        ownerID: session.owner.id,
+    };
+}
+
+function buildSessionSnapshot(session: GameSession): ActivitySnapshot {
+    const round = session.round;
+    return {
+        hasSession: true,
+        session: snapshotSessionMeta(session),
+        scoreboard: snapshotScoreboard(session.scoreboard),
+        currentRound:
+            round && round.songStartedAt !== null
+                ? {
+                      roundIndex: session.getRoundsPlayed(),
+                      songStartedAt: round.songStartedAt,
+                      guessTimeoutSec: null,
+                  }
+                : undefined,
+    };
+}
+
+function pushEvent(guildID: string, event: ActivityEvent): void {
+    try {
+        State.ipc.sendToAdmiral(ACTIVITY_IPC_EVENT, { guildID, event });
+    } catch (e) {
+        logger.warn(
+            `Failed to forward activity event for gid: ${guildID}. type=${event.type}. err=${e}`,
+        );
+    }
+}
+
+interface RoundStartPayload {
+    roundIndex: number;
+    songStartedAt: number;
+    guessTimeoutSec: number | null;
+}
+
+interface RoundEndPayload {
+    song: QueriedSong;
+    correctGuessers: KmqMember[];
+    playerRoundResults: PlayerRoundResult[];
+    isCorrectGuess: boolean;
+    guesses: Record<
+        string,
+        Array<{
+            timeToGuessMs: number;
+            guess: string;
+            correct: boolean;
+            pointsAwarded: number;
+        }>
+    >;
+}
+
+interface GuessReceivedPayload {
+    userID: string;
+    isCorrect: boolean;
+    ts: number;
+}
+
+interface SessionEndPayload {
+    reason: string;
+}
+
+/**
+ * Registers a single worker-wide IPC listener for admiral→worker activity
+ * requests. Idempotent: subsequent calls are a no-op.
+ */
+function ensureWorkerHandlerRegistered(): void {
+    if (workerHandlerRegistered) {
+        return;
+    }
+
+    workerHandlerRegistered = true;
+    State.ipc.register(ACTIVITY_IPC_REQUEST, (msg: ActivityRequestMessage) => {
+        const { cid, op, args } = msg;
+        try {
+            switch (op) {
+                case "snapshot": {
+                    const snapshotArgs = args as ActivitySnapshotArgs;
+                    const session = Session.getSession(snapshotArgs.guildID);
+                    if (!session || !session.isGameSession()) {
+                        const payload: ActivitySnapshot = { hasSession: false };
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                        return;
+                    }
+
+                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                        cid,
+                        payload: buildSessionSnapshot(session),
+                    });
+                    return;
+                }
+
+                case "guess": {
+                    const guessArgs = args as ActivityGuessArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(guessArgs.guildID);
+                    if (!session || !session.isGameSession()) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
+                        reply({ ok: false, reason: "maintenance" });
+                        return;
+                    }
+
+                    if (State.bannedPlayers.has(guessArgs.userID)) {
+                        reply({ ok: false, reason: "banned" });
+                        return;
+                    }
+
+                    if (!State.rateLimiter.check(guessArgs.userID)) {
+                        reply({ ok: false, reason: "rate_limit" });
+                        return;
+                    }
+
+                    const inVC = getCurrentVoiceMembers(
+                        session.voiceChannelID,
+                    ).some((m) => m.id === guessArgs.userID);
+
+                    if (!inVC) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const messageContext = new MessageContext(
+                        session.textChannelID,
+                        new KmqMember(guessArgs.userID),
+                        session.guildID,
+                    );
+
+                    // Fire and reply optimistically; guessSong is async but we
+                    // don't need to block the admiral on the round-end work.
+                    session
+                        .guessSong(
+                            messageContext,
+                            guessArgs.guess,
+                            guessArgs.ts,
+                        )
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity guess for gid=${guessArgs.guildID}, uid=${guessArgs.userID}. err=${e}`,
+                            );
+                        });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                case "startGame": {
+                    const startArgs = args as ActivityStartGameArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
+                        reply({ ok: false, reason: "maintenance" });
+                        return;
+                    }
+
+                    if (State.bannedPlayers.has(startArgs.userID)) {
+                        reply({ ok: false, reason: "banned" });
+                        return;
+                    }
+
+                    const existing = Session.getSession(startArgs.guildID);
+                    if (existing && existing.sessionInitialized) {
+                        reply({
+                            ok: false,
+                            reason: "session_already_running",
+                        });
+                        return;
+                    }
+
+                    const inVC = getCurrentVoiceMembers(
+                        startArgs.voiceChannelID,
+                    ).some((m) => m.id === startArgs.userID);
+
+                    if (!inVC) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const messageContext = new MessageContext(
+                        startArgs.textChannelID,
+                        new KmqMember(startArgs.userID),
+                        startArgs.guildID,
+                    );
+
+                    PlayCommand.startGame(
+                        messageContext,
+                        GameType.CLASSIC,
+                        null,
+                        false,
+                        false,
+                    ).catch((e) => {
+                        logger.error(
+                            `Error in activity startGame for gid=${startArgs.guildID}. err=${e}`,
+                        );
+                    });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                case "skipVote": {
+                    const skipArgs = args as ActivityUserActionArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(skipArgs.guildID);
+                    if (!session) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    if (!session.round || session.round.finished) {
+                        reply({ ok: false, reason: "no_round" });
+                        return;
+                    }
+
+                    const inVC = getCurrentVoiceMembers(
+                        session.voiceChannelID,
+                    ).some((m) => m.id === skipArgs.userID);
+
+                    if (!inVC) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const messageContext = new MessageContext(
+                        session.textChannelID,
+                        new KmqMember(skipArgs.userID),
+                        session.guildID,
+                    );
+
+                    const wasSkipped = session.round.skipAchieved;
+
+                    SkipCommand.executeSkip(messageContext)
+                        .then(() => {
+                            const round = session.round;
+                            const threshold = getMajorityCount(session.guildID);
+
+                            // round becomes null after skipSong cleanup, so
+                            // if we lost it, we know the skip just achieved.
+                            if (!round) {
+                                pushEvent(session.guildID, { type: "skipped" });
+                                return;
+                            }
+
+                            pushEvent(session.guildID, {
+                                type: "skipProgress",
+                                requesters: round.getSkipCount(),
+                                threshold,
+                            });
+
+                            if (round.skipAchieved && !wasSkipped) {
+                                pushEvent(session.guildID, { type: "skipped" });
+                            }
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity skipVote for gid=${skipArgs.guildID}. err=${e}`,
+                            );
+                        });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                case "hint": {
+                    const hintArgs = args as ActivityUserActionArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(hintArgs.guildID);
+                    if (!session || !session.isGameSession()) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    if (!session.round || session.round.finished) {
+                        reply({ ok: false, reason: "no_round" });
+                        return;
+                    }
+
+                    const inVC = getCurrentVoiceMembers(
+                        session.voiceChannelID,
+                    ).some((m) => m.id === hintArgs.userID);
+
+                    if (!inVC) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const wasHintUsed = session.round.hintUsed;
+                    const messageContext = new MessageContext(
+                        session.textChannelID,
+                        new KmqMember(hintArgs.userID),
+                        session.guildID,
+                    );
+
+                    HintCommand.sendHint(messageContext)
+                        .then(async () => {
+                            const round = session.round;
+                            if (!round) return;
+
+                            const requesters = round.getHintRequests();
+                            const threshold = getMajorityCount(session.guildID);
+
+                            pushEvent(session.guildID, {
+                                type: "hintProgress",
+                                requesters,
+                                threshold,
+                            });
+
+                            if (round.hintUsed && !wasHintUsed) {
+                                const guildPreference =
+                                    await GuildPreference.getGuildPreference(
+                                        session.guildID,
+                                    );
+
+                                const text = round.getHint(
+                                    session.guildID,
+                                    guildPreference.gameOptions.guessModeType,
+                                    State.getGuildLocale(session.guildID),
+                                );
+
+                                pushEvent(session.guildID, {
+                                    type: "hintRevealed",
+                                    text,
+                                });
+                            }
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity hint for gid=${hintArgs.guildID}. err=${e}`,
+                            );
+                        });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                case "bookmark": {
+                    const bookmarkArgs = args as ActivityBookmarkArgs;
+                    const reply = (payload: ActivityBookmarkResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(bookmarkArgs.guildID);
+                    if (!session) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    // Resolve the link: prefer the explicit one, else fall back
+                    // to the current round's song (so users can bookmark while
+                    // the song plays without the iframe ever seeing the link).
+                    const resolvedLink =
+                        bookmarkArgs.youtubeLink ||
+                        session.round?.song.youtubeLink;
+
+                    if (!resolvedLink) {
+                        reply({ ok: false, reason: "no_round" });
+                        return;
+                    }
+
+                    SongSelector.getSongByLink(resolvedLink)
+                        .then((song) => {
+                            if (!song) {
+                                reply({ ok: false, reason: "song_not_found" });
+                                return;
+                            }
+
+                            session.addBookmarkedSong(bookmarkArgs.userID, {
+                                song,
+                                bookmarkedAt: new Date(),
+                            });
+
+                            reply({
+                                ok: true,
+                                songName: song.songName,
+                                artistName: song.artistName,
+                                youtubeLink: song.youtubeLink,
+                            });
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity bookmark for gid=${bookmarkArgs.guildID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        });
+
+                    return;
+                }
+
+                case "endGame": {
+                    const endArgs = args as ActivityUserActionArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(endArgs.guildID);
+                    if (!session) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    // Only the session owner (or someone in VC) can end —
+                    // matches the relaxed posture of the existing /end command,
+                    // which has no explicit owner check.
+                    const inVC = getCurrentVoiceMembers(
+                        session.voiceChannelID,
+                    ).some((m) => m.id === endArgs.userID);
+
+                    if (!inVC) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const messageContext = new MessageContext(
+                        session.textChannelID,
+                        new KmqMember(endArgs.userID),
+                        session.guildID,
+                    );
+
+                    EndCommand.endGame(messageContext).catch((e) => {
+                        logger.error(
+                            `Error in activity endGame for gid=${endArgs.guildID}. err=${e}`,
+                        );
+                    });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                default: {
+                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                        cid,
+                        error: `Unknown activity op: ${op as string}`,
+                    });
+                }
+            }
+        } catch (e) {
+            logger.error(
+                `Error handling activity:request. cid=${cid}. op=${op}. err=${e}`,
+            );
+
+            State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                cid,
+                error: e instanceof Error ? e.message : String(e),
+            });
+        }
+    });
+}
+
+/**
+ * Registers the worker-side IPC handlers needed to answer admiral activity
+ * requests. Call once during worker startup so the Activity can fetch a
+ * snapshot for guilds that haven't started a game yet.
+ */
+export function initActivityWorker(): void {
+    ensureWorkerHandlerRegistered();
+}
+
+/**
+ * Attach activity-event forwarding to a GameSession. Subscribes to lifecycle
+ * events emitted by the session and forwards JSON snapshots to the admiral.
+ * @param session - The game session to instrument
+ */
+export function attachActivityBridge(session: GameSession): void {
+    ensureWorkerHandlerRegistered();
+    const { guildID } = session;
+
+    pushEvent(guildID, {
+        type: "sessionStart",
+        session: snapshotSessionMeta(session),
+    });
+
+    session.on("roundStart", (payload: RoundStartPayload) => {
+        pushEvent(guildID, {
+            type: "roundStart",
+            round: {
+                roundIndex: payload.roundIndex,
+                songStartedAt: payload.songStartedAt,
+                guessTimeoutSec: payload.guessTimeoutSec,
+            },
+        });
+    });
+
+    session.on("roundEnd", (payload: RoundEndPayload) => {
+        // KmqMember instances on round results are bare (id only) — names come
+        // from the scoreboard's Player objects, which were populated when each
+        // user joined the VC.
+        const playersById = new Map(
+            session.scoreboard.getPlayers().map((p) => [p.id, p]),
+        );
+
+        const lookupName = (
+            userID: string,
+        ): { username: string; avatarUrl: string | null } => {
+            const sbPlayer = playersById.get(userID);
+            const cachedUser = State.client.users.get(userID);
+            return {
+                username:
+                    sbPlayer?.getName() ||
+                    sbPlayer?.username ||
+                    cachedUser?.username ||
+                    userID,
+                avatarUrl:
+                    sbPlayer?.getAvatarURL() || cachedUser?.avatarURL || null,
+            };
+        };
+
+        const correctGuessers: ActivityCorrectGuesser[] =
+            payload.playerRoundResults.map((r) => {
+                const { username, avatarUrl } = lookupName(r.player.id);
+                return {
+                    id: r.player.id,
+                    username,
+                    avatarUrl,
+                    pointsEarned: r.pointsEarned,
+                    expGain: r.expGain,
+                };
+            });
+
+        const songStart = session.round?.songStartedAt ?? null;
+        const allGuesses = Object.entries(payload.guesses).flatMap(
+            ([userID, list]) => {
+                const last = list[list.length - 1];
+                if (!last) return [];
+                const { username, avatarUrl } = lookupName(userID);
+                return [
+                    {
+                        userID,
+                        username,
+                        avatarUrl,
+                        guess: last.guess,
+                        isCorrect: last.correct,
+                        ts:
+                            songStart !== null
+                                ? songStart + last.timeToGuessMs
+                                : last.timeToGuessMs,
+                    },
+                ];
+            },
+        );
+
+        pushEvent(guildID, {
+            type: "roundEnd",
+            song: snapshotSong(payload.song),
+            correctGuessers,
+            allGuesses,
+            isCorrectGuess: payload.isCorrectGuess,
+            scoreboard: snapshotScoreboard(session.scoreboard),
+        });
+    });
+
+    session.on("scoreboardUpdate", () => {
+        pushEvent(guildID, {
+            type: "scoreboardUpdate",
+            scoreboard: snapshotScoreboard(session.scoreboard),
+        });
+    });
+
+    session.on("guessReceived", (payload: GuessReceivedPayload) => {
+        pushEvent(guildID, {
+            type: "guessReceived",
+            userID: payload.userID,
+            isCorrect: payload.isCorrect,
+            ts: payload.ts,
+        });
+    });
+
+    session.on("sessionEnd", (payload: SessionEndPayload) => {
+        pushEvent(guildID, {
+            type: "sessionEnd",
+            reason: payload.reason,
+        });
+    });
+}

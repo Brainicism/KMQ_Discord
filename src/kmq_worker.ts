@@ -8,6 +8,7 @@ import {
     getCachedAppCommandIds,
     updateAppCommands,
 } from "./helpers/discord_utils";
+import { initActivityWorker } from "./structures/activity_bridge";
 import {
     registerIntervals,
     reloadArtists,
@@ -312,6 +313,11 @@ export default class BotWorker extends BaseClusterWorker {
                 `${this.logHeader()} | Registering process event handlers...`,
             );
             this.registerProcessEvents();
+
+            logger.info(
+                `${this.logHeader()} | Registering activity IPC handler...`,
+            );
+            initActivityWorker();
         } catch (e) {
             logger.error(`Fatal error during kmq worker initialization: ${e}`);
             process.exit(1);

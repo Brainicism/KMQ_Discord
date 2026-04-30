@@ -3,6 +3,8 @@ import * as uuid from "uuid";
 import Eris from "eris";
 import _ from "lodash";
 
+// eslint-disable-next-line import/no-cycle
+import { attachActivityBridge } from "./activity_bridge";
 import {
     bold,
     chunkArray,
@@ -204,6 +206,8 @@ export default class GameSession extends Session {
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.syncAllVoiceMembers();
+
+        attachActivityBridge(this);
     }
 
     sessionName(): string {
@@ -344,6 +348,14 @@ export default class GameSession extends Session {
             timePlayed,
         );
 
+        this.emit("roundEnd", {
+            song: round.song,
+            correctGuessers,
+            playerRoundResults: round.playerRoundResults,
+            isCorrectGuess,
+            guesses: round.getGuesses(),
+        });
+
         const remainingDuration = this.getRemainingDuration(
             this.guildPreference,
         );
@@ -452,6 +464,7 @@ export default class GameSession extends Session {
         }
 
         this.finished = true;
+        this.emit("sessionEnd", { reason });
         if (this.gameType === GameType.COMPETITION) {
             // log scoreboard
             logger.info("Scoreboard:");
@@ -569,6 +582,12 @@ export default class GameSession extends Session {
             this.isMultipleChoiceMode(),
             this.guildPreference.typosAllowed(),
         );
+
+        this.emit("guessReceived", {
+            userID: messageContext.author.id,
+            isCorrect: pointsEarned > 0,
+            ts: createdAt,
+        });
 
         if (pointsEarned) {
             logger.info(
@@ -1739,6 +1758,7 @@ export default class GameSession extends Session {
             }));
 
         this.scoreboard.update(scoreboardUpdatePayload);
+        this.emit("scoreboardUpdate");
     }
 
     private startHiddenUpdateTimer(): void {

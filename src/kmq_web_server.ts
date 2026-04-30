@@ -3,12 +3,19 @@ import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import _ from "lodash";
+import axios from "axios";
 import ejs from "ejs";
 import fastify from "fastify";
+import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
+import fastifyWebsocket from "@fastify/websocket";
+import fs from "fs";
 import os from "os";
+import path from "path";
+import type { ActivitySubscriber } from "./activity_hub";
 import type { DatabaseContext } from "./database_context";
 import type { Fleet, Stats } from "eris-fleet";
+import type ActivityHub from "./activity_hub";
 
 const logger = new IPCLogger("web_server");
 
@@ -41,10 +48,42 @@ interface ShardData {
     healthIndicator: HealthIndicator;
 }
 
+interface CachedDiscordUser {
+    id: string;
+    username: string;
+    cachedAt: number;
+}
+
+const ACCESS_TOKEN_TTL_MS = 60_000;
+const ACTIVITY_INSTANCE_TTL_MS = 5_000;
+const WS_HEARTBEAT_INTERVAL_MS = 30_000;
+
 export default class KmqWebServer {
     private dbContext: DatabaseContext;
-    constructor(databaseContext: DatabaseContext) {
+
+    private activityHub: ActivityHub | null;
+
+    private accessTokenCache: Map<
+        string,
+        { user: CachedDiscordUser; expiresAt: number }
+    > = new Map();
+
+    private instanceCache: Map<
+        string,
+        {
+            guildID: string;
+            channelID: string | null;
+            participantIDs: Set<string>;
+            expiresAt: number;
+        }
+    > = new Map();
+
+    constructor(
+        databaseContext: DatabaseContext,
+        activityHub: ActivityHub | null = null,
+    ) {
         this.dbContext = databaseContext;
+        this.activityHub = activityHub;
     }
 
     /**
@@ -58,6 +97,58 @@ export default class KmqWebServer {
                 ejs,
             },
         });
+
+        await httpServer.register(fastifyWebsocket);
+
+        const activityDistRoot = path.resolve(
+            __dirname,
+            "..",
+            "activity",
+            "dist",
+        );
+
+        let activityDistExists = false;
+        try {
+            await fs.promises.access(activityDistRoot);
+            activityDistExists = true;
+        } catch {
+            // dist not present; will skip static handler below
+        }
+
+        if (activityDistExists) {
+            await httpServer.register(fastifyStatic, {
+                root: activityDistRoot,
+                prefix: "/activity/",
+                decorateReply: false,
+            });
+
+            // Discord opens the Activity iframe at the root of the URL Mapping
+            // target ("/?instance_id=...&channel_id=..."). Serve index.html
+            // there so the SPA can pick up the params from window.location.
+            const activityIndexPath = path.join(activityDistRoot, "index.html");
+
+            httpServer.get("/", async (request, reply) => {
+                try {
+                    const html = await fs.promises.readFile(
+                        activityIndexPath,
+                        "utf8",
+                    );
+
+                    await reply.type("text/html").send(html);
+                } catch (e) {
+                    logger.warn(
+                        `Failed to serve activity index. err=${
+                            (e as Error).message
+                        }`,
+                    );
+                    await reply.code(500).send();
+                }
+            });
+        } else {
+            logger.info(
+                `Activity dist not found at ${activityDistRoot}; skipping static handler. Build with 'npm run build:activity' to enable.`,
+            );
+        }
 
         httpServer.get("/run_id", {}, async (request, reply) => {
             if (request.ip !== "127.0.0.1") {
@@ -387,6 +478,473 @@ export default class KmqWebServer {
             });
         });
 
+        httpServer.post("/api/activity/token", async (request, reply) => {
+            const code = (request.body as any)?.code as string | undefined;
+            if (!code) {
+                await reply.code(400).send({ error: "Missing code" });
+                return;
+            }
+
+            if (
+                !process.env.BOT_CLIENT_ID ||
+                !process.env.DISCORD_CLIENT_SECRET
+            ) {
+                logger.error(
+                    "BOT_CLIENT_ID or DISCORD_CLIENT_SECRET not configured for OAuth",
+                );
+                await reply.code(500).send({ error: "OAuth not configured" });
+                return;
+            }
+
+            try {
+                const params = new URLSearchParams();
+                params.set("client_id", process.env.BOT_CLIENT_ID);
+                params.set("client_secret", process.env.DISCORD_CLIENT_SECRET);
+                params.set("grant_type", "authorization_code");
+                params.set("code", code);
+
+                const response = await axios.post(
+                    "https://discord.com/api/oauth2/token",
+                    params.toString(),
+                    {
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded",
+                        },
+                        timeout: 5000,
+                    },
+                );
+
+                await reply
+                    .code(200)
+                    .send({ access_token: response.data.access_token });
+            } catch (e) {
+                const err = e as {
+                    message: string;
+                    response?: { status?: number; data?: unknown };
+                };
+
+                logger.warn(
+                    `Activity OAuth code exchange failed. err=${err.message} status=${err.response?.status} body=${JSON.stringify(err.response?.data)}`,
+                );
+
+                await reply.code(401).send({ error: "Code exchange failed" });
+            }
+        });
+
+        const extractBearer = (request: any): string | undefined => {
+            const header = request.headers["authorization"] as
+                | string
+                | undefined;
+
+            if (header?.startsWith("Bearer ")) {
+                return header.slice(7);
+            }
+
+            const queryToken = (request.query as any)?.access_token as
+                | string
+                | undefined;
+
+            return queryToken;
+        };
+
+        httpServer.get("/api/activity/session", async (request, reply) => {
+            if (!this.activityHub) {
+                await reply.code(503).send({ error: "Activity not enabled" });
+                return;
+            }
+
+            const user = await this.resolveAccessToken(extractBearer(request));
+            if (!user) {
+                await reply.code(401).send({ error: "Unauthorized" });
+                return;
+            }
+
+            const instanceId = (request.query as any)?.instance_id as
+                | string
+                | undefined;
+
+            if (!instanceId) {
+                await reply.code(400).send({ error: "Missing instance_id" });
+                return;
+            }
+
+            const instance = await this.resolveActivityInstance(instanceId);
+            if (!instance) {
+                await reply.code(404).send({ error: "Unknown instance" });
+                return;
+            }
+
+            if (!instance.participantIDs.has(user.id)) {
+                logger.warn(
+                    `Activity participant check failed. user=${user.id}, instance=${instanceId}, participants=${[...instance.participantIDs].join(",")}`,
+                );
+
+                await reply
+                    .code(403)
+                    .send({ error: "Not a participant of this instance" });
+                return;
+            }
+
+            try {
+                const snapshot = await this.activityHub.requestSnapshot(
+                    instance.guildID,
+                );
+
+                await reply.code(200).send(snapshot);
+            } catch (e) {
+                logger.warn(
+                    `Failed to fetch activity snapshot. gid=${
+                        instance.guildID
+                    }. err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Snapshot failed" });
+            }
+        });
+
+        const requireAuthedInstance = async (
+            request: any,
+            reply: any,
+        ): Promise<{
+            user: CachedDiscordUser;
+            instance: {
+                guildID: string;
+                channelID: string | null;
+                participantIDs: Set<string>;
+            };
+        } | null> => {
+            if (!this.activityHub) {
+                await reply.code(503).send({ error: "Activity not enabled" });
+                return null;
+            }
+
+            const user = await this.resolveAccessToken(extractBearer(request));
+            if (!user) {
+                await reply.code(401).send({ error: "Unauthorized" });
+                return null;
+            }
+
+            const body = (request.body ?? {}) as { instance_id?: string };
+            const instanceId = body.instance_id;
+            if (!instanceId) {
+                await reply.code(400).send({ error: "Missing instance_id" });
+                return null;
+            }
+
+            const instance = await this.resolveActivityInstance(instanceId);
+            if (!instance || !instance.participantIDs.has(user.id)) {
+                await reply.code(403).send({ error: "Forbidden" });
+                return null;
+            }
+
+            return { user, instance };
+        };
+
+        httpServer.post("/api/activity/start", async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            if (!ctx.instance.channelID) {
+                await reply.code(400).send({ error: "Missing channel" });
+                return;
+            }
+
+            try {
+                const result = await this.activityHub!.startGame({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                    voiceChannelID: ctx.instance.channelID,
+                    textChannelID: ctx.instance.channelID,
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity start failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.post("/api/activity/skip", async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            try {
+                const result = await this.activityHub!.skipVote({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity skip failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.post("/api/activity/hint", async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            try {
+                const result = await this.activityHub!.hint({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity hint failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.post("/api/activity/bookmark", async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            const body = (request.body ?? {}) as { youtube_link?: string };
+            const youtubeLink = body.youtube_link;
+
+            try {
+                const result = await this.activityHub!.bookmark({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                    youtubeLink:
+                        typeof youtubeLink === "string" && youtubeLink
+                            ? youtubeLink
+                            : undefined,
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    ok: true,
+                    songName: result.songName,
+                    artistName: result.artistName,
+                    youtubeLink: result.youtubeLink,
+                });
+            } catch (e) {
+                logger.warn(
+                    `Activity bookmark failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.post("/api/activity/end", async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            try {
+                const result = await this.activityHub!.endGame({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity end failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.post("/api/activity/guess", async (request, reply) => {
+            if (!this.activityHub) {
+                await reply.code(503).send({ error: "Activity not enabled" });
+                return;
+            }
+
+            const user = await this.resolveAccessToken(extractBearer(request));
+            if (!user) {
+                await reply.code(401).send({ error: "Unauthorized" });
+                return;
+            }
+
+            const body = (request.body ?? {}) as {
+                instance_id?: string;
+                guess?: string;
+            };
+
+            const instanceId = body.instance_id;
+            const guess = body.guess;
+            if (
+                !instanceId ||
+                typeof guess !== "string" ||
+                guess.length === 0
+            ) {
+                await reply
+                    .code(400)
+                    .send({ error: "Missing instance_id or guess" });
+                return;
+            }
+
+            if (guess.length > 500) {
+                await reply.code(400).send({ error: "Guess too long" });
+                return;
+            }
+
+            const instance = await this.resolveActivityInstance(instanceId);
+            if (!instance || !instance.participantIDs.has(user.id)) {
+                await reply.code(403).send({ error: "Forbidden" });
+                return;
+            }
+
+            try {
+                const result = await this.activityHub.submitGuess(
+                    instance.guildID,
+                    user.id,
+                    guess,
+                    Date.now(),
+                );
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity guess failed. gid=${instance.guildID}, uid=${user.id}, err=${(e as Error).message}`,
+                );
+
+                await reply.code(500).send({ error: "Internal" });
+            }
+        });
+
+        httpServer.get(
+            "/ws/activity",
+            { websocket: true },
+            async (socket, request) => {
+                if (!this.activityHub) {
+                    socket.close(1011, "Activity not enabled");
+                    return;
+                }
+
+                const user = await this.resolveAccessToken(
+                    extractBearer(request),
+                );
+
+                if (!user) {
+                    socket.close(4401, "Unauthorized");
+                    return;
+                }
+
+                const instanceId = (request.query as any)?.instance_id as
+                    | string
+                    | undefined;
+
+                if (!instanceId) {
+                    socket.close(4400, "Missing instance_id");
+                    return;
+                }
+
+                const instance = await this.resolveActivityInstance(instanceId);
+
+                if (!instance || !instance.participantIDs.has(user.id)) {
+                    socket.close(4403, "Forbidden");
+                    return;
+                }
+
+                const subscriber: ActivitySubscriber = {
+                    id: `${user.id}:${instanceId}`,
+                    send: (data) => {
+                        try {
+                            socket.send(data);
+                        } catch (e) {
+                            logger.debug(
+                                `Activity WS send failed for ${user.id}. err=${e}`,
+                            );
+                        }
+                    },
+                    close: () => {
+                        try {
+                            socket.close();
+                        } catch {
+                            // ignore
+                        }
+                    },
+                };
+
+                const guildID = instance.guildID;
+                this.activityHub.subscribe(guildID, subscriber);
+
+                let alive = true;
+                const heartbeat = setInterval(() => {
+                    if (!alive) {
+                        try {
+                            socket.terminate();
+                        } catch {
+                            // ignore
+                        }
+
+                        return;
+                    }
+
+                    alive = false;
+                    try {
+                        socket.ping();
+                    } catch {
+                        // ignore
+                    }
+                }, WS_HEARTBEAT_INTERVAL_MS);
+
+                socket.on("pong", () => {
+                    alive = true;
+                });
+
+                socket.on("close", () => {
+                    clearInterval(heartbeat);
+                    if (this.activityHub) {
+                        this.activityHub.unsubscribe(guildID, subscriber);
+                    }
+                });
+
+                try {
+                    const snapshot =
+                        await this.activityHub.requestSnapshot(guildID);
+
+                    socket.send(JSON.stringify({ type: "snapshot", snapshot }));
+                } catch (e) {
+                    logger.warn(
+                        `Failed initial activity snapshot for gid=${guildID}. err=${
+                            (e as Error).message
+                        }`,
+                    );
+                }
+            },
+        );
+
         try {
             if (!process.env.WEB_SERVER_PORT) {
                 logger.warn(
@@ -400,6 +958,116 @@ export default class KmqWebServer {
             }
         } catch (err) {
             logger.error(`Erroring starting HTTP server: ${err}`);
+        }
+    }
+
+    private async resolveAccessToken(
+        token: string | undefined,
+    ): Promise<CachedDiscordUser | null> {
+        if (!token) return null;
+        const now = Date.now();
+        const cached = this.accessTokenCache.get(token);
+        if (cached && cached.expiresAt > now) {
+            return cached.user;
+        }
+
+        try {
+            const response = await axios.get(
+                "https://discord.com/api/users/@me",
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                    timeout: 5000,
+                },
+            );
+
+            const user: CachedDiscordUser = {
+                id: response.data.id,
+                username: response.data.username,
+                cachedAt: now,
+            };
+
+            this.accessTokenCache.set(token, {
+                user,
+                expiresAt: now + ACCESS_TOKEN_TTL_MS,
+            });
+
+            return user;
+        } catch (e) {
+            logger.warn(
+                `Failed to resolve activity access token. err=${
+                    (e as Error).message
+                }`,
+            );
+            return null;
+        }
+    }
+
+    private async resolveActivityInstance(instanceId: string): Promise<{
+        guildID: string;
+        channelID: string | null;
+        participantIDs: Set<string>;
+    } | null> {
+        const now = Date.now();
+        const cached = this.instanceCache.get(instanceId);
+        if (cached && cached.expiresAt > now) {
+            return {
+                guildID: cached.guildID,
+                channelID: cached.channelID,
+                participantIDs: cached.participantIDs,
+            };
+        }
+
+        try {
+            const response = await axios.get(
+                `https://discord.com/api/applications/${process.env.BOT_CLIENT_ID}/activity-instances/${instanceId}`,
+                {
+                    headers: {
+                        Authorization: `Bot ${process.env.BOT_TOKEN}`,
+                    },
+                    timeout: 5000,
+                },
+            );
+
+            const guildID = response.data?.location?.guild_id as
+                | string
+                | undefined;
+
+            const channelID =
+                (response.data?.location?.channel_id as string | undefined) ??
+                null;
+
+            // Discord returns `users` as an array of snowflake strings, but
+            // some SDK versions wrap them in `{id}` objects. Handle both.
+            const rawUsers = (response.data?.users ?? []) as Array<unknown>;
+            const participantIDs = new Set<string>(
+                rawUsers
+                    .map((u) =>
+                        typeof u === "string"
+                            ? u
+                            : ((u as { id?: string }).id ?? null),
+                    )
+                    .filter((id): id is string => typeof id === "string"),
+            );
+
+            if (!guildID) {
+                return null;
+            }
+
+            this.instanceCache.set(instanceId, {
+                guildID,
+                channelID,
+                participantIDs,
+                expiresAt: now + ACTIVITY_INSTANCE_TTL_MS,
+            });
+
+            return { guildID, channelID, participantIDs };
+        } catch (e) {
+            logger.warn(
+                `Failed to resolve activity instance ${instanceId}. err=${
+                    (e as Error).message
+                }`,
+            );
+            return null;
         }
     }
 }
