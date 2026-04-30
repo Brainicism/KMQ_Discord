@@ -391,15 +391,17 @@ function GuessInput({
     const [feedback, setFeedback] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
-    // Refocus when the input transitions back to enabled (new round) so the
-    // user can keep typing without clicking back into the box. preventScroll
-    // because the input lives below the fold on short viewports — the
-    // default focus() behavior would scroll past the round reveal.
+    // Refocus whenever the input becomes typable: on round start (enabled
+    // flips true) and after a submit resolves (busy flips false). Running
+    // from an effect is important — focusing inside the submit's finally
+    // block happens before React re-renders the input with disabled=false,
+    // and the browser rejects focus() on a disabled element. preventScroll
+    // because the input lives below the fold on short viewports.
     useEffect(() => {
-        if (enabled) {
+        if (enabled && !busy) {
             inputRef.current?.focus({ preventScroll: true });
         }
-    }, [enabled]);
+    }, [enabled, busy]);
 
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -418,9 +420,6 @@ function GuessInput({
             setFeedback(err instanceof Error ? err.message : t("networkError"));
         } finally {
             setBusy(false);
-            // Refocus after every submit (the disabled-while-busy flicker can
-            // drop focus on some browsers).
-            inputRef.current?.focus({ preventScroll: true });
         }
     };
 
