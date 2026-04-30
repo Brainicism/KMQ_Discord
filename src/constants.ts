@@ -405,5 +405,7 @@ export const DISCORD_ACTIVITY_INSTANCE_URL = (
 
 // YouTube thumbnail URL builder for snapshot payloads.
 const YOUTUBE_THUMBNAIL_HOST = "https://i.ytimg.com";
+// maxresdefault.jpg is native 1280x720 (16:9, no letterboxing) and is
+// generated for every video uploaded at >=720p — essentially every K-pop MV.
 export const youtubeThumbnailUrl = (videoId: string): string =>
-    `${YOUTUBE_THUMBNAIL_HOST}/vi/${videoId}/hqdefault.jpg`;
+    `${YOUTUBE_THUMBNAIL_HOST}/vi/${videoId}/maxresdefault.jpg`;

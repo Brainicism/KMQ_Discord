@@ -346,9 +346,10 @@ body {
 }
 
 /* Reserve enough vertical space that the layout doesn't shift between
-   round (no thumbnail) and reveal (thumbnail) states. */
+   round (no thumbnail) and reveal (thumbnail) states. Chosen to fit the
+   16:9 thumbnail at the desktop grid's 400px column width plus padding. */
 .round-area {
-    min-height: 280px;
+    min-height: 260px;
 }
 
 .round-area-body {
@@ -388,7 +389,7 @@ body {
 
 .thumbnail-slot {
     width: 100%;
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 16 / 9;
     border-radius: 8px;
     overflow: hidden;
     display: flex;
