@@ -10,12 +10,12 @@ import {
 import { userBonusIsActive } from "../helpers/game_utils";
 import KmqMember from "./kmq_member";
 import ListeningRound from "./listening_round";
+import MessageContext from "./message_context";
 import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import i18n from "../helpers/localization_manager";
 import type Eris from "eris";
 import type GuildPreference from "./guild_preference";
-import type MessageContext from "./message_context";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
@@ -133,6 +133,14 @@ export default class ListeningSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Listening session ended. rounds_played = ${this.roundsPlayed}`,
         );
+
+        // End the current round before base cleanup, since Session.endSession
+        // no longer calls this.endRound() to avoid polymorphic mutex re-entry.
+        await this.endRound(
+            false,
+            new MessageContext(this.textChannelID, null, this.guildID),
+        );
+
         await super.endSession(reason, false);
     }
 
