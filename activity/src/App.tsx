@@ -44,6 +44,15 @@ const initialSkip: SkipState = {
     userVoted: false,
 };
 
+// Rendered only between first paint and the /api/activity/i18n response.
+// Every other string goes through the server-delivered bundle, so this map
+// stays deliberately small — keeping it in sync with en.json isn't important
+// because once the bundle arrives it overwrites these values.
+const PRE_HYDRATE_STRINGS: Record<string, string> = {
+    appTitle: "KMQ",
+    statusConnecting: "Connecting...",
+};
+
 const initialUi: UiState = {
     session: null,
     scoreboard: null,
@@ -702,9 +711,13 @@ export default function App() {
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
-    // Translator is stable for a given bundle; untranslated keys render their
-    // own name (e.g. "appTitle") so the UI is never fully blank pre-hydrate.
-    const t = useMemo<Translator>(() => makeTranslator(bundle ?? {}), [bundle]);
+    // Translator is stable for a given bundle. Seed with an English stub for
+    // the two strings rendered before the /api/activity/i18n fetch resolves,
+    // so the splash isn't "appTitle" / "statusConnecting".
+    const t = useMemo<Translator>(
+        () => makeTranslator(bundle ?? PRE_HYDRATE_STRINGS),
+        [bundle],
+    );
 
     useEffect(() => {
         let cancelled = false;
