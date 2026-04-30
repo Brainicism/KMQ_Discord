@@ -17,13 +17,13 @@ import {
     getAverageVolume,
     getCurrentVoiceMembers,
     getDebugLogHeader,
+    getMajorityCount,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
-    getMajorityCount,
 } from "../helpers/discord_utils";
 import {
     delay,
@@ -60,12 +60,13 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
-import { SessionState, SessionStateMachine } from "./session_state";
 import {
+    type SessionActionResult,
+    SessionRejectReason,
     actionFail,
     actionOkVoid,
-    type SessionActionResult,
 } from "./session_action_result";
+import { SessionState, SessionStateMachine } from "./session_state";
 
 const logger = new IPCLogger("session");
 
@@ -661,17 +662,24 @@ export default abstract class Session extends EventEmitter {
     /**
      * Process a skip vote from a user. Returns a result indicating
      * whether the vote was counted and whether skip threshold was reached.
+     * @param userID - The ID of the user voting to skip
+     * @param _messageContext - The message context (unused)
+     * @returns A SessionActionResult with skip status
      */
     processSkipVote(
         userID: string,
         _messageContext: MessageContext,
-    ): SessionActionResult<{ skipAchieved: boolean; skipCount: number; skipThreshold: number }> {
+    ): SessionActionResult<{
+        skipAchieved: boolean;
+        skipCount: number;
+        skipThreshold: number;
+    }> {
         if (!this.round || this.round.finished || this.round.skipAchieved) {
-            return actionFail("no_active_round");
+            return actionFail(SessionRejectReason.NO_ACTIVE_ROUND);
         }
 
         if (!this.stateMachine.isAcceptingInput) {
-            return actionFail("not_accepting_input");
+            return actionFail(SessionRejectReason.NOT_ACCEPTING_INPUT);
         }
 
         this.round.userSkipped(userID);
@@ -686,10 +694,15 @@ export default abstract class Session extends EventEmitter {
         };
     }
 
-    /** Force-skip the current song (end round + start new one). */
-    async forceSkip(messageContext: MessageContext): Promise<SessionActionResult> {
+    /**
+     * Force-skip the current song (end round + start new one).
+     * @param messageContext - The message context for the command
+     */
+    async forceSkip(
+        messageContext: MessageContext,
+    ): Promise<SessionActionResult> {
         if (!this.round) {
-            return actionFail("no_active_round");
+            return actionFail(SessionRejectReason.NO_ACTIVE_ROUND);
         }
 
         this.round.skipAchieved = true;
