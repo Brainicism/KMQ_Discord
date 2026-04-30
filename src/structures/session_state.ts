@@ -86,9 +86,8 @@ export class SessionStateMachine {
     }
 
     /**
-     * Attempt a state transition. Returns true if the transition was valid.
-     * Invalid transitions are logged as warnings but still applied to avoid
-     * breaking existing behavior during rollout.
+     * Attempt a state transition. Returns true if valid and applied,
+     * false if rejected (invalid transition).
      */
     transition(to: SessionState): boolean {
         const allowed = VALID_TRANSITIONS[this._state];
@@ -97,8 +96,9 @@ export class SessionStateMachine {
 
         if (!isValid) {
             logger.warn(
-                `gid: ${this.guildID} | Invalid state transition: ${from} → ${to}`,
+                `gid: ${this.guildID} | Invalid state transition rejected: ${from} → ${to}`,
             );
+            return false;
         }
 
         this._state = to;
