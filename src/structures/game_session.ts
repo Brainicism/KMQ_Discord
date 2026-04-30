@@ -478,6 +478,7 @@ export default class GameSession extends Session {
                 .sort((a, b) => {
                     const levelsGainedDiff =
                         b.endLevel - b.startLevel - (a.endLevel - a.startLevel);
+
                     return levelsGainedDiff !== 0
                         ? levelsGainedDiff
                         : b.endLevel - a.endLevel;
