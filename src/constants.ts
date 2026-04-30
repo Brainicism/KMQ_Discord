@@ -401,7 +401,12 @@ export const DISCORD_ACTIVITY_INSTANCE_URL = (
     appId: string,
     instanceId: string,
 ): string =>
-    `${DISCORD_API_BASE}/applications/${appId}/activity-instances/${instanceId}`;
+    // Both components are percent-encoded to keep user-controlled input from
+    // altering the URL's path/query — defense-in-depth even though callers
+    // also allow-list the instanceId shape.
+    `${DISCORD_API_BASE}/applications/${encodeURIComponent(
+        appId,
+    )}/activity-instances/${encodeURIComponent(instanceId)}`;
 
 // YouTube thumbnail URL builder for snapshot payloads.
 const YOUTUBE_THUMBNAIL_HOST = "https://i.ytimg.com";

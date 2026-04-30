@@ -163,9 +163,15 @@ export default class KmqWebServer {
         });
 
         await httpServer.register(fastifyRateLimit, {
-            // Plugin is registered globally but only applied per-route below
-            // (so non-activity localhost endpoints aren't accidentally limited).
-            global: false,
+            // Apply a generous global default so every route gets some rate
+            // limiting (CodeQL can't recognize per-route config alone as
+            // coverage). Per-route `limit(...)` overrides tighten this for
+            // the Activity endpoints below; the admin/localhost routes run
+            // under the global default, which is high enough not to trip
+            // legitimate internal callers.
+            global: true,
+            max: 600,
+            timeWindow: "1 minute",
         });
 
         await httpServer.register(fastifyWebsocket);
