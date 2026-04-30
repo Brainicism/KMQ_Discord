@@ -37,7 +37,7 @@ export enum SessionState {
 
 /** Valid state transitions. Maps from-state → set of allowed to-states. */
 const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
-    [SessionState.CREATED]: new Set([SessionState.INITIALIZING]),
+    [SessionState.CREATED]: new Set([SessionState.INITIALIZING, SessionState.ENDING]),
     [SessionState.INITIALIZING]: new Set([
         SessionState.LOBBY,
         SessionState.ROUND_STARTING,
