@@ -295,6 +295,22 @@ function CurrentRound({
                             <img
                                 src={proxyImageUrl(reveal.song.thumbnailUrl)}
                                 alt=""
+                                onError={(e) => {
+                                    // maxresdefault.jpg isn't generated for
+                                    // pre-720p uploads — fall back to the
+                                    // always-present hqdefault.jpg. Guard
+                                    // against a re-trigger loop by swapping
+                                    // only once.
+                                    const img = e.currentTarget;
+                                    if (
+                                        img.src.includes("/maxresdefault.jpg")
+                                    ) {
+                                        img.src = img.src.replace(
+                                            "/maxresdefault.jpg",
+                                            "/hqdefault.jpg",
+                                        );
+                                    }
+                                }}
                             />
                             <span className="thumbnail-overlay">
                                 {t("youtubePlayLabel")}
