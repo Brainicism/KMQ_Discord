@@ -670,8 +670,8 @@ export async function sendErrorMessage(
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const author =
         embedPayload.author == null
-            ? embedPayload.author
-            : messageContext.author;
+            ? messageContext.author
+            : embedPayload.author;
 
     return sendMessage(
         messageContext.textChannelID,
@@ -717,8 +717,8 @@ export function generateEmbed(
 ): Eris.EmbedOptions {
     const author =
         embedPayload.author == null
-            ? embedPayload.author
-            : messageContext.author;
+            ? messageContext.author
+            : embedPayload.author;
 
     return {
         color: embedPayload.color,
@@ -2646,8 +2646,8 @@ export function clickableSlashCommand(
                 break;
             case "add":
             case "remove":
-                commandName = "groups";
                 subcommandName = commandName;
+                commandName = "groups";
                 break;
             case "preset":
                 subcommandName = "list";
