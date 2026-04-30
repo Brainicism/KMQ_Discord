@@ -78,6 +78,14 @@ export default class ListeningSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
+        return this.withLifecycleLock(() =>
+            this.startRoundCore(messageContext),
+        );
+    }
+
+    private async startRoundCore(
+        messageContext: MessageContext,
+    ): Promise<Round | null> {
         if (this.isFinished || this.round) {
             return null;
         }
@@ -120,11 +128,24 @@ export default class ListeningSession extends Session {
         isError: boolean,
         messageContext?: MessageContext,
     ): Promise<void> {
+        return this.withLifecycleLock(() =>
+            this.endRoundCore(isError, messageContext),
+        );
+    }
+
+    private async endRoundCore(
+        isError: boolean,
+        messageContext?: MessageContext,
+    ): Promise<void> {
         await this.round?.interactionMarkButtons();
         await super.endRound(isError, messageContext);
     }
 
     async endSession(reason: string): Promise<void> {
+        return this.withLifecycleLock(() => this.endSessionCore(reason));
+    }
+
+    private async endSessionCore(reason: string): Promise<void> {
         if (this.isFinished) {
             return;
         }
@@ -136,7 +157,8 @@ export default class ListeningSession extends Session {
 
         // End the current round before base cleanup, since Session.endSession
         // no longer calls this.endRound() to avoid polymorphic mutex re-entry.
-        await this.endRound(
+        // Call endRoundCore directly since we already hold the lifecycle lock.
+        await this.endRoundCore(
             false,
             new MessageContext(this.textChannelID, null, this.guildID),
         );

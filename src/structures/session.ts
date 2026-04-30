@@ -96,6 +96,17 @@ export default abstract class Session {
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
     protected lifecycleMutex = new Mutex();
 
+    /**
+     * AbortController for cancelling in-flight operations when the session ends.
+     * Signal this in endSession to unblock cancellableDelay() calls.
+     */
+    protected sessionAbortController = new AbortController();
+
+    /** Shorthand for the abort signal */
+    protected get abortSignal(): AbortSignal {
+        return this.sessionAbortController.signal;
+    }
+
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
@@ -155,6 +166,15 @@ export default abstract class Session {
             this.stateMachine.state !== SessionState.CREATED &&
             this.stateMachine.state !== SessionState.INITIALIZING
         );
+    }
+
+    /**
+     * Run a callback while holding the lifecycle mutex.
+     * All lifecycle operations (startRound, endRound, endSession) should
+     * be wrapped in this to prevent concurrent state transitions.
+     */
+    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T> {
+        return this.lifecycleMutex.runExclusive(fn);
     }
 
     static getSession(guildID: string): Session | undefined {
@@ -433,6 +453,10 @@ export default abstract class Session {
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         this.stateMachine.transition(SessionState.ENDING);
+
+        // Cancel any in-flight cancellable delays (e.g., between-round timer)
+        this.sessionAbortController.abort();
+
         logger.info(
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
