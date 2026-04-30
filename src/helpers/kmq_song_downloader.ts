@@ -1,20 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import * as cp from "child_process";
-import {
-    DataFiles,
-    YOUTUBE_SESSION_COOKIE_PATH,
-    YT_DLP_LOCATION,
-} from "../constants";
+import { BGUTIL_PROVIDER_URL, DataFiles, YT_DLP_LOCATION } from "../constants";
 import { IPCLogger } from "../logger";
-import {
-    extractErrorString,
-    parseJsonFile,
-    pathExists,
-    pathExistsSync,
-    validateYouTubeID,
-} from "./utils";
 import { getAverageVolume } from "./discord_utils";
 import { getNewConnection } from "../database_context";
+import { pathExists, pathExistsSync, validateYouTubeID } from "./utils";
 import Axios from "axios";
 import KmqConfiguration from "../kmq_configuration";
 import YoutubeOnesieProvider from "../youtube_onesie_provider";
@@ -31,22 +21,8 @@ const logger = new IPCLogger("download-new-songs");
 export default class KmqSongDownloader {
     TARGET_AVERAGE_VOLUME = -30;
 
-    YOUTUBE_SESSION_TOKENS_PATH = path.join(
-        __dirname,
-        "../../data/yt_session.json",
-    );
-
     private proxies: Array<string>;
     private onesieProvider: YoutubeOnesieProvider;
-    private youtubeSessionTokens:
-        | {
-              po_token: string;
-              visitor_data: string;
-              generated_at: string;
-          }
-        | undefined;
-
-    private hasYtDlpSessionCookies = false;
 
     constructor() {
         this.onesieProvider = new YoutubeOnesieProvider();
@@ -105,7 +81,6 @@ export default class KmqSongDownloader {
             logger.info("Downloading via onesie URLs");
         } else {
             logger.info("Downloading via yt-dlp");
-            await this.reloadYoutubeSessionTokens();
         }
 
         const db = getNewConnection();
@@ -352,51 +327,6 @@ export default class KmqSongDownloader {
             .execute();
     }
 
-    private async reloadYoutubeSessionTokens(): Promise<void> {
-        if (process.env.MOCK_AUDIO === "true") {
-            logger.info("Skipping Youtube session reload due to mock audio");
-            return;
-        }
-
-        logger.info("Reloading Youtube session tokens");
-
-        try {
-            this.youtubeSessionTokens = await parseJsonFile(
-                this.YOUTUBE_SESSION_TOKENS_PATH,
-            );
-        } catch (e) {
-            logger.error(
-                `Error while trying to reload youtube session token. e = ${extractErrorString(e)}`,
-            );
-        }
-
-        this.hasYtDlpSessionCookies = pathExistsSync(
-            YOUTUBE_SESSION_COOKIE_PATH,
-        );
-
-        if (
-            !this.youtubeSessionTokens ||
-            !this.youtubeSessionTokens.po_token ||
-            !this.youtubeSessionTokens.visitor_data
-        ) {
-            logger.error(
-                `Youtube session tokens unexpectedly empty. ${JSON.stringify(this.youtubeSessionTokens)}`,
-            );
-            return;
-        }
-
-        if (
-            new Date(this.youtubeSessionTokens.generated_at) <
-            new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
-        ) {
-            logger.warn("Youtube session token is 6 hours old, should refresh");
-        }
-
-        logger.info(
-            `Youtube session tokens loaded (${this.youtubeSessionTokens.generated_at})`,
-        );
-    }
-
     private async encodeToOpus(
         fileLocation: string,
         db: DatabaseContext,
@@ -514,11 +444,6 @@ export default class KmqSongDownloader {
         outputFile: string,
         proxy: string | undefined,
     ): Promise<void> {
-        if (!this.youtubeSessionTokens) {
-            logger.warn("Youtube session token doesn't exist... aborting");
-            throw new Error("Youtube session token doesn't exist");
-        }
-
         try {
             const ytdlpArgs = [
                 YT_DLP_LOCATION,
@@ -529,6 +454,13 @@ export default class KmqSongDownloader {
                 "--abort-on-unavailable-fragments",
             ];
 
+            if (KmqConfiguration.Instance.ytdlpUseBgutilProvider()) {
+                ytdlpArgs.push(
+                    "--extractor-args",
+                    `"youtubepot-bgutilhttp:base_url=${BGUTIL_PROVIDER_URL}"`,
+                );
+            }
+
             if (KmqConfiguration.Instance.ytdlpDownloadWithProxy()) {
                 if (proxy) {
                     ytdlpArgs.push("--proxy", proxy);
@@ -537,33 +469,15 @@ export default class KmqSongDownloader {
                 }
             }
 
-            if (KmqConfiguration.Instance.ytdlpDownloadWithPoToken()) {
-                ytdlpArgs.push(
-                    "--extractor-args",
-                    `"youtube:player-client=web_creator;po_token=web_creator+${this.youtubeSessionTokens.po_token}"`,
-                );
-                ytdlpArgs.push("--cookies", YOUTUBE_SESSION_COOKIE_PATH);
-            }
-
             ytdlpArgs.push("--", `'${videoId}'`);
             const ytdlpCommand = ytdlpArgs.join(" ");
             await exec(ytdlpCommand);
         } catch (err) {
-            let errorMessage =
+            const errorMessage =
                 (err as Error).message
                     .split("\n")
                     .find((x) => x.startsWith("ERROR:")) ||
                 (err as Error).message;
-
-            const sessionGeneratedOn = new Date(
-                this.youtubeSessionTokens.generated_at,
-            );
-
-            const cookieGeneratedOn = this.hasYtDlpSessionCookies
-                ? (await fs.promises.stat(YOUTUBE_SESSION_COOKIE_PATH)).mtime
-                : null;
-
-            errorMessage += `.\nsessionGeneratedOn=${sessionGeneratedOn.toISOString()}. cookieGeneratedOn=${cookieGeneratedOn?.toISOString()}. curr_time=${new Date().toISOString()}`;
 
             await db.kmq
                 .insertInto("dead_links")
@@ -575,7 +489,7 @@ export default class KmqSongDownloader {
                 .ignore()
                 .execute();
 
-            throw new Error(err);
+            throw new Error(errorMessage);
         }
     }
 
