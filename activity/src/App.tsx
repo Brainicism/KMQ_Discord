@@ -22,6 +22,7 @@ import {
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
+import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
@@ -310,9 +311,15 @@ function CurrentRound({
                             <p className="empty">{t("waitingForNextRound")}</p>
                         )}
                     </div>
-                    <div className="thumbnail-slot placeholder" aria-hidden>
-                        <span>🎵</span>
-                    </div>
+                    {winnerText ? (
+                        <div className="thumbnail-slot session-winner-art">
+                            <img src={thumbsUpUrl} alt="" />
+                        </div>
+                    ) : (
+                        <div className="thumbnail-slot placeholder" aria-hidden>
+                            <span>🎵</span>
+                        </div>
+                    )}
                 </div>
             )}
         </section>
