@@ -3,11 +3,11 @@ import * as uuid from "uuid";
 import Eris from "eris";
 import _ from "lodash";
 
-import { E_TIMEOUT } from "async-mutex";
 import {
     bold,
     chunkArray,
     codeLine,
+    cancellableDelay,
     delay,
     getOrdinalNum,
     setDifference,
@@ -226,30 +226,9 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        const waitStart = Date.now();
-        try {
-            return await this.lifecycleMutex.runExclusive(() => {
-                const waitMs = Date.now() - waitStart;
-                if (waitMs > 5000) {
-                    logger.warn(
-                        `gid: ${this.guildID} | startRound() waited ${waitMs}ms for lifecycleMutex`,
-                    );
-                }
-
-                return this.startRoundCore(messageContext);
-            });
-        } catch (e) {
-            if (e === E_TIMEOUT) {
-                logger.error(
-                    `gid: ${this.guildID} | DEADLOCK: startRound() could not acquire lifecycleMutex after 30s — force-removing session`,
-                );
-
-                Session.deleteSession(this.guildID);
-                return null;
-            }
-
-            throw e;
-        }
+        return this.withLifecycleLock(() =>
+            this.startRoundCore(messageContext),
+        );
     }
 
     /**
@@ -264,30 +243,9 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         gameRound?: GameRound,
     ): Promise<void> {
-        const waitStart = Date.now();
-        try {
-            await this.lifecycleMutex.runExclusive(async () => {
-                const waitMs = Date.now() - waitStart;
-                if (waitMs > 5000) {
-                    logger.warn(
-                        `gid: ${this.guildID} | endRound() waited ${waitMs}ms for lifecycleMutex`,
-                    );
-                }
-
-                await this.endRoundCore(isError, messageContext, gameRound);
-            });
-        } catch (e) {
-            if (e === E_TIMEOUT) {
-                logger.error(
-                    `gid: ${this.guildID} | DEADLOCK: endRound() could not acquire lifecycleMutex after 30s — force-removing session`,
-                );
-
-                Session.deleteSession(this.guildID);
-                return;
-            }
-
-            throw e;
-        }
+        return this.withLifecycleLock(() =>
+            this.endRoundCore(isError, messageContext, gameRound),
+        );
     }
 
     /**
@@ -298,30 +256,9 @@ export default class GameSession extends Session {
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         this.pendingEndSession = true;
-        const waitStart = Date.now();
-        try {
-            await this.lifecycleMutex.runExclusive(async () => {
-                const waitMs = Date.now() - waitStart;
-                if (waitMs > 5000) {
-                    logger.warn(
-                        `gid: ${this.guildID} | endSession("${reason}") waited ${waitMs}ms for lifecycleMutex`,
-                    );
-                }
-
-                await this.endSessionCore(reason, endedDueToError);
-            });
-        } catch (e) {
-            if (e === E_TIMEOUT) {
-                logger.error(
-                    `gid: ${this.guildID} | DEADLOCK: endSession("${reason}") could not acquire lifecycleMutex after 30s — force-removing session`,
-                );
-
-                Session.deleteSession(this.guildID);
-                return;
-            }
-
-            throw e;
-        }
+        return this.withLifecycleLock(() =>
+            this.endSessionCore(reason, endedDueToError),
+        );
     }
 
     /**
@@ -1022,13 +959,16 @@ export default class GameSession extends Session {
 
         if (this.isSessionActive) {
             // Only add a delay if the game has already started
-            await delay(
+            // Uses cancellableDelay so /end can abort without waiting
+            await cancellableDelay(
                 this.multiguessDelayIsActive(this.guildPreference)
                     ? Math.max(songStartDelayMs - multiGuessDelayMs, 0)
                     : songStartDelayMs,
+                this.abortSignal,
             );
         }
 
+        // Re-check after delay — session may have ended while we waited
         if (this.isFinished || this.round || this.pendingEndSession) {
             return null;
         }
@@ -1062,11 +1002,12 @@ export default class GameSession extends Session {
             round = this.round;
         }
 
-        // wait and accept multiguess results
-        await delay(
+        // wait and accept multiguess results (cancellable on session end)
+        await cancellableDelay(
             this.multiguessDelayIsActive(this.guildPreference)
                 ? this.guildPreference.getMultiGuessDelay() * 1000
                 : 0,
+            this.abortSignal,
         );
 
         // ensure that only one invocation can proceed
@@ -1237,7 +1178,7 @@ export default class GameSession extends Session {
                 );
 
                 if (playSuccess) {
-                    await delay(songStartDelay * 1000);
+                    await cancellableDelay(songStartDelay * 1000, this.abortSignal);
                 }
             }
         }
