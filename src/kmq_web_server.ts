@@ -11,6 +11,7 @@ import {
     ACTIVITY_RATE_LIMIT_TOKEN,
     ACTIVITY_WS_HEARTBEAT_INTERVAL_MS,
     ACTIVITY_WS_TICKET_TTL_MS,
+    DEFAULT_LOCALE,
     DISCORD_ACTIVITY_INSTANCE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
@@ -19,6 +20,7 @@ import { IPCLogger } from "./logger";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
+import LocaleType from "./enums/locale_type";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -28,6 +30,7 @@ import fastifyStatic from "@fastify/static";
 import fastifyView from "@fastify/view";
 import fastifyWebsocket from "@fastify/websocket";
 import fs from "fs";
+import i18n from "./helpers/localization_manager";
 import os from "os";
 import path from "path";
 import type { ActivitySubscriber } from "./activity_hub";
@@ -72,6 +75,41 @@ interface CachedDiscordUser {
     /** Discord user locale (e.g. "en-US"). Empty if Discord didn't return one. */
     locale: string;
     cachedAt: number;
+}
+
+const SUPPORTED_LOCALES: ReadonlySet<string> = new Set(
+    Object.values(LocaleType),
+);
+
+/**
+ * Normalizes a raw locale tag from an Activity client into a KMQ-supported
+ * `LocaleType`. Discord hands back BCP-47-ish tags ("en-US", "pt-BR") while
+ * KMQ only supports a subset, so we match exact, then the language prefix,
+ * then fall back to English.
+ * @param raw - unverified locale tag from the client
+ * @returns a supported `LocaleType`
+ */
+function resolveServerLocale(raw: string | undefined): LocaleType {
+    if (!raw) return DEFAULT_LOCALE;
+
+    if (SUPPORTED_LOCALES.has(raw)) {
+        return raw as LocaleType;
+    }
+
+    const language = raw.split("-")[0]?.toLowerCase();
+    if (!language) return DEFAULT_LOCALE;
+
+    if (SUPPORTED_LOCALES.has(language)) {
+        return language as LocaleType;
+    }
+
+    for (const supported of SUPPORTED_LOCALES) {
+        if (supported.split("-")[0] === language) {
+            return supported as LocaleType;
+        }
+    }
+
+    return DEFAULT_LOCALE;
 }
 
 export default class KmqWebServer {
@@ -584,6 +622,29 @@ export default class KmqWebServer {
                         .code(401)
                         .send({ error: "Code exchange failed" });
                 }
+            },
+        );
+
+        httpServer.get(
+            "/api/activity/i18n",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                // Static translation bundle — no auth required. The caller
+                // supplies a raw Discord locale tag (e.g. "en-US", "pt-BR");
+                // we normalize it to a KMQ-supported LocaleType, with English
+                // as the fallback for unsupported languages.
+                const rawLocale = (request.query as any)?.locale as
+                    | string
+                    | undefined;
+
+                const locale = resolveServerLocale(rawLocale);
+                const bundle = i18n.getBundle(locale, "activity");
+                if (!bundle) {
+                    await reply.code(500).send({ error: "Bundle unavailable" });
+                    return;
+                }
+
+                await reply.code(200).send({ locale, strings: bundle });
             },
         );
 

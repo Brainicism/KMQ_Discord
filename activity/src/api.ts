@@ -7,6 +7,28 @@ import type BookmarkResult from "./types/bookmark_result";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type GuessResult from "./types/guess_result";
 
+export interface ActivityI18nBundle {
+    locale: string;
+    strings: Record<string, string>;
+}
+
+/**
+ * Fetches the server-resolved translation bundle for the given locale. Public
+ * endpoint — no auth required. Server normalizes the locale tag (BCP-47 →
+ * KMQ LocaleType) and merges the English fallback in for missing keys.
+ */
+export async function fetchI18nBundle(
+    locale: string,
+): Promise<ActivityI18nBundle> {
+    const url = `${ACTIVITY_PROXY_BASE}/i18n?locale=${encodeURIComponent(locale)}`;
+    const resp = await fetch(url);
+    if (!resp.ok) {
+        throw new Error(`i18n bundle failed: ${resp.status}`);
+    }
+
+    return resp.json();
+}
+
 export async function fetchSnapshot(
     accessToken: string,
     instanceId: string,

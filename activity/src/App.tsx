@@ -11,6 +11,7 @@ import {
 import {
     bookmarkSong,
     endGame as apiEndGame,
+    fetchI18nBundle,
     fetchSnapshot,
     hintVote as apiHintVote,
     openActivityStream,
@@ -19,17 +20,15 @@ import {
     submitGuess,
 } from "./api";
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
-import getStrings from "./i18n/messages";
-import resolveLocale from "./i18n/resolve_locale";
+import { makeTranslator } from "./i18n/translator";
+import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type ActivityScoreboardSnapshot from "./types/activity_scoreboard_snapshot";
 import type ActivitySnapshot from "./types/activity_snapshot";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type HintState from "./types/hint_state";
-import type Locale from "./i18n/locale";
 import type SkipState from "./types/skip_state";
-import type Strings from "./i18n/strings";
 import type UiState from "./types/ui_state";
 
 const initialHint: HintState = {
@@ -79,43 +78,43 @@ function proxyImageUrl(url: string): string {
 }
 
 function rejectReasonText(
-    strings: Strings,
+    t: Translator,
     reason: GuessRejectReason | undefined,
 ): string {
     switch (reason) {
         case "no_session":
-            return strings.rejectNoSession;
+            return t("rejectNoSession");
         case "maintenance":
-            return strings.rejectMaintenance;
+            return t("rejectMaintenance");
         case "banned":
-            return strings.rejectBanned;
+            return t("rejectBanned");
         case "rate_limit":
-            return strings.rejectRateLimit;
+            return t("rejectRateLimit");
         case "not_in_vc":
-            return strings.rejectNotInVC;
+            return t("rejectNotInVC");
         case "unauthorized":
-            return strings.rejectUnauthorized;
+            return t("rejectUnauthorized");
         case "forbidden":
-            return strings.rejectForbidden;
+            return t("rejectForbidden");
         case "bad_request":
-            return strings.rejectBadRequest;
+            return t("rejectBadRequest");
         case "session_already_running":
-            return strings.rejectSessionAlreadyRunning;
+            return t("rejectSessionAlreadyRunning");
         case "no_round":
-            return strings.rejectNoRound;
+            return t("rejectNoRound");
         default:
-            return strings.rejectGeneric;
+            return t("rejectGeneric");
     }
 }
 
 function RoundTimer({ startedAt }: { startedAt: number }) {
     const [elapsedMs, setElapsedMs] = useState(Date.now() - startedAt);
     useEffect(() => {
-        const t = setInterval(
+        const id = setInterval(
             () => setElapsedMs(Date.now() - startedAt),
             ROUND_TIMER_TICK_MS,
         );
-        return () => clearInterval(t);
+        return () => clearInterval(id);
     }, [startedAt]);
 
     const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
@@ -124,17 +123,17 @@ function RoundTimer({ startedAt }: { startedAt: number }) {
 
 function Scoreboard({
     scoreboard,
-    strings,
+    t,
 }: {
     scoreboard: ActivityScoreboardSnapshot;
-    strings: Strings;
+    t: Translator;
 }) {
     const sorted = [...scoreboard.players]
         .filter((p) => p.score > 0 || p.inVC)
         .sort((a, b) => b.score - a.score);
 
     if (sorted.length === 0) {
-        return <p className="empty">{strings.scoreboardEmptyJoinVC}</p>;
+        return <p className="empty">{t("scoreboardEmptyJoinVC")}</p>;
     }
 
     return (
@@ -159,16 +158,13 @@ function Scoreboard({
                     <span className="name">
                         {p.username}
                         {!p.inVC && (
-                            <span className="afk">
-                                {" "}
-                                {strings.scoreboardLeft}
-                            </span>
+                            <span className="afk"> {t("scoreboardLeft")}</span>
                         )}
                     </span>
                     <span className="score">{p.score}</span>
                     {p.expGain > 0 && (
                         <span className="exp">
-                            {strings.scoreboardExpGain(p.expGain)}
+                            {t("scoreboardExpGain", { exp: p.expGain })}
                         </span>
                     )}
                 </li>
@@ -181,12 +177,12 @@ function CurrentRound({
     round,
     reveal,
     bookmarkSlot,
-    strings,
+    t,
 }: {
     round: ActivityRoundMeta | null;
     reveal: UiState["lastReveal"];
     bookmarkSlot: React.ReactNode;
-    strings: Strings;
+    t: Translator;
 }) {
     return (
         <section className="round-area">
@@ -194,15 +190,17 @@ function CurrentRound({
                 <div className="round-area-body in-round">
                     <div className="round-area-text">
                         <div className="reveal-header">
-                            <h3>{strings.roundLabel(round.roundIndex + 1)}</h3>
+                            <h3>
+                                {t("roundLabel", { num: round.roundIndex + 1 })}
+                            </h3>
                             {bookmarkSlot}
                         </div>
                         <RoundTimer startedAt={round.songStartedAt} />
                         {round.guessTimeoutSec && (
                             <span className="timeout">
-                                {strings.roundTimeoutLabel(
-                                    round.guessTimeoutSec,
-                                )}
+                                {t("roundTimeoutLabel", {
+                                    sec: round.guessTimeoutSec,
+                                })}
                             </span>
                         )}
                     </div>
@@ -223,20 +221,20 @@ function CurrentRound({
                         <ul className="winners">
                             {reveal.correctGuessers.map((g) => (
                                 <li key={g.id}>
-                                    {strings.revealWinners(
-                                        g.username,
-                                        g.pointsEarned,
-                                        g.expGain,
-                                    )}
+                                    {t("revealWinners", {
+                                        username: g.username,
+                                        points: g.pointsEarned,
+                                        exp: g.expGain,
+                                    })}
                                 </li>
                             ))}
                         </ul>
                         {reveal.allGuesses.length > 0 && (
                             <details className="all-guesses" open>
                                 <summary>
-                                    {strings.revealAllGuessesSummary(
-                                        reveal.allGuesses.length,
-                                    )}
+                                    {t("revealAllGuessesSummary", {
+                                        count: reveal.allGuesses.length,
+                                    })}
                                 </summary>
                                 <ul>
                                     {reveal.allGuesses
@@ -275,14 +273,14 @@ function CurrentRound({
                                     `${YOUTUBE_WATCH_URL_PREFIX}${reveal.song.youtubeLink}`,
                                 )
                             }
-                            title={strings.openOnYouTube}
+                            title={t("openOnYouTube")}
                         >
                             <img
                                 src={proxyImageUrl(reveal.song.thumbnailUrl)}
                                 alt=""
                             />
                             <span className="thumbnail-overlay">
-                                {strings.youtubePlayLabel}
+                                {t("youtubePlayLabel")}
                             </span>
                         </button>
                     </div>
@@ -290,7 +288,7 @@ function CurrentRound({
             ) : (
                 <div className="round-area-body idle">
                     <div className="round-area-text">
-                        <p className="empty">{strings.waitingForNextRound}</p>
+                        <p className="empty">{t("waitingForNextRound")}</p>
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
                         <span>🎵</span>
@@ -305,12 +303,12 @@ function ControlButtons({
     accessToken,
     instanceId,
     hasSession,
-    strings,
+    t,
 }: {
     accessToken: string;
     instanceId: string;
     hasSession: boolean;
-    strings: Strings;
+    t: Translator;
 }) {
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -324,12 +322,9 @@ function ControlButtons({
         setFeedback(null);
         try {
             const result = await fn();
-            if (!result.ok)
-                setFeedback(rejectReasonText(strings, result.reason));
+            if (!result.ok) setFeedback(rejectReasonText(t, result.reason));
         } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
         } finally {
             setBusy(null);
         }
@@ -349,8 +344,8 @@ function ControlButtons({
                     }
                 >
                     {busy === "start"
-                        ? strings.startGameBusy
-                        : strings.startGameButton}
+                        ? t("startGameBusy")
+                        : t("startGameButton")}
                 </button>
             )}
             {hasSession && (
@@ -362,9 +357,7 @@ function ControlButtons({
                         run("end", () => apiEndGame(accessToken, instanceId))
                     }
                 >
-                    {busy === "end"
-                        ? strings.endGameBusy
-                        : strings.endGameButton}
+                    {busy === "end" ? t("endGameBusy") : t("endGameButton")}
                 </button>
             )}
             {feedback && <span className="control-feedback">{feedback}</span>}
@@ -376,12 +369,12 @@ function GuessInput({
     accessToken,
     instanceId,
     enabled,
-    strings,
+    t,
 }: {
     accessToken: string;
     instanceId: string;
     enabled: boolean;
-    strings: Strings;
+    t: Translator;
 }) {
     const [text, setText] = useState("");
     const [busy, setBusy] = useState(false);
@@ -409,12 +402,10 @@ function GuessInput({
             if (result.ok) {
                 setText("");
             } else {
-                setFeedback(rejectReasonText(strings, result.reason));
+                setFeedback(rejectReasonText(t, result.reason));
             }
         } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
         } finally {
             setBusy(false);
             // Refocus after every submit (the disabled-while-busy flicker can
@@ -430,8 +421,8 @@ function GuessInput({
                 type="text"
                 placeholder={
                     enabled
-                        ? strings.guessPlaceholderActive
-                        : strings.guessPlaceholderWaiting
+                        ? t("guessPlaceholderActive")
+                        : t("guessPlaceholderWaiting")
                 }
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -439,7 +430,7 @@ function GuessInput({
                 maxLength={MAX_GUESS_LENGTH}
             />
             <button type="submit" disabled={!enabled || busy || !text.trim()}>
-                {strings.guessButton}
+                {t("guessButton")}
             </button>
             {feedback && <span className="guess-feedback">{feedback}</span>}
         </form>
@@ -452,7 +443,7 @@ function SkipControl({
     skip,
     enabled,
     roundKey,
-    strings,
+    t,
     onVoteStart,
     onVoteFailed,
 }: {
@@ -466,7 +457,7 @@ function SkipControl({
      *  server awaits endRound/startRound before replying, so the POST can
      *  resolve after the next round has already started. */
     roundKey: number | null;
-    strings: Strings;
+    t: Translator;
     onVoteStart: () => void;
     onVoteFailed: (roundKey: number | null) => void;
 }) {
@@ -485,13 +476,11 @@ function SkipControl({
         try {
             const result = await apiSkipVote(accessToken, instanceId);
             if (!result.ok) {
-                setFeedback(rejectReasonText(strings, result.reason));
+                setFeedback(rejectReasonText(t, result.reason));
                 onVoteFailed(clickedRoundKey);
             }
         } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
             onVoteFailed(clickedRoundKey);
         }
     };
@@ -499,7 +488,7 @@ function SkipControl({
     const tally =
         skip.threshold > 0
             ? `${skip.requesters}/${skip.threshold}`
-            : strings.skipVoteFallback;
+            : t("skipVoteFallback");
 
     const pct =
         skip.threshold > 0
@@ -519,13 +508,11 @@ function SkipControl({
                 onClick={onClick}
                 disabled={!enabled || skip.achieved || skip.userVoted}
                 className={`skip-button ${stateClass}`}
-                title={strings.skipTitle}
+                title={t("skipTitle")}
             >
                 <span className="hint-icon">⏭️</span>
                 <span className="hint-label">
-                    {skip.achieved
-                        ? strings.skipDone
-                        : strings.skipButton(tally)}
+                    {skip.achieved ? t("skipDone") : t("skipButton", { tally })}
                 </span>
                 <span
                     className="hint-progress skip-bar"
@@ -542,13 +529,13 @@ function HintControl({
     instanceId,
     hint,
     enabled,
-    strings,
+    t,
 }: {
     accessToken: string;
     instanceId: string;
     hint: HintState;
     enabled: boolean;
-    strings: Strings;
+    t: Translator;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -559,12 +546,9 @@ function HintControl({
         setFeedback(null);
         try {
             const result = await apiHintVote(accessToken, instanceId);
-            if (!result.ok)
-                setFeedback(rejectReasonText(strings, result.reason));
+            if (!result.ok) setFeedback(rejectReasonText(t, result.reason));
         } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
         } finally {
             setBusy(false);
         }
@@ -573,7 +557,7 @@ function HintControl({
     const tally =
         hint.threshold > 0
             ? `${hint.requesters}/${hint.threshold}`
-            : strings.hintVoteFallback;
+            : t("hintVoteFallback");
 
     const pct =
         hint.threshold > 0
@@ -587,13 +571,13 @@ function HintControl({
                 onClick={onClick}
                 disabled={busy || !enabled}
                 className={hint.revealed ? "revealed" : ""}
-                title={strings.hintTitle}
+                title={t("hintTitle")}
             >
                 <span className="hint-icon">💡</span>
                 <span className="hint-label">
                     {hint.revealed
-                        ? strings.hintRevealed
-                        : strings.hintButton(tally)}
+                        ? t("hintRevealed")
+                        : t("hintButton", { tally })}
                 </span>
                 <span className="hint-progress" style={{ width: `${pct}%` }} />
             </button>
@@ -609,7 +593,7 @@ function BookmarkStar({
     youtubeLink,
     isBookmarked,
     onBookmarked,
-    strings,
+    t,
 }: {
     accessToken: string;
     instanceId: string;
@@ -621,7 +605,7 @@ function BookmarkStar({
     youtubeLink: string | null;
     isBookmarked: boolean;
     onBookmarked: (link: string) => void;
-    strings: Strings;
+    t: Translator;
 }) {
     const [busy, setBusy] = useState(false);
     const [feedback, setFeedback] = useState<string | null>(null);
@@ -651,13 +635,11 @@ function BookmarkStar({
                 const resolved = result.youtubeLink ?? youtubeLink;
                 if (resolved) onBookmarked(resolved);
             } else {
-                setFeedback(rejectReasonText(strings, result.reason));
+                setFeedback(rejectReasonText(t, result.reason));
                 setOptimistic(false);
             }
         } catch (err) {
-            setFeedback(
-                err instanceof Error ? err.message : strings.networkError,
-            );
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
             setOptimistic(false);
         } finally {
             setBusy(false);
@@ -671,9 +653,7 @@ function BookmarkStar({
             onClick={onClick}
             disabled={busy || showFilled}
             title={
-                showFilled
-                    ? strings.bookmarkTitleDone
-                    : strings.bookmarkTitleActive
+                showFilled ? t("bookmarkTitleDone") : t("bookmarkTitleActive")
             }
         >
             {showFilled ? "🔖" : "🏷️"}
@@ -719,13 +699,12 @@ export default function App() {
         accessToken: string;
         instanceId: string;
     } | null>(null);
-    const [locale, setLocale] = useState<Locale | null>(null);
+    const [bundle, setBundle] = useState<Record<string, string> | null>(null);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
-    const strings = useMemo(
-        () => getStrings(locale ?? resolveLocale(null)),
-        [locale],
-    );
+    // Translator is stable for a given bundle; untranslated keys render their
+    // own name (e.g. "appTitle") so the UI is never fully blank pre-hydrate.
+    const t = useMemo<Translator>(() => makeTranslator(bundle ?? {}), [bundle]);
 
     useEffect(() => {
         let cancelled = false;
@@ -734,23 +713,43 @@ export default function App() {
                 const auth = await authenticate();
                 if (cancelled) return;
                 const instanceId = auth.sdk.instanceId;
+
+                // Fetch the snapshot and initial i18n bundle in parallel —
+                // they don't depend on each other. The i18n endpoint is
+                // public; seeding from the snapshot's viewerLocale (OAuth
+                // user.locale) avoids an extra SDK round-trip on first
+                // render.
                 const snapshot = await fetchSnapshot(
                     auth.accessToken,
                     instanceId,
                 );
 
                 if (cancelled) return;
+                const initialBundle = await fetchI18nBundle(
+                    snapshot.viewerLocale || "en",
+                );
+
+                if (cancelled) return;
+                setBundle(initialBundle.strings);
                 setUi((prev) => applySnapshot(prev, snapshot));
                 setAuthState({ accessToken: auth.accessToken, instanceId });
-                // Seed locale from the OAuth-supplied user.locale (cheap; comes
-                // back with the snapshot). Override below with the live SDK
-                // value if Discord supplies one.
-                setLocale(resolveLocale(snapshot.viewerLocale));
                 setReady(true);
 
+                // The SDK exposes the live Discord client locale, which can
+                // differ from the OAuth-embedded user.locale. Fetch the
+                // matching bundle and swap if it's different.
                 const sdkLocale = await readSdkLocale();
-                if (!cancelled && sdkLocale) {
-                    setLocale(resolveLocale(sdkLocale));
+                if (
+                    !cancelled &&
+                    sdkLocale &&
+                    sdkLocale !== snapshot.viewerLocale
+                ) {
+                    try {
+                        const next = await fetchI18nBundle(sdkLocale);
+                        if (!cancelled) setBundle(next.strings);
+                    } catch (e) {
+                        console.warn("locale swap failed", e);
+                    }
                 }
 
                 const stream = await openActivityStream(
@@ -761,7 +760,7 @@ export default function App() {
                     },
                     () => {
                         // socket closed — show banner; phase 2 can add reconnect
-                        setError(strings.statusDisconnected);
+                        setError(t("statusDisconnected"));
                     },
                 );
 
@@ -783,15 +782,15 @@ export default function App() {
             cancelled = true;
             streamRef.current?.close();
         };
-        // strings.statusDisconnected is captured at first run; subsequent
-        // locale flips don't re-open the WS.
+        // t's identity changes with the bundle but the WS setup only runs
+        // once, so don't restart it on locale flips.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     if (error) {
         return (
             <div className="kmq-app error">
-                <h2>{strings.appTitle}</h2>
+                <h2>{t("appTitle")}</h2>
                 <p>{error}</p>
             </div>
         );
@@ -800,8 +799,8 @@ export default function App() {
     if (!ready) {
         return (
             <div className="kmq-app loading">
-                <h2>{strings.appTitle}</h2>
-                <p>{strings.statusConnecting}</p>
+                <h2>{t("appTitle")}</h2>
+                <p>{t("statusConnecting")}</p>
             </div>
         );
     }
@@ -809,7 +808,7 @@ export default function App() {
     return (
         <div className="kmq-app">
             <header>
-                <h1>{strings.appTitle}</h1>
+                <h1>{t("appTitle")}</h1>
                 {ui.session &&
                     (() => {
                         const completed = ui.session.roundsPlayed;
@@ -825,14 +824,16 @@ export default function App() {
                             <span className="meta">
                                 {displayed > 0 && (
                                     <>
-                                        {strings.headerRound(displayed)}
+                                        {t("headerRound", { num: displayed })}
                                         {showRatio && (
                                             <>
                                                 {" · "}
-                                                {strings.headerCorrectRatio(
-                                                    ui.session.correctGuesses,
-                                                    completed,
-                                                )}
+                                                {t("headerCorrectRatio", {
+                                                    correct:
+                                                        ui.session
+                                                            .correctGuesses,
+                                                    total: completed,
+                                                })}
                                             </>
                                         )}
                                     </>
@@ -852,20 +853,20 @@ export default function App() {
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}
                     hasSession={ui.session !== null && !ui.sessionEnded}
-                    strings={strings}
+                    t={t}
                 />
             )}
 
             {ui.sessionEnded && (
                 <div className="banner">
-                    {strings.sessionEndedBanner("/play")}
+                    {t("sessionEndedBanner", { playSlash: "/play" })}
                 </div>
             )}
 
             <CurrentRound
                 round={ui.currentRound}
                 reveal={ui.lastReveal}
-                strings={strings}
+                t={t}
                 bookmarkSlot={
                     authState && (ui.currentRound || ui.lastReveal) ? (
                         <BookmarkStar
@@ -889,7 +890,7 @@ export default function App() {
                                       )
                                     : ui.currentRoundBookmarked
                             }
-                            strings={strings}
+                            t={t}
                             onBookmarked={(link) =>
                                 setUi((prev) => ({
                                     ...prev,
@@ -910,7 +911,7 @@ export default function App() {
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}
                     enabled={ui.currentRound !== null && !ui.sessionEnded}
-                    strings={strings}
+                    t={t}
                 />
             )}
 
@@ -921,7 +922,7 @@ export default function App() {
                         instanceId={authState.instanceId}
                         hint={ui.hint}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        strings={strings}
+                        t={t}
                     />
                     <SkipControl
                         accessToken={authState.accessToken}
@@ -929,7 +930,7 @@ export default function App() {
                         skip={ui.skip}
                         enabled={ui.currentRound !== null && !ui.sessionEnded}
                         roundKey={ui.currentRound?.roundIndex ?? null}
-                        strings={strings}
+                        t={t}
                         onVoteStart={() =>
                             setUi((prev) => ({
                                 ...prev,
@@ -958,11 +959,11 @@ export default function App() {
             )}
 
             <section className="scoreboard-section">
-                <h3>{strings.scoreboardHeading}</h3>
+                <h3>{t("scoreboardHeading")}</h3>
                 {ui.scoreboard ? (
-                    <Scoreboard scoreboard={ui.scoreboard} strings={strings} />
+                    <Scoreboard scoreboard={ui.scoreboard} t={t} />
                 ) : (
-                    <p className="empty">{strings.scoreboardEmpty}</p>
+                    <p className="empty">{t("scoreboardEmpty")}</p>
                 )}
             </section>
 

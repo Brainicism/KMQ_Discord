@@ -9,6 +9,21 @@ import path from "path";
 
 const logger = new IPCLogger("localization_manager");
 
+function* flattenLeafKeys(
+    node: unknown,
+    prefix: string = "",
+): Generator<string> {
+    if (node === null || typeof node !== "object") return;
+    for (const [k, v] of Object.entries(node)) {
+        const next = prefix ? `${prefix}.${k}` : k;
+        if (v !== null && typeof v === "object") {
+            yield* flattenLeafKeys(v, next);
+        } else if (typeof v === "string") {
+            yield next;
+        }
+    }
+}
+
 class LocalizationManager {
     internalLocalizer: typeof i18next;
 
@@ -88,6 +103,44 @@ class LocalizationManager {
 
     hasKey(key: string): boolean {
         return this.internalLocalizer.exists(key);
+    }
+
+    /**
+     * Returns the raw sub-tree for a given top-level i18n key. Each value is
+     * the template string (double-brace placeholders intact) from the target
+     * locale, with English as the fallback for missing keys. Used to ship a
+     * bundle to clients that do their own runtime interpolation.
+     * @param locale - the locale to fetch
+     * @param rootKey - the top-level key (e.g. "activity")
+     * @returns a flat leafKey-to-template map, or null if the key doesn't exist
+     */
+    getBundle(
+        locale: LocaleType,
+        rootKey: string,
+    ): Record<string, string> | null {
+        const english = this.internalLocalizer.getResource(
+            DEFAULT_LOCALE,
+            "translation",
+            rootKey,
+        );
+
+        if (english == null || typeof english !== "object") {
+            return null;
+        }
+
+        // Walk the English tree to enumerate every leaf key, then ask
+        // i18next to resolve each one at the target locale (which handles
+        // fallback automatically). This means translators can add nested
+        // keys and they'll just work without changes here.
+        const bundle: Record<string, string> = {};
+        for (const leafKey of flattenLeafKeys(english)) {
+            bundle[leafKey] = this.internalLocalizer.t(
+                `${rootKey}.${leafKey}`,
+                { lng: locale },
+            );
+        }
+
+        return bundle;
     }
 
     /**
