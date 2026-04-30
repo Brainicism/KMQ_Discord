@@ -164,9 +164,19 @@ export default abstract class Session {
         );
     }
 
-    /** Run fn while holding the lifecycle mutex. */
-    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T> {
-        return this.lifecycleMutex.runExclusive(fn);
+    /** Run fn while holding the lifecycle mutex. Returns null if session is ending/ended. */
+    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
+        if (!this.stateMachine.isAlive) {
+            return Promise.resolve(null);
+        }
+
+        return this.lifecycleMutex.runExclusive(async () => {
+            if (!this.stateMachine.isAlive) {
+                return null;
+            }
+
+            return fn();
+        });
     }
 
     static getSession(guildID: string): Session | undefined {
@@ -392,7 +402,7 @@ export default abstract class Session {
         );
 
         if (voiceConnectionSuccess) {
-            if (!this.stateMachine.canTransition(SessionState.ROUND_ACTIVE)) {
+            if (this.stateMachine.state === SessionState.INITIALIZING) {
                 this.stateMachine.transition(SessionState.ROUND_STARTING);
             }
 
