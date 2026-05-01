@@ -19,9 +19,6 @@ export enum SessionState {
     /** Between rounds: delay period, preparing next song */
     BETWEEN_ROUNDS = "BETWEEN_ROUNDS",
 
-    /** Round starting: song selected, audio being prepared */
-    ROUND_STARTING = "ROUND_STARTING",
-
     /** Round active: song playing, accepting guesses/skips */
     ROUND_ACTIVE = "ROUND_ACTIVE",
 
@@ -43,7 +40,7 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
     ]),
     [SessionState.INITIALIZING]: new Set([
         SessionState.LOBBY,
-        SessionState.ROUND_STARTING,
+        SessionState.ROUND_ACTIVE,
         SessionState.BETWEEN_ROUNDS,
         SessionState.ENDING,
     ]),
@@ -52,10 +49,6 @@ const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
         SessionState.ENDING,
     ]),
     [SessionState.BETWEEN_ROUNDS]: new Set([
-        SessionState.ROUND_STARTING,
-        SessionState.ENDING,
-    ]),
-    [SessionState.ROUND_STARTING]: new Set([
         SessionState.ROUND_ACTIVE,
         SessionState.ENDING,
     ]),
@@ -131,7 +124,6 @@ export class SessionStateMachine {
     /** Is the session in a state where rounds can be active? */
     get isRoundCapable(): boolean {
         return (
-            this.currentState === SessionState.ROUND_STARTING ||
             this.currentState === SessionState.ROUND_ACTIVE ||
             this.currentState === SessionState.ROUND_ENDING
         );

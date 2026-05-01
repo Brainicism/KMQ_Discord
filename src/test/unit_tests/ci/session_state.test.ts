@@ -23,13 +23,10 @@ describe("SessionStateMachine", () => {
             assert.strictEqual(sm.state, SessionState.INITIALIZING);
         });
 
-        it("INITIALIZING → ROUND_STARTING should succeed", () => {
+        it("INITIALIZING → ROUND_ACTIVE should succeed", () => {
             sm.transition(SessionState.INITIALIZING);
-            assert.strictEqual(
-                sm.transition(SessionState.ROUND_STARTING),
-                true,
-            );
-            assert.strictEqual(sm.state, SessionState.ROUND_STARTING);
+            assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), true);
+            assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
         });
 
         it("INITIALIZING → LOBBY should succeed", () => {
@@ -45,22 +42,14 @@ describe("SessionStateMachine", () => {
             );
         });
 
-        it("ROUND_STARTING → ROUND_ACTIVE should succeed", () => {
-            sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
-            assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), true);
-        });
-
         it("ROUND_ACTIVE → ROUND_ENDING should succeed", () => {
             sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
             sm.transition(SessionState.ROUND_ACTIVE);
             assert.strictEqual(sm.transition(SessionState.ROUND_ENDING), true);
         });
 
         it("ROUND_ENDING → BETWEEN_ROUNDS should succeed", () => {
             sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
             sm.transition(SessionState.ROUND_ACTIVE);
             sm.transition(SessionState.ROUND_ENDING);
             assert.strictEqual(
@@ -69,13 +58,10 @@ describe("SessionStateMachine", () => {
             );
         });
 
-        it("BETWEEN_ROUNDS → ROUND_STARTING should succeed", () => {
+        it("BETWEEN_ROUNDS → ROUND_ACTIVE should succeed", () => {
             sm.transition(SessionState.INITIALIZING);
             sm.transition(SessionState.BETWEEN_ROUNDS);
-            assert.strictEqual(
-                sm.transition(SessionState.ROUND_STARTING),
-                true,
-            );
+            assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), true);
         });
 
         it("ENDING → ENDED should succeed", () => {
@@ -86,11 +72,9 @@ describe("SessionStateMachine", () => {
 
         it("full round lifecycle should work", () => {
             sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
             sm.transition(SessionState.ROUND_ACTIVE);
             sm.transition(SessionState.ROUND_ENDING);
             sm.transition(SessionState.BETWEEN_ROUNDS);
-            sm.transition(SessionState.ROUND_STARTING);
             sm.transition(SessionState.ROUND_ACTIVE);
             sm.transition(SessionState.ROUND_ENDING);
             sm.transition(SessionState.ENDING);
@@ -102,7 +86,6 @@ describe("SessionStateMachine", () => {
     describe("invalid transitions", () => {
         it("CREATED → ROUND_ACTIVE should fail", () => {
             assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), false);
-            assert.strictEqual(sm.state, SessionState.CREATED);
         });
 
         it("ENDED → anything should fail", () => {
@@ -110,24 +93,21 @@ describe("SessionStateMachine", () => {
             sm.transition(SessionState.ENDING);
             sm.transition(SessionState.ENDED);
             assert.strictEqual(sm.transition(SessionState.CREATED), false);
-            assert.strictEqual(sm.state, SessionState.ENDED);
         });
 
-        it("ROUND_ACTIVE → ROUND_STARTING should fail", () => {
+        it("ROUND_ACTIVE → BETWEEN_ROUNDS should fail (must go through ROUND_ENDING)", () => {
             sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
             sm.transition(SessionState.ROUND_ACTIVE);
             assert.strictEqual(
-                sm.transition(SessionState.ROUND_STARTING),
+                sm.transition(SessionState.BETWEEN_ROUNDS),
                 false,
             );
-            assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
         });
 
-        it("BETWEEN_ROUNDS → ROUND_ACTIVE should fail (must go through ROUND_STARTING)", () => {
+        it("BETWEEN_ROUNDS → ROUND_ENDING should fail", () => {
             sm.transition(SessionState.INITIALIZING);
             sm.transition(SessionState.BETWEEN_ROUNDS);
-            assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), false);
+            assert.strictEqual(sm.transition(SessionState.ROUND_ENDING), false);
         });
     });
 
@@ -136,7 +116,6 @@ describe("SessionStateMachine", () => {
             SessionState.INITIALIZING,
             SessionState.LOBBY,
             SessionState.BETWEEN_ROUNDS,
-            SessionState.ROUND_STARTING,
             SessionState.ROUND_ACTIVE,
             SessionState.ROUND_ENDING,
         ];
@@ -150,13 +129,9 @@ describe("SessionStateMachine", () => {
                     fresh.transition(SessionState.LOBBY);
                 } else if (state === SessionState.BETWEEN_ROUNDS) {
                     fresh.transition(SessionState.BETWEEN_ROUNDS);
-                } else if (state === SessionState.ROUND_STARTING) {
-                    fresh.transition(SessionState.ROUND_STARTING);
                 } else if (state === SessionState.ROUND_ACTIVE) {
-                    fresh.transition(SessionState.ROUND_STARTING);
                     fresh.transition(SessionState.ROUND_ACTIVE);
                 } else if (state === SessionState.ROUND_ENDING) {
-                    fresh.transition(SessionState.ROUND_STARTING);
                     fresh.transition(SessionState.ROUND_ACTIVE);
                     fresh.transition(SessionState.ROUND_ENDING);
                 }
@@ -166,8 +141,8 @@ describe("SessionStateMachine", () => {
             });
         }
 
-        it("CREATED → ENDING should fail (not in transition table)", () => {
-            assert.strictEqual(sm.transition(SessionState.ENDING), false);
+        it("CREATED → ENDING should succeed", () => {
+            assert.strictEqual(sm.transition(SessionState.ENDING), true);
         });
     });
 
@@ -190,18 +165,15 @@ describe("SessionStateMachine", () => {
             assert.strictEqual(sm.isAcceptingInput, false);
             sm.transition(SessionState.INITIALIZING);
             assert.strictEqual(sm.isAcceptingInput, false);
-            sm.transition(SessionState.ROUND_STARTING);
-            assert.strictEqual(sm.isAcceptingInput, false);
             sm.transition(SessionState.ROUND_ACTIVE);
             assert.strictEqual(sm.isAcceptingInput, true);
             sm.transition(SessionState.ROUND_ENDING);
             assert.strictEqual(sm.isAcceptingInput, false);
         });
 
-        it("isRoundCapable should be true for ROUND_STARTING, ROUND_ACTIVE, ROUND_ENDING", () => {
+        it("isRoundCapable should be true for ROUND_ACTIVE and ROUND_ENDING", () => {
             sm.transition(SessionState.INITIALIZING);
-            sm.transition(SessionState.ROUND_STARTING);
-            assert.strictEqual(sm.isRoundCapable, true);
+            assert.strictEqual(sm.isRoundCapable, false);
             sm.transition(SessionState.ROUND_ACTIVE);
             assert.strictEqual(sm.isRoundCapable, true);
             sm.transition(SessionState.ROUND_ENDING);

@@ -182,7 +182,6 @@ export default abstract class Session {
                 )} | ${this.sessionName()} initializing session`,
             );
         } else {
-            this.stateMachine.transition(SessionState.ROUND_STARTING);
             logger.info(
                 `${getDebugLogHeader(messageContext)} | Round starting`,
             );
@@ -361,10 +360,6 @@ export default abstract class Session {
         );
 
         if (voiceConnectionSuccess) {
-            if (this.stateMachine.state === SessionState.INITIALIZING) {
-                this.stateMachine.transition(SessionState.ROUND_STARTING);
-            }
-
             this.stateMachine.transition(SessionState.ROUND_ACTIVE);
         }
 
