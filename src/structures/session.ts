@@ -9,6 +9,7 @@ import {
     specialFfmpegArgs,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import { Mutex } from "async-mutex";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -57,6 +58,8 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
+import { SessionState, SessionStateMachine } from "./session_state";
+
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
@@ -89,6 +92,12 @@ export default abstract class Session {
 
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
+
+    /** State machine tracking session lifecycle */
+    public readonly stateMachine: SessionStateMachine;
+
+    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
+    protected lifecycleMutex = new Mutex();
 
     /** The guild preference */
     protected guildPreference: GuildPreference;
@@ -124,6 +133,7 @@ export default abstract class Session {
         this.roundsPlayed = 0;
         this.bookmarkedSongs = {};
         this.guildPreference.songSelector.resetSessionState();
+        this.stateMachine = new SessionStateMachine(guildID);
     }
 
     abstract sessionName(): string;
@@ -165,6 +175,7 @@ export default abstract class Session {
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
         if (!this.sessionInitialized) {
+            this.stateMachine.transition(SessionState.INITIALIZING);
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
@@ -186,11 +197,12 @@ export default abstract class Session {
             return null;
         }
 
+        const isFirstRound = !this.sessionInitialized;
         this.sessionInitialized = true;
         if (this.guildPreference.songSelector.getSongs().songs.size === 0) {
             try {
                 await this.guildPreference.songSelector.reloadSongs(
-                    !this.sessionInitialized,
+                    isFirstRound,
                 );
             } catch (err) {
                 await sendErrorMessage(messageContext, {
@@ -347,6 +359,10 @@ export default abstract class Session {
             round,
         );
 
+        if (voiceConnectionSuccess) {
+            this.stateMachine.transition(SessionState.ROUND_ACTIVE);
+        }
+
         return voiceConnectionSuccess ? this.round : null;
     }
 
@@ -365,6 +381,8 @@ export default abstract class Session {
             return;
         }
 
+        this.stateMachine.transition(SessionState.ROUND_ENDING);
+
         this.round = null;
 
         // cleanup
@@ -372,6 +390,7 @@ export default abstract class Session {
 
         if (this.finished) return;
         this.roundsPlayed++;
+        this.stateMachine.transition(SessionState.BETWEEN_ROUNDS);
         // check if duration has been reached
         const remainingDuration = this.getRemainingDuration(
             this.guildPreference,
@@ -389,15 +408,18 @@ export default abstract class Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
+        this.stateMachine.transition(SessionState.ENDING);
         logger.info(
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
 
         Session.deleteSession(this.guildID);
-        await this.endRound(
-            false,
-            new MessageContext(this.textChannelID, null, this.guildID),
-        );
+
+        // Inline base round cleanup instead of polymorphic this.endRound() call.
+        // Subclasses handle full round ending (with scoring) before calling
+        // super.endSession() to avoid re-entering mutex-wrapped lifecycle methods.
+        this.stopGuessTimeout();
+        this.round = null;
 
         const voiceConnection = State.client.voiceConnections.get(this.guildID);
 
@@ -504,6 +526,8 @@ export default abstract class Session {
                 games_played: sql`games_played + 1`,
             })
             .execute();
+
+        this.stateMachine.transition(SessionState.ENDED);
     }
 
     /**
@@ -1211,7 +1235,7 @@ export default abstract class Session {
         timeRemaining: number | null,
         nonEmptyFooter: boolean,
     ): string {
-        if (!timeRemaining) {
+        if (timeRemaining == null) {
             return "";
         }
 

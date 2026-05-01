@@ -670,8 +670,8 @@ export async function sendErrorMessage(
 ): Promise<Eris.Message<Eris.TextableChannel> | null> {
     const author =
         embedPayload.author == null
-            ? embedPayload.author
-            : messageContext.author;
+            ? messageContext.author
+            : embedPayload.author;
 
     return sendMessage(
         messageContext.textChannelID,
@@ -679,12 +679,10 @@ export async function sendErrorMessage(
             embeds: [
                 {
                     color: embedPayload.color || EMBED_ERROR_COLOR,
-                    author: author
-                        ? {
-                              name: author.username,
-                              icon_url: author.avatarUrl,
-                          }
-                        : undefined,
+                    author: {
+                        name: author.username,
+                        icon_url: author.avatarUrl,
+                    },
                     title: embedPayload.title,
                     description: embedPayload.description,
                     footer: embedPayload.footerText
@@ -717,17 +715,15 @@ export function generateEmbed(
 ): Eris.EmbedOptions {
     const author =
         embedPayload.author == null
-            ? embedPayload.author
-            : messageContext.author;
+            ? messageContext.author
+            : embedPayload.author;
 
     return {
         color: embedPayload.color,
-        author: author
-            ? {
-                  name: author.username,
-                  icon_url: author.avatarUrl,
-              }
-            : undefined,
+        author: {
+            name: author.username,
+            icon_url: author.avatarUrl,
+        },
         title: embedPayload.title,
         url: embedPayload.url,
         description: embedPayload.description,
@@ -2648,8 +2644,8 @@ export function clickableSlashCommand(
                 break;
             case "add":
             case "remove":
-                commandName = "groups";
                 subcommandName = commandName;
+                commandName = "groups";
                 break;
             case "preset":
                 subcommandName = "list";

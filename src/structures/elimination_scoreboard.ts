@@ -29,6 +29,7 @@ export default class EliminationScoreboard extends Scoreboard {
         for (const guessResult of guessResults) {
             const correctGuesser = this.players[guessResult.userID]!;
             correctGuesser.incrementExp(guessResult.expGain);
+            correctGuesser.incrementCorrectGuessCount();
         }
 
         const guesserIDs = guessResults.map((x) => x.userID);

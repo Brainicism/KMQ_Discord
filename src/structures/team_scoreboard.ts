@@ -40,6 +40,7 @@ export default class TeamScoreboard extends Scoreboard {
             const correctGuesser = this.getPlayer(guessResult.userID);
             if (correctGuesser) {
                 correctGuesser.incrementExp(guessResult.expGain);
+                correctGuesser.incrementCorrectGuessCount();
             }
         }
 
