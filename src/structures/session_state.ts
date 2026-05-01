@@ -36,16 +36,16 @@ export enum SessionState {
 const VALID_TRANSITIONS: Record<SessionState, Set<SessionState>> = {
     [SessionState.CREATED]: new Set([
         SessionState.INITIALIZING,
+        SessionState.LOBBY,
         SessionState.ENDING,
     ]),
     [SessionState.INITIALIZING]: new Set([
-        SessionState.LOBBY,
         SessionState.ROUND_ACTIVE,
         SessionState.BETWEEN_ROUNDS,
         SessionState.ENDING,
     ]),
     [SessionState.LOBBY]: new Set([
-        SessionState.BETWEEN_ROUNDS,
+        SessionState.INITIALIZING,
         SessionState.ENDING,
     ]),
     [SessionState.BETWEEN_ROUNDS]: new Set([

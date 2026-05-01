@@ -29,9 +29,9 @@ describe("SessionStateMachine", () => {
             assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
         });
 
-        it("INITIALIZING → LOBBY should succeed", () => {
-            sm.transition(SessionState.INITIALIZING);
+        it("CREATED → LOBBY should succeed", () => {
             assert.strictEqual(sm.transition(SessionState.LOBBY), true);
+            assert.strictEqual(sm.state, SessionState.LOBBY);
         });
 
         it("INITIALIZING → BETWEEN_ROUNDS should succeed", () => {
@@ -81,6 +81,19 @@ describe("SessionStateMachine", () => {
             sm.transition(SessionState.ENDED);
             assert.strictEqual(sm.state, SessionState.ENDED);
         });
+
+        it("teams mode lifecycle should work (CREATED → LOBBY → INITIALIZING → ROUND_ACTIVE)", () => {
+            assert.strictEqual(sm.transition(SessionState.LOBBY), true);
+            assert.strictEqual(sm.state, SessionState.LOBBY);
+            assert.strictEqual(sm.transition(SessionState.INITIALIZING), true);
+            assert.strictEqual(sm.state, SessionState.INITIALIZING);
+            assert.strictEqual(sm.transition(SessionState.ROUND_ACTIVE), true);
+            assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
+            sm.transition(SessionState.ROUND_ENDING);
+            sm.transition(SessionState.ENDING);
+            sm.transition(SessionState.ENDED);
+            assert.strictEqual(sm.state, SessionState.ENDED);
+        });
     });
 
     describe("invalid transitions", () => {
@@ -109,6 +122,11 @@ describe("SessionStateMachine", () => {
             sm.transition(SessionState.BETWEEN_ROUNDS);
             assert.strictEqual(sm.transition(SessionState.ROUND_ENDING), false);
         });
+
+        it("INITIALIZING → LOBBY should fail (LOBBY comes before INITIALIZING)", () => {
+            sm.transition(SessionState.INITIALIZING);
+            assert.strictEqual(sm.transition(SessionState.LOBBY), false);
+        });
     });
 
     describe("emergency transitions to ENDING", () => {
@@ -123,20 +141,23 @@ describe("SessionStateMachine", () => {
         for (const state of statesWithEndingTransition) {
             it(`${state} → ENDING should succeed`, () => {
                 const fresh = new SessionStateMachine("test");
-                fresh.transition(SessionState.INITIALIZING);
                 // Navigate to the target state
                 if (state === SessionState.LOBBY) {
                     fresh.transition(SessionState.LOBBY);
+                } else if (state === SessionState.INITIALIZING) {
+                    fresh.transition(SessionState.INITIALIZING);
                 } else if (state === SessionState.BETWEEN_ROUNDS) {
+                    fresh.transition(SessionState.INITIALIZING);
                     fresh.transition(SessionState.BETWEEN_ROUNDS);
                 } else if (state === SessionState.ROUND_ACTIVE) {
+                    fresh.transition(SessionState.INITIALIZING);
                     fresh.transition(SessionState.ROUND_ACTIVE);
                 } else if (state === SessionState.ROUND_ENDING) {
+                    fresh.transition(SessionState.INITIALIZING);
                     fresh.transition(SessionState.ROUND_ACTIVE);
                     fresh.transition(SessionState.ROUND_ENDING);
                 }
 
-                // INITIALIZING is already the state after first transition
                 assert.strictEqual(fresh.transition(SessionState.ENDING), true);
             });
         }
