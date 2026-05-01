@@ -220,4 +220,51 @@ describe("SessionStateMachine", () => {
             );
         });
     });
+
+    describe("Phase 2: enforcement (rejected transitions preserve state)", () => {
+        it("invalid transition should not change state", () => {
+            assert.strictEqual(sm.state, SessionState.CREATED);
+            sm.transition(SessionState.ROUND_ACTIVE); // invalid
+            assert.strictEqual(sm.state, SessionState.CREATED);
+        });
+
+        it("state should remain unchanged after multiple rejected transitions", () => {
+            sm.transition(SessionState.INITIALIZING);
+            sm.transition(SessionState.ROUND_ACTIVE);
+            assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
+
+            // Try several invalid transitions
+            sm.transition(SessionState.CREATED);
+            sm.transition(SessionState.LOBBY);
+            sm.transition(SessionState.BETWEEN_ROUNDS);
+            sm.transition(SessionState.ENDED);
+
+            // State should still be ROUND_ACTIVE
+            assert.strictEqual(sm.state, SessionState.ROUND_ACTIVE);
+        });
+
+        it("ENDED state should be truly terminal", () => {
+            sm.transition(SessionState.ENDING);
+            sm.transition(SessionState.ENDED);
+
+            const allStates = Object.values(SessionState);
+            for (const state of allStates) {
+                const result = sm.transition(state);
+                assert.strictEqual(result, false);
+            }
+
+            assert.strictEqual(sm.state, SessionState.ENDED);
+        });
+
+        it("valid transition after rejected one should still work", () => {
+            // Try invalid transition
+            sm.transition(SessionState.ROUND_ACTIVE);
+            assert.strictEqual(sm.state, SessionState.CREATED);
+
+            // Now do valid transition
+            const result = sm.transition(SessionState.INITIALIZING);
+            assert.strictEqual(result, true);
+            assert.strictEqual(sm.state, SessionState.INITIALIZING);
+        });
+    });
 });
