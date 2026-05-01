@@ -330,4 +330,68 @@ describe("elimination scoreboard", () => {
             });
         });
     });
+
+    describe("Phase 5 hardening", () => {
+        beforeEach(() => {
+            scoreboard.addPlayer(
+                getMockEliminationPlayer(userIDs[0]!, DEFAULT_LIVES),
+            );
+
+            scoreboard.addPlayer(
+                getMockEliminationPlayer(userIDs[1]!, DEFAULT_LIVES),
+            );
+
+            scoreboard.addPlayer(
+                getMockEliminationPlayer(userIDs[2]!, DEFAULT_LIVES),
+            );
+        });
+
+        describe("getLivesOfWeakestPlayer with all dead players", () => {
+            it("should return startingLives as fallback when all players are dead", () => {
+                // Kill all players by making others guess many times
+                for (let i = 0; i < DEFAULT_LIVES; i++) {
+                    scoreboard.update([
+                        {
+                            userID: "nonexistent",
+                            pointsEarned: 0,
+                            expGain: 0,
+                        },
+                    ]);
+                }
+
+                // All players should be dead now
+                assert.strictEqual(scoreboard.getAlivePlayersCount(), 0);
+                // Should return startingLives as fallback, not crash
+                assert.strictEqual(
+                    scoreboard.getLivesOfWeakestPlayer(),
+                    DEFAULT_LIVES,
+                );
+            });
+        });
+
+        describe("firstPlace recomputation after life decrement", () => {
+            it("should correctly identify firstPlace after mixed guessing", () => {
+                // Player 0 guesses correctly, others lose a life
+                scoreboard.update([
+                    { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+                ]);
+
+                // Player 0 has DEFAULT_LIVES, others have DEFAULT_LIVES - 1
+                const winners = scoreboard.getWinners();
+                assert.strictEqual(winners.length, 1);
+                assert.strictEqual(winners[0]!.id, userIDs[0]);
+            });
+
+            it("should show all players tied when no one guesses", () => {
+                // No one guesses - everyone loses a life equally
+                scoreboard.update([
+                    { userID: "nonexistent", pointsEarned: 0, expGain: 0 },
+                ]);
+
+                // All three players should be tied at DEFAULT_LIVES - 1
+                const winners = scoreboard.getWinners();
+                assert.strictEqual(winners.length, 3);
+            });
+        });
+    });
 });
