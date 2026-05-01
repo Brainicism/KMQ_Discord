@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { IPCLogger } from "../logger";
 import { delay, extractErrorString } from "../helpers/utils";
 import type Eris from "eris";
@@ -83,6 +84,7 @@ export class VoiceManager {
             return;
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (!this._connection.piper?.encoding) {
             return;
         }
@@ -92,11 +94,13 @@ export class VoiceManager {
         );
 
         const deadline = Date.now() + 500;
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         while (this._connection?.piper?.encoding && Date.now() < deadline) {
             // eslint-disable-next-line no-await-in-loop
             await delay(50);
         }
 
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
         if (this._connection?.piper?.encoding) {
             logger.warn(
                 `gid: ${this.guildID} | Encoder still busy after timeout, force stopping`,
@@ -108,6 +112,9 @@ export class VoiceManager {
     /**
      * Register a one-shot stream "end" handler tagged to a specific round.
      * Stale events (from a previous round) are silently ignored.
+     * @param roundId - The unique identifier for the current round
+     * @param onEnd - Callback invoked when the stream ends for this round
+     * @param onError - Callback invoked when a stream error occurs for this round
      */
     onceStreamEnd(
         roundId: string,
@@ -166,6 +173,7 @@ export class VoiceManager {
                     const voiceChannel = this.client.getChannel(
                         this._connection.channelID,
                     ) as Eris.VoiceChannel | undefined;
+
                     voiceChannel?.leave();
                 }
             } catch (e) {

@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle */
 import { VoiceManager, VoiceState } from "../../../structures/voice_manager";
 import assert from "assert";
 
@@ -29,7 +30,11 @@ function createMockConnection(opts?: {
             }
         },
         stopPlaying() {},
-        /** Test helper: fire registered listeners for an event */
+        /**
+         * Test helper: fire registered listeners for an event
+         * @param event - The event name to emit
+         * @param args - Arguments to pass to the listeners
+         */
         _emit(event: string, ...args: any[]) {
             const fns = listeners[event] || [];
             for (const fn of fns) {
@@ -47,16 +52,20 @@ function createMockClient(opts?: {
     const conn = opts?.mockConnection ?? createMockConnection();
     return {
         joinVoiceChannel: opts?.joinThrows
-            ? async () => {
+            ? () => {
                   throw new Error("Cannot join VC");
               }
-            : async () => conn,
+            : () => Promise.resolve(conn),
         getChannel: () => ({ leave() {} }),
         _connection: conn,
     };
 }
 
-/** Access private fields for testing via type assertion */
+/**
+ * Access private fields for testing via type assertion
+ * @param vm - The VoiceManager instance to access private fields on
+ * @returns The VoiceManager cast to any for private field access
+ */
 function getPrivate(vm: VoiceManager): any {
     return vm as any;
 }
@@ -195,8 +204,8 @@ describe("VoiceManager", () => {
 
             vm.onceStreamEnd(
                 "round-1",
-                async () => {},
-                async () => {},
+                () => Promise.resolve(),
+                () => Promise.resolve(),
             );
             assert.strictEqual(vm.state, VoiceState.PLAYING);
             assert.strictEqual(getPrivate(vm).currentRoundId, "round-1");
@@ -209,8 +218,8 @@ describe("VoiceManager", () => {
             assert.doesNotThrow(() => {
                 vm.onceStreamEnd(
                     "round-1",
-                    async () => {},
-                    async () => {},
+                    () => Promise.resolve(),
+                    () => Promise.resolve(),
                 );
             });
             assert.strictEqual(vm.state, VoiceState.PLAYING);
@@ -225,10 +234,11 @@ describe("VoiceManager", () => {
             let onEndCalled = false;
             vm.onceStreamEnd(
                 "round-1",
-                async () => {
+                () => {
                     onEndCalled = true;
+                    return Promise.resolve();
                 },
-                async () => {},
+                () => Promise.resolve(),
             );
 
             await conn._emit("end");
@@ -245,10 +255,11 @@ describe("VoiceManager", () => {
             let onEndCalled = false;
             vm.onceStreamEnd(
                 "round-1",
-                async () => {
+                () => {
                     onEndCalled = true;
+                    return Promise.resolve();
                 },
-                async () => {},
+                () => Promise.resolve(),
             );
 
             getPrivate(vm).currentRoundId = "round-2";
@@ -266,10 +277,11 @@ describe("VoiceManager", () => {
             let receivedErr: Error | null = null;
             vm.onceStreamEnd(
                 "round-1",
-                async () => {},
-                async (err: Error) => {
+                () => Promise.resolve(),
+                (err: Error) => {
                     onErrorCalled = true;
                     receivedErr = err;
+                    return Promise.resolve();
                 },
             );
 
@@ -289,9 +301,10 @@ describe("VoiceManager", () => {
             let onErrorCalled = false;
             vm.onceStreamEnd(
                 "round-1",
-                async () => {},
-                async () => {
+                () => Promise.resolve(),
+                () => {
                     onErrorCalled = true;
+                    return Promise.resolve();
                 },
             );
 
