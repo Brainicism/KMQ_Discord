@@ -58,6 +58,8 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
+import { SessionState, SessionStateMachine } from "./session_state";
+
 const logger = new IPCLogger("session");
 
 export default abstract class Session {
@@ -90,6 +92,9 @@ export default abstract class Session {
 
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
+
+    /** State machine tracking session lifecycle */
+    public readonly stateMachine: SessionStateMachine;
 
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
     protected lifecycleMutex = new Mutex();
@@ -128,6 +133,7 @@ export default abstract class Session {
         this.roundsPlayed = 0;
         this.bookmarkedSongs = {};
         this.guildPreference.songSelector.resetSessionState();
+        this.stateMachine = new SessionStateMachine(guildID);
     }
 
     abstract sessionName(): string;
@@ -169,6 +175,7 @@ export default abstract class Session {
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
         if (!this.sessionInitialized) {
+            this.stateMachine.transition(SessionState.INITIALIZING);
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
@@ -352,6 +359,10 @@ export default abstract class Session {
             round,
         );
 
+        if (voiceConnectionSuccess) {
+            this.stateMachine.transition(SessionState.ROUND_ACTIVE);
+        }
+
         return voiceConnectionSuccess ? this.round : null;
     }
 
@@ -370,6 +381,8 @@ export default abstract class Session {
             return;
         }
 
+        this.stateMachine.transition(SessionState.ROUND_ENDING);
+
         this.round = null;
 
         // cleanup
@@ -377,6 +390,7 @@ export default abstract class Session {
 
         if (this.finished) return;
         this.roundsPlayed++;
+        this.stateMachine.transition(SessionState.BETWEEN_ROUNDS);
         // check if duration has been reached
         const remainingDuration = this.getRemainingDuration(
             this.guildPreference,
@@ -394,6 +408,7 @@ export default abstract class Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
+        this.stateMachine.transition(SessionState.ENDING);
         logger.info(
             `gid: ${this.guildID} | Session ended. endedDueToError: ${endedDueToError}. Reason: ${reason}`,
         );
@@ -511,6 +526,8 @@ export default abstract class Session {
                 games_played: sql`games_played + 1`,
             })
             .execute();
+
+        this.stateMachine.transition(SessionState.ENDED);
     }
 
     /**

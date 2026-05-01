@@ -1,15 +1,13 @@
-FROM mcr.microsoft.com/vscode/devcontainers/typescript-node:22-bullseye
+FROM mcr.microsoft.com/devcontainers/python:3.14-bookworm
+
+RUN curl -fsSL https://deb.nodesource.com/setup_24.x | bash - && \
+    apt-get install -y nodejs
 
 RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-    && apt-get -y install --no-install-recommends git \ 
-    python3 \
-    make \
-    g++ \
-    autoconf \
-    automake \
-    libtool \
-    mariadb-client \
-    ffmpeg
+    && apt-get -y install --no-install-recommends \
+    git make g++ autoconf automake libtool \
+    mariadb-client ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN npm install -g yarn
-RUN mkdir /songs && chown node:node /songs
+
+RUN mkdir /songs && chown vscode:vscode /songs
