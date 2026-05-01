@@ -120,24 +120,6 @@ export default class Scoreboard {
         this.recomputeFirstPlace();
     }
 
-    /**
-     * Recompute highestScore and firstPlace from scratch by iterating all players.
-     * Called after every mutation to ensure consistency regardless of interleaving.
-     */
-    protected recomputeFirstPlace(): void {
-        this.highestScore = 0;
-        this.firstPlace = [];
-        for (const player of Object.values(this.players)) {
-            const score = player.getScore();
-            if (score > this.highestScore) {
-                this.highestScore = score;
-                this.firstPlace = [player];
-            } else if (score === this.highestScore && score > 0) {
-                this.firstPlace.push(player);
-            }
-        }
-    }
-
     /** @returns a list of the player currently in first place */
     getWinners(): Array<Player> {
         return this.firstPlace;
@@ -298,6 +280,24 @@ export default class Scoreboard {
                     !incorrectGuessers.has(player.id) &&
                     !correctGuessers.map((x) => x).includes(player.id),
             );
+    }
+
+    /**
+     * Recompute highestScore and firstPlace from scratch by iterating all players.
+     * Called after every mutation to ensure consistency regardless of interleaving.
+     */
+    protected recomputeFirstPlace(): void {
+        this.highestScore = 0;
+        this.firstPlace = [];
+        for (const player of Object.values(this.players)) {
+            const score = player.getScore();
+            if (score > this.highestScore) {
+                this.highestScore = score;
+                this.firstPlace = [player];
+            } else if (score === this.highestScore && score > 0) {
+                this.firstPlace.push(player);
+            }
+        }
     }
 
     /**
