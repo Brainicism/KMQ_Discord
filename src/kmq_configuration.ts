@@ -89,6 +89,6 @@ export default class KmqConfiguration {
     }
 
     downloadWithOnesieRequest(): boolean {
-        return this.config["downloadWithOnesieRequest"] ?? true;
+        return this.config["downloadWithOnesieRequest"] ?? false;
     }
 }

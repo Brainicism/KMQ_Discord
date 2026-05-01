@@ -52,6 +52,7 @@ import {
     VOTE_LINK,
 } from "../constants";
 import { IPCLogger } from "../logger";
+import { SessionState } from "./session_state";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import ClipAction from "../enums/clip_action";
@@ -177,6 +178,10 @@ export default class GameSession extends Session {
             default:
                 this.scoreboard = new Scoreboard(voiceChannelID);
                 break;
+        }
+
+        if (this.gameType === GameType.TEAMS) {
+            this.stateMachine.transition(SessionState.LOBBY);
         }
 
         // eslint-disable-next-line @typescript-eslint/require-await

@@ -18,7 +18,6 @@
             ],
         },
     },
-    "remoteUser": "node",
     "postCreateCommand": "/bin/sh .devcontainer/post_create_command.sh",
     "postAttachCommand": "/bin/sh .devcontainer/post_attach_command.sh",
 }
