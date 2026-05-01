@@ -350,13 +350,7 @@ describe("elimination scoreboard", () => {
             it("should return startingLives as fallback when all players are dead", () => {
                 // Kill all players by making others guess many times
                 for (let i = 0; i < DEFAULT_LIVES; i++) {
-                    scoreboard.update([
-                        {
-                            userID: "nonexistent",
-                            pointsEarned: 0,
-                            expGain: 0,
-                        },
-                    ]);
+                    scoreboard.update([]);
                 }
 
                 // All players should be dead now
@@ -384,9 +378,7 @@ describe("elimination scoreboard", () => {
 
             it("should show all players tied when no one guesses", () => {
                 // No one guesses - everyone loses a life equally
-                scoreboard.update([
-                    { userID: "nonexistent", pointsEarned: 0, expGain: 0 },
-                ]);
+                scoreboard.update([]);
 
                 // All three players should be tied at DEFAULT_LIVES - 1
                 const winners = scoreboard.getWinners();
