@@ -603,12 +603,7 @@ export default class GameSession extends Session {
                               .startingLives,
                           firstGameOfDay,
                       )
-                    : Player.fromUser(
-                          player,
-                          this.guildID,
-                          0,
-                          firstGameOfDay,
-                      ),
+                    : Player.fromUser(player, this.guildID, 0, firstGameOfDay),
             );
         }
     }

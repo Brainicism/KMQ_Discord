@@ -116,9 +116,11 @@ export default class EliminationScoreboard extends Scoreboard {
             return this.startingLives;
         }
 
-        return alivePlayers.reduce((prev, curr) =>
-            prev.getLives() < curr.getLives() ? prev : curr,
-        ).getLives();
+        return alivePlayers
+            .reduce((prev, curr) =>
+                prev.getLives() < curr.getLives() ? prev : curr,
+            )
+            .getLives();
     }
 
     /** @returns the number of players that are alive */
