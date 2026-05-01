@@ -1076,7 +1076,6 @@ export default class GameSession extends Session {
             return;
         }
 
-
         // sets the round to null
         await super.endRound(false, messageContext);
 
