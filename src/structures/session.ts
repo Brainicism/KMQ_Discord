@@ -60,8 +60,8 @@ import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 import { SessionState, SessionStateMachine } from "./session_state";
-import { TypedEventEmitter } from "./typed_event_emitter";
 import { TimerManager } from "./timer_manager";
+import { TypedEventEmitter } from "./typed_event_emitter";
 import type { SessionEvents } from "./session_events";
 
 const logger = new IPCLogger("session");
