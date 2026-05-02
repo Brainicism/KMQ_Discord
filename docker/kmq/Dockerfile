@@ -29,12 +29,12 @@ RUN chmod u+x bin/yt-dlp
 COPY src/ src/
 RUN npx tsc
 
-# Build the Discord Activity SPA. Vite reads VITE_DISCORD_CLIENT_ID at
-# build time and bakes it into the bundle, so the build arg has to be
-# passed through to the build command's environment. The activity bundle
-# is stored unbuilt in the source tree; its dist/ is produced here.
-ARG VITE_DISCORD_CLIENT_ID=""
-ENV VITE_DISCORD_CLIENT_ID=$VITE_DISCORD_CLIENT_ID
+# Build the Discord Activity SPA. Vite bakes BOT_CLIENT_ID into the
+# bundle at build time (see activity/vite.config.ts's envPrefix), so the
+# value must be passed through the build stage's environment. The activity
+# source is stored unbuilt in the tree; dist/ is produced here.
+ARG BOT_CLIENT_ID=""
+ENV BOT_CLIENT_ID=$BOT_CLIENT_ID
 COPY activity/package.json activity/yarn.lock activity/tsconfig.json \
      activity/vite.config.ts activity/index.html activity/
 COPY activity/src/ activity/src/

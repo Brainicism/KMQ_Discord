@@ -3,13 +3,13 @@ import { DiscordSDK } from "@discord/embedded-app-sdk";
 
 let sdkPromise: Promise<DiscordSDK> | null = null;
 
-const CLIENT_ID = import.meta.env.VITE_DISCORD_CLIENT_ID as string | undefined;
+const CLIENT_ID = import.meta.env.BOT_CLIENT_ID as string | undefined;
 
 export function getDiscordSdk(): Promise<DiscordSDK> {
     if (sdkPromise !== null) return sdkPromise;
     if (!CLIENT_ID) {
         return Promise.reject(
-            new Error("VITE_DISCORD_CLIENT_ID is not configured"),
+            new Error("BOT_CLIENT_ID is not configured"),
         );
     }
 
