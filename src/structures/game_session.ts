@@ -262,7 +262,7 @@ export default class GameSession extends Session {
     ): Promise<void> {
         const waitStart = Date.now();
         try {
-            return await this.lifecycleMutex.runExclusive(() => {
+            await this.lifecycleMutex.runExclusive(async () => {
                 const waitMs = Date.now() - waitStart;
                 if (waitMs > 5000) {
                     logger.warn(
@@ -270,7 +270,7 @@ export default class GameSession extends Session {
                     );
                 }
 
-                return this.endRoundCore(isError, messageContext, gameRound);
+                await this.endRoundCore(isError, messageContext, gameRound);
             });
         } catch (e) {
             if (e === E_TIMEOUT) {
@@ -295,7 +295,7 @@ export default class GameSession extends Session {
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
         const waitStart = Date.now();
         try {
-            return await this.lifecycleMutex.runExclusive(() => {
+            await this.lifecycleMutex.runExclusive(async () => {
                 const waitMs = Date.now() - waitStart;
                 if (waitMs > 5000) {
                     logger.warn(
@@ -303,7 +303,7 @@ export default class GameSession extends Session {
                     );
                 }
 
-                return this.endSessionCore(reason, endedDueToError);
+                await this.endSessionCore(reason, endedDueToError);
             });
         } catch (e) {
             if (e === E_TIMEOUT) {
