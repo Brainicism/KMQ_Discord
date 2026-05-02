@@ -1,4 +1,5 @@
 import type ActivityCorrectGuesser from "./activity_correct_guesser";
+import type ActivityOptionsSnapshot from "./activity_options_snapshot";
 import type ActivityRoundGuess from "./activity_round_guess";
 import type ActivityRoundMeta from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
@@ -28,4 +29,7 @@ export default interface UiState {
      *  to decide whether the "session ended" splash should render a winner
      *  banner. A fresh open with no active session should NOT show it. */
     hadSession: boolean;
+    /** Current GuildPreference values surfaced by the Activity options panel.
+     *  Null until the first snapshot/optionsChanged arrives. */
+    options: ActivityOptionsSnapshot | null;
 }

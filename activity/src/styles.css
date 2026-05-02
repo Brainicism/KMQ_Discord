@@ -188,6 +188,76 @@ body {
     gap: 8px;
 }
 
+.options-panel {
+    background: #2b2d31;
+    border-radius: 6px;
+    padding: 12px 16px;
+}
+
+.options-panel > summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #b5bac1;
+    user-select: none;
+}
+
+.options-panel[open] > summary {
+    margin-bottom: 10px;
+}
+
+.options-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 8px 0;
+    border-top: 1px solid #1e1f22;
+}
+
+.options-group:first-of-type {
+    border-top: 0;
+}
+
+.options-label {
+    font-size: 0.85rem;
+    color: #b5bac1;
+}
+
+.options-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.option-chip {
+    background: #1e1f22;
+    border: 1px solid #3f4147;
+    color: inherit;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+        background 0.15s ease,
+        border-color 0.15s ease;
+}
+
+.option-chip:hover:not(:disabled) {
+    border-color: #5865f2;
+}
+
+.option-chip.active {
+    background: #404a28;
+    border-color: #fbb03b;
+    color: #fbb03b;
+}
+
+.options-feedback {
+    color: #f23f42;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 6px;
+}
+
 .vote-row .hint-control {
     margin: 0;
 }

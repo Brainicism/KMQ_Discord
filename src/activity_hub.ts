@@ -13,6 +13,7 @@ import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
 import type ActivityReplyMessage from "./interfaces/activity_reply_message";
 import type ActivityRequestOp from "./enums/activity_request_op";
+import type ActivitySetOptionArgs from "./interfaces/activity_set_option_args";
 import type ActivitySnapshot from "./interfaces/activity_snapshot";
 import type ActivityStartGameArgs from "./interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "./interfaces/activity_user_action_args";
@@ -209,6 +210,22 @@ export default class ActivityHub {
     }
 
     /**
+     * Applies a GuildPreference change submitted from the Activity.
+     * @param args - the discriminated payload; see ActivitySetOptionArgs
+     * @returns the worker's accept/reject response
+     */
+    async setOption(
+        args: ActivitySetOptionArgs,
+    ): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(
+            target,
+            "setOption",
+            args,
+        );
+    }
+
+    /**
      * Adds a subscriber to receive live events for a guild.
      * @param guildID - the guild whose events to forward
      * @param subscriber - the subscriber's send/close handles
@@ -324,7 +341,8 @@ export default class ActivityHub {
             | ActivityGuessArgs
             | ActivityStartGameArgs
             | ActivityUserActionArgs
-            | ActivityBookmarkArgs,
+            | ActivityBookmarkArgs
+            | ActivitySetOptionArgs,
     ): Promise<T> {
         const cid = uuid.v4();
         return new Promise<T>((resolve, reject) => {
