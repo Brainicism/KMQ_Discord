@@ -8,7 +8,11 @@ BEGIN
 	
 	UPDATE kpop_videos.app_kpop a
 	LEFT JOIN kpop_videos.app_kpop b ON a.id_better_audio = b.id
-	SET a.better_audio_link = b.vlink;
+	SET a.better_audio_link = CASE
+		WHEN a.id_better_audio IS NULL THEN NULL
+		WHEN b.id IS NOT NULL THEN b.vlink
+		ELSE a.better_audio_link
+	END;
 
 	DELETE a
 	FROM kpop_videos.app_kpop a
