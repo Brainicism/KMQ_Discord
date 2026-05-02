@@ -154,8 +154,8 @@ const program = new Command()
         false,
     );
 
-program.parse();
-const options = program.opts();
+// Use defaults when imported as a module; only parse CLI args when running directly
+let options = program.opts();
 
 async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
     return (
@@ -795,6 +795,8 @@ async function reloadAutocompleteData(): Promise<void> {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
+        program.parse();
+        options = program.opts();
         logger.info(JSON.stringify(options));
         const db = getNewConnection();
         const availableSongsBefore = await db.kmq

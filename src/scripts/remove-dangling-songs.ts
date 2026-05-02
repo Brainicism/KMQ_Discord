@@ -12,10 +12,10 @@ const logger = new IPCLogger("remove-dangling-songs");
 config({ path: path.resolve(__dirname, "../../.env") });
 
 const program = new Command().option("--delete", "Delete the songs");
-program.parse();
 
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
+    program.parse();
     const options = program.opts();
     const db = getNewConnection();
     const availableSongs = (
