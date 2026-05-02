@@ -431,4 +431,83 @@ describe("scoreboard", () => {
             });
         });
     });
+
+    describe("recomputeFirstPlace (Phase 5 hardening)", () => {
+        it("should maintain correct firstPlace after interleaved updates", () => {
+            // Player 0 scores first
+            scoreboard.update([
+                { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 1);
+            assert.strictEqual(scoreboard.getWinners()[0]!.id, userIDs[0]);
+
+            // Player 1 scores, ties
+            scoreboard.update([
+                { userID: userIDs[1]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 2);
+
+            // Player 0 scores again, takes the lead
+            scoreboard.update([
+                { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 1);
+            assert.strictEqual(scoreboard.getWinners()[0]!.id, userIDs[0]);
+        });
+
+        it("should handle three-way tie correctly", () => {
+            scoreboard.update([
+                { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+            ]);
+
+            scoreboard.update([
+                { userID: userIDs[1]!, pointsEarned: 1, expGain: 0 },
+            ]);
+
+            scoreboard.update([
+                { userID: userIDs[2]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 3);
+        });
+
+        it("should correctly update when leader changes", () => {
+            // Player 0 takes lead with 3 points
+            for (let i = 0; i < 3; i++) {
+                scoreboard.update([
+                    { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+                ]);
+            }
+
+            assert.strictEqual(scoreboard.getWinners()[0]!.id, userIDs[0]);
+
+            // Player 1 overtakes with 4 points
+            for (let i = 0; i < 4; i++) {
+                scoreboard.update([
+                    { userID: userIDs[1]!, pointsEarned: 1, expGain: 0 },
+                ]);
+            }
+
+            assert.strictEqual(scoreboard.getWinners().length, 1);
+            assert.strictEqual(scoreboard.getWinners()[0]!.id, userIDs[1]);
+        });
+
+        it("should return empty array when no one has scored", () => {
+            assert.strictEqual(scoreboard.getWinners().length, 0);
+        });
+
+        it("should handle multiguess recomputeFirstPlace correctly", () => {
+            // Both players score in same round
+            scoreboard.update([
+                { userID: userIDs[0]!, pointsEarned: 1, expGain: 0 },
+                { userID: userIDs[1]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 2);
+
+            // Player 2 scores alone, three-way tie
+            scoreboard.update([
+                { userID: userIDs[2]!, pointsEarned: 1, expGain: 0 },
+            ]);
+            assert.strictEqual(scoreboard.getWinners().length, 3);
+        });
+    });
 });

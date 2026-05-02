@@ -564,51 +564,48 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Add all players in VC that aren't tracked to the scoreboard, and update those who left
+     * Sync scoreboard with current VC members.
+     * Sequential iteration prevents concurrent addPlayer/setPlayerInVC interleaving.
      */
     async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMemberIds = getCurrentVoiceMembers(
             this.voiceChannelID,
         ).map((x) => x.id);
 
-        await Promise.allSettled(
-            this.scoreboard
-                .getPlayerIDs()
-                .filter((x) => !currentVoiceMemberIds.includes(x))
-                .map(async (player) => {
-                    await this.setPlayerInVC(player, false);
-                }),
-        );
+        const departedPlayers = this.scoreboard
+            .getPlayerIDs()
+            .filter((x) => !currentVoiceMemberIds.includes(x));
+
+        for (const player of departedPlayers) {
+            // eslint-disable-next-line no-await-in-loop
+            await this.setPlayerInVC(player, false);
+        }
 
         if (this.gameType === GameType.TEAMS) {
-            // Players join teams manually with /join
             return;
         }
 
-        await Promise.allSettled(
-            currentVoiceMemberIds
-                .filter((x) => x !== process.env.BOT_CLIENT_ID)
-                .map(async (playerId) => {
-                    const firstGameOfDay = await isFirstGameOfDay(playerId);
-                    const player = (await fetchUser(playerId)) as Eris.User;
-                    this.scoreboard.addPlayer(
-                        this.gameType === GameType.ELIMINATION
-                            ? EliminationPlayer.fromUser(
-                                  player,
-                                  this.guildID,
-                                  (this.scoreboard as EliminationScoreboard)
-                                      .startingLives,
-                                  firstGameOfDay,
-                              )
-                            : Player.fromUser(
-                                  player,
-                                  this.guildID,
-                                  0,
-                                  firstGameOfDay,
-                              ),
-                    );
-                }),
+        const newPlayers = currentVoiceMemberIds.filter(
+            (x) => x !== process.env.BOT_CLIENT_ID,
         );
+
+        for (const playerId of newPlayers) {
+            // eslint-disable-next-line no-await-in-loop
+            const firstGameOfDay = await isFirstGameOfDay(playerId);
+            // eslint-disable-next-line no-await-in-loop
+            const player = (await fetchUser(playerId)) as Eris.User;
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUser(
+                          player,
+                          this.guildID,
+                          (this.scoreboard as EliminationScoreboard)
+                              .startingLives,
+                          firstGameOfDay,
+                      )
+                    : Player.fromUser(player, this.guildID, 0, firstGameOfDay),
+            );
+        }
     }
 
     /**
