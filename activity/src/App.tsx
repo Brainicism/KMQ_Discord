@@ -849,6 +849,30 @@ function OptionsPanel({
         );
     };
 
+    const submitLimit = (start: number, end: number): void => {
+        if (start >= end) return;
+        void submit(
+            { kind: "limit", limitStart: start, limitEnd: end },
+            { ...options, limitStart: start, limitEnd: end },
+        );
+    };
+
+    const submitCutoff = (beginning: number, end: number): void => {
+        if (beginning > end) return;
+        void submit(
+            { kind: "cutoff", beginningYear: beginning, endYear: end },
+            { ...options, beginningYear: beginning, endYear: end },
+        );
+    };
+
+    const submitGoal = (goal: number | null): void => {
+        void submit({ kind: "goal", goal }, { ...options, goal });
+    };
+
+    const submitTimer = (timer: number | null): void => {
+        void submit({ kind: "timer", timer }, { ...options, timer });
+    };
+
     return (
         <details className="options-panel" open>
             <summary>{t("options.heading")}</summary>
@@ -916,8 +940,178 @@ function OptionsPanel({
                 </div>
             </div>
 
+            <NumberRangeGroup
+                label={t("options.limit")}
+                startValue={options.limitStart}
+                endValue={options.limitEnd}
+                startMin={0}
+                startMax={100000}
+                endMin={1}
+                endMax={100000}
+                onCommit={submitLimit}
+            />
+
+            <NumberRangeGroup
+                label={t("options.cutoff")}
+                startValue={options.beginningYear}
+                endValue={options.endYear}
+                startMin={1900}
+                startMax={new Date().getFullYear()}
+                endMin={1900}
+                endMax={new Date().getFullYear()}
+                onCommit={submitCutoff}
+            />
+
+            <NullableNumberGroup
+                label={t("options.goal")}
+                value={options.goal}
+                min={1}
+                max={100000}
+                onCommit={submitGoal}
+                offLabel={t("options.off")}
+            />
+
+            <NullableNumberGroup
+                label={t("options.timer")}
+                value={options.timer}
+                min={2}
+                max={180}
+                onCommit={submitTimer}
+                offLabel={t("options.off")}
+            />
+
             {feedback && <span className="options-feedback">{feedback}</span>}
         </details>
+    );
+}
+
+function NumberRangeGroup({
+    label,
+    startValue,
+    endValue,
+    startMin,
+    startMax,
+    endMin,
+    endMax,
+    onCommit,
+}: {
+    label: string;
+    startValue: number;
+    endValue: number;
+    startMin: number;
+    startMax: number;
+    endMin: number;
+    endMax: number;
+    onCommit: (start: number, end: number) => void;
+}) {
+    const [start, setStart] = useState(String(startValue));
+    const [end, setEnd] = useState(String(endValue));
+
+    // Re-sync when the wire-side value changes (optimistic write, or a
+    // slash-command-driven optionsChanged event).
+    useEffect(() => setStart(String(startValue)), [startValue]);
+    useEffect(() => setEnd(String(endValue)), [endValue]);
+
+    const commit = (): void => {
+        const s = parseInt(start, 10);
+        const e = parseInt(end, 10);
+        if (!Number.isInteger(s) || !Number.isInteger(e)) {
+            setStart(String(startValue));
+            setEnd(String(endValue));
+            return;
+        }
+        if (s === startValue && e === endValue) return;
+        onCommit(s, e);
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-row">
+                <input
+                    type="number"
+                    className="option-number"
+                    value={start}
+                    min={startMin}
+                    max={startMax}
+                    onChange={(e) => setStart(e.target.value)}
+                    onBlur={commit}
+                />
+                <span className="option-range-sep">–</span>
+                <input
+                    type="number"
+                    className="option-number"
+                    value={end}
+                    min={endMin}
+                    max={endMax}
+                    onChange={(e) => setEnd(e.target.value)}
+                    onBlur={commit}
+                />
+            </div>
+        </div>
+    );
+}
+
+function NullableNumberGroup({
+    label,
+    value,
+    min,
+    max,
+    onCommit,
+    offLabel,
+}: {
+    label: string;
+    value: number | null;
+    min: number;
+    max: number;
+    onCommit: (next: number | null) => void;
+    offLabel: string;
+}) {
+    // Keep a local text state so typing doesn't immediately fire a write.
+    // Commit on blur, or on clicking the Off chip.
+    const [text, setText] = useState(value === null ? "" : String(value));
+
+    useEffect(() => {
+        setText(value === null ? "" : String(value));
+    }, [value]);
+
+    const commit = (): void => {
+        if (text.trim() === "") {
+            if (value !== null) onCommit(null);
+            return;
+        }
+        const n = parseInt(text, 10);
+        if (!Number.isInteger(n) || n < min || n > max) {
+            setText(value === null ? "" : String(value));
+            return;
+        }
+        if (n === value) return;
+        onCommit(n);
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-row">
+                <input
+                    type="number"
+                    className="option-number"
+                    value={text}
+                    min={min}
+                    max={max}
+                    placeholder={offLabel}
+                    onChange={(e) => setText(e.target.value)}
+                    onBlur={commit}
+                />
+                <button
+                    type="button"
+                    className={`option-chip ${value === null ? "active" : ""}`}
+                    onClick={() => onCommit(null)}
+                >
+                    {offLabel}
+                </button>
+            </div>
+        </div>
     );
 }
 

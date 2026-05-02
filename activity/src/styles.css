@@ -258,6 +258,27 @@ body {
     margin-top: 6px;
 }
 
+.option-number {
+    background: #1e1f22;
+    border: 1px solid #3f4147;
+    color: inherit;
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 0.9rem;
+    width: 90px;
+    font-variant-numeric: tabular-nums;
+}
+
+.option-number:focus {
+    outline: none;
+    border-color: #5865f2;
+}
+
+.option-range-sep {
+    color: #6d6f78;
+    align-self: center;
+}
+
 .vote-row .hint-control {
     margin: 0;
 }
