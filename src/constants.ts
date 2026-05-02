@@ -363,11 +363,6 @@ export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
 export const BGUTIL_PROVIDER_URL =
     process.env.BGUTIL_PROVIDER_URL ?? "http://127.0.0.1:4416";
 
-export const YOUTUBE_SESSION_TMP_COOKIE_PATH = path.join(
-    __dirname,
-    "../data/yt_session.cookie.tmp",
-);
-
 export const PLAYLIST_CACHE_TTL_HOURS = 12;
 
 // IPC channels for the Discord Activity bridge (admiral ↔ workers).

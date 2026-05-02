@@ -138,6 +138,7 @@ export default class ServiceWorker extends BaseServiceWorker {
         }
 
         if (!process.env.GEMINI_API_KEY) {
+            logger.info("Skipping news generation, GEMINI_API_KEY is not set");
             return;
         }
 

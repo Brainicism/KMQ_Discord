@@ -57,13 +57,7 @@ export default class TeamScoreboard extends Scoreboard {
         );
 
         if (correctGuesserTeam) {
-            const correctGuesserTeamScore = correctGuesserTeam.getScore();
-            if (correctGuesserTeamScore === this.highestScore) {
-                this.firstPlace.push(correctGuesserTeam);
-            } else if (correctGuesserTeamScore > this.highestScore) {
-                this.highestScore = correctGuesserTeamScore;
-                this.firstPlace = [correctGuesserTeam];
-            }
+            this.recomputeFirstPlace();
         }
     }
 

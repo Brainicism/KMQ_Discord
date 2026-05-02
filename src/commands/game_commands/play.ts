@@ -18,6 +18,7 @@ import {
     isFirstGameOfDay,
     isPowerHour,
 } from "../../helpers/game_utils";
+import { attachActivityBridge } from "../../structures/activity_bridge";
 import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
 import {
     clickableSlashCommand,
@@ -41,7 +42,6 @@ import AnswerCommand from "../game_options/answer";
 import AnswerType from "../../enums/option_types/answer_type";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
-// eslint-disable-next-line import/no-cycle
 import GameSession from "../../structures/game_session";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
@@ -1537,6 +1537,11 @@ export default class PlayCommand implements BaseCommand {
         }
 
         State.gameSessions[guildID] = gameSession;
+        // Attach the Activity bridge after registration so any sessionStart
+        // event the bridge emits finds the session in State.gameSessions.
+        // Kept out of the GameSession constructor to avoid a cyclic import
+        // (game_session ↔ activity_bridge ↔ play).
+        attachActivityBridge(gameSession);
         if (gameSession.isHiddenMode()) {
             if (!guildPreference.isGuessTimeoutSet()) {
                 await guildPreference.setGuessTimeout(HIDDEN_DEFAULT_TIMER);

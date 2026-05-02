@@ -18,8 +18,8 @@ const program = new Command().option(
     "The dump file to import",
 );
 
-program.parse();
-const options = program.opts();
+// Use defaults when imported as a module; only parse CLI args when running directly
+let options = program.opts();
 
 /**
  * Backups the current KMQ database
@@ -76,6 +76,8 @@ function importKmqDatabase(fileWithPath: string): void {
 // eslint-disable-next-line @typescript-eslint/no-floating-promises
 (async () => {
     if (require.main === module) {
+        program.parse();
+        options = program.opts();
         if (options.import) {
             importKmqDatabase(options.import);
         } else {

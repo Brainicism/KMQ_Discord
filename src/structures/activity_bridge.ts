@@ -1,12 +1,8 @@
-// Cycle: game_session.ts imports attachActivityBridge from this module, and
-// the command imports below transitively import game_session.ts. The cycle is
-// runtime-safe because each side only references the other through function
-// calls that happen after both modules finish loading.
-/* eslint-disable import/no-cycle */
 import {
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
+    HIDDEN_DEFAULT_TIMER,
     youtubeThumbnailUrl,
 } from "../constants";
 import { IPCLogger } from "../logger";
@@ -17,13 +13,16 @@ import {
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
+// Not a cycle: game_session.ts no longer imports this module — the
+// attachActivityBridge call was moved to PlayCommand alongside the
+// State.gameSessions write, so this import is a one-way edge.
+import GameSession from "./game_session";
 import GameType from "../enums/game_type";
 import GuildPreference from "./guild_preference";
 import HintCommand from "../commands/game_commands/hint";
 import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
-import PlayCommand from "../commands/game_commands/play";
 import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
@@ -44,7 +43,6 @@ import type ActivitySnapshot from "../interfaces/activity_snapshot";
 import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
-import type GameSession from "./game_session";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
@@ -478,13 +476,60 @@ function ensureWorkerHandlerRegistered(): void {
                         );
 
                         try {
-                            await PlayCommand.startGame(
-                                messageContext,
+                            // Inline classic-mode start. Duplicates the tail
+                            // of PlayCommand.startGameLocked on purpose —
+                            // once Phase 5 retires the chat-channel /play
+                            // flow the full slash-command variant goes away
+                            // and this becomes the only start path. Keeping
+                            // the import graph acyclic matters more than
+                            // the small duplication here (Activity bridge
+                            // must not import PlayCommand, because
+                            // play.ts → game_session.ts → activity_bridge.ts
+                            // would cycle right back through PlayCommand).
+                            const guildPreference =
+                                await GuildPreference.getGuildPreference(
+                                    startArgs.guildID,
+                                );
+
+                            const gameOwner = new KmqMember(startArgs.userID);
+                            const gameSession = new GameSession(
+                                guildPreference,
+                                startArgs.textChannelID,
+                                startArgs.voiceChannelID,
+                                startArgs.guildID,
+                                gameOwner,
                                 GameType.CLASSIC,
-                                null,
-                                false,
-                                false,
                             );
+
+                            // Swap out any stale non-initialized session
+                            // (mirrors the slash-command path).
+                            const previous = Session.getSession(
+                                startArgs.guildID,
+                            );
+
+                            if (previous) {
+                                await previous.endSession(
+                                    "Replaced by Activity startGame",
+                                    false,
+                                );
+                            }
+
+                            State.gameSessions[startArgs.guildID] = gameSession;
+                            // Safe to forward-reference: IPC handlers only
+                            // fire after module load is complete.
+                            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+                            attachActivityBridge(gameSession);
+
+                            if (
+                                gameSession.isHiddenMode() &&
+                                !guildPreference.isGuessTimeoutSet()
+                            ) {
+                                await guildPreference.setGuessTimeout(
+                                    HIDDEN_DEFAULT_TIMER,
+                                );
+                            }
+
+                            await gameSession.startRound(messageContext);
                             reply({ ok: true });
                         } catch (e) {
                             logger.error(
