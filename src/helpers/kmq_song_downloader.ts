@@ -98,8 +98,11 @@ export default class KmqSongDownloader {
             let songsToDownload = allSongs;
 
             if (songOverrides) {
-                songsToDownload = songsToDownload.filter((x) =>
-                    songOverrides.includes(x.youtubeLink),
+                songsToDownload = songsToDownload.filter(
+                    (x) =>
+                        songOverrides.includes(x.youtubeLink) ||
+                        (x.betterAudioLink !== null &&
+                            songOverrides.includes(x.betterAudioLink)),
                 );
             }
 
@@ -147,7 +150,10 @@ export default class KmqSongDownloader {
 
             logger.info(`Total songs in database: ${allSongs.length}`);
             songsToDownload = songsToDownload.filter(
-                (x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`),
+                (x) =>
+                    !currentlyDownloadedFiles.has(
+                        `${x.betterAudioLink ?? x.youtubeLink}.ogg`,
+                    ) && !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`),
             );
 
             songsToDownload = songsToDownload.filter(
@@ -201,30 +207,32 @@ export default class KmqSongDownloader {
                         );
                     }
 
-                    const cachedSongLocation = path.join(
-                        process.env.SONG_DOWNLOAD_DIR as string,
-                        `${song.youtubeLink}.m4a`,
-                    );
-
+                    let downloadedId: string;
                     try {
                         if (process.env.MOCK_AUDIO === "true") {
+                            downloadedId =
+                                song.betterAudioLink ?? song.youtubeLink;
+
                             logger.info(
-                                `Mocking downloading for ${song.youtubeLink}`,
+                                `Mocking downloading for ${downloadedId}`,
                             );
 
                             await fs.promises.copyFile(
                                 path.resolve(__dirname, "../test/silence.m4a"),
-                                cachedSongLocation,
+                                path.join(
+                                    process.env.SONG_DOWNLOAD_DIR as string,
+                                    `${downloadedId}.m4a`,
+                                ),
                             );
                         } else {
                             try {
-                                await this.downloadYouTubeAudioWithFallback(
-                                    db,
-                                    song.youtubeLink,
-                                    song.betterAudioLink,
-                                    cachedSongLocation,
-                                    proxy,
-                                );
+                                downloadedId =
+                                    await this.downloadYouTubeAudioWithFallback(
+                                        db,
+                                        song.youtubeLink,
+                                        song.betterAudioLink,
+                                        proxy,
+                                    );
                             } catch (e) {
                                 throw new Error(
                                     `Failed to download video for '${song.youtubeLink}'. error = ${e}`,
@@ -240,13 +248,19 @@ export default class KmqSongDownloader {
                     }
 
                     logger.info(
-                        `Encoding song: '${song.songName}' by ${song.artistName} | ${song.youtubeLink}`,
+                        `Encoding song: '${song.songName}' by ${song.artistName} | ${downloadedId}`,
                     );
                     try {
-                        await this.encodeToOpus(cachedSongLocation, db);
+                        await this.encodeToOpus(
+                            path.join(
+                                process.env.SONG_DOWNLOAD_DIR as string,
+                                `${downloadedId}.m4a`,
+                            ),
+                            db,
+                        );
                     } catch (err) {
                         logger.error(
-                            `Error encoding song ${song.youtubeLink}, exiting... err = ${err}`,
+                            `Error encoding song ${downloadedId}, exiting... err = ${err}`,
                         );
                         break;
                     }
@@ -493,22 +507,33 @@ export default class KmqSongDownloader {
         }
     }
 
+    /**
+     * Downloads audio, preferring the better audio link if available.
+     * Files are saved under the actual downloaded YouTube ID so that
+     * filenames on disk reflect the real audio source.
+     * @returns the YouTube ID that was actually downloaded
+     */
     private async downloadYouTubeAudioWithFallback(
         db: DatabaseContext,
         videoId: string,
         videoIdBetterAudio: string | null,
-        outputFile: string,
         proxy: string | undefined,
-    ): Promise<void> {
+    ): Promise<string> {
+        const downloadDir = process.env.SONG_DOWNLOAD_DIR as string;
         if (videoIdBetterAudio) {
             try {
+                const outputFile = path.join(
+                    downloadDir,
+                    `${videoIdBetterAudio}.m4a`,
+                );
+
                 await this.downloadYouTubeAudio(
                     db,
                     videoIdBetterAudio,
                     outputFile,
                     proxy,
                 );
-                return;
+                return videoIdBetterAudio;
             } catch (e) {
                 logger.warn(
                     `Failed to download better audio link ${videoIdBetterAudio}, falling back to main link ${videoId}. err = ${e}`,
@@ -516,7 +541,9 @@ export default class KmqSongDownloader {
             }
         }
 
+        const outputFile = path.join(downloadDir, `${videoId}.m4a`);
         await this.downloadYouTubeAudio(db, videoId, outputFile, proxy);
+        return videoId;
     }
 
     private async downloadYouTubeAudio(
@@ -599,6 +626,7 @@ export default class KmqSongDownloader {
             views: number;
             artistName: string;
             youtubeLink: string;
+            betterAudioLink: string | null;
         }>,
     ): Promise<void> {
         // update list of non-downloaded songs
@@ -607,7 +635,10 @@ export default class KmqSongDownloader {
 
         const songIDsNotDownloaded = songs
             .filter(
-                (x) => !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`),
+                (x) =>
+                    !currentlyDownloadedFiles.has(
+                        `${x.betterAudioLink ?? x.youtubeLink}.ogg`,
+                    ) && !currentlyDownloadedFiles.has(`${x.youtubeLink}.ogg`),
             )
             .map((x) => ({ vlink: x.youtubeLink }));
 

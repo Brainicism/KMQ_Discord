@@ -29,6 +29,7 @@ import {
     extractErrorString,
     friendlyFormattedNumber,
     getMention,
+    pathExistsSync,
     truncatedString,
     underline,
 } from "../helpers/utils";
@@ -801,17 +802,22 @@ export default abstract class Session extends EventEmitter {
             return false;
         }
 
-        let songLocation = `${process.env.SONG_DOWNLOAD_DIR}/${round.song.youtubeLink}.ogg`;
+        let songLocation = Session.resolveSongAudioPath(round.song);
 
         const seekType = this.isListeningSession()
             ? SeekType.BEGINNING
             : this.guildPreference.gameOptions.seekType;
 
+        // Duration is cached under the actual audio file ID, which may
+        // be the better_audio link rather than the original video ID.
+        const audioFileId =
+            round.song.betterAudioLink ?? round.song.youtubeLink;
+
         let songDuration = (
             await dbContext.kmq
                 .selectFrom("cached_song_duration")
                 .select(["duration"])
-                .where("vlink", "=", round.song.youtubeLink)
+                .where("vlink", "=", audioFileId)
                 .executeTakeFirst()
         )?.duration;
 
@@ -1303,6 +1309,27 @@ export default abstract class Session extends EventEmitter {
      */
     private getDebugSongDetails(round: Round): string {
         return `${round.song.songName}:${round.song.artistName}:${round.song.youtubeLink}`;
+    }
+
+    /**
+     * Resolves the audio file path for a song, preferring the better_audio file.
+     * Files are saved by their actual YouTube ID, so a song with betterAudioLink
+     * will have its file named after the betterAudioLink ID.
+     */
+    private static resolveSongAudioPath(song: QueriedSong): string {
+        const dir = process.env.SONG_DOWNLOAD_DIR!;
+        if (song.betterAudioLink) {
+            const betterPath = `${dir}/${song.betterAudioLink}.ogg`;
+            if (pathExistsSync(betterPath)) {
+                return betterPath;
+            }
+
+            logger.warn(
+                `Better audio file missing for ${song.youtubeLink} (expected ${song.betterAudioLink}.ogg), falling back to original`,
+            );
+        }
+
+        return `${dir}/${song.youtubeLink}.ogg`;
     }
 
     private getDurationFooter(
