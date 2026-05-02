@@ -1,4 +1,12 @@
 /**
+ * Enum of all named timer/interval keys used across sessions.
+ */
+export enum SessionTimerName {
+    GUESS_TIMEOUT = "guessTimeout",
+    HIDDEN_UPDATE = "hiddenUpdate",
+}
+
+/**
  * Manages named timers and intervals with automatic cleanup.
  * All timers are cleaned up when clearAll() is called on session end.
  */

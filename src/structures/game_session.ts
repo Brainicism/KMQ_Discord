@@ -52,6 +52,7 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { SessionState } from "./session_state";
+import { SessionTimerName } from "./timer_manager";
 import { sql } from "kysely";
 import AnswerType from "../enums/option_types/answer_type";
 import ClipAction from "../enums/clip_action";
@@ -1919,7 +1920,7 @@ export default class GameSession extends Session {
 
     private startHiddenUpdateTimer(): void {
         this.timers.setInterval(
-            "hiddenUpdate",
+            SessionTimerName.HIDDEN_UPDATE,
             async () => {
                 await this.updateGuessedMembersMessage();
             },
@@ -1928,8 +1929,8 @@ export default class GameSession extends Session {
     }
 
     private async stopHiddenUpdateTimer(): Promise<void> {
-        if (this.timers.has("hiddenUpdate")) {
-            this.timers.clearInterval("hiddenUpdate");
+        if (this.timers.has(SessionTimerName.HIDDEN_UPDATE)) {
+            this.timers.clearInterval(SessionTimerName.HIDDEN_UPDATE);
             const round = this.round;
             try {
                 await round?.interactionMessage?.delete();

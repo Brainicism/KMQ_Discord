@@ -60,7 +60,7 @@ import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 import { SessionState, SessionStateMachine } from "./session_state";
-import { TimerManager } from "./timer_manager";
+import { SessionTimerName, TimerManager } from "./timer_manager";
 import { TypedEventEmitter } from "./typed_event_emitter";
 import type { SessionEvents } from "./session_events";
 
@@ -100,17 +100,16 @@ export default abstract class Session extends EventEmitter {
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
+    /** Typed event emitter for session lifecycle events */
+    public readonly events = new TypedEventEmitter<SessionEvents>();
+
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession).
      *  Wrapped with a 30s timeout to prevent permanent deadlocks from blocking
      *  the session indefinitely — legitimate holds complete well within this. */
     protected lifecycleMutex = withTimeout(new Mutex(), 30_000);
 
-    /** Typed event emitter for session lifecycle events */
-    public readonly events = new TypedEventEmitter<SessionEvents>();
-
     /** Centralized timer management — all timers cleaned up on session end */
     protected readonly timers = new TimerManager();
-
 
     /** The guild preference */
     protected guildPreference: GuildPreference;
@@ -584,7 +583,7 @@ export default abstract class Session extends EventEmitter {
 
         const time = this.guildPreference.gameOptions.guessTimeout;
         this.timers.set(
-            "guessTimeout",
+            SessionTimerName.GUESS_TIMEOUT,
             async () => {
                 if (this.finished || !this.round || this.round.finished) return;
                 logger.info(
@@ -612,7 +611,7 @@ export default abstract class Session extends EventEmitter {
      * Stops the timer set in timer mode
      */
     stopGuessTimeout(): void {
-        this.timers.clear("guessTimeout");
+        this.timers.clear(SessionTimerName.GUESS_TIMEOUT);
     }
 
     /**
