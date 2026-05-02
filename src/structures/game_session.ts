@@ -134,6 +134,10 @@ export default class GameSession extends Session {
     /** Manages updating a message with current guessers with hidden enabled */
     private hiddenUpdateTimer: NodeJS.Timeout | null;
 
+    /** Set immediately when endSession is requested, before the mutex is acquired.
+     *  Allows startRoundCore to abort its between-round delay even while the mutex is held. */
+    private pendingEndSession = false;
+
     constructor(
         guildPreference: GuildPreference,
         textChannelID: string,
@@ -293,6 +297,7 @@ export default class GameSession extends Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
+        this.pendingEndSession = true;
         const waitStart = Date.now();
         try {
             await this.lifecycleMutex.runExclusive(async () => {
@@ -1022,7 +1027,7 @@ export default class GameSession extends Session {
             );
         }
 
-        if (this.finished || this.round) {
+        if (this.finished || this.round || this.pendingEndSession) {
             return null;
         }
 
@@ -1068,6 +1073,14 @@ export default class GameSession extends Session {
         }
 
         round.finished = true;
+
+        if (this.pendingEndSession) {
+            // Session end was requested while we held the mutex — skip round scoring/messages
+            // and leave the state at ROUND_ACTIVE so endSession can transition directly to ENDING.
+            this.round = null;
+            this.stopGuessTimeout();
+            return;
+        }
 
         // sets the round to null
         await super.endRound(false, messageContext);
