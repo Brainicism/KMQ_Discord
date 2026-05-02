@@ -111,6 +111,7 @@ export default abstract class Session extends EventEmitter {
     /** Centralized timer management — all timers cleaned up on session end */
     protected readonly timers = new TimerManager();
 
+
     /** The guild preference */
     protected guildPreference: GuildPreference;
 

@@ -4,6 +4,7 @@ import { EventEmitter } from "events";
  * Type-safe event emitter wrapper. Provides compile-time checking for
  * event names and payload types.
  */
+// eslint-disable-next-line import/prefer-default-export
 export class TypedEventEmitter<T extends Record<string, any>> {
     private emitter = new EventEmitter();
 
