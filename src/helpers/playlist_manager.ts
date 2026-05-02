@@ -96,7 +96,7 @@ export default class PlaylistManager {
         }
 
         return (
-            await State.playlistManager.getMatchedPlaylist(
+            await this.getMatchedPlaylist(
                 guildID,
                 kmqPlaylistIdentifier,
                 forceRefreshMetadata,
@@ -118,31 +118,12 @@ export default class PlaylistManager {
         );
 
         const playlistId = kmqPlaylistParsed.playlistId;
-
-        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
-            metadata: {
-                playlistId,
-                playlistName: "",
-                playlistLength: 0,
-                matchedSongsLength: 0,
-                limit: 0,
-                playlistChangeHash: "",
-                thumbnailUrl: null,
-            },
-            matchedSongs: [],
-            truncated: false,
-            unmatchedSongs: [],
-            expiresAt: Date.now(),
-        };
-
-        let logHeader: string;
-        if (messageContext || interaction) {
-            logHeader = `${getDebugLogHeader(
-                (messageContext || interaction)!,
-            )}, playlistID = ${playlistId}`;
-        } else {
-            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
-        }
+        const logHeader = this.buildLogHeader(
+            guildID,
+            playlistId,
+            messageContext,
+            interaction,
+        );
 
         if (this.isParseInProgress(guildID)) {
             if (messageContext) {
@@ -166,7 +147,7 @@ export default class PlaylistManager {
                 );
             }
 
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
         return kmqPlaylistParsed.isSpotify
@@ -193,35 +174,17 @@ export default class PlaylistManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
-        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
-            metadata: {
-                playlistId,
-                playlistName: "",
-                playlistLength: 0,
-                matchedSongsLength: 0,
-                limit: 0,
-                playlistChangeHash: "",
-                thumbnailUrl: null,
-            },
-            matchedSongs: [],
-            truncated: false,
-            unmatchedSongs: [],
-            expiresAt: Date.now(),
-        };
-
         if (!this.youtubeClient) {
             logger.warn("YouTube API client not initialized, API key missing?");
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
-        let logHeader: string;
-        if (messageContext || interaction) {
-            logHeader = `${getDebugLogHeader(
-                (messageContext || interaction)!,
-            )}, playlistID = ${playlistId}`;
-        } else {
-            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
-        }
+        const logHeader = this.buildLogHeader(
+            guildID,
+            playlistId,
+            messageContext,
+            interaction,
+        );
 
         let metadata: PlaylistMetadata | null;
         const cachedPlaylist = this.cachedPlaylists[playlistId];
@@ -241,11 +204,11 @@ export default class PlaylistManager {
 
         if (!metadata) {
             logger.warn(`${logHeader} | No YouTube metadata`);
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
         let matchedSongs: Array<QueriedSong> = [];
-        let unmatchedSongs: Array<string>;
+        let unmatchedSongs: Array<string> = [];
         let truncated = false;
 
         if (
@@ -268,11 +231,7 @@ export default class PlaylistManager {
         this.guildsParseInProgress[guildID] = new Date();
         await interaction?.acknowledge();
 
-        let pageToken: string | null | undefined = "";
-        const songs: Array<{
-            title: string;
-            videoId: string;
-        }> = [];
+        const songs: Array<{ title: string; videoId: string }> = [];
 
         let page = 0;
         // only first page of a mix playlist contains unique songs
@@ -327,6 +286,7 @@ export default class PlaylistManager {
         const parseStartTime = Date.now();
 
         try {
+            let pageToken: string | null | undefined = "";
             while (page < numPlaylistPages) {
                 if (
                     page % Math.floor(numPlaylistPages / 4) === 0 ||
@@ -388,14 +348,6 @@ export default class PlaylistManager {
                 );
             }
 
-            const youtubePlaylistVideoIDs: {
-                videoId: string;
-                title: string;
-            }[] = songs.map((x) => ({
-                videoId: x.videoId,
-                title: x.title,
-            }));
-
             // Get list of vids with parent vid if possible.
             const duplicateToMainVideoMapping = await dbContext.kpopVideos
                 .selectFrom("app_kpop as a")
@@ -404,18 +356,22 @@ export default class PlaylistManager {
                 .where(
                     "a.vlink",
                     "in",
-                    youtubePlaylistVideoIDs.map((x) => x.videoId),
+                    songs.map((x) => x.videoId),
                 )
                 .execute();
 
             // Replace duplicate links with main links.
-            for (const duplicate of duplicateToMainVideoMapping) {
-                for (const original of youtubePlaylistVideoIDs) {
-                    if (original.videoId === duplicate.duplicate_link) {
-                        original.videoId = duplicate.main_link;
-                    }
-                }
+            const dupeMap = new Map(
+                duplicateToMainVideoMapping.map((d) => [
+                    d.duplicate_link,
+                    d.main_link,
+                ]),
+            );
+            for (const song of songs) {
+                song.videoId = dupeMap.get(song.videoId) ?? song.videoId;
             }
+
+            const videoIds = songs.map((x) => x.videoId);
 
             // Match songs with vlinks
             matchedSongs = (
@@ -432,32 +388,23 @@ export default class PlaylistManager {
                     )
                     .where((eb) =>
                         eb.or([
-                            eb(
-                                "link",
-                                "in",
-                                youtubePlaylistVideoIDs.map((x) => x.videoId),
-                            ),
-                            eb(
-                                "better_audio_link",
-                                "in",
-                                youtubePlaylistVideoIDs.map((x) => x.videoId),
-                            ),
+                            eb("link", "in", videoIds),
+                            eb("better_audio_link", "in", videoIds),
                         ]),
                     )
                     .execute()
             ).map((x) => new QueriedSong(x));
 
-            unmatchedSongs = youtubePlaylistVideoIDs
-                .filter(
-                    (x) =>
-                        !matchedSongs
-                            .flatMap((y) =>
-                                y.betterAudioLink
-                                    ? [y.betterAudioLink, y.youtubeLink]
-                                    : [y.youtubeLink],
-                            )
-                            .includes(x.videoId),
-                )
+            const matchedVideoIds = new Set(
+                matchedSongs.flatMap((y) =>
+                    y.betterAudioLink
+                        ? [y.betterAudioLink, y.youtubeLink]
+                        : [y.youtubeLink],
+                ),
+            );
+
+            unmatchedSongs = songs
+                .filter((x) => !matchedVideoIds.has(x.videoId))
                 .map((x) => `${x.title} (${x.videoId})`);
         } finally {
             clearInterval(updateParsing);
@@ -466,36 +413,11 @@ export default class PlaylistManager {
 
         metadata.matchedSongsLength = matchedSongs.length;
 
-        if (unmatchedSongs.length) {
-            if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
-                await fs.promises.mkdir(PLAYLIST_UNMATCHED_SONGS_DIR);
-            }
-
-            const playlistUnmatchedSongsPath = path.resolve(
-                __dirname,
-                PLAYLIST_UNMATCHED_SONGS_DIR,
-                `${playlistId}-${standardDateFormat(new Date())}.txt`,
-            );
-
-            await fs.promises.writeFile(
-                playlistUnmatchedSongsPath,
-                unmatchedSongs.join("\n"),
-            );
-        }
-
-        if (KmqConfiguration.Instance.persistMatchedPlaylistSongs()) {
-            await fs.promises.writeFile(
-                path.resolve(
-                    PLAYLIST_UNMATCHED_SONGS_DIR,
-                    `${playlistId}-${standardDateFormat(
-                        new Date(),
-                    )}.matched.txt`,
-                ),
-                matchedSongs
-                    .map((x) => `${x.songName} - ${x.artistName}`)
-                    .join("\n"),
-            );
-        }
+        await this.persistPlaylistFiles(
+            playlistId,
+            matchedSongs,
+            unmatchedSongs,
+        );
 
         logger.info(
             `${logHeader} | Finished parsing playlist after ${
@@ -529,30 +451,12 @@ export default class PlaylistManager {
         messageContext?: MessageContext,
         interaction?: Eris.CommandInteraction,
     ): Promise<MatchedPlaylist> => {
-        const UNMATCHED_PLAYLIST: MatchedPlaylist = {
-            metadata: {
-                playlistId,
-                playlistName: "",
-                playlistLength: 0,
-                matchedSongsLength: 0,
-                limit: 0,
-                playlistChangeHash: "",
-                thumbnailUrl: null,
-            },
-            matchedSongs: [],
-            truncated: false,
-            unmatchedSongs: [],
-            expiresAt: Date.now(),
-        };
-
-        let logHeader: string;
-        if (messageContext || interaction) {
-            logHeader = `${getDebugLogHeader(
-                (messageContext || interaction)!,
-            )}, playlistID = ${playlistId}`;
-        } else {
-            logHeader = `guildID = ${guildID}. playlistID = ${playlistId}`;
-        }
+        const logHeader = this.buildLogHeader(
+            guildID,
+            playlistId,
+            messageContext,
+            interaction,
+        );
 
         if (
             !process.env.SPOTIFY_CLIENT_ID ||
@@ -561,7 +465,7 @@ export default class PlaylistManager {
             logger.warn(
                 `${logHeader} | No songs matched due to missing Spotify client ID or secret`,
             );
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
         const cachedPlaylist = this.cachedPlaylists[playlistId];
@@ -583,14 +487,14 @@ export default class PlaylistManager {
             logger.warn(
                 `${logHeader} | No Spotify metadata for id = ${playlistId}`,
             );
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
         if (!metadata.limit) {
             logger.warn(
                 `${logHeader} | Playlist limit is 0, likely auto-generated Spotify playlist. id = ${metadata.playlistId}. name = ${metadata.playlistName}`,
             );
-            return UNMATCHED_PLAYLIST;
+            return this.makeUnmatchedPlaylist(playlistId);
         }
 
         let matchedSongs: Array<QueriedSong> = [];
@@ -618,6 +522,11 @@ export default class PlaylistManager {
         this.guildsParseInProgress[guildID] = new Date();
         await interaction?.acknowledge();
 
+        const parsingTitle = i18n.translate(
+            guildID,
+            "command.playlist.parsing",
+        );
+
         const spotifySongs: Array<SpotifyTrack> = [];
         const start = Date.now();
         logger.info(`${logHeader} | Using Spotify API for playlist`);
@@ -637,85 +546,85 @@ export default class PlaylistManager {
 
         let numProcessedPlaylistPages = 0;
         const parseStartTime = Date.now();
-        for await (const results of asyncPool(
-            10,
-            requestURLs,
-            (requestURL: string) =>
-                this.generateSpotifyResponsePromise(requestURL, guildID),
-        )) {
-            if (
-                numProcessedPlaylistPages % Math.floor(numPlaylistPages / 4) ===
-                    0 ||
-                numProcessedPlaylistPages === numPlaylistPages ||
-                numProcessedPlaylistPages === 0
-            ) {
-                logger.info(
-                    `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages + 1}/${numPlaylistPages} for playlist`,
-                );
+        let message: Eris.Message | null = null;
+        let updateParsing: ReturnType<typeof setInterval> | undefined;
+
+        try {
+            for await (const results of asyncPool(
+                10,
+                requestURLs,
+                (requestURL: string) =>
+                    this.generateSpotifyResponsePromise(requestURL),
+            )) {
+                if (
+                    numProcessedPlaylistPages %
+                        Math.floor(numPlaylistPages / 4) ===
+                        0 ||
+                    numProcessedPlaylistPages === numPlaylistPages ||
+                    numProcessedPlaylistPages === 0
+                ) {
+                    logger.info(
+                        `${logHeader} | Calling Spotify API ${numProcessedPlaylistPages + 1}/${numPlaylistPages} for playlist`,
+                    );
+                }
+
+                spotifySongs.push(...results);
+                numProcessedPlaylistPages++;
             }
 
-            spotifySongs.push(...results);
-            numProcessedPlaylistPages++;
-        }
+            logger.info(
+                `${logHeader} | Finished grabbing Spotify song data for playlist after ${
+                    Date.now() - start
+                }ms`,
+            );
 
-        logger.info(
-            `${logHeader} | Finished grabbing Spotify song data for playlist after ${
-                Date.now() - start
-            }ms`,
-        );
+            logger.info(
+                `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
+            );
 
-        logger.info(
-            `${logHeader} | Starting to parse playlist, number of songs: ${spotifySongs.length}`,
-        );
-
-        const parsingTitle = i18n.translate(
-            guildID,
-            "command.playlist.parsing",
-        );
-
-        let message: Eris.Message | null = null;
-        if (interaction?.acknowledged) {
-            message = await interaction.createFollowup({
-                embeds: [
-                    {
-                        title: parsingTitle,
-                        description: visualProgressBar(0, spotifySongs.length),
-                    },
-                ],
-            });
-        } else if (messageContext) {
-            message = await sendInfoMessage(messageContext, {
-                title: parsingTitle,
-                description: visualProgressBar(0, spotifySongs.length),
-            });
-        }
-
-        const updateParsing = setInterval(async () => {
-            try {
-                await message?.edit({
+            if (interaction?.acknowledged) {
+                message = await interaction.createFollowup({
                     embeds: [
                         {
                             title: parsingTitle,
                             description: visualProgressBar(
-                                unmatchedSongs.length + matchedSongs.length,
+                                0,
                                 spotifySongs.length,
                             ),
                         },
                     ],
                 });
-            } catch (e) {
-                logger.warn(
-                    `Error editing getMatchedSpotifyPlaylist inProgressParsingMessage. gid = ${message?.guildID}. e = ${e}`,
-                );
+            } else if (messageContext) {
+                message = await sendInfoMessage(messageContext, {
+                    title: parsingTitle,
+                    description: visualProgressBar(0, spotifySongs.length),
+                });
             }
-        }, 2000);
 
-        try {
+            updateParsing = setInterval(async () => {
+                try {
+                    await message?.edit({
+                        embeds: [
+                            {
+                                title: parsingTitle,
+                                description: visualProgressBar(
+                                    unmatchedSongs.length + matchedSongs.length,
+                                    spotifySongs.length,
+                                ),
+                            },
+                        ],
+                    });
+                } catch (e) {
+                    logger.warn(
+                        `Error editing getMatchedSpotifyPlaylist inProgressParsingMessage. gid = ${message?.guildID}. e = ${e}`,
+                    );
+                }
+            }, 2000);
+
             for await (const queryOutput of asyncPool(
                 4,
                 spotifySongs,
-                (x: SpotifyTrack) =>
-                    this.generateSpotifySongMatchingPromise(x, guildID),
+                (x: SpotifyTrack) => this.generateSpotifySongMatchingPromise(x),
             )) {
                 if (typeof queryOutput === "string") {
                     unmatchedSongs.push(queryOutput);
@@ -774,36 +683,11 @@ export default class PlaylistManager {
         unmatchedSongs = _.uniq(unmatchedSongs);
         metadata.matchedSongsLength = matchedSongs.length;
 
-        if (unmatchedSongs.length) {
-            if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
-                await fs.promises.mkdir(PLAYLIST_UNMATCHED_SONGS_DIR);
-            }
-
-            const playlistUnmatchedSongsPath = path.resolve(
-                __dirname,
-                PLAYLIST_UNMATCHED_SONGS_DIR,
-                `${playlistId}-${standardDateFormat(new Date())}.txt`,
-            );
-
-            await fs.promises.writeFile(
-                playlistUnmatchedSongsPath,
-                unmatchedSongs.join("\n"),
-            );
-        }
-
-        if (KmqConfiguration.Instance.persistMatchedPlaylistSongs()) {
-            await fs.promises.writeFile(
-                path.resolve(
-                    PLAYLIST_UNMATCHED_SONGS_DIR,
-                    `${playlistId}-${standardDateFormat(
-                        new Date(),
-                    )}.matched.txt`,
-                ),
-                matchedSongs
-                    .map((x) => `${x.songName} - ${x.artistName}`)
-                    .join("\n"),
-            );
-        }
+        await this.persistPlaylistFiles(
+            playlistId,
+            matchedSongs,
+            unmatchedSongs,
+        );
 
         const playlist: MatchedPlaylist = {
             metadata,
@@ -834,274 +718,252 @@ export default class PlaylistManager {
         }
     }
 
-    private generateSpotifyResponsePromise(
+    private async generateSpotifyResponsePromise(
         requestURL: string,
-        guildID: string,
     ): Promise<Array<SpotifyTrack>> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const spotifyRequest = async (
-                    url: string,
-                ): Promise<AxiosResponse> =>
-                    Axios.get(url, {
-                        headers: {
-                            Authorization: `Bearer ${this.accessToken}`,
-                            "Content-Type": "application/x-www-form-urlencoded",
-                        },
-                    });
+        const spotifyRequest = async (url: string): Promise<AxiosResponse> =>
+            Axios.get(url, {
+                headers: {
+                    Authorization: `Bearer ${this.accessToken}`,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+            });
 
-                let response: AxiosResponse;
-                try {
-                    response = await spotifyRequest(requestURL);
-                } catch (err) {
-                    if (err.response?.status === 429) {
-                        const rateLimit =
-                            Number(err.response.headers["retry-after"]) ||
-                            DEFAULT_RATE_LIMIT_SECS;
+        let response: AxiosResponse;
+        try {
+            response = await spotifyRequest(requestURL);
+        } catch (err: any) {
+            if (err.response?.status === 429) {
+                const rateLimit =
+                    Number(err.response.headers["retry-after"]) ||
+                    DEFAULT_RATE_LIMIT_SECS;
 
-                        logger.warn(
-                            `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
-                        );
-
-                        response = await retryJob(
-                            spotifyRequest,
-                            [requestURL],
-                            1,
-                            false,
-                            rateLimit * 1000,
-                        );
-                    } else {
-                        throw err;
-                    }
-                }
-
-                if (!response.data.items) {
-                    throw new Error(
-                        `Received unexpected response from Spotify. responseCode = ${response.status}. response.data = ${response.data}`,
-                    );
-                }
-
-                resolve(
-                    response.data.items.reduce(
-                        (
-                            songs: Array<SpotifyTrack>,
-                            song: {
-                                track: {
-                                    name: string;
-                                    artists: Array<{ name: string }>;
-                                };
-                            },
-                        ) => {
-                            let parsedSong: SpotifyTrack;
-                            try {
-                                parsedSong = {
-                                    name: song.track.name,
-                                    artists: song.track.artists.map(
-                                        (artist: { name: string }) =>
-                                            artist.name,
-                                    ),
-                                };
-                            } catch (err) {
-                                logger.warn(
-                                    `Failed parsing song. song = ${JSON.stringify(
-                                        song,
-                                    )}. err = ${err}`,
-                                );
-                                return songs;
-                            }
-
-                            songs.push(parsedSong);
-                            return songs;
-                        },
-                        [],
-                    ),
+                logger.warn(
+                    `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
                 );
-            } catch (err) {
-                logger.error(`Failed fetching Spotify playlist. err = ${err}`);
 
+                response = await retryJob(
+                    spotifyRequest,
+                    [requestURL],
+                    1,
+                    false,
+                    rateLimit * 1000,
+                );
+            } else {
+                logger.error(`Failed fetching Spotify playlist. err = ${err}`);
                 if (err.response) {
                     logger.error(err.response.data);
                     logger.error(err.response.status);
                 }
 
-                delete this.guildsParseInProgress[guildID];
-                reject(err);
+                throw err;
             }
-        });
+        }
+
+        if (!response.data.items) {
+            throw new Error(
+                `Received unexpected response from Spotify. responseCode = ${response.status}. response.data = ${response.data}`,
+            );
+        }
+
+        return response.data.items.reduce(
+            (
+                songs: Array<SpotifyTrack>,
+                song: {
+                    track: {
+                        name: string;
+                        artists: Array<{ name: string }>;
+                    };
+                },
+            ) => {
+                let parsedSong: SpotifyTrack;
+                try {
+                    parsedSong = {
+                        name: song.track.name,
+                        artists: song.track.artists.map(
+                            (artist: { name: string }) => artist.name,
+                        ),
+                    };
+                } catch (err) {
+                    logger.warn(
+                        `Failed parsing song. song = ${JSON.stringify(
+                            song,
+                        )}. err = ${err}`,
+                    );
+                    return songs;
+                }
+
+                songs.push(parsedSong);
+                return songs;
+            },
+            [],
+        );
     }
 
-    private generateSpotifySongMatchingPromise(
+    private async generateSpotifySongMatchingPromise(
         song: SpotifyTrack,
-        guildID: string,
     ): Promise<QueriedSong | string> {
-        return new Promise(async (resolve, reject) => {
-            try {
-                const aliasIDs: Array<number> = [];
-                for (const artist of song.artists) {
-                    if (!artist) {
-                        logger.warn(
-                            `Failed matching Spotify song due to empty artist. song = ${JSON.stringify(
-                                song,
-                            )}.`,
-                        );
+        try {
+            const aliasIDs: Array<number> = [];
+            for (const artist of song.artists) {
+                if (!artist) {
+                    logger.warn(
+                        `Failed matching Spotify song due to empty artist. song = ${JSON.stringify(
+                            song,
+                        )}.`,
+                    );
 
-                        resolve(`"${song.name}" - ${song.artists.join(", ")}`);
-                        return;
-                    }
+                    return `"${song.name}" - ${song.artists.join(", ")}`;
+                }
 
-                    const lowercaseArtist =
-                        GameRound.normalizePunctuationInName(artist);
+                const lowercaseArtist =
+                    GameRound.normalizePunctuationInName(artist);
 
-                    const artistMapping = State.artistToEntry[lowercaseArtist];
-                    if (artistMapping) {
-                        aliasIDs.push(artistMapping.id);
-                        const artistAliases =
-                            State.aliases.artist[lowercaseArtist];
+                const artistMapping = State.artistToEntry[lowercaseArtist];
+                if (artistMapping) {
+                    aliasIDs.push(artistMapping.id);
+                    const artistAliases = State.aliases.artist[lowercaseArtist];
 
-                        if (artistAliases) {
-                            for (const alias of artistAliases) {
-                                const lowercaseAlias =
-                                    GameRound.normalizePunctuationInName(alias);
+                    if (artistAliases) {
+                        for (const alias of artistAliases) {
+                            const lowercaseAlias =
+                                GameRound.normalizePunctuationInName(alias);
 
-                                if (lowercaseAlias in State.artistToEntry) {
-                                    aliasIDs.push(
-                                        State.artistToEntry[lowercaseAlias]!.id,
-                                    );
-                                }
+                            if (lowercaseAlias in State.artistToEntry) {
+                                aliasIDs.push(
+                                    State.artistToEntry[lowercaseAlias]!.id,
+                                );
                             }
                         }
                     }
                 }
+            }
 
-                // handle songs with brackets in name, consider all components separately
-                const songNameBracketComponents = song.name.split("(");
-                const songNames = [songNameBracketComponents[0]!.trim()];
-                if (songNameBracketComponents.length > 1) {
-                    songNames.push(
-                        songNameBracketComponents[1]!.replace(")", "").trim(),
-                    );
-                    songNames.push(song.name);
-                }
+            // handle songs with brackets in name, consider all components separately
+            const songNameBracketComponents = song.name.split("(");
+            const songNames = [songNameBracketComponents[0]!.trim()];
+            if (songNameBracketComponents.length > 1) {
+                songNames.push(
+                    songNameBracketComponents[1]!.replace(")", "").trim(),
+                );
+                songNames.push(song.name);
+            }
 
-                const artistName = song.artists[0]!;
-                const query = dbContext.kmq
-                    .selectFrom(
-                        EnvVariableManager.isGodMode()
-                            ? "expected_available_songs"
-                            : "available_songs",
-                    )
-                    .leftJoin(
-                        "kpop_videos.app_kpop_group as a",
-                        "a.id",
-                        "id_artist",
-                    )
-                    .leftJoin(
-                        "kpop_videos.app_kpop_group as b",
-                        "b.id",
-                        "id_parent_artist",
-                    )
-                    .select(
-                        EnvVariableManager.isGodMode()
-                            ? SongSelector.ExpectedQueriedSongFields
-                            : SongSelector.QueriedSongFields,
-                    )
-                    .where(({ eb, or }) =>
-                        or(
-                            songNames.map((songName) =>
-                                eb(
-                                    "clean_song_name_alpha_numeric",
-                                    "like",
-                                    songName.replace(/[^0-9a-z]/gi, "")
-                                        ? eb.fn("CleanSongName", [
-                                              sql`${songName}`,
-                                          ])
-                                        : eb.fn("CleanSongName", [
-                                              sql`${songName.replace(/[^0-9a-z]/gi, "")}`,
-                                          ]),
-                                ),
+            const artistName = song.artists[0]!;
+            const query = dbContext.kmq
+                .selectFrom(
+                    EnvVariableManager.isGodMode()
+                        ? "expected_available_songs"
+                        : "available_songs",
+                )
+                .leftJoin(
+                    "kpop_videos.app_kpop_group as a",
+                    "a.id",
+                    "id_artist",
+                )
+                .leftJoin(
+                    "kpop_videos.app_kpop_group as b",
+                    "b.id",
+                    "id_parent_artist",
+                )
+                .select(
+                    EnvVariableManager.isGodMode()
+                        ? SongSelector.ExpectedQueriedSongFields
+                        : SongSelector.QueriedSongFields,
+                )
+                .where(({ eb, or }) =>
+                    or(
+                        songNames.map((songName) =>
+                            eb(
+                                "clean_song_name_alpha_numeric",
+                                "like",
+                                songName.replace(/[^0-9a-z]/gi, "")
+                                    ? eb.fn("CleanSongName", [sql`${songName}`])
+                                    : eb.fn("CleanSongName", [
+                                          sql`${songName.replace(/[^0-9a-z]/gi, "")}`,
+                                      ]),
                             ),
                         ),
-                    )
-                    .where(({ or, eb, and }) => {
-                        const expressions = [
-                            eb("original_artist_name_en", "like", artistName),
-                            and([
-                                eb("original_artist_name_en", "like", "% + %"),
-                                eb(
-                                    "original_artist_name_en",
-                                    "like",
-                                    `%${artistName}%`,
-                                ),
-                            ]),
-                            eb("previous_name_en", "like", artistName),
-                            eb("artist_aliases", "like", `${artistName}`),
-                            eb("artist_aliases", "like", `${artistName};%`),
-                            eb("artist_aliases", "like", `%;${artistName};%`),
-                            eb("artist_aliases", "like", `%;${artistName}`),
-                        ];
+                    ),
+                )
+                .where(({ or, eb, and }) => {
+                    const expressions = [
+                        eb("original_artist_name_en", "like", artistName),
+                        and([
+                            eb("original_artist_name_en", "like", "% + %"),
+                            eb(
+                                "original_artist_name_en",
+                                "like",
+                                `%${artistName}%`,
+                            ),
+                        ]),
+                        eb("previous_name_en", "like", artistName),
+                        eb("artist_aliases", "like", `${artistName}`),
+                        eb("artist_aliases", "like", `${artistName};%`),
+                        eb("artist_aliases", "like", `%;${artistName};%`),
+                        eb("artist_aliases", "like", `%;${artistName}`),
+                    ];
 
-                        if (aliasIDs.length) {
-                            expressions.push(
-                                ...[
-                                    eb("a.id_parentgroup", "in", aliasIDs),
-                                    eb("id_artist", "in", aliasIDs),
-                                    eb("id_parent_artist", "in", aliasIDs),
-                                ],
-                            );
-                        }
-
-                        return or(expressions);
-                    })
-                    .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
-                    .orderBy("views", "desc");
-
-                const results = await query.execute();
-                let result: QueriedSong | null = null;
-                if (results.length === 1) {
-                    result = new QueriedSong(results[0]!);
-                } else if (results.length > 1) {
-                    // results may contain subgroups/parent groups, prioritize by original artist name
-                    const properArtistNameMatches = results.filter(
-                        (x) =>
-                            x.artistName
-                                .toLowerCase()
-                                .replace(/[^0-9a-z]/gi, "") ===
-                            artistName.toLowerCase().replace(/[^0-9a-z]/gi, ""),
-                    );
-
-                    // if multiple matches with and without punctuation removal
-                    if (properArtistNameMatches.length > 1) {
-                        // filter by even exact-er match
-                        const sortedMatches = _.orderBy(
-                            properArtistNameMatches,
-                            ["artistName"],
-                            "asc",
-                        );
-
-                        result = new QueriedSong(sortedMatches[0]!);
-                    } else {
-                        result = new QueriedSong(
-                            properArtistNameMatches[0] || results[0]!,
+                    if (aliasIDs.length) {
+                        expressions.push(
+                            ...[
+                                eb("a.id_parentgroup", "in", aliasIDs),
+                                eb("id_artist", "in", aliasIDs),
+                                eb("id_parent_artist", "in", aliasIDs),
+                            ],
                         );
                     }
-                }
 
-                if (result) {
-                    resolve(result);
-                } else {
-                    resolve(`"${song.name}" - ${song.artists.join(", ")}`);
-                }
-            } catch (err) {
-                logger.error(
-                    `Failed matching Spotify song. song = ${JSON.stringify(
-                        song,
-                    )}. err = ${err}`,
+                    return or(expressions);
+                })
+                .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
+                .orderBy("views", "desc");
+
+            const results = await query.execute();
+            let result: QueriedSong | null = null;
+            if (results.length === 1) {
+                result = new QueriedSong(results[0]!);
+            } else if (results.length > 1) {
+                // results may contain subgroups/parent groups, prioritize by original artist name
+                const properArtistNameMatches = results.filter(
+                    (x) =>
+                        x.artistName
+                            .toLowerCase()
+                            .replace(/[^0-9a-z]/gi, "") ===
+                        artistName.toLowerCase().replace(/[^0-9a-z]/gi, ""),
                 );
 
-                delete this.guildsParseInProgress[guildID];
-                reject(err);
+                // if multiple matches with and without punctuation removal
+                if (properArtistNameMatches.length > 1) {
+                    // filter by even exact-er match
+                    const sortedMatches = _.orderBy(
+                        properArtistNameMatches,
+                        ["artistName"],
+                        "asc",
+                    );
+
+                    result = new QueriedSong(sortedMatches[0]!);
+                } else {
+                    result = new QueriedSong(
+                        properArtistNameMatches[0] || results[0]!,
+                    );
+                }
             }
-        });
+
+            if (result) {
+                return result;
+            }
+
+            return `"${song.name}" - ${song.artists.join(", ")}`;
+        } catch (err) {
+            logger.error(
+                `Failed matching Spotify song. song = ${JSON.stringify(
+                    song,
+                )}. err = ${err}`,
+            );
+
+            throw err;
+        }
     }
 
     private refreshSpotifyToken = async (): Promise<void> => {
@@ -1256,6 +1118,71 @@ export default class PlaylistManager {
             }
 
             return null;
+        }
+    }
+
+    private buildLogHeader(
+        guildID: string,
+        playlistId: string,
+        messageContext?: MessageContext,
+        interaction?: Eris.CommandInteraction,
+    ): string {
+        if (messageContext || interaction) {
+            return `${getDebugLogHeader(
+                (messageContext || interaction)!,
+            )}, playlistID = ${playlistId}`;
+        }
+
+        return `guildID = ${guildID}. playlistID = ${playlistId}`;
+    }
+
+    private makeUnmatchedPlaylist(playlistId: string): MatchedPlaylist {
+        return {
+            metadata: {
+                playlistId,
+                playlistName: "",
+                playlistLength: 0,
+                matchedSongsLength: 0,
+                limit: 0,
+                playlistChangeHash: "",
+                thumbnailUrl: null,
+            },
+            matchedSongs: [],
+            truncated: false,
+            unmatchedSongs: [],
+            expiresAt: Date.now(),
+        };
+    }
+
+    private async persistPlaylistFiles(
+        playlistId: string,
+        matchedSongs: Array<QueriedSong>,
+        unmatchedSongs: Array<string>,
+    ): Promise<void> {
+        if (unmatchedSongs.length) {
+            if (!(await pathExists(PLAYLIST_UNMATCHED_SONGS_DIR))) {
+                await fs.promises.mkdir(PLAYLIST_UNMATCHED_SONGS_DIR);
+            }
+
+            await fs.promises.writeFile(
+                path.join(
+                    PLAYLIST_UNMATCHED_SONGS_DIR,
+                    `${playlistId}-${standardDateFormat(new Date())}.txt`,
+                ),
+                unmatchedSongs.join("\n"),
+            );
+        }
+
+        if (KmqConfiguration.Instance.persistMatchedPlaylistSongs()) {
+            await fs.promises.writeFile(
+                path.join(
+                    PLAYLIST_UNMATCHED_SONGS_DIR,
+                    `${playlistId}-${standardDateFormat(new Date())}.matched.txt`,
+                ),
+                matchedSongs
+                    .map((x) => `${x.songName} - ${x.artistName}`)
+                    .join("\n"),
+            );
         }
     }
 }
