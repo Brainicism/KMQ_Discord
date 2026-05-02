@@ -111,7 +111,7 @@
         "i18n-ai-translate": "^4.1.2",
         "kysely-codegen": "^0.20.0",
         "prettier": "3.8.3",
-        "typescript": "^5.5.4"
+        "typescript": "^6.0.3"
     },
     "description": "K-pop guessing game over Discord"
 }

@@ -354,7 +354,7 @@ export default class ProfileCommand implements BaseCommand {
             logger.error(
                 `${getDebugLogHeader(
                     interaction,
-                )} | Interaction acknowledge failed. err = ${err.stack}`,
+                )} | Interaction acknowledge failed. err = ${(err as Error).stack}`,
             );
         }
     }

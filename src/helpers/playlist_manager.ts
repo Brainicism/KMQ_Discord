@@ -854,10 +854,11 @@ export default class PlaylistManager {
                 try {
                     response = await spotifyRequest(requestURL);
                 } catch (err) {
-                    if (err.response?.status === 429) {
+                    if ((err as any).response?.status === 429) {
                         const rateLimit =
-                            Number(err.response.headers["retry-after"]) ||
-                            DEFAULT_RATE_LIMIT_SECS;
+                            Number(
+                                (err as any).response.headers["retry-after"],
+                            ) || DEFAULT_RATE_LIMIT_SECS;
 
                         logger.warn(
                             `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
@@ -919,9 +920,9 @@ export default class PlaylistManager {
             } catch (err) {
                 logger.error(`Failed fetching Spotify playlist. err = ${err}`);
 
-                if (err.response) {
-                    logger.error(err.response.data);
-                    logger.error(err.response.status);
+                if ((err as any).response) {
+                    logger.error((err as any).response.data);
+                    logger.error((err as any).response.status);
                 }
 
                 delete this.guildsParseInProgress[guildID];

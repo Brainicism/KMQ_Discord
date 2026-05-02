@@ -262,7 +262,7 @@ export default class YoutubeOnesieProvider {
                 "content-type": "text/plain",
             },
             referrer: "https://www.youtube.com/",
-            body: onesieRequest.body,
+            body: Buffer.from(onesieRequest.body),
         });
 
         const arrayBuffer = await response.arrayBuffer();
@@ -354,7 +354,7 @@ export default class YoutubeOnesieProvider {
             await crypto.subtle.encrypt(
                 { name: "AES-CTR", counter: iv, length: 128 },
                 aesKey,
-                data,
+                Buffer.from(data),
             ),
         );
 
@@ -396,9 +396,9 @@ export default class YoutubeOnesieProvider {
 
         const decryptedData = new Uint8Array(
             await crypto.subtle.decrypt(
-                { name: "AES-CTR", counter: iv, length: 128 },
+                { name: "AES-CTR", counter: Buffer.from(iv), length: 128 },
                 aesKey,
-                data,
+                Buffer.from(data),
             ),
         );
 
@@ -413,7 +413,7 @@ export default class YoutubeOnesieProvider {
         const isValid = await crypto.subtle.verify(
             "HMAC",
             hmacKey,
-            hmac,
+            Buffer.from(hmac),
             new Uint8Array([...data, ...iv]),
         );
 

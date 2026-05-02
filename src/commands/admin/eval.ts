@@ -42,7 +42,7 @@ export default class EvalCommand implements BaseCommand {
                     const result = eval(command);
                     resolve(result);
                 } catch (e) {
-                    resolve(`Error: ${e.message}`);
+                    resolve(`Error: ${(e as Error).message}`);
                 }
             }.call(State, evalString);
         });

@@ -400,7 +400,7 @@ export default class GuildPreference {
             return true;
         } catch (e) {
             logger.warn(
-                `failed to save preset. presetName = '${presetName}'. oldUUID = ${oldUUID}. e = ${extractErrorString(e)}`,
+                `failed to save preset. presetName = '${presetName}'. oldUUID = ${oldUUID}. e = ${extractErrorString(e as Error)}`,
             );
             return false;
         }
@@ -1050,7 +1050,7 @@ export default class GuildPreference {
             };
         } catch (e) {
             logger.error(
-                `gid: ${this.guildID} | Error retrieving song count ${e.stack}`,
+                `gid: ${this.guildID} | Error retrieving song count ${(e as Error).stack}`,
             );
             return {
                 count: undefined,

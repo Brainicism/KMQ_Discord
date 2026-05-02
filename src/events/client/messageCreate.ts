@@ -307,7 +307,7 @@ export default async function messageCreateHandler(
             const debugId = uuid.v4();
 
             logger.error(
-                `Error during session.guessSong(). Debug ID: ${debugId}. Name: ${e.name}. Reason: ${e.message}. Trace: ${e.stack}}}`,
+                `Error during session.guessSong(). Debug ID: ${debugId}. Name: ${(e as Error).name}. Reason: ${(e as Error).message}. Trace: ${(e as Error).stack}}}`,
             );
 
             await sendErrorMessage(messageContext, {

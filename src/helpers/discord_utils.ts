@@ -165,7 +165,7 @@ export async function fetchUser(
         } catch (err) {
             if (!silentErrors)
                 logger.warn(
-                    `Could not fetch user: ${userID}. err: ${err.code}. msg: ${err.message}`,
+                    `Could not fetch user: ${userID}. err: ${(err as any).code}. msg: ${(err as Error).message}`,
                 );
             return null;
         }
@@ -222,13 +222,13 @@ export async function fetchChannel(
                     guild.members.update(member);
                 } catch (e) {
                     logger.warn(
-                        `Failed while fetching corresponding channel metadata via REST: ${extractErrorString(e)}`,
+                        `Failed while fetching corresponding channel metadata via REST: ${extractErrorString(e as Error)}`,
                     );
                 }
             }
         } catch (err) {
             logger.warn(
-                `Could not fetch text channel: ${textChannelID}. err: ${err.code}. msg: ${err.message}`,
+                `Could not fetch text channel: ${textChannelID}. err: ${(err as any).code}. msg: ${(err as Error).message}`,
             );
             return null;
         }

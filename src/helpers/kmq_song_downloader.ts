@@ -286,7 +286,7 @@ export default class KmqSongDownloader {
                 process.env.SONG_DOWNLOAD_DIR as string as string,
             );
         } catch (err) {
-            logger.error(err);
+            logger.error(err as Error);
             return;
         }
 
@@ -302,7 +302,7 @@ export default class KmqSongDownloader {
                         `${process.env.SONG_DOWNLOAD_DIR as string}/${partFile}`,
                     );
                 } catch (err) {
-                    logger.error(err);
+                    logger.error(err as Error);
                 }
             }),
         );
@@ -434,7 +434,7 @@ export default class KmqSongDownloader {
                 .ignore()
                 .execute();
 
-            throw new Error(e);
+            throw new Error(String(e));
         }
     }
 
