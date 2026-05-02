@@ -19,6 +19,12 @@ type ActivitySetOptionArgs = {
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
+    | { kind: "duration"; duration: number | null }
+    // Artist-list kinds: empty array is treated as "reset to null" to
+    // mirror the slash-command `/groups reset` flow.
+    | { kind: "groups"; artistIDs: number[] }
+    | { kind: "includes"; artistIDs: number[] }
+    | { kind: "excludes"; artistIDs: number[] }
 );
 
 export default ActivitySetOptionArgs;

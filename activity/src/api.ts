@@ -24,7 +24,34 @@ export type SetOptionRequest =
     | { kind: "limit"; limitStart: number; limitEnd: number }
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
-    | { kind: "timer"; timer: number | null };
+    | { kind: "timer"; timer: number | null }
+    | { kind: "duration"; duration: number | null }
+    | { kind: "groups"; artistIDs: number[] }
+    | { kind: "includes"; artistIDs: number[] }
+    | { kind: "excludes"; artistIDs: number[] };
+
+export interface AutocompleteArtist {
+    id: number;
+    name: string;
+    hangulName: string | null;
+}
+
+/**
+ * Typeahead lookup for groups / includes / excludes. Empty q returns the
+ * top artists; typed prefix returns a small prefix-match result set.
+ */
+export async function fetchArtistAutocomplete(
+    accessToken: string,
+    q: string,
+): Promise<AutocompleteArtist[]> {
+    const url = `${ACTIVITY_PROXY_BASE}/artist-autocomplete?q=${encodeURIComponent(q)}`;
+    const resp = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!resp.ok) return [];
+    const body = (await resp.json()) as { results: AutocompleteArtist[] };
+    return body.results;
+}
 
 export interface ActivityI18nBundle {
     locale: string;

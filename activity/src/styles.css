@@ -279,6 +279,72 @@ body {
     align-self: center;
 }
 
+.options-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.artist-chip {
+    background: #404a28;
+    border: 1px solid #fbb03b;
+    color: #fbb03b;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.artist-chip:hover {
+    background: #5a6839;
+}
+
+.artist-chip-x {
+    font-size: 1rem;
+    line-height: 1;
+    opacity: 0.7;
+}
+
+.artist-autocomplete {
+    position: relative;
+    max-width: 260px;
+}
+
+.artist-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin: 4px 0 0;
+    padding: 4px 0;
+    list-style: none;
+    background: #1e1f22;
+    border: 1px solid #3f4147;
+    border-radius: 6px;
+    max-height: 240px;
+    overflow-y: auto;
+    z-index: 20;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.artist-suggestions li button {
+    width: 100%;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    color: inherit;
+    padding: 6px 10px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.artist-suggestions li button:hover {
+    background: #2b2d31;
+}
+
 .vote-row .hint-control {
     margin: 0;
 }
