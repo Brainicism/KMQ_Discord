@@ -3,8 +3,6 @@ import * as uuid from "uuid";
 import Eris from "eris";
 import _ from "lodash";
 
-// eslint-disable-next-line import/no-cycle
-import { attachActivityBridge } from "./activity_bridge";
 import {
     bold,
     chunkArray,
@@ -211,8 +209,6 @@ export default class GameSession extends Session {
 
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.syncAllVoiceMembers();
-
-        attachActivityBridge(this);
     }
 
     sessionName(): string {
