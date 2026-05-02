@@ -17,6 +17,7 @@ import {
     getAverageVolume,
     getCurrentVoiceMembers,
     getDebugLogHeader,
+    getMajorityCount,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
@@ -59,6 +60,12 @@ import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
+import {
+    type SessionActionResult,
+    SessionRejectReason,
+    actionFail,
+    actionOkVoid,
+} from "./session_action_result";
 import { SessionState, SessionStateMachine } from "./session_state";
 
 const logger = new IPCLogger("session");
@@ -94,15 +101,11 @@ export default abstract class Session extends EventEmitter {
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
-    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
-    protected sessionAbortController = new AbortController();
-
-    protected get abortSignal(): AbortSignal {
-        return this.sessionAbortController.signal;
-    }
-
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
+
+    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
+    protected sessionAbortController = new AbortController();
 
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession).
      *  Wrapped with a 30s timeout to prevent permanent deadlocks from blocking
@@ -166,21 +169,6 @@ export default abstract class Session extends EventEmitter {
             this.stateMachine.state !== SessionState.CREATED &&
             this.stateMachine.state !== SessionState.INITIALIZING
         );
-    }
-
-    /** Run fn while holding the lifecycle mutex. Returns null if session is ending/ended. */
-    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
-        if (!this.stateMachine.isAlive) {
-            return Promise.resolve(null);
-        }
-
-        return this.lifecycleMutex.runExclusive(async () => {
-            if (!this.stateMachine.isAlive) {
-                return null;
-            }
-
-            return fn();
-        });
     }
 
     static getSession(guildID: string): Session | undefined {
@@ -650,6 +638,62 @@ export default abstract class Session extends EventEmitter {
         }
     }
 
+    // ── Session API: actions that commands call ─────────────────────────
+
+    /**
+     * Process a skip vote from a user. Returns a result indicating
+     * whether the vote was counted and whether skip threshold was reached.
+     * @param userID - The ID of the user voting to skip
+     * @param _messageContext - The message context (unused)
+     * @returns A SessionActionResult with skip status
+     */
+    processSkipVote(
+        userID: string,
+        _messageContext: MessageContext,
+    ): SessionActionResult<{
+        skipAchieved: boolean;
+        skipCount: number;
+        skipThreshold: number;
+    }> {
+        if (!this.round || this.round.finished || this.round.skipAchieved) {
+            return actionFail(SessionRejectReason.NO_ACTIVE_ROUND);
+        }
+
+        if (!this.stateMachine.isAcceptingInput) {
+            return actionFail(SessionRejectReason.NOT_ACCEPTING_INPUT);
+        }
+
+        this.round.userSkipped(userID);
+
+        const skipCount = this.round.getSkipCount();
+        const skipThreshold = getMajorityCount(this.guildID);
+        const skipAchieved = skipCount >= skipThreshold;
+
+        return {
+            ok: true,
+            value: { skipAchieved, skipCount, skipThreshold },
+        };
+    }
+
+    /**
+     * Force-skip the current song (end round + start new one).
+     * @param messageContext - The message context for the command
+     */
+    async forceSkip(
+        messageContext: MessageContext,
+    ): Promise<SessionActionResult> {
+        if (!this.round) {
+            return actionFail(SessionRejectReason.NO_ACTIVE_ROUND);
+        }
+
+        this.round.skipAchieved = true;
+        await this.endRound(false, messageContext);
+        await this.startRound(messageContext);
+        return actionOkVoid();
+    }
+
+    // ── End Session API ───────────────────────────────────────────────
+
     /**
      * Updates the Session's lastActive timestamp and it's value in the data store
      */
@@ -773,6 +817,29 @@ export default abstract class Session extends EventEmitter {
         }
 
         return false;
+    }
+
+    protected get abortSignal(): AbortSignal {
+        return this.sessionAbortController.signal;
+    }
+
+    /**
+     * Run fn while holding the lifecycle mutex.
+     * @param fn - The async function to execute under the lock
+     * @returns The result of fn, or null if session is ending/ended
+     */
+    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
+        if (!this.stateMachine.isAlive) {
+            return Promise.resolve(null);
+        }
+
+        return this.lifecycleMutex.runExclusive(async () => {
+            if (!this.stateMachine.isAlive) {
+                return null;
+            }
+
+            return fn();
+        });
     }
 
     /**

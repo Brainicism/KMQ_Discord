@@ -23,6 +23,9 @@ export function delay(delayDuration: number): Promise<void> {
 /**
  * Like delay(), but can be cancelled via an AbortSignal.
  * Resolves normally if the signal fires (does NOT reject/throw).
+ * @param delayDuration - Delay in milliseconds
+ * @param signal - Optional AbortSignal to cancel the delay
+ * @returns A promise that resolves after the delay or on abort
  */
 export function cancellableDelay(
     delayDuration: number,
@@ -31,6 +34,7 @@ export function cancellableDelay(
     if (signal?.aborted) return Promise.resolve();
     return new Promise((resolve) => {
         const onAbort = (): void => {
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
             clearTimeout(timer);
             resolve();
         };
