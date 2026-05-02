@@ -8,6 +8,7 @@ import {
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
 } from "../constants";
+import { EventEmitter } from "events";
 import { IPCLogger } from "../logger";
 import { Mutex, withTimeout } from "async-mutex";
 import {
@@ -62,7 +63,7 @@ import { SessionState, SessionStateMachine } from "./session_state";
 
 const logger = new IPCLogger("session");
 
-export default abstract class Session {
+export default abstract class Session extends EventEmitter {
     /** The ID of text channel in which the Session was started in, and will be active in */
     public readonly textChannelID: string;
 
@@ -122,6 +123,7 @@ export default abstract class Session {
         guildID: string,
         sessionCreator: KmqMember,
     ) {
+        super();
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
@@ -169,6 +171,13 @@ export default abstract class Session {
 
     isGameSession(): this is GameSession {
         return false;
+    }
+
+    /** @returns the timer-mode timeout in seconds, or null if disabled */
+    getGuessTimeoutSec(): number | null {
+        return this.guildPreference.isGuessTimeoutSet()
+            ? this.guildPreference.gameOptions.guessTimeout
+            : null;
     }
 
     /**
@@ -225,8 +234,8 @@ export default abstract class Session {
                 logger.error(
                     `${getDebugLogHeader(
                         messageContext,
-                    )} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(
-                        this.guildPreference,
+                    )} | Error querying song: ${err.toString()}. guildOptions = ${JSON.stringify(
+                        this.guildPreference.gameOptions,
                     )}`,
                 );
 
@@ -938,6 +947,13 @@ export default abstract class Session {
             // Only set songStartedAt for clip mode at the start of the round
             if (!isClipMode || round.songStartedAt === null) {
                 round.songStartedAt = Date.now();
+                this.emit("roundStart", {
+                    roundIndex: this.roundsPlayed,
+                    songStartedAt: round.songStartedAt,
+                    guessTimeoutSec: this.guildPreference.isGuessTimeoutSet()
+                        ? this.guildPreference.gameOptions.guessTimeout
+                        : null,
+                });
             }
 
             await this.ensureConnectionReady();

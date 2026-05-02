@@ -37,14 +37,20 @@
         "prepare-schema": "bash src/scripts/prepare-kysely-schema.sh",
         "prettier": "prettier --write '**/*.{js,ts}'",
         "prettier-ci": "prettier --check '**/*.{js,ts}'",
-        "missing-i18n": "ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)"
+        "missing-i18n": "ts-node src/ci_checks/missing_i18n.ts $(find src -name '*.ts' -print)",
+        "build:activity": "cd activity && yarn install && yarn build",
+        "tunnel": "bash src/scripts/start-tunnel.sh",
+        "repair-available-songs": "ts-node --swc src/scripts/repair-available-songs.ts"
     },
     "author": "Brian Le",
     "license": "GPL-3.0",
     "dependencies": {
         "@commander-js/extra-typings": "^14.0.0",
         "@discordjs/opus": "^0.10.0",
+        "@fastify/rate-limit": "^10.3.0",
+        "@fastify/static": "^8.3.0",
         "@fastify/view": "^11.1.1",
+        "@fastify/websocket": "^11.2.0",
         "@google/generative-ai": "^0.24.1",
         "@swc-node/register": "^1.11.1",
         "@swc/core": "^1.15.32",
