@@ -104,8 +104,8 @@ describe("VoiceManager", () => {
             const conn = createMockConnection({ ready: true });
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
-            getPrivate(vm)._state = VoiceState.READY;
+            getPrivate(vm).voiceConnection = conn;
+            getPrivate(vm).voiceState = VoiceState.READY;
 
             await vm.ensureConnected();
             assert.strictEqual(vm.state, VoiceState.READY);
@@ -157,7 +157,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection({ ready: true });
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             await vm.ensureEncoderIdle();
         });
@@ -170,7 +170,7 @@ describe("VoiceManager", () => {
 
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             await vm.ensureEncoderIdle();
         });
@@ -188,7 +188,7 @@ describe("VoiceManager", () => {
 
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             await vm.ensureEncoderIdle();
             assert.strictEqual(stopPlayingCalled, true);
@@ -200,7 +200,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             vm.onceStreamEnd(
                 "round-1",
@@ -229,7 +229,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             let onEndCalled = false;
             vm.onceStreamEnd(
@@ -250,7 +250,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             let onEndCalled = false;
             vm.onceStreamEnd(
@@ -271,7 +271,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             let onErrorCalled = false;
             let receivedErr: Error | null = null;
@@ -296,7 +296,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             let onErrorCalled = false;
             vm.onceStreamEnd(
@@ -324,7 +324,7 @@ describe("VoiceManager", () => {
 
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             vm.stopPlaying();
             assert.strictEqual(stopCalled, true);
@@ -342,8 +342,8 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
-            getPrivate(vm)._state = VoiceState.READY;
+            getPrivate(vm).voiceConnection = conn;
+            getPrivate(vm).voiceState = VoiceState.READY;
 
             vm.disconnect();
             assert.strictEqual(vm.state, VoiceState.DISCONNECTED);
@@ -366,7 +366,7 @@ describe("VoiceManager", () => {
 
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             vm.disconnect();
             assert.strictEqual(stopCalled, true);
@@ -377,7 +377,7 @@ describe("VoiceManager", () => {
             const conn = createMockConnection();
             const client = createMockClient({ mockConnection: conn });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
             getPrivate(vm).currentRoundId = "round-5";
 
             vm.disconnect();
@@ -400,7 +400,7 @@ describe("VoiceManager", () => {
                 },
             });
             const vm = new VoiceManager("guild-1", "vc-1", client);
-            getPrivate(vm)._connection = conn;
+            getPrivate(vm).voiceConnection = conn;
 
             assert.doesNotThrow(() => vm.disconnect());
             assert.strictEqual(vm.state, VoiceState.DISCONNECTED);
