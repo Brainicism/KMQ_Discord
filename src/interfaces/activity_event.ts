@@ -1,4 +1,5 @@
 import type ActivityCorrectGuesser from "./activity_correct_guesser";
+import type ActivityOptionsSnapshot from "./activity_options_snapshot";
 import type ActivityRoundGuess from "./activity_round_guess";
 import type ActivityRoundMeta from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
@@ -29,6 +30,7 @@ type ActivityEvent =
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }
-    | { type: "skipped" };
+    | { type: "skipped" }
+    | { type: "optionsChanged"; options: ActivityOptionsSnapshot };
 
 export default ActivityEvent;

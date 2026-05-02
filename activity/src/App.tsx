@@ -15,10 +15,18 @@ import {
     fetchSnapshot,
     hintVote as apiHintVote,
     openActivityStream,
+    setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
+import type {
+    ActivityGender,
+    ActivityGuessMode,
+    ActivityMultiguess,
+} from "./types/activity_options_snapshot";
+import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
+import type { SetOptionRequest } from "./api";
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
@@ -67,6 +75,7 @@ const initialUi: UiState = {
     bookmarkedLinks: new Set(),
     currentRoundBookmarked: false,
     hadSession: false,
+    options: null,
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -77,6 +86,7 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
         currentRound: snapshot.currentRound ?? null,
         sessionEnded: !snapshot.hasSession,
         hadSession: prev.hadSession || snapshot.hasSession,
+        options: snapshot.options,
     };
 }
 
@@ -753,6 +763,164 @@ function resolveWinnerText(
     });
 }
 
+const GENDER_OPTIONS: ActivityGender[] = ["male", "female", "coed"];
+const GUESS_MODE_OPTIONS: ActivityGuessMode[] = ["song", "artist", "both"];
+
+function OptionsPanel({
+    accessToken,
+    instanceId,
+    options,
+    t,
+    onOptimistic,
+    onRollback,
+}: {
+    accessToken: string;
+    instanceId: string;
+    options: ActivityOptionsSnapshot;
+    t: Translator;
+    /** Applied instantly on click so the UI doesn't stall for the server
+     *  round-trip. Rolled back to the pre-click value if the request fails. */
+    onOptimistic: (next: ActivityOptionsSnapshot) => void;
+    onRollback: (prev: ActivityOptionsSnapshot) => void;
+}) {
+    const [feedback, setFeedback] = useState<string | null>(null);
+
+    const submit = async (
+        req: SetOptionRequest,
+        nextOptions: ActivityOptionsSnapshot,
+    ): Promise<void> => {
+        const prev = options;
+        onOptimistic(nextOptions);
+        setFeedback(null);
+        try {
+            const result = await apiSetOption(accessToken, instanceId, req);
+            if (!result.ok) {
+                setFeedback(rejectReasonText(t, result.reason));
+                onRollback(prev);
+            }
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+            onRollback(prev);
+        }
+    };
+
+    const isAlternating = options.gender[0] === "alternating";
+
+    const toggleGender = (g: ActivityGender): void => {
+        // Alternating is mutually exclusive with the flat genders.
+        const set = new Set<ActivityGender>(
+            isAlternating ? [] : options.gender,
+        );
+        if (set.has(g)) {
+            set.delete(g);
+        } else {
+            set.add(g);
+        }
+
+        const next = Array.from(set);
+        void submit(
+            { kind: "gender", genders: next },
+            { ...options, gender: next },
+        );
+    };
+
+    const toggleAlternating = (): void => {
+        const next: ActivityGender[] = isAlternating ? [] : ["alternating"];
+        void submit(
+            { kind: "gender", genders: next },
+            { ...options, gender: next },
+        );
+    };
+
+    const pickGuessMode = (mode: ActivityGuessMode): void => {
+        if (mode === options.guessMode) return;
+        void submit(
+            { kind: "guessMode", guessMode: mode },
+            { ...options, guessMode: mode },
+        );
+    };
+
+    const toggleMultiguess = (): void => {
+        const next: ActivityMultiguess =
+            options.multiguess === "on" ? "off" : "on";
+        void submit(
+            { kind: "multiguess", multiguess: next },
+            { ...options, multiguess: next },
+        );
+    };
+
+    return (
+        <details className="options-panel" open>
+            <summary>{t("options.heading")}</summary>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.gender")}</span>
+                <div className="options-row">
+                    {GENDER_OPTIONS.map((g) => {
+                        const active =
+                            !isAlternating && options.gender.includes(g);
+
+                        return (
+                            <button
+                                key={g}
+                                type="button"
+                                className={`option-chip ${active ? "active" : ""}`}
+                                onClick={() => toggleGender(g)}
+                            >
+                                {t(`options.${g}`)}
+                            </button>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        className={`option-chip ${isAlternating ? "active" : ""}`}
+                        onClick={toggleAlternating}
+                    >
+                        {t("options.alternating")}
+                    </button>
+                </div>
+            </div>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.guessMode")}</span>
+                <div className="options-row">
+                    {GUESS_MODE_OPTIONS.map((mode) => (
+                        <button
+                            key={mode}
+                            type="button"
+                            className={`option-chip ${
+                                options.guessMode === mode ? "active" : ""
+                            }`}
+                            onClick={() => pickGuessMode(mode)}
+                        >
+                            {t(`options.${mode}`)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.multiguess")}</span>
+                <div className="options-row">
+                    <button
+                        type="button"
+                        className={`option-chip ${
+                            options.multiguess === "on" ? "active" : ""
+                        }`}
+                        onClick={toggleMultiguess}
+                    >
+                        {options.multiguess === "on"
+                            ? t("options.on")
+                            : t("options.off")}
+                    </button>
+                </div>
+            </div>
+
+            {feedback && <span className="options-feedback">{feedback}</span>}
+        </details>
+    );
+}
+
 function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
     if (guesses.length === 0) return null;
 
@@ -1059,6 +1227,21 @@ export default function App() {
                 </div>
             )}
 
+            {authState && ui.options && (
+                <OptionsPanel
+                    accessToken={authState.accessToken}
+                    instanceId={authState.instanceId}
+                    options={ui.options}
+                    t={t}
+                    onOptimistic={(next) =>
+                        setUi((prev) => ({ ...prev, options: next }))
+                    }
+                    onRollback={(prevOptions) =>
+                        setUi((prev) => ({ ...prev, options: prevOptions }))
+                    }
+                />
+            )}
+
             <section className="scoreboard-section">
                 <h3>{t("scoreboardHeading")}</h3>
                 {ui.scoreboard ? (
@@ -1164,6 +1347,8 @@ function reduce(
             };
         case "scoreboardUpdate":
             return { ...prev, scoreboard: msg.scoreboard };
+        case "optionsChanged":
+            return { ...prev, options: msg.options };
         case "guessReceived":
             return {
                 ...prev,
