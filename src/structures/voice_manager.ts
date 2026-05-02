@@ -19,8 +19,8 @@ export enum VoiceState {
  * Provides clean voice state tracking and round-ID-tagged stream listeners.
  */
 export class VoiceManager {
-    private _connection: Eris.VoiceConnection | null = null;
-    private _state: VoiceState = VoiceState.DISCONNECTED;
+    private voiceConnection: Eris.VoiceConnection | null = null;
+    private voiceState: VoiceState = VoiceState.DISCONNECTED;
     private currentRoundId: string | null = null;
 
     constructor(
@@ -30,11 +30,11 @@ export class VoiceManager {
     ) {}
 
     get connection(): Eris.VoiceConnection | null {
-        return this._connection;
+        return this.voiceConnection;
     }
 
     get state(): VoiceState {
-        return this._state;
+        return this.voiceState;
     }
 
     updateVoiceChannelID(channelID: string): void {
@@ -43,26 +43,26 @@ export class VoiceManager {
 
     /** Ensure we have a ready voice connection. Joins if needed. */
     async ensureConnected(): Promise<void> {
-        if (this._connection?.ready) {
+        if (this.voiceConnection?.ready) {
             return;
         }
 
-        this._state = VoiceState.CONNECTING;
+        this.voiceState = VoiceState.CONNECTING;
 
         try {
-            this._connection = await this.client.joinVoiceChannel(
+            this.voiceConnection = await this.client.joinVoiceChannel(
                 this.voiceChannelID,
                 { opusOnly: true, selfDeaf: true },
             );
 
-            this._state = VoiceState.READY;
+            this.voiceState = VoiceState.READY;
         } catch (err) {
-            this._state = VoiceState.DISCONNECTED;
+            this.voiceState = VoiceState.DISCONNECTED;
             throw err;
         }
 
-        this._connection.removeAllListeners();
-        this._connection.on("error", (err) => {
+        this.voiceConnection.removeAllListeners();
+        this.voiceConnection.on("error", (err) => {
             logger.warn(
                 `gid: ${this.guildID} | Voice WS error: ${extractErrorString(err)}`,
             );
@@ -74,18 +74,18 @@ export class VoiceManager {
      * Replaces the old 1-second delay hack with bounded polling.
      */
     async ensureEncoderIdle(): Promise<void> {
-        if (!this._connection) {
+        if (!this.voiceConnection) {
             throw new Error(
                 "Connection is unexpectedly null in ensureEncoderIdle",
             );
         }
 
-        if (this._connection.ready) {
+        if (this.voiceConnection.ready) {
             return;
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (!this._connection.piper?.encoding) {
+        if (!this.voiceConnection.piper?.encoding) {
             return;
         }
 
@@ -95,17 +95,17 @@ export class VoiceManager {
 
         const deadline = Date.now() + 500;
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        while (this._connection?.piper?.encoding && Date.now() < deadline) {
+        while (this.voiceConnection?.piper?.encoding && Date.now() < deadline) {
             // eslint-disable-next-line no-await-in-loop
             await delay(50);
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-        if (this._connection?.piper?.encoding) {
+        if (this.voiceConnection?.piper?.encoding) {
             logger.warn(
                 `gid: ${this.guildID} | Encoder still busy after timeout, force stopping`,
             );
-            this._connection.stopPlaying();
+            this.voiceConnection.stopPlaying();
         }
     }
 
@@ -122,20 +122,20 @@ export class VoiceManager {
         onError: (err: Error) => Promise<void>,
     ): void {
         this.currentRoundId = roundId;
-        this._state = VoiceState.PLAYING;
+        this.voiceState = VoiceState.PLAYING;
 
-        if (!this._connection) return;
+        if (!this.voiceConnection) return;
 
-        this._connection.removeAllListeners("end");
-        this._connection.removeAllListeners("error");
+        this.voiceConnection.removeAllListeners("end");
+        this.voiceConnection.removeAllListeners("error");
 
-        this._connection.on("error", (err) => {
+        this.voiceConnection.on("error", (err) => {
             logger.warn(
                 `gid: ${this.guildID} | Voice WS error: ${extractErrorString(err)}`,
             );
         });
 
-        this._connection.once("end", async () => {
+        this.voiceConnection.once("end", async () => {
             if (this.currentRoundId !== roundId) {
                 logger.info(
                     `gid: ${this.guildID} | Ignoring stale stream end for round ${roundId} (current: ${this.currentRoundId})`,
@@ -143,14 +143,14 @@ export class VoiceManager {
                 return;
             }
 
-            this._state = VoiceState.READY;
+            this.voiceState = VoiceState.READY;
             await onEnd();
         });
 
-        this._connection.once("error", async (err) => {
+        this.voiceConnection.once("error", async (err) => {
             if (this.currentRoundId !== roundId) return;
 
-            this._state = VoiceState.ERROR;
+            this.voiceState = VoiceState.ERROR;
             logger.error(
                 `gid: ${this.guildID} | Stream error for round ${roundId}: ${extractErrorString(err)}`,
             );
@@ -159,19 +159,19 @@ export class VoiceManager {
     }
 
     stopPlaying(): void {
-        this._connection?.stopPlaying();
+        this.voiceConnection?.stopPlaying();
     }
 
     /** Disconnect from voice and clean up all listeners. */
     disconnect(): void {
         this.currentRoundId = null;
-        if (this._connection) {
-            this._connection.stopPlaying();
-            this._connection.removeAllListeners();
+        if (this.voiceConnection) {
+            this.voiceConnection.stopPlaying();
+            this.voiceConnection.removeAllListeners();
             try {
-                if (this._connection.channelID) {
+                if (this.voiceConnection.channelID) {
                     const voiceChannel = this.client.getChannel(
-                        this._connection.channelID,
+                        this.voiceConnection.channelID,
                     ) as Eris.VoiceChannel | undefined;
 
                     voiceChannel?.leave();
@@ -183,7 +183,7 @@ export class VoiceManager {
             }
         }
 
-        this._connection = null;
-        this._state = VoiceState.DISCONNECTED;
+        this.voiceConnection = null;
+        this.voiceState = VoiceState.DISCONNECTED;
     }
 }
