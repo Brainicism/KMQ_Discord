@@ -621,36 +621,86 @@ export default class PlaylistManager {
                 }
             }, 2000);
 
-            for await (const queryOutput of asyncPool(
-                4,
-                spotifySongs,
-                (x: SpotifyTrack) => this.generateSpotifySongMatchingPromise(x),
-            )) {
-                if (typeof queryOutput === "string") {
-                    unmatchedSongs.push(queryOutput);
-                } else {
-                    matchedSongs.push(queryOutput);
+            // Songs with any empty artist are immediately unmatched
+            for (const song of spotifySongs) {
+                if (song.artists.some((a) => !a)) {
+                    logger.warn(
+                        `Failed matching Spotify song due to empty artist. song = ${JSON.stringify(song)}.`,
+                    );
+                    unmatchedSongs.push(
+                        `"${song.name}" - ${song.artists.join(", ")}`,
+                    );
+                }
+            }
+            const songsToProcess = spotifySongs.filter((s) =>
+                s.artists.every((a) => !!a),
+            );
+
+            // Group by artist so each unique artist gets one batch DB query
+            const artistGroups = new Map<
+                string,
+                {
+                    songs: SpotifyTrack[];
+                    aliasIDs: number[];
+                    artistName: string;
+                }
+            >();
+            for (const song of songsToProcess) {
+                const aliasIDs = this.computeAliasIDs(song.artists);
+                const artistName = song.artists[0]!;
+                const key = `${artistName}|${[...aliasIDs].sort().join(",")}`;
+                if (!artistGroups.has(key)) {
+                    artistGroups.set(key, {
+                        songs: [],
+                        aliasIDs,
+                        artistName,
+                    });
+                }
+
+                artistGroups.get(key)!.songs.push(song);
+            }
+
+            for (const {
+                songs,
+                aliasIDs,
+                artistName,
+            } of artistGroups.values()) {
+                if (Date.now() - parseStartTime > SONG_MATCH_TIMEOUT_MS) {
+                    logger.warn(
+                        `${logHeader} | Playlist exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${unmatchedSongs.length + matchedSongs.length}/${spotifySongs.length}`,
+                    );
+                    unmatchedSongs.push(
+                        ...songs.map(
+                            (s) => `"${s.name}" - ${s.artists.join(", ")}`,
+                        ),
+                    );
+                    truncated = true;
+                    break;
+                }
+
+                const groupResults = await this.matchSongsByArtistGroup(
+                    songs,
+                    aliasIDs,
+                    artistName,
+                );
+
+                for (const result of groupResults) {
+                    if (typeof result === "string") {
+                        unmatchedSongs.push(result);
+                    } else {
+                        matchedSongs.push(result);
+                    }
                 }
 
                 const processedSongCount =
                     unmatchedSongs.length + matchedSongs.length;
-
                 if (
                     processedSongCount % 100 === 0 ||
-                    processedSongCount === 1 ||
                     processedSongCount === spotifySongs.length
                 ) {
                     logger.info(
                         `${logHeader} | Processed ${processedSongCount}/${spotifySongs.length} for playlist`,
                     );
-                }
-
-                if (Date.now() - parseStartTime > SONG_MATCH_TIMEOUT_MS) {
-                    logger.warn(
-                        `${logHeader} | Playlist exceeded song match timeout of ${SONG_MATCH_TIMEOUT_MS}ms after processing ${processedSongCount}/${spotifySongs.length}`,
-                    );
-                    truncated = true;
-                    break;
                 }
             }
 
@@ -800,57 +850,57 @@ export default class PlaylistManager {
         );
     }
 
-    private async generateSpotifySongMatchingPromise(
-        song: SpotifyTrack,
-    ): Promise<QueriedSong | string> {
-        try {
-            const aliasIDs: Array<number> = [];
-            for (const artist of song.artists) {
-                if (!artist) {
-                    logger.warn(
-                        `Failed matching Spotify song due to empty artist. song = ${JSON.stringify(
-                            song,
-                        )}.`,
-                    );
+    // handle songs with brackets in name, consider all components separately
+    private getSongNameVariants(name: string): string[] {
+        const components = name.split("(");
+        const variants = [components[0]!.trim()];
+        if (components.length > 1) {
+            variants.push(components[1]!.replace(")", "").trim());
+            variants.push(name);
+        }
 
-                    return `"${song.name}" - ${song.artists.join(", ")}`;
-                }
+        return variants;
+    }
 
-                const lowercaseArtist =
-                    GameRound.normalizePunctuationInName(artist);
-
-                const artistMapping = State.artistToEntry[lowercaseArtist];
-                if (artistMapping) {
-                    aliasIDs.push(artistMapping.id);
-                    const artistAliases = State.aliases.artist[lowercaseArtist];
-
-                    if (artistAliases) {
-                        for (const alias of artistAliases) {
-                            const lowercaseAlias =
-                                GameRound.normalizePunctuationInName(alias);
-
-                            if (lowercaseAlias in State.artistToEntry) {
-                                aliasIDs.push(
-                                    State.artistToEntry[lowercaseAlias]!.id,
-                                );
-                            }
+    private computeAliasIDs(artists: string[]): number[] {
+        const aliasIDs: number[] = [];
+        for (const artist of artists) {
+            const lowercaseArtist =
+                GameRound.normalizePunctuationInName(artist);
+            const artistMapping = State.artistToEntry[lowercaseArtist];
+            if (artistMapping) {
+                aliasIDs.push(artistMapping.id);
+                const artistAliases = State.aliases.artist[lowercaseArtist];
+                if (artistAliases) {
+                    for (const alias of artistAliases) {
+                        const lowercaseAlias =
+                            GameRound.normalizePunctuationInName(alias);
+                        if (lowercaseAlias in State.artistToEntry) {
+                            aliasIDs.push(
+                                State.artistToEntry[lowercaseAlias]!.id,
+                            );
                         }
                     }
                 }
             }
+        }
 
-            // handle songs with brackets in name, consider all components separately
-            const songNameBracketComponents = song.name.split("(");
-            const songNames = [songNameBracketComponents[0]!.trim()];
-            if (songNameBracketComponents.length > 1) {
-                songNames.push(
-                    songNameBracketComponents[1]!.replace(")", "").trim(),
-                );
-                songNames.push(song.name);
-            }
+        return aliasIDs;
+    }
 
-            const artistName = song.artists[0]!;
-            const query = dbContext.kmq
+    private async matchSongsByArtistGroup(
+        songs: SpotifyTrack[],
+        aliasIDs: number[],
+        artistName: string,
+    ): Promise<Array<QueriedSong | string>> {
+        try {
+            const allVariants = [
+                ...new Set(
+                    songs.flatMap((s) => this.getSongNameVariants(s.name)),
+                ),
+            ];
+
+            const rows = await dbContext.kmq
                 .selectFrom(
                     EnvVariableManager.isGodMode()
                         ? "expected_available_songs"
@@ -873,14 +923,14 @@ export default class PlaylistManager {
                 )
                 .where(({ eb, or }) =>
                     or(
-                        songNames.map((songName) =>
+                        allVariants.map((name) =>
                             eb(
                                 "clean_song_name_alpha_numeric",
                                 "like",
-                                songName.replace(/[^0-9a-z]/gi, "")
-                                    ? eb.fn("CleanSongName", [sql`${songName}`])
+                                name.replace(/[^0-9a-z]/gi, "")
+                                    ? eb.fn("CleanSongName", [sql`${name}`])
                                     : eb.fn("CleanSongName", [
-                                          sql`${songName.replace(/[^0-9a-z]/gi, "")}`,
+                                          sql`${name.replace(/[^0-9a-z]/gi, "")}`,
                                       ]),
                             ),
                         ),
@@ -917,51 +967,62 @@ export default class PlaylistManager {
                     return or(expressions);
                 })
                 .orderBy((eb) => eb.fn("CHAR_LENGTH", ["tags"]), "asc")
-                .orderBy("views", "desc");
+                .orderBy("views", "desc")
+                .execute();
 
-            const results = await query.execute();
-            let result: QueriedSong | null = null;
-            if (results.length === 1) {
-                result = new QueriedSong(results[0]!);
-            } else if (results.length > 1) {
+            // Group candidates by cleanSongName for O(1) per-song lookup
+            const byCleanName = new Map<string, typeof rows>();
+            for (const row of rows) {
+                const key = row.cleanSongName;
+                const existing = byCleanName.get(key);
+                if (existing) existing.push(row);
+                else byCleanName.set(key, [row]);
+            }
+
+            const normalize = (s: string) =>
+                s.replace(/[^0-9a-z]/gi, "").toLowerCase();
+
+            return songs.map((song) => {
+                // Collect candidates for this song's name variants, preserving
+                // ORDER BY order and deduplicating by youtubeLink
+                const seen = new Set<string>();
+                const candidates = this.getSongNameVariants(song.name)
+                    .map((v) => normalize(v))
+                    .flatMap((v) => byCleanName.get(v) ?? [])
+                    .filter((r) => {
+                        if (seen.has(r.youtubeLink)) return false;
+                        seen.add(r.youtubeLink);
+                        return true;
+                    });
+
+                if (candidates.length === 0) {
+                    return `"${song.name}" - ${song.artists.join(", ")}`;
+                }
+
+                if (candidates.length === 1) {
+                    return new QueriedSong(candidates[0]!);
+                }
+
                 // results may contain subgroups/parent groups, prioritize by original artist name
-                const properArtistNameMatches = results.filter(
+                const properMatches = candidates.filter(
                     (x) =>
-                        x.artistName
-                            .toLowerCase()
-                            .replace(/[^0-9a-z]/gi, "") ===
-                        artistName.toLowerCase().replace(/[^0-9a-z]/gi, ""),
+                        normalize(x.artistName) === normalize(song.artists[0]!),
                 );
 
                 // if multiple matches with and without punctuation removal
-                if (properArtistNameMatches.length > 1) {
+                if (properMatches.length > 1) {
                     // filter by even exact-er match
-                    const sortedMatches = _.orderBy(
-                        properArtistNameMatches,
-                        ["artistName"],
-                        "asc",
-                    );
-
-                    result = new QueriedSong(sortedMatches[0]!);
-                } else {
-                    result = new QueriedSong(
-                        properArtistNameMatches[0] || results[0]!,
+                    return new QueriedSong(
+                        _.orderBy(properMatches, ["artistName"], "asc")[0]!,
                     );
                 }
-            }
 
-            if (result) {
-                return result;
-            }
-
-            return `"${song.name}" - ${song.artists.join(", ")}`;
+                return new QueriedSong(properMatches[0] ?? candidates[0]!);
+            });
         } catch (err) {
             logger.error(
-                `Failed matching Spotify song. song = ${JSON.stringify(
-                    song,
-                )}. err = ${err}`,
+                `Failed matching Spotify songs for artist "${artistName}". err = ${err}`,
             );
-
             throw err;
         }
     }
