@@ -3,19 +3,15 @@ START TRANSACTION //
 DROP PROCEDURE IF EXISTS GenerateExpectedAvailableSongs //
 CREATE PROCEDURE GenerateExpectedAvailableSongs()
 BEGIN
-	/* Add better audio column */
-	ALTER TABLE kpop_videos.app_kpop ADD COLUMN IF NOT EXISTS better_audio_link VARCHAR(255);	
-	
-	UPDATE kpop_videos.app_kpop a
-	LEFT JOIN kpop_videos.app_kpop b ON a.id_better_audio = b.id
-	SET a.better_audio_link = b.vlink;
-
-	DELETE a
-	FROM kpop_videos.app_kpop a
-	JOIN (SELECT DISTINCT id_better_audio FROM kpop_videos.app_kpop WHERE id_better_audio IS NOT NULL) b
-	ON a.id = b.id_better_audio;
-	
-	/* Generate table of expected available songs */
+	/* Generate table of expected available songs.
+	 *
+	 * better_audio_link is resolved inline via a LEFT JOIN on app_kpop
+	 * (a.id_better_audio → b.vlink) instead of mutating app_kpop in place.
+	 * Audio-only rows (those that ARE a better-audio target) are excluded
+	 * with a NOT IN subquery rather than being DELETEd from the source table.
+	 *
+	 * This keeps app_kpop pristine and makes the procedure fully idempotent —
+	 * safe to run multiple times or concurrently without corrupting data. */
 	DROP TABLE IF EXISTS expected_available_songs;
 	CREATE TABLE expected_available_songs (
 		song_name_en VARCHAR(255) NOT NULL,
@@ -44,40 +40,48 @@ BEGIN
 
 	INSERT INTO expected_available_songs
 	SELECT
-		kpop_videos.app_kpop.name AS song_name_en,
+		a.name AS song_name_en,
 		(CASE 
-			WHEN kpop_videos.app_kpop.name REGEXP '^[^a-zA-Z0-9]+$' -- no-op if song name is fully non-alphanumeric (i.e punctuation)
-			THEN kpop_videos.app_kpop.name 
-			WHEN kpop_videos.app_kpop.name REGEXP '\\([^)]*\\)$' -- ignore bracketed part if at end of the song name
-			THEN CleanSongName(SUBSTRING_INDEX(kpop_videos.app_kpop.name, '(', 1))
-			ELSE CleanSongName(kpop_videos.app_kpop.name) -- regular cleaning
+			WHEN a.name REGEXP '^[^a-zA-Z0-9]+$' -- no-op if song name is fully non-alphanumeric (i.e punctuation)
+			THEN a.name 
+			WHEN a.name REGEXP '\\([^)]*\\)$' -- ignore bracketed part if at end of the song name
+			THEN CleanSongName(SUBSTRING_INDEX(a.name, '(', 1))
+			ELSE CleanSongName(a.name) -- regular cleaning
 		END) AS clean_song_name_alpha_numeric,
-		kpop_videos.app_kpop.kname AS song_name_ko,
-		kpop_videos.app_kpop.alias AS song_aliases,
-		vlink AS link,
-		kpop_videos.app_kpop.better_audio_link AS better_audio_link,
-		kpop_videos.app_kpop_group.name AS artist_name_en,
-		kpop_videos.app_kpop_group.original_name AS original_artist_name_en,
-		kpop_videos.app_kpop_group.kname AS artist_name_ko,
-		REPLACE(kpop_videos.app_kpop_group.alias, '; ', ';') AS artist_aliases,
-		kpop_videos.app_kpop_group.previous_name AS previous_name_en,
-		kpop_videos.app_kpop_group.previous_kname AS previous_name_ko,
-		kpop_videos.app_kpop_group.members AS members,
-		kpop_videos.app_kpop.views AS views,
-		releasedate as publishedon,
-		kpop_videos.app_kpop_group.id as id_artist,
-		issolo,
-		id_parentgroup,
-		IF(kpop_videos.app_kpop.is_audio = 'n', 'main', 'audio'),
-		tags,
-		kpop_videos.app_kpop.dead AS dead,
-		kpop_videos.app_kpop.id as daisuki_id
-	FROM kpop_videos.app_kpop
-	JOIN kpop_videos.app_kpop_group ON kpop_videos.app_kpop.id_artist = kpop_videos.app_kpop_group.id
-	AND vtype = 'main'
-	AND kpop_videos.app_kpop.name REGEXP '[0-9a-zA-Z[:punct:]]' -- only songs with english song names
-	AND tags NOT LIKE "%c%" -- no covers
-	AND tags NOT LIKE "%x%"; -- no remixes
+		a.kname AS song_name_ko,
+		a.alias AS song_aliases,
+		a.vlink AS link,
+		better_audio.vlink AS better_audio_link,
+		grp.name AS artist_name_en,
+		grp.original_name AS original_artist_name_en,
+		grp.kname AS artist_name_ko,
+		REPLACE(grp.alias, '; ', ';') AS artist_aliases,
+		grp.previous_name AS previous_name_en,
+		grp.previous_kname AS previous_name_ko,
+		grp.members AS members,
+		a.views AS views,
+		a.releasedate as publishedon,
+		grp.id as id_artist,
+		grp.issolo,
+		grp.id_parentgroup,
+		IF(a.is_audio = 'n', 'main', 'audio'),
+		a.tags,
+		a.dead AS dead,
+		a.id as daisuki_id
+	FROM kpop_videos.app_kpop a
+	JOIN kpop_videos.app_kpop_group grp ON a.id_artist = grp.id
+	/* Resolve better audio: look up the audio-only row's vlink inline */
+	LEFT JOIN kpop_videos.app_kpop better_audio ON a.id_better_audio = better_audio.id
+	WHERE a.vtype = 'main'
+	AND a.name REGEXP '[0-9a-zA-Z[:punct:]]' -- only songs with english song names
+	AND a.tags NOT LIKE "%c%" -- no covers
+	AND a.tags NOT LIKE "%x%" -- no remixes
+	/* Exclude audio-only rows that exist solely as better-audio targets */
+	AND a.id NOT IN (
+		SELECT DISTINCT id_better_audio
+		FROM kpop_videos.app_kpop
+		WHERE id_better_audio IS NOT NULL
+	);
 
 END //
 COMMIT //
