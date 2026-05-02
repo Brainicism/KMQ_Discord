@@ -32,6 +32,7 @@ exports.up = async function (knex) {
                 .notNullable()
                 .defaultTo(knex.fn.now())
                 .alter();
+
             table
                 .datetime("last_active")
                 .notNullable()

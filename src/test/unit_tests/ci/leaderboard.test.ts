@@ -1,22 +1,23 @@
-import * as discordUtils from "../../../helpers/discord_utils";
-import { LEADERBOARD_ENTRIES_PER_PAGE } from "../../../constants";
+import assert from "assert";
+import type Eris from "eris";
+import type { EmbedGenerator } from "eris-pagination";
 import { describe } from "mocha";
-import GameSession from "../../../structures/game_session";
-import GameType from "../../../enums/game_type";
-import GuildPreference from "../../../structures/guild_preference";
-import KmqMember from "../../../structures/kmq_member";
+import sinon from "sinon";
+
 import LeaderboardCommand from "../../../commands/game_commands/leaderboard";
+import { LEADERBOARD_ENTRIES_PER_PAGE } from "../../../constants";
+import dbContext from "../../../database_context";
+import GameType from "../../../enums/game_type";
 import LeaderboardDuration from "../../../enums/option_types/leaderboard_duration";
 import LeaderboardScope from "../../../enums/option_types/leaderboard_scope";
 import LeaderboardType from "../../../enums/option_types/leaderboard_type";
+import * as discordUtils from "../../../helpers/discord_utils";
+import State from "../../../state";
+import GameSession from "../../../structures/game_session";
+import GuildPreference from "../../../structures/guild_preference";
+import KmqMember from "../../../structures/kmq_member";
 import MessageContext from "../../../structures/message_context";
 import Player from "../../../structures/player";
-import State from "../../../state";
-import assert from "assert";
-import dbContext from "../../../database_context";
-import sinon from "sinon";
-import type { EmbedGenerator } from "eris-pagination";
-import type Eris from "eris";
 
 const SERVER_ID = "0";
 const gameStarter = new KmqMember("123");

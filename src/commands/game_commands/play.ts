@@ -1,3 +1,8 @@
+import { Mutex } from "async-mutex";
+import Eris from "eris";
+import fs from "fs";
+
+import CommandPrechecks from "../../command_prechecks";
 import {
     CLIP_DEFAULT_DURATION_SEC,
     CLIP_MAX_DURATION_SEC,
@@ -11,14 +16,10 @@ import {
     KmqImages,
     MAX_AUTOCOMPLETE_FIELDS,
 } from "../../constants";
-import { IPCLogger } from "../../logger";
-import { Mutex } from "async-mutex";
-import {
-    activeBonusUsers,
-    isFirstGameOfDay,
-    isPowerHour,
-} from "../../helpers/game_utils";
-import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
+import dbContext from "../../database_context";
+import GameType from "../../enums/game_type";
+import LocaleType from "../../enums/locale_type";
+import AnswerType from "../../enums/option_types/answer_type";
 import {
     clickableSlashCommand,
     fetchChannel,
@@ -37,27 +38,27 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import AnswerCommand from "../game_options/answer";
-import AnswerType from "../../enums/option_types/answer_type";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
+import {
+    activeBonusUsers,
+    isFirstGameOfDay,
+    isPowerHour,
+} from "../../helpers/game_utils";
+import i18n from "../../helpers/localization_manager";
+import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GameSession from "../../structures/game_session";
-import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Player from "../../structures/player";
 import Session from "../../structures/session";
-import State from "../../state";
-import dbContext from "../../database_context";
-import fs from "fs";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
 import type TeamScoreboard from "../../structures/team_scoreboard";
+import AnswerCommand from "../game_options/answer";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "play";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -779,7 +780,6 @@ export default class PlayCommand implements BaseCommand {
                     .emojis.map((e) => e.id)
                     .includes(emojiID)
             ) {
-                // eslint-disable-next-line no-await-in-loop
                 await sendErrorMessage(
                     messageContext,
                     {

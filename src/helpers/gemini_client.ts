@@ -1,10 +1,11 @@
+import type { GenerativeModel } from "@google/generative-ai";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { IPCLogger } from "../logger";
-import { standardDateFormat } from "./utils";
+
 import LocaleType from "../enums/locale_type";
 import NewsRange from "../enums/news_range";
-import type { GenerativeModel } from "@google/generative-ai";
+import { IPCLogger } from "../logger";
 import type { KpopNewsRedditPost } from "./reddit_client";
+import { standardDateFormat } from "./utils";
 
 const logger = new IPCLogger("gemini_client");
 

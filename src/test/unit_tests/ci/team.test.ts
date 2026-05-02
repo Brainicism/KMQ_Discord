@@ -1,6 +1,7 @@
+import assert from "assert";
+
 import Player from "../../../structures/player";
 import Team from "../../../structures/team";
-import assert from "assert";
 
 describe("team", () => {
     let team: Team;

@@ -1,8 +1,9 @@
-import { IPCLogger } from "../logger";
+import type { AxiosInstance } from "axios";
+import axios from "axios";
+
 import { KMQ_USER_AGENT } from "../constants";
 import NewsRange from "../enums/news_range";
-import axios from "axios";
-import type { AxiosInstance } from "axios";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("reddit_client");
 

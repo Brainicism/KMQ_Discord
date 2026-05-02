@@ -1,22 +1,22 @@
-import { IPCLogger } from "../../logger";
-import { getDebugLogHeader } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import Session from "../../structures/session";
-import i18n from "../../helpers/localization_manager";
 import type { CommandInteraction } from "eris";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
+import Eris from "eris";
 import type { GuildTextableMessage } from "src/types";
-import type BaseCommand from "../interfaces/base_command";
+
+import CommandPrechecks from "../../command_prechecks";
+import { getDebugLogHeader } from "../../helpers/discord_utils";
+import i18n from "../../helpers/localization_manager";
 import type CommandArgs from "../../interfaces/command_args";
-import type GameSession from "../../structures/game_session";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import type GameSession from "../../structures/game_session";
 import type MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "score";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ScoreCommand implements BaseCommand {
     aliases = ["scoreboard", "sb"];
 

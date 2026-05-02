@@ -1,5 +1,6 @@
-import { SessionRegistry } from "../../../structures/session_registry";
 import assert from "assert";
+
+import { SessionRegistry } from "../../../structures/session_registry";
 
 describe("SessionRegistry", () => {
     let registry: SessionRegistry;

@@ -1,27 +1,26 @@
-/* eslint-disable global-require */
 import Eris from "eris";
-/* eslint-disable import/no-dynamic-require */
+import { sql } from "kysely";
+import _ from "lodash";
+import schedule from "node-schedule";
+
+import NewsCommand from "../commands/misc_commands/news";
+import dbContext from "../database_context";
+import type LocaleType from "../enums/locale_type";
+import NewsRange from "../enums/news_range";
+import type MatchedArtist from "../interfaces/matched_artist";
+import KmqConfiguration from "../kmq_configuration";
 import { IPCLogger } from "../logger";
-import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
+import State from "../state";
+import GameRound from "../structures/game_round";
+import MessageContext from "../structures/message_context";
+import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import {
     cleanupInactiveGameSessions,
     cleanupInactiveListeningSessions,
     isPowerHour,
 } from "./game_utils";
-import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
-import { sql } from "kysely";
-import GameRound from "../structures/game_round";
-import KmqConfiguration from "../kmq_configuration";
-import MessageContext from "../structures/message_context";
-import NewsCommand from "../commands/misc_commands/news";
-import NewsRange from "../enums/news_range";
-import State from "../state";
-import _ from "lodash";
-import dbContext from "../database_context";
 import i18n from "./localization_manager";
-import schedule from "node-schedule";
-import type LocaleType from "../enums/locale_type";
-import type MatchedArtist from "../interfaces/matched_artist";
+import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 
 const logger = new IPCLogger("management_utils");
 const RESTART_WARNING_INTERVALS = new Set([10, 5, 3, 2, 1]);
@@ -54,7 +53,7 @@ export async function warnServersImpendingRestart(
             ...Object.values(State.listeningSessions),
         ]) {
             if (session.finished) continue;
-            // eslint-disable-next-line no-await-in-loop
+
             await sendInfoMessage(
                 new MessageContext(
                     session.textChannelID,
@@ -78,7 +77,7 @@ export async function warnServersImpendingRestart(
                     ),
                 },
             );
-            // eslint-disable-next-line no-await-in-loop
+
             await delay(200);
             serversWarned++;
         }
@@ -465,7 +464,6 @@ async function sendNewsNotifications(newsRange: NewsRange): Promise<void> {
         );
 
         try {
-            // eslint-disable-next-line no-await-in-loop
             await NewsCommand.sendNews(
                 subscriptionContext,
                 subscription.range as NewsRange,

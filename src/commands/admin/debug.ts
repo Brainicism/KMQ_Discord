@@ -1,5 +1,6 @@
+import type Eris from "eris";
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
+
 import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
@@ -7,17 +8,16 @@ import {
     sendInfoEmbedsWebhook,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import i18n from "../../helpers/localization_manager";
+import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
 
 const logger = new IPCLogger("debug");
 
-// eslint-disable-next-line import/no-unused-modules
 export default class DebugCommand implements BaseCommand {
     call = async ({ message, channel }: CommandArgs): Promise<void> => {
         const guildPreference = await GuildPreference.getGuildPreference(

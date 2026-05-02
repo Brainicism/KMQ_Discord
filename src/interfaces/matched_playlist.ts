@@ -1,5 +1,5 @@
-import type { PlaylistMetadata } from "./playlist_metadata";
 import type QueriedSong from "../structures/queried_song";
+import type { PlaylistMetadata } from "./playlist_metadata";
 
 export interface MatchedPlaylist {
     matchedSongs: Array<QueriedSong>;

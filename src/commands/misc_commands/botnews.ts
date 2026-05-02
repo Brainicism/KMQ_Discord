@@ -1,23 +1,23 @@
+import Eris from "eris";
+import fs from "fs";
+
 import { DataFiles, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import fs from "fs";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "botnews";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class BotNewsCommand implements BaseCommand {
     aliases = ["updates"];
 

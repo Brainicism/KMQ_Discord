@@ -1,19 +1,18 @@
-import { IPCLogger } from "../../logger";
+import CommandPrechecks from "../../command_prechecks";
+import GameOption from "../../enums/game_option_name";
 import {
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameOption from "../../enums/game_option_name";
+import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("forceplay");
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ForcePlayCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 

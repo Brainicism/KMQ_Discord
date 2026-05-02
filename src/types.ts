@@ -1,7 +1,8 @@
-import GameOption from "./enums/game_option_name";
-import type { GuildTextableWithThreads } from "eris";
-import type AdvancedCommandAction from "./enums/advanced_setting_action_name";
 import type Eris from "eris";
+import type { GuildTextableWithThreads } from "eris";
+
+import type AdvancedCommandAction from "./enums/advanced_setting_action_name";
+import GameOption from "./enums/game_option_name";
 
 export type GuildTextableMessage = Eris.Message<GuildTextableWithThreads> & {
     guildID: string;

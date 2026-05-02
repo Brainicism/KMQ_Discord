@@ -1,21 +1,21 @@
-import * as game_utils from "../../../helpers/game_utils";
-import * as utils from "../../../helpers/utils";
+import assert from "assert";
+import sinon from "sinon";
+
+import ExpCommand from "../../../commands/game_commands/exp";
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
 } from "../../../constants";
-
-import AnswerType from "../../../enums/option_types/answer_type";
 import ExpBonusModifier from "../../../enums/exp_bonus_modifier";
-import ExpCommand from "../../../commands/game_commands/exp";
-import GameRound from "../../../structures/game_round";
+import AnswerType from "../../../enums/option_types/answer_type";
 import GuessModeType from "../../../enums/option_types/guess_mode_type";
+import ShuffleType from "../../../enums/option_types/shuffle_type";
+import * as game_utils from "../../../helpers/game_utils";
+import * as utils from "../../../helpers/utils";
+import GameRound from "../../../structures/game_round";
 import GuildPreference from "../../../structures/guild_preference";
 import QueriedSong from "../../../structures/queried_song";
-import ShuffleType from "../../../enums/option_types/shuffle_type";
-import assert from "assert";
-import sinon from "sinon";
 
 describe("exp command", () => {
     let guildPreference: GuildPreference;
@@ -220,7 +220,6 @@ describe("exp command", () => {
                     for (const answerType of Object.keys(
                         multipleChoicePenaltyMap,
                     )) {
-                        // eslint-disable-next-line @typescript-eslint/no-loop-func
                         it(`should return corresponding multiple choice penalty (${answerType})`, async () => {
                             await guildPreference.setAnswerType(
                                 answerType as AnswerType,

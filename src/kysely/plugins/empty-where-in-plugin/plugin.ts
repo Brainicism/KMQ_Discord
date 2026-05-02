@@ -3,8 +3,6 @@
  * Plugin that replaces .where("column", "not in", []) with a condition that returns true
  */
 
-import { SelectQueryNode } from "kysely";
-import EmptyWhereInTransformer from "./transformer";
 import type {
     KyselyPlugin,
     PluginTransformQueryArgs,
@@ -13,6 +11,9 @@ import type {
     RootOperationNode,
     UnknownRow,
 } from "kysely";
+import { SelectQueryNode } from "kysely";
+
+import EmptyWhereInTransformer from "./transformer";
 
 export default class EmptyWhereInPlugin implements KyselyPlugin {
     readonly #transformer = new EmptyWhereInTransformer();

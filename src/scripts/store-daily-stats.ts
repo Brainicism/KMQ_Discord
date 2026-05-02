@@ -1,5 +1,5 @@
-import { IPCLogger } from "../logger";
 import dbContext from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("daily_stats");
 

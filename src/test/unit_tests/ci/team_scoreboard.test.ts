@@ -1,9 +1,10 @@
+import assert from "assert";
+
 import GameOption from "../../../enums/game_option_name";
 import GuildPreference from "../../../structures/guild_preference";
 import Player from "../../../structures/player";
-import TeamScoreboard from "../../../structures/team_scoreboard";
-import assert from "assert";
 import type Team from "../../../structures/team";
+import TeamScoreboard from "../../../structures/team_scoreboard";
 
 const FIRST_TEAM_NAME = "kmq team";
 const SECOND_TEAM_NAME = "not kmqer";

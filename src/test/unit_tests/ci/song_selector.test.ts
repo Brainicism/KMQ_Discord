@@ -1,6 +1,6 @@
-/* eslint-disable sort-imports-es6-autofix/sort-imports-es6 */
+/* eslint-disable simple-import-sort/imports */
 /* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
+
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,

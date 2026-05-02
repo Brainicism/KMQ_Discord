@@ -1,7 +1,7 @@
+import dbContext from "../database_context";
 import { IPCLogger } from "../logger";
 import QueriedSong from "../structures/queried_song";
 import SongSelector from "../structures/song_selector";
-import dbContext from "../database_context";
 
 const logger = new IPCLogger("get-unclean-song-names");
 

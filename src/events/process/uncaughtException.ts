@@ -1,6 +1,6 @@
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
 import EnvType from "../../enums/env_type";
+import { extractErrorString } from "../../helpers/utils";
+import { IPCLogger } from "../../logger";
 import State from "../../state";
 
 const logger = new IPCLogger("uncaughtException");

@@ -1,6 +1,7 @@
+import assert from "assert";
+
 import EliminationPlayer from "../../../structures/elimination_player";
 import EliminationScoreboard from "../../../structures/elimination_scoreboard";
-import assert from "assert";
 
 const userIDs = ["12345", "23456", "34567"];
 const DEFAULT_LIVES = 10;

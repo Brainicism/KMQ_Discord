@@ -1,6 +1,7 @@
-import KmqMember from "./kmq_member";
-import State from "../state";
 import type Eris from "eris";
+
+import State from "../state";
+import KmqMember from "./kmq_member";
 
 export default class MessageContext {
     /** The text channel to send the message to */

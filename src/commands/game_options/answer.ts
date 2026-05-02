@@ -1,29 +1,30 @@
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import {
     ExpBonusModifierValues,
     HIDDEN_DEFAULT_TIMER,
     OptionAction,
 } from "../../constants";
-import { IPCLogger } from "../../logger";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
+import GameOption from "../../enums/game_option_name";
+import LocaleType from "../../enums/locale_type";
+import AnswerType from "../../enums/option_types/answer_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import AnswerType from "../../enums/option_types/answer_type";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "answer";
 const logger = new IPCLogger(COMMAND_NAME);

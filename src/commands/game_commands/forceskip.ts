@@ -1,26 +1,26 @@
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import { getMention } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
+import { getMention } from "../../helpers/utils";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "forceskip";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ForceSkipCommand implements BaseCommand {
     aliases = ["fskip", "fs"];
 

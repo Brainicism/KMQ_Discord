@@ -1,19 +1,19 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable node/no-sync */
+/* eslint-disable n/no-sync */
 import * as cp from "child_process";
+import fs from "fs";
+import { sql } from "kysely";
+import path from "path";
+import sinon from "sinon";
+
 import { DATABASE_DOWNLOAD_DIR } from "../../constants";
+import dbContext, { getNewConnection } from "../../database_context";
+import EnvType from "../../enums/env_type";
 import { IPCLogger } from "../../logger";
 import {
     importCachedDump,
     performMigrationDown,
     performMigrations,
 } from "../../seed/bootstrap";
-import { sql } from "kysely";
-import EnvType from "../../enums/env_type";
-import dbContext, { getNewConnection } from "../../database_context";
-import fs from "fs";
-import path from "path";
-import sinon from "sinon";
 
 const logger = new IPCLogger("test_setup");
 const sandbox = sinon.createSandbox();

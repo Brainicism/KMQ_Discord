@@ -1,11 +1,11 @@
-import { IPCLogger } from "../../logger";
-import { getNewConnection } from "../../database_context";
-import { seedAndDownloadNewSongs } from "../../seed/seed_db";
-import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
+import { getNewConnection } from "../../database_context";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
+import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import { seedAndDownloadNewSongs } from "../../seed/seed_db";
 import MessageContext from "../../structures/message_context";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
 
 const logger = new IPCLogger("download_songs");
 
@@ -14,7 +14,6 @@ enum DownloadMode {
     SEED = "seed",
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export default class DownloadSongsCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 

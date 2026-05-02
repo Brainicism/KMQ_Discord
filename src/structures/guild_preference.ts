@@ -1,4 +1,9 @@
+import type { MutexInterface } from "async-mutex";
+import { Mutex } from "async-mutex";
+import type { Insertable } from "kysely";
+import _ from "lodash";
 import * as uuid from "uuid";
+
 import {
     DEFAULT_ADVANCED_SETTINGS,
     DEFAULT_ANSWER_TYPE,
@@ -18,28 +23,16 @@ import {
     GameOptionInternal,
     NON_RELOAD_IMPACTING_GAME_OPTION_INTERNALS,
 } from "../constants";
-import { IPCLogger } from "../logger";
-import { Mutex } from "async-mutex";
-import { extractErrorString, mapTo } from "../helpers/utils";
+import dbContext from "../database_context";
+import type AdvancedCommandAction from "../enums/advanced_setting_action_name";
 import AdvancedCommandActionName from "../enums/advanced_setting_action_name";
-import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
-import Session from "./session";
-import SongSelector from "./song_selector";
-import _ from "lodash";
-import dbContext from "../database_context";
-import type { AdvancedSettings } from "../types";
-import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db";
-import type { GenderModeOptions } from "../enums/option_types/gender";
-import type { Insertable } from "kysely";
-import type { MutexInterface } from "async-mutex";
-import type AdvancedCommandAction from "../enums/advanced_setting_action_name";
+import AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
-import type GameOptions from "../interfaces/game_options";
+import type { GenderModeOptions } from "../enums/option_types/gender";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
-import type MatchedArtist from "../interfaces/matched_artist";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
 import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
@@ -47,8 +40,15 @@ import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
+import { extractErrorString, mapTo } from "../helpers/utils";
+import type GameOptions from "../interfaces/game_options";
+import type MatchedArtist from "../interfaces/matched_artist";
+import { IPCLogger } from "../logger";
+import type { AdvancedSettings } from "../types";
+import type { GameOptions as GameOptionsSchema } from "../typings/kmq_db";
+import Session from "./session";
+import SongSelector from "./song_selector";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("guild_preference");
 
 type GameOptionValue =
@@ -985,7 +985,6 @@ export default class GuildPreference {
             );
 
             for (const insert of inserts) {
-                // eslint-disable-next-line no-await-in-loop
                 await insert.execute();
             }
         });

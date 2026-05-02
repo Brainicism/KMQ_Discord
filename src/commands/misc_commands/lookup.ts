@@ -1,15 +1,11 @@
-import { IPCLogger } from "../../logger";
+import type { CommandInteraction, EmbedOptions } from "eris";
+import Eris from "eris";
+import _ from "lodash";
+import type MatchedArtist from "src/interfaces/matched_artist";
+
 import { KmqImages } from "../../constants";
-import {
-    chunkArray,
-    containsHangul,
-    friendlyFormattedDate,
-    friendlyFormattedNumber,
-    getYouTubeVideoID,
-    isValidURL,
-    truncatedString,
-    validateYouTubeID,
-} from "../../helpers/utils";
+import dbContext from "../../database_context";
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     getAllClickableSlashCommands,
@@ -23,26 +19,31 @@ import {
     tryAutocompleteInteractionAcknowledge,
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
+import i18n from "../../helpers/localization_manager";
+import {
+    chunkArray,
+    containsHangul,
+    friendlyFormattedDate,
+    friendlyFormattedNumber,
+    getYouTubeVideoID,
+    isValidURL,
+    truncatedString,
+    validateYouTubeID,
+} from "../../helpers/utils";
 import { sendValidationErrorMessage } from "../../helpers/validate";
-import Eris from "eris";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import QueriedSong from "../../structures/queried_song";
 import SongSelector from "../../structures/song_selector";
-import State from "../../state";
-import _ from "lodash";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { CommandInteraction, EmbedOptions } from "eris";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import type MatchedArtist from "src/interfaces/matched_artist";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "lookup";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -419,7 +420,7 @@ export default class LookupCommand implements BaseCommand {
 
         if (!daisukiEntry) {
             // maybe it was falsely parsed as video ID? fallback to song name lookup
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+
             const found = await LookupCommand.lookupBySongName(
                 messageOrInteraction,
                 videoID,

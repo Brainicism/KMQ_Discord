@@ -1,21 +1,20 @@
-import { IPCLogger } from "../../logger";
+import CommandPrechecks from "../../command_prechecks";
+import GameType from "../../enums/game_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendErrorMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameType from "../../enums/game_type";
-import MessageContext from "../../structures/message_context";
-import PlayCommand, { PlayTeamsAction } from "./play";
 import i18n from "../../helpers/localization_manager";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import PlayCommand, { PlayTeamsAction } from "./play";
 
 const COMMAND_NAME = "join";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class JoinCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

@@ -1,4 +1,12 @@
-/* eslint-disable no-await-in-loop */
+import cluster from "cluster";
+import { config } from "dotenv";
+import Eris from "eris";
+import type { Options } from "eris-fleet";
+import { Fleet } from "eris-fleet";
+import fs from "fs";
+import schedule from "node-schedule";
+import path from "path";
+
 import {
     EMBED_SUCCESS_COLOR,
     IGNORED_WARNING_SUBSTRINGS,
@@ -6,30 +14,21 @@ import {
     STANDBY_COOKIE,
     STATUS_COOKIE,
 } from "./constants";
-import { Fleet } from "eris-fleet";
+import dbContext from "./database_context";
+import EnvType from "./enums/env_type";
+import { sendInfoWebhook } from "./helpers/discord_utils";
 import { clearRestartNotification } from "./helpers/management_utils";
-import { config } from "dotenv";
 import {
     delay,
     extractErrorString,
     isPrimaryInstance,
     pathExists,
 } from "./helpers/utils";
-import { getInternalLogger } from "./logger";
-import EnvType from "./enums/env_type";
-import Eris from "eris";
 import KmqClient from "./kmq_client";
-import backupKmqDatabase from "./scripts/backup-kmq-database";
-import cluster from "cluster";
-import dbContext from "./database_context";
-import fs from "fs";
-
-import { sendInfoWebhook } from "./helpers/discord_utils";
 import KmqWebServer from "./kmq_web_server";
-import path from "path";
-import schedule from "node-schedule";
+import { getInternalLogger } from "./logger";
+import backupKmqDatabase from "./scripts/backup-kmq-database";
 import storeDailyStats from "./scripts/store-daily-stats";
-import type { Options } from "eris-fleet";
 
 const logger = getInternalLogger();
 

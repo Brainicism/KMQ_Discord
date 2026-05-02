@@ -1,6 +1,7 @@
+import type Eris from "eris";
+
 import { ELIMINATION_DEFAULT_LIVES } from "../constants";
 import Player from "./player";
-import type Eris from "eris";
 
 export default class EliminationPlayer extends Player {
     static fromUser(

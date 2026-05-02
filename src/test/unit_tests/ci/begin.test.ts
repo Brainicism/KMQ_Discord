@@ -1,13 +1,14 @@
+import assert from "assert";
+import sinon from "sinon";
+
+import PlayCommand from "../../../commands/game_commands/play";
+import GameType from "../../../enums/game_type";
 import * as discordUtils from "../../../helpers/discord_utils";
 import GameSession from "../../../structures/game_session";
-import GameType from "../../../enums/game_type";
 import GuildPreference from "../../../structures/guild_preference";
 import KmqMember from "../../../structures/kmq_member";
 import MessageContext from "../../../structures/message_context";
-import PlayCommand from "../../../commands/game_commands/play";
 import Player from "../../../structures/player";
-import assert from "assert";
-import sinon from "sinon";
 import type TeamScoreboard from "../../../structures/team_scoreboard";
 
 function getMockGuildPreference(): GuildPreference {

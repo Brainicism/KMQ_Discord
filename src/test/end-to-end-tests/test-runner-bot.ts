@@ -1,21 +1,21 @@
-/* eslint-disable no-case-declarations */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-use-before-define */
+
 /* eslint-disable no-console */
-/* eslint-disable no-await-in-loop */
-import * as Eris from "eris";
+
 import { Command } from "@commander-js/extra-typings";
-import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
-import { KmqResponseType } from "./test_suites/test_suite";
-import { delay } from "../../helpers/utils";
-import { sendInfoWebhook } from "../../helpers/discord_utils";
 import Axios from "axios";
-import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
-import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
-import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
 import crypto from "crypto";
+import * as Eris from "eris";
+
+import { EMBED_ERROR_COLOR, KmqImages } from "../../constants";
+import { sendInfoWebhook } from "../../helpers/discord_utils";
+import { delay } from "../../helpers/utils";
 import type ParsedGameOptionValues from "./parsed_game_options_value";
+import BASIC_OPTIONS_TEST_SUITE from "./test_suites/basic_options_test";
+import PLAY_TEST_SUITE from "./test_suites/gameplay_test";
+import HEALTH_CHECK_TEST_SUITE from "./test_suites/healthcheck_test";
 import type TestSuite from "./test_suites/test_suite";
+import { KmqResponseType } from "./test_suites/test_suite";
 
 function log(msg: string): void {
     console.log(`${new Date().toISOString()} | ${msg}`);
@@ -27,7 +27,6 @@ function debug(msg: string): void {
     }
 }
 
-// eslint-disable-next-line consistent-return
 async function getKmqRunId(): Promise<string> {
     try {
         return (

@@ -1,6 +1,8 @@
+import Eris from "eris";
 import * as uuid from "uuid";
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
+
+import CommandPrechecks from "../../command_prechecks";
+import PrivateMessageCommand from "../../commands/admin/privatemessage";
 import {
     fetchChannel,
     getAllClickableSlashCommands,
@@ -8,19 +10,18 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import KmqConfiguration from "../../kmq_configuration";
-import MessageContext from "../../structures/message_context";
-import PrivateMessageCommand from "../../commands/admin/privatemessage";
-import Session from "../../structures/session";
-import State from "../../state";
 import i18n from "../../helpers/localization_manager";
+import { extractErrorString } from "../../helpers/utils";
 import validate from "../../helpers/validate";
-import type { GuildTextableMessage } from "../../types";
 import type ParsedMessage from "../../interfaces/parsed_message";
 import type PrecheckArgs from "../../interfaces/precheck_args";
+import KmqConfiguration from "../../kmq_configuration";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type { GuildTextableMessage } from "../../types";
 
 const logger = new IPCLogger("messageCreate");
 
@@ -67,7 +68,6 @@ export default async function messageCreateHandler(
         return;
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (message.guildID === undefined) {
         logger.debug(`Message received in DMs. msg = ${message.content}`);
 
@@ -222,7 +222,6 @@ export default async function messageCreateHandler(
 
             for (const precheck of prechecks) {
                 if (
-                    // eslint-disable-next-line no-await-in-loop
                     !(await precheck.checkFn({
                         messageContext,
                         session,

@@ -1,9 +1,9 @@
-/* eslint-disable no-await-in-loop */
-import { IPCLogger } from "./logger";
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
+
 import type BaseCommand from "./commands/interfaces/base_command";
+import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("kmq_client");
 
@@ -64,10 +64,9 @@ export default class KmqClient extends Eris.Client {
                 }
 
                 try {
-                    // eslint-disable-next-line global-require,import/no-dynamic-require
                     const command = require(commandFilePath);
                     const commandName = path.parse(commandFile).name;
-                    // eslint-disable-next-line new-cap
+
                     commandMap[commandName] = new command.default();
                 } catch (e) {
                     throw new Error(

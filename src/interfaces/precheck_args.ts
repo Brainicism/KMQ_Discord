@@ -1,7 +1,8 @@
 import type Eris from "eris";
+
 import type MessageContext from "../structures/message_context";
-import type ParsedMessage from "./parsed_message";
 import type Session from "../structures/session";
+import type ParsedMessage from "./parsed_message";
 
 export default interface PrecheckArgs {
     messageContext: MessageContext;

@@ -1,6 +1,10 @@
-import { IPCLogger } from "../../logger";
+import type { CommandInteraction, EmbedOptions } from "eris";
+import Eris from "eris";
+import type CommandArgs from "src/interfaces/command_args";
+
 import { KmqImages } from "../../constants";
-import { chunkArray, discordDateFormat } from "../../helpers/utils";
+import dbContext from "../../database_context";
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
@@ -9,20 +13,17 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import Eris from "eris";
-import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import UpcomingRelease from "../../structures/upcoming_release";
-import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
-import type { CommandInteraction, EmbedOptions } from "eris";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
+import { chunkArray, discordDateFormat } from "../../helpers/utils";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import UpcomingRelease from "../../structures/upcoming_release";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "src/interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "upcomingreleases";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -33,7 +34,6 @@ enum ReleaseType {
     Album = "album",
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export default class UpcomingReleasesCommand implements BaseCommand {
     static FIELDS_PER_EMBED = 9;
     aliases = ["upcoming"];

@@ -1,18 +1,19 @@
+import Eris from "eris";
 import * as uuid from "uuid";
+
 import { EMBED_SUCCESS_COLOR, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
 import {
     getUserTag,
     sendDeprecatedTextCommandMessage,
     sendInfoWebhook,
 } from "../../helpers/discord_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "feedback";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -131,7 +132,6 @@ export default class FeedbackCommand implements BaseCommand {
             )}\n`;
 
             if (
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
                 modalComponent.type === Eris.Constants.ComponentTypes.ACTION_ROW
             ) {
                 feedbackResponse += `${modalComponent.components[0]!.value}\n`;

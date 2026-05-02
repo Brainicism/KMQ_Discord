@@ -1,10 +1,11 @@
-/* eslint-disable node/no-sync */
-import * as cp from "child_process";
+/* eslint-disable n/no-sync */
 import { Command } from "@commander-js/extra-typings";
-import { IPCLogger } from "../logger";
-import { join } from "path";
+import * as cp from "child_process";
 import fs from "fs";
+import { join } from "path";
 import util from "util";
+
+import { IPCLogger } from "../logger";
 
 const exec = util.promisify(cp.exec);
 

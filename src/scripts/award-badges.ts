@@ -1,6 +1,7 @@
-import { IPCLogger } from "../logger";
 import { createInterface } from "readline";
+
 import dbContext from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("award-badges");
 

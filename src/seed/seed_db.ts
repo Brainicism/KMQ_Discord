@@ -1,6 +1,13 @@
-/* eslint-disable no-await-in-loop */
-import * as cp from "child_process";
 import { Command } from "@commander-js/extra-typings";
+import Axios from "axios";
+import * as cp from "child_process";
+import { config } from "dotenv";
+import fs from "fs";
+import { sql } from "kysely";
+import _ from "lodash";
+import path from "path";
+import util from "util";
+
 import {
     DATABASE_DOWNLOAD_DIR,
     DataFiles,
@@ -11,8 +18,14 @@ import {
     KmqImages,
     LATEST_DAISUKI_DUMP,
 } from "../constants";
-import { IPCLogger } from "../logger";
-import { config } from "dotenv";
+import type { DatabaseContext } from "../database_context";
+import { getNewConnection } from "../database_context";
+import EnvType from "../enums/env_type";
+import {
+    sendDebugAlertFileWebhook,
+    sendInfoWebhook,
+} from "../helpers/discord_utils";
+import KmqSongDownloader from "../helpers/kmq_song_downloader";
 import {
     discordDateFormat,
     parseJsonFile,
@@ -20,20 +33,7 @@ import {
     standardDateFormat,
     truncatedString,
 } from "../helpers/utils";
-import { getNewConnection } from "../database_context";
-import {
-    sendDebugAlertFileWebhook,
-    sendInfoWebhook,
-} from "../helpers/discord_utils";
-import { sql } from "kysely";
-import Axios from "axios";
-import EnvType from "../enums/env_type";
-import KmqSongDownloader from "../helpers/kmq_song_downloader";
-import _ from "lodash";
-import fs from "fs";
-import path from "path";
-import util from "util";
-import type { DatabaseContext } from "../database_context";
+import { IPCLogger } from "../logger";
 
 const exec = util.promisify(cp.exec);
 

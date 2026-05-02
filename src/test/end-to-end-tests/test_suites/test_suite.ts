@@ -1,4 +1,5 @@
 import type * as Eris from "eris";
+
 import type ParsedGameOptionValues from "../parsed_game_options_value";
 
 export default interface TestSuite {

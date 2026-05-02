@@ -1,12 +1,13 @@
 import * as cp from "child_process";
-import { IPCLogger } from "../../logger";
-import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
 import util from "util";
-import type BaseCommand from "../interfaces/base_command";
+
+import CommandPrechecks from "../../command_prechecks";
+import { sendErrorMessage, sendInfoMessage } from "../../helpers/discord_utils";
 import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
 
 const exec = util.promisify(cp.exec);
 

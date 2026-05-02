@@ -1,21 +1,21 @@
-import { IPCLogger } from "../../logger";
+import type Eris from "eris";
+import type { TextableChannel } from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
+import LocaleType from "../../enums/locale_type";
 import {
     sendDmMessage,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
 import i18n from "../../helpers/localization_manager";
-import type { TextableChannel } from "eris";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
-import type Eris from "eris";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("privatemessage");
 
-// eslint-disable-next-line import/no-unused-modules
 export default class PrivateMessageCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.userAdminPrecheck }];
 

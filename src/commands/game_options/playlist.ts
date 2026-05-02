@@ -1,9 +1,13 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import {
     SPOTIFY_BASE_URL,
     SPOTIFY_SHORTHAND_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
 } from "../../constants";
+import GameOption from "../../enums/game_option_name";
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -16,26 +20,23 @@ import {
     sendMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
+import i18n from "../../helpers/localization_manager";
 import {
     friendlyFormattedNumber,
     isValidURL,
     italicize,
     standardDateFormat,
 } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LimitCommand from "./limit";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
+import LimitCommand from "./limit";
 
 const COMMAND_NAME = "playlist";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -46,7 +47,6 @@ const enum PlaylistCommandAction {
     MATCHES = "matches",
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export default class PlaylistCommand implements BaseCommand {
     aliases = ["spotify", "youtube"];
 

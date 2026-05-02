@@ -1,3 +1,5 @@
+import Eris from "eris";
+
 import {
     EMBED_SUCCESS_BONUS_COLOR,
     KmqImages,
@@ -6,27 +8,25 @@ import {
     VOTE_LINK,
     VOTE_RESET_DURATION,
 } from "../../constants";
-import { IPCLogger } from "../../logger";
-import { bold } from "../../helpers/utils";
+import dbContext from "../../database_context";
 import {
     getDebugLogHeader,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
 import { userBonusIsActive } from "../../helpers/game_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
+import { bold } from "../../helpers/utils";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "vote";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class VoteCommand implements BaseCommand {
     aliases = ["v", "voted"];
 

@@ -1,4 +1,8 @@
-import { IPCLogger } from "../../logger";
+import type { CommandInteraction } from "eris";
+import Eris from "eris";
+
+import LocaleType from "../../enums/locale_type";
+import AnswerType from "../../enums/option_types/answer_type";
 import {
     clickableSlashCommand,
     getInteractionValue,
@@ -6,22 +10,18 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../../helpers/discord_utils";
-import AnswerType from "../../enums/option_types/answer_type";
-import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { CommandInteraction } from "eris";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "guess";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class GuessCommand implements BaseCommand {
     static MIN_GUESS_LENGTH = 1;
     static MAX_GUESS_LENGTH = 500;

@@ -1,16 +1,15 @@
-/* eslint-disable no-template-curly-in-string */
-/* eslint-disable @typescript-eslint/quotes */
+/* eslint-disable @stylistic/quotes */
 
-import { IPCLogger } from "../logger";
-// eslint-disable-next-line import/no-extraneous-dependencies
+import type { CallExpression, Node } from "typescript";
 import {
+    createProgram,
     ModuleKind,
     ScriptTarget,
     SyntaxKind,
-    createProgram,
 } from "typescript";
+
 import i18n from "../helpers/localization_manager";
-import type { CallExpression, Node } from "typescript";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("missing_i18n");
 

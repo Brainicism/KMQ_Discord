@@ -1,17 +1,18 @@
+import assert from "assert";
+import sinon from "sinon";
+
+import CommandPrechecks from "../../../command_prechecks";
+import dbContext from "../../../database_context";
+import GameType from "../../../enums/game_type";
+import AnswerType from "../../../enums/option_types/answer_type";
 import * as discord_utils from "../../../helpers/discord_utils";
 import * as management_utils from "../../../helpers/management_utils";
-import AnswerType from "../../../enums/option_types/answer_type";
-import CommandPrechecks from "../../../command_prechecks";
-import GameSession from "../../../structures/game_session";
-import GameType from "../../../enums/game_type";
-import GuildPreference from "../../../structures/guild_preference";
 import KmqConfiguration from "../../../kmq_configuration";
+import GameSession from "../../../structures/game_session";
+import GuildPreference from "../../../structures/guild_preference";
 import KmqMember from "../../../structures/kmq_member";
 import ListeningSession from "../../../structures/listening_session";
 import MessageContext from "../../../structures/message_context";
-import assert from "assert";
-import dbContext from "../../../database_context";
-import sinon from "sinon";
 
 describe("command prechecks", () => {
     const sandbox = sinon.createSandbox();
@@ -134,7 +135,6 @@ describe("command prechecks", () => {
                         teamGameSession,
                     ]) {
                         assert.equal(
-                            // eslint-disable-next-line no-await-in-loop
                             await CommandPrechecks.inSessionCommandPrecheck({
                                 session,
                                 messageContext,

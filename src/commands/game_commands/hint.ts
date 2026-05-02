@@ -1,26 +1,27 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import { KmqImages } from "../../constants";
+import GameType from "../../enums/game_type";
 import {
     getDebugLogHeader,
     getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameType from "../../enums/game_type";
+import i18n from "../../helpers/localization_manager";
+import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import type EliminationScoreboard from "../../structures/elimination_scoreboard";
+import type GameSession from "../../structures/game_session";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EliminationScoreboard from "../../structures/elimination_scoreboard";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type GameSession from "../../structures/game_session";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "hint";
 const logger = new IPCLogger(COMMAND_NAME);

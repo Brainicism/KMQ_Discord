@@ -1,11 +1,10 @@
-import { IPCLogger } from "../logger";
 import { SCOREBOARD_FIELD_CUTOFF } from "../constants";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { IPCLogger } from "../logger";
+import type Player from "./player";
 import Scoreboard from "./scoreboard";
 import Team from "./team";
-import type Player from "./player";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const logger = new IPCLogger("team_scoreboard");
 
 interface TeamMap {

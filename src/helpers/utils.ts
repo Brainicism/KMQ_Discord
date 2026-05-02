@@ -1,12 +1,13 @@
 /* eslint-disable tsdoc/syntax */
-import * as uuid from "uuid";
-import { DataFiles } from "../constants";
-import { IPCLogger } from "../logger";
-import _ from "lodash";
 import crypto from "crypto";
 import fs from "fs";
-import i18n from "./localization_manager";
+import _ from "lodash";
 import moment from "moment-timezone";
+import * as uuid from "uuid";
+
+import { DataFiles } from "../constants";
+import { IPCLogger } from "../logger";
+import i18n from "./localization_manager";
 
 const logger = new IPCLogger("utils");
 
@@ -16,7 +17,6 @@ const logger = new IPCLogger("utils");
  * @returns Promise
  */
 export function delay(delayDuration: number): Promise<void> {
-    // eslint-disable-next-line no-promise-executor-return
     return new Promise((resolve) => setTimeout(resolve, delayDuration));
 }
 
@@ -115,7 +115,7 @@ export async function parseJsonFile(filePath: string): Promise<any> {
  */
 export function parseJsonFileSync(filePath: string): any {
     try {
-        // eslint-disable-next-line node/no-sync
+        // eslint-disable-next-line n/no-sync
         const fileContents = fs.readFileSync(filePath).toString();
         return JSON.parse(fileContents);
     } catch (e) {
@@ -509,7 +509,7 @@ export async function pathExists(filePath: string): Promise<boolean> {
  */
 export function pathExistsSync(filePath: string): boolean {
     try {
-        // eslint-disable-next-line node/no-sync
+        // eslint-disable-next-line n/no-sync
         fs.accessSync(filePath);
         return true;
     } catch (e) {
@@ -530,7 +530,6 @@ export async function isPrimaryInstance(): Promise<boolean> {
  */
 export function isValidURL(url: string): boolean {
     try {
-        // eslint-disable-next-line no-new
         new URL(url);
         return true;
     } catch (err) {
@@ -641,7 +640,6 @@ export function parseKmqPlaylistIdentifier(kmqPlaylistIdentifier: string): {
  * @returns whether the string contains atleast one alphanum char
  */
 export function hasAtLeastOneAlphanumeric(m: string): boolean {
-    // eslint-disable-next-line no-control-regex
     return /[a-zA-Z0-9]/.test(m);
 }
 

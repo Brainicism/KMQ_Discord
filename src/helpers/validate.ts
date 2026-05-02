@@ -1,17 +1,17 @@
-/* eslint-disable no-await-in-loop */
+import type Eris from "eris";
+
+import type CommandValidations from "../interfaces/command_validations";
+import type ParsedMessage from "../interfaces/parsed_message";
 import { IPCLogger } from "../logger";
-import { arrayToString } from "./utils";
+import MessageContext from "../structures/message_context";
+import type { GuildTextableMessage } from "../types";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendErrorMessage,
 } from "./discord_utils";
-import MessageContext from "../structures/message_context";
 import i18n from "./localization_manager";
-import type { GuildTextableMessage } from "../types";
-import type CommandValidations from "../interfaces/command_validations";
-import type Eris from "eris";
-import type ParsedMessage from "../interfaces/parsed_message";
+import { arrayToString } from "./utils";
 
 const logger = new IPCLogger("validate");
 

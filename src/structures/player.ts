@@ -1,8 +1,9 @@
-import { ExpBonusModifierValues } from "../constants";
-import { bold, escapedFormatting, getMention } from "../helpers/utils";
-import ExpBonusModifier from "../enums/exp_bonus_modifier";
-import State from "../state";
 import type Eris from "eris";
+
+import { ExpBonusModifierValues } from "../constants";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import { bold, escapedFormatting, getMention } from "../helpers/utils";
+import State from "../state";
 
 export default class Player {
     /** The Discord user ID of the player */

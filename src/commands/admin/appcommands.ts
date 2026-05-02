@@ -1,17 +1,15 @@
-/* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../../logger";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import AppCommandsAction from "../../enums/app_command_action";
 import CommandPrechecks from "../../command_prechecks";
+import AppCommandsAction from "../../enums/app_command_action";
 import EnvType from "../../enums/env_type";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import type BaseCommand from "../interfaces/base_command";
+import { sendInfoMessage } from "../../helpers/discord_utils";
 import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("app_commands");
 
-// eslint-disable-next-line import/no-unused-modules
 export default class AppCommandsCommand implements BaseCommand {
     validations = {
         minArgCount: 1,

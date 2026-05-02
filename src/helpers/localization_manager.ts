@@ -1,11 +1,12 @@
-import { DEFAULT_LOCALE } from "../constants";
-import { IPCLogger } from "../logger";
+import i18next from "i18next";
 import Backend from "i18next-fs-backend";
+import path from "path";
+
+import { DEFAULT_LOCALE } from "../constants";
 import EnvType from "../enums/env_type";
 import LocaleType from "../enums/locale_type";
+import { IPCLogger } from "../logger";
 import State from "../state";
-import i18next from "i18next";
-import path from "path";
 
 const logger = new IPCLogger("localization_manager");
 

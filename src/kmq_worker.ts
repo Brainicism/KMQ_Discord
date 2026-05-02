@@ -1,13 +1,44 @@
-/* eslint-disable node/no-sync */
-import { BaseClusterWorker } from "eris-fleet";
-import { IPCLogger } from "./logger";
-import { RedditClient } from "./helpers/reddit_client";
+/* eslint-disable n/no-sync */
 import { config } from "dotenv";
-import { durationSeconds } from "./helpers/utils";
+import type * as Eris from "eris";
+import { BaseClusterWorker } from "eris-fleet";
+import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
+import fs from "fs";
+import schedule from "node-schedule";
+import path from "path";
+
+import EvalCommand from "./commands/admin/eval";
+import ReloadCommand from "./commands/admin/reload";
+import dbContext from "./database_context";
+import AppCommandsAction from "./enums/app_command_action";
+import EnvType from "./enums/env_type";
+import EnvVariableManager from "./env_variable_manager";
+import channelDeleteHandler from "./events/client/channelDelete";
+import connectHandler from "./events/client/connect";
+import debugHandler from "./events/client/debug";
+import disconnectHandler from "./events/client/disconnect";
+import errorHandler from "./events/client/error";
+import guildAvailableHandler from "./events/client/guildAvailable";
+import guildCreateHandler from "./events/client/guildCreate";
+import guildDeleteHandler from "./events/client/guildDelete";
+import interactionCreateHandler from "./events/client/interactionCreate";
+import messageCreateHandler from "./events/client/messageCreate";
+import shardDisconnectHandler from "./events/client/shardDisconnect";
+import shardReadyHandler from "./events/client/shardReady";
+import shardResumeHandler from "./events/client/shardResume";
+import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate";
+import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
+import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
+import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
+import warnHandler from "./events/client/warn";
+import SIGINTHandler from "./events/process/SIGINT";
+import uncaughtExceptionHandler from "./events/process/uncaughtException";
+import unhandledRejectionHandler from "./events/process/unhandledRejection";
 import {
     getCachedAppCommandIds,
     updateAppCommands,
 } from "./helpers/discord_utils";
+import GeminiClient from "./helpers/gemini_client";
 import {
     registerIntervals,
     reloadArtists,
@@ -15,49 +46,18 @@ import {
     reloadSongs,
     updateBotStatus,
 } from "./helpers/management_utils";
-import AppCommandsAction from "./enums/app_command_action";
-import EnvType from "./enums/env_type";
-import EnvVariableManager from "./env_variable_manager";
-import EvalCommand from "./commands/admin/eval";
-import GeminiClient from "./helpers/gemini_client";
-import KmqConfiguration from "./kmq_configuration";
 import PlaylistManager from "./helpers/playlist_manager";
-import ReloadCommand from "./commands/admin/reload";
-import SIGINTHandler from "./events/process/SIGINT";
-import Session from "./structures/session";
-import State from "./state";
-import channelDeleteHandler from "./events/client/channelDelete";
-import connectHandler from "./events/client/connect";
-import dbContext from "./database_context";
-import debugHandler from "./events/client/debug";
-import disconnectHandler from "./events/client/disconnect";
-import errorHandler from "./events/client/error";
-import fs from "fs";
-import guildAvailableHandler from "./events/client/guildAvailable";
-import guildCreateHandler from "./events/client/guildCreate";
-import guildDeleteHandler from "./events/client/guildDelete";
-import interactionCreateHandler from "./events/client/interactionCreate";
-import messageCreateHandler from "./events/client/messageCreate";
-import path from "path";
-import schedule from "node-schedule";
-import shardDisconnectHandler from "./events/client/shardDisconnect";
-import shardReadyHandler from "./events/client/shardReady";
-import shardResumeHandler from "./events/client/shardResume";
-import unavailableGuildCreateHandler from "./events/client/unavailableGuildCreate";
-import uncaughtExceptionHandler from "./events/process/uncaughtException";
-import unhandledRejectionHandler from "./events/process/unhandledRejection";
-import voiceChannelJoinHandler from "./events/client/voiceChannelJoin";
-import voiceChannelLeaveHandler from "./events/client/voiceChannelLeave";
-import voiceChannelSwitchHandler from "./events/client/voiceChannelSwitch";
-import warnHandler from "./events/client/warn";
-import type * as Eris from "eris";
-import type { Setup } from "eris-fleet/dist/clusters/BaseClusterWorker";
+import { RedditClient } from "./helpers/reddit_client";
+import { durationSeconds } from "./helpers/utils";
 import type KmqClient from "./kmq_client";
+import KmqConfiguration from "./kmq_configuration";
+import { IPCLogger } from "./logger";
+import State from "./state";
+import Session from "./structures/session";
 
 const logger = new IPCLogger("kmq");
 config({ path: path.resolve(__dirname, "../.env") });
 
-// eslint-disable-next-line import/no-unused-modules
 export default class BotWorker extends BaseClusterWorker {
     ready = false;
     logHeader = (): string => `Cluster #${this.clusterID}`;
@@ -190,7 +190,6 @@ export default class BotWorker extends BaseClusterWorker {
         }
     };
 
-    // eslint-disable-next-line class-methods-use-this
     registerClientEvents(client: KmqClient): void {
         // remove listeners registered by eris-fleet, handle on cluster instead
         client.removeAllListeners("warn");
@@ -216,14 +215,12 @@ export default class BotWorker extends BaseClusterWorker {
             .on("guildUnavailable", unavailableGuildCreateHandler);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     registerInteractiveClientEvents(client: KmqClient): void {
         client
             .on("messageCreate", messageCreateHandler)
             .on("interactionCreate", interactionCreateHandler);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     registerProcessEvents(): void {
         // remove listeners registered by eris-fleet, handle on cluster instead
         process.removeAllListeners("unhandledRejection");
@@ -235,7 +232,6 @@ export default class BotWorker extends BaseClusterWorker {
             .on("SIGINT", SIGINTHandler);
     }
 
-    // eslint-disable-next-line class-methods-use-this
     shutdown = async (done: () => void): Promise<void> => {
         logger.info(`${this.logHeader()} | SHUTDOWN received, cleaning up...`);
 

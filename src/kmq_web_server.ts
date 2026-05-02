@@ -1,14 +1,15 @@
-import { IPCLogger } from "./logger";
-import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
-import { sql } from "kysely";
-import { userVoted } from "./helpers/bot_listing_manager";
-import _ from "lodash";
-import ejs from "ejs";
-import fastify from "fastify";
 import fastifyView from "@fastify/view";
-import os from "os";
-import type { DatabaseContext } from "./database_context";
+import ejs from "ejs";
 import type { Fleet, Stats } from "eris-fleet";
+import fastify from "fastify";
+import { sql } from "kysely";
+import _ from "lodash";
+import os from "os";
+
+import type { DatabaseContext } from "./database_context";
+import { userVoted } from "./helpers/bot_listing_manager";
+import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { IPCLogger } from "./logger";
 
 const logger = new IPCLogger("web_server");
 
@@ -136,10 +137,9 @@ export default class KmqWebServer {
 
                 const query = request.body as string;
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-floating-promises
+                // eslint-disable-next-line @typescript-eslint/no-floating-promises
                 (async function executeEval(command: string) {
                     try {
-                        // eslint-disable-next-line no-eval
                         const result = eval(command);
                         await reply.code(200).send({ result });
                     } catch (e) {

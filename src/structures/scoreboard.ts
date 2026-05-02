@@ -1,14 +1,14 @@
-import { IPCLogger } from "../logger";
 import {
     ROUND_MAX_SCOREBOARD_PLAYERS,
     SCOREBOARD_FIELD_CUTOFF,
 } from "../constants";
-import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
 import { getCurrentVoiceMembers } from "../helpers/discord_utils";
 import i18n from "../helpers/localization_manager";
+import { bold, friendlyFormattedNumber, getMention } from "../helpers/utils";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import { IPCLogger } from "../logger";
 import type GuildPreference from "./guild_preference";
 import type Player from "./player";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 
 const logger = new IPCLogger("scoreboard");
 

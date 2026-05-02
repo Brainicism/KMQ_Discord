@@ -1,6 +1,10 @@
 import * as cp from "child_process";
+import { config } from "dotenv";
+import fs, { promises as fsp } from "fs";
 import { FileMigrationProvider, Migrator, NO_MIGRATIONS, sql } from "kysely";
-import { IPCLogger } from "../logger";
+import path from "path";
+import util from "util";
+
 import {
     PROMOTED_COOKIE,
     STANDBY_COOKIE,
@@ -8,7 +12,14 @@ import {
     TEST_DB_CACHED_EXPORT,
     YT_DLP_LOCATION,
 } from "../constants";
-import { config } from "dotenv";
+import type { DatabaseContext } from "../database_context";
+import { getNewConnection } from "../database_context";
+import EnvType from "../enums/env_type";
+import EnvVariableManager from "../env_variable_manager";
+import KmqSongDownloader from "../helpers/kmq_song_downloader";
+import { pathExists } from "../helpers/utils";
+import KmqConfiguration from "../kmq_configuration";
+import { IPCLogger } from "../logger";
 import {
     databaseExists,
     generateExpectedAvailableSongs,
@@ -17,16 +28,6 @@ import {
     tableExists,
     updateKpopDatabase,
 } from "./seed_db";
-import { getNewConnection } from "../database_context";
-import { pathExists } from "../helpers/utils";
-import EnvType from "../enums/env_type";
-import EnvVariableManager from "../env_variable_manager";
-import KmqConfiguration from "../kmq_configuration";
-import KmqSongDownloader from "../helpers/kmq_song_downloader";
-import fs, { promises as fsp } from "fs";
-import path from "path";
-import util from "util";
-import type { DatabaseContext } from "../database_context";
 
 const exec = util.promisify(cp.exec);
 
@@ -96,7 +97,7 @@ async function songThresholdReached(db: DatabaseContext): Promise<boolean> {
  * @param databaseName - the database name
  */
 export function importCachedDump(databaseName: string): void {
-    // eslint-disable-next-line node/no-sync
+    // eslint-disable-next-line n/no-sync
     cp.execSync(
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} ${databaseName} < ${TEST_DB_CACHED_EXPORT}`,
     );

@@ -1,5 +1,6 @@
-import { IPCLogger } from "./logger";
 import { OptionAction } from "./constants";
+import dbContext from "./database_context";
+import GameType from "./enums/game_type";
 import {
     areUserAndBotInSameVoiceChannel,
     clickableSlashCommand,
@@ -8,16 +9,15 @@ import {
     sendErrorMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "./helpers/discord_utils";
-import { getTimeUntilRestart } from "./helpers/management_utils";
 import { userIsAdmin } from "./helpers/game_utils";
-import GameType from "./enums/game_type";
-import GuildPreference from "./structures/guild_preference";
-import KmqConfiguration from "./kmq_configuration";
-import dbContext from "./database_context";
 import i18n from "./helpers/localization_manager";
+import { getTimeUntilRestart } from "./helpers/management_utils";
 import type EmbedPayload from "./interfaces/embed_payload";
-import type GameSession from "./structures/game_session";
 import type PrecheckArgs from "./interfaces/precheck_args";
+import KmqConfiguration from "./kmq_configuration";
+import { IPCLogger } from "./logger";
+import type GameSession from "./structures/game_session";
+import GuildPreference from "./structures/guild_preference";
 
 const logger = new IPCLogger("command_prechecks");
 

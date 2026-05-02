@@ -1,29 +1,29 @@
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import { DEFAULT_MULTIGUESS_TYPE, OptionAction } from "../../constants";
-import { IPCLogger } from "../../logger";
+import GameOption from "../../enums/game_option_name";
+import LocaleType from "../../enums/locale_type";
+import MultiGuessType from "../../enums/option_types/multiguess_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import MultiGuessType from "../../enums/option_types/multiguess_type";
-import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "multiguess";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class MultiGuessCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

@@ -1,29 +1,29 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+import type GameSession from "src/structures/game_session";
+
+import CommandPrechecks from "../../command_prechecks";
 import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import i18n from "../../helpers/localization_manager";
 import { getMention } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
-import HintCommand from "./hint";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type GameSession from "src/structures/game_session";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
+import HintCommand from "./hint";
 
 const COMMAND_NAME = "forcehint";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ForceHintCommand implements BaseCommand {
     aliases = ["fhint", "fh"];
 

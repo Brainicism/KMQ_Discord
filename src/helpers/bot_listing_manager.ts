@@ -1,8 +1,9 @@
-import { IPCLogger } from "../logger";
-import { VOTE_BONUS_DURATION } from "../constants";
 import Axios from "axios";
-import dbContext from "../database_context";
 import type { IPC } from "eris-fleet";
+
+import { VOTE_BONUS_DURATION } from "../constants";
+import dbContext from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("bot_stats_poster");
 interface BotListing {
@@ -79,7 +80,6 @@ export default class BotListingManager {
         for (const siteConfigKeyName of Object.keys(BOT_LISTING_SITES).filter(
             (x) => x in process.env,
         )) {
-            // eslint-disable-next-line no-await-in-loop
             await this.postStat(siteConfigKeyName);
         }
     }

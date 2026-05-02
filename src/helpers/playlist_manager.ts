@@ -1,6 +1,32 @@
-/* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../logger";
+import type { AxiosResponse } from "axios";
+import Axios from "axios";
+import type Eris from "eris";
+import fs from "fs";
+import { youtube_v3 } from "googleapis";
+import { sql } from "kysely";
+import _ from "lodash";
+import path from "path";
+import asyncPool from "tiny-async-pool";
+
 import { PLAYLIST_CACHE_TTL_HOURS } from "../constants";
+import dbContext from "../database_context";
+import EnvVariableManager from "../env_variable_manager";
+import type { MatchedPlaylist } from "../interfaces/matched_playlist";
+import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
+import type SpotifyTrack from "../interfaces/spotify_track";
+import KmqConfiguration from "../kmq_configuration";
+import { IPCLogger } from "../logger";
+import State from "../state";
+import GameRound from "../structures/game_round";
+import type MessageContext from "../structures/message_context";
+import QueriedSong from "../structures/queried_song";
+import SongSelector from "../structures/song_selector";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "./discord_utils";
+import i18n from "./localization_manager";
 import {
     extractErrorString,
     parseKmqPlaylistIdentifier,
@@ -10,32 +36,6 @@ import {
     standardDateFormat,
     visualProgressBar,
 } from "./utils";
-import {
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-} from "./discord_utils";
-import { sql } from "kysely";
-import { youtube_v3 } from "googleapis";
-import Axios from "axios";
-import EnvVariableManager from "../env_variable_manager";
-import GameRound from "../structures/game_round";
-import KmqConfiguration from "../kmq_configuration";
-import QueriedSong from "../structures/queried_song";
-import SongSelector from "../structures/song_selector";
-import State from "../state";
-import _ from "lodash";
-import asyncPool from "tiny-async-pool";
-import dbContext from "../database_context";
-import fs from "fs";
-import i18n from "./localization_manager";
-import path from "path";
-import type { AxiosResponse } from "axios";
-import type { MatchedPlaylist } from "../interfaces/matched_playlist";
-import type { PlaylistMetadata } from "../interfaces/playlist_metadata";
-import type Eris from "eris";
-import type MessageContext from "../structures/message_context";
-import type SpotifyTrack from "../interfaces/spotify_track";
 
 const logger = new IPCLogger("playlist_manager");
 
@@ -357,7 +357,6 @@ export default class PlaylistManager {
                 }
 
                 songs.push(
-                    // eslint-disable-next-line no-unsafe-optional-chaining
                     ...resp.items!.map((x) => ({
                         title: x.snippet?.title as string,
                         videoId: x.snippet?.resourceId?.videoId as string,

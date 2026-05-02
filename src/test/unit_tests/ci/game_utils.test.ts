@@ -1,21 +1,22 @@
+import assert from "assert";
+import { describe } from "mocha";
+import sinon from "sinon";
+
+import GameType from "../../../enums/game_type";
+import LocaleType from "../../../enums/locale_type";
+import OstPreference from "../../../enums/option_types/ost_preference";
+import ReleaseType from "../../../enums/option_types/release_type";
+import SubunitsPreference from "../../../enums/option_types/subunit_preference";
 import * as discordUtils from "../../../helpers/discord_utils";
 import {
     cleanupInactiveGameSessions,
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../../helpers/game_utils";
-import { describe } from "mocha";
+import State from "../../../state";
 import GameSession from "../../../structures/game_session";
-import GameType from "../../../enums/game_type";
 import GuildPreference from "../../../structures/guild_preference";
 import KmqMember from "../../../structures/kmq_member";
-import LocaleType from "../../../enums/locale_type";
-import OstPreference from "../../../enums/option_types/ost_preference";
-import ReleaseType from "../../../enums/option_types/release_type";
-import State from "../../../state";
-import SubunitsPreference from "../../../enums/option_types/subunit_preference";
-import assert from "assert";
-import sinon from "sinon";
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
     const guildPreference = new GuildPreference("test");

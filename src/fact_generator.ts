@@ -1,8 +1,10 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
-/* eslint-disable no-underscore-dangle */
-import { IPCLogger } from "./logger";
-import { RedditClient } from "./helpers/reddit_client";
+import { sql } from "kysely";
 import { URL } from "url";
+
+import dbContext from "./database_context";
+import LocaleType from "./enums/locale_type";
+import i18n from "./helpers/localization_manager";
+import { RedditClient } from "./helpers/reddit_client";
 import {
     discordDateFormat,
     friendlyFormattedNumber,
@@ -11,12 +13,9 @@ import {
     standardDateFormat,
     weekOfYear,
 } from "./helpers/utils";
-import { sql } from "kysely";
-import LocaleType from "./enums/locale_type";
-import State from "./state";
-import dbContext from "./database_context";
-import i18n from "./helpers/localization_manager";
 import type FactCache from "./interfaces/fact_cache";
+import { IPCLogger } from "./logger";
+import State from "./state";
 
 const logger = new IPCLogger("fact_generator");
 

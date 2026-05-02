@@ -1,12 +1,13 @@
 /* eslint-disable no-console */
 
-import * as readline from "readline";
-import { FileMigrationProvider, Migrator } from "kysely";
-import { IPCLogger } from "../logger";
 import { promises as fsp } from "fs";
-import { getNewConnection } from "../database_context";
+import { FileMigrationProvider, Migrator } from "kysely";
 import path from "path";
+import * as readline from "readline";
+
 import type { DatabaseContext } from "../database_context";
+import { getNewConnection } from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("migrate_down");
 

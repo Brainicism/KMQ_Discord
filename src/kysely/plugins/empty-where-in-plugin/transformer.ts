@@ -1,3 +1,4 @@
+import type { BinaryOperationNode } from "kysely";
 import {
     OperationNodeTransformer,
     OperatorNode,
@@ -5,7 +6,6 @@ import {
     ValueListNode,
     ValueNode,
 } from "kysely";
-import type { BinaryOperationNode } from "kysely";
 
 export default class EmptyWhereInTransformer extends OperationNodeTransformer {
     protected transformBinaryOperation(

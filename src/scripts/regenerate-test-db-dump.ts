@@ -1,11 +1,12 @@
-/* eslint-disable node/no-sync */
+/* eslint-disable n/no-sync */
 import * as cp from "child_process";
-import { IPCLogger } from "../logger";
+import { sql } from "kysely";
+
 import { TEST_DB_CACHED_EXPORT } from "../constants";
 import { getNewConnection } from "../database_context";
-import { importCachedDump, performMigrations } from "../seed/bootstrap";
-import { sql } from "kysely";
 import EnvType from "../enums/env_type";
+import { IPCLogger } from "../logger";
+import { importCachedDump, performMigrations } from "../seed/bootstrap";
 
 const logger = new IPCLogger("regenerate-test-db-dump");
 

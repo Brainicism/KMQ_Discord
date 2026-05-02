@@ -1,5 +1,10 @@
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import { EMBED_ERROR_COLOR, OptionAction } from "../../constants";
-import { IPCLogger } from "../../logger";
+import GameOption from "../../enums/game_option_name";
+import LocaleType from "../../enums/locale_type";
+import ArtistType from "../../enums/option_types/artist_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
@@ -7,25 +12,20 @@ import {
     sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import ArtistType from "../../enums/option_types/artist_type";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
-import GameOption from "../../enums/game_option_name";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EmbedPayload from "../../interfaces/embed_payload";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "artisttype";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ArtistTypeCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

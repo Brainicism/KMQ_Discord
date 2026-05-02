@@ -1,17 +1,34 @@
-/* eslint-disable no-return-assign */
-import * as uuid from "uuid";
-import Eris from "eris";
-import _ from "lodash";
-
 import { E_TIMEOUT } from "async-mutex";
+import type { CommandInteraction } from "eris";
+import Eris from "eris";
+import { sql } from "kysely";
+import _ from "lodash";
+import * as uuid from "uuid";
+
+import ExpCommand from "../commands/game_commands/exp";
+import ProfileCommand from "../commands/game_commands/profile";
+import SkipCommand from "../commands/game_commands/skip";
 import {
-    bold,
-    chunkArray,
-    codeLine,
-    delay,
-    getOrdinalNum,
-    setDifference,
-} from "../helpers/utils";
+    CLIP_LAST_REPLAY_DELAY_MS,
+    CLIP_MAX_REPLAY_COUNT,
+    CLIP_PADDING_BEGINNING_MS,
+    CLIP_VC_END_TIMEOUT_MS,
+    CUM_EXP_TABLE,
+    ELIMINATION_DEFAULT_LIVES,
+    EMBED_FIELDS_PER_PAGE,
+    EMBED_SUCCESS_BONUS_COLOR,
+    EMBED_SUCCESS_COLOR,
+    KmqImages,
+    REVIEW_LINK,
+    SKIP_BUTTON_PREFIX,
+    VOTE_LINK,
+} from "../constants";
+import dbContext from "../database_context";
+import ClipAction from "../enums/clip_action";
+import GameType from "../enums/game_type";
+import AnswerType from "../enums/option_types/answer_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import MultiGuessType from "../enums/option_types/multiguess_type";
 import {
     clickableSlashCommand,
     fetchUser,
@@ -32,52 +49,33 @@ import {
     isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
-import State from "../state";
-import dbContext from "../database_context";
-
+import i18n from "../helpers/localization_manager";
 import {
-    CLIP_LAST_REPLAY_DELAY_MS,
-    CLIP_MAX_REPLAY_COUNT,
-    CLIP_PADDING_BEGINNING_MS,
-    CLIP_VC_END_TIMEOUT_MS,
-    CUM_EXP_TABLE,
-    ELIMINATION_DEFAULT_LIVES,
-    EMBED_FIELDS_PER_PAGE,
-    EMBED_SUCCESS_BONUS_COLOR,
-    EMBED_SUCCESS_COLOR,
-    KmqImages,
-    REVIEW_LINK,
-    SKIP_BUTTON_PREFIX,
-    VOTE_LINK,
-} from "../constants";
+    bold,
+    chunkArray,
+    codeLine,
+    delay,
+    getOrdinalNum,
+    setDifference,
+} from "../helpers/utils";
+import type SuccessfulGuessResult from "../interfaces/success_guess_result";
 import { IPCLogger } from "../logger";
-import { SessionState } from "./session_state";
-import { sql } from "kysely";
-import AnswerType from "../enums/option_types/answer_type";
-import ClipAction from "../enums/clip_action";
+import State from "../state";
+import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import ClipGameRound from "./clip_game_round";
 import EliminationPlayer from "./elimination_player";
 import EliminationScoreboard from "./elimination_scoreboard";
-import ExpCommand from "../commands/game_commands/exp";
 import GameRound from "./game_round";
-import GameType from "../enums/game_type";
-import GuessModeType from "../enums/option_types/guess_mode_type";
 import GuildPreference from "./guild_preference";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
-import MultiGuessType from "../enums/option_types/multiguess_type";
 import Player from "./player";
-import ProfileCommand from "../commands/game_commands/profile";
-import Scoreboard from "./scoreboard";
-import Session from "./session";
-import SkipCommand from "../commands/game_commands/skip";
-import TeamScoreboard from "./team_scoreboard";
-import i18n from "../helpers/localization_manager";
-import type { ButtonActionRow, GuildTextableMessage } from "../types";
-import type { CommandInteraction } from "eris";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
-import type SuccessfulGuessResult from "../interfaces/success_guess_result";
+import Scoreboard from "./scoreboard";
+import Session from "./session";
+import { SessionState } from "./session_state";
+import TeamScoreboard from "./team_scoreboard";
 
 const HIDDEN_UPDATE_INTERVAL = 2000;
 
@@ -183,7 +181,6 @@ export default class GameSession extends Session {
             this.stateMachine.transition(SessionState.LOBBY);
         }
 
-        // eslint-disable-next-line @typescript-eslint/require-await
         this.guildPreference.answerTypeChangeCallback = async () => {
             const round = this.round;
 
@@ -641,7 +638,6 @@ export default class GameSession extends Session {
             .filter((x) => !currentVoiceMemberIds.includes(x));
 
         for (const player of departedPlayers) {
-            // eslint-disable-next-line no-await-in-loop
             await this.setPlayerInVC(player, false);
         }
 
@@ -654,9 +650,8 @@ export default class GameSession extends Session {
         );
 
         for (const playerId of newPlayers) {
-            // eslint-disable-next-line no-await-in-loop
             const firstGameOfDay = await isFirstGameOfDay(playerId);
-            // eslint-disable-next-line no-await-in-loop
+
             const player = (await fetchUser(playerId)) as Eris.User;
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION

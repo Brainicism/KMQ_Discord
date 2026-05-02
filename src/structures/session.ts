@@ -1,3 +1,7 @@
+import { Mutex, withTimeout } from "async-mutex";
+import Eris from "eris";
+import { sql } from "kysely";
+
 import {
     BOOKMARK_BUTTON_PREFIX,
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -8,8 +12,13 @@ import {
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
 } from "../constants";
-import { IPCLogger } from "../logger";
-import { Mutex, withTimeout } from "async-mutex";
+import dbContext from "../database_context";
+import ClipAction from "../enums/clip_action";
+import LocaleType from "../enums/locale_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import SeekType from "../enums/option_types/seek_type";
+import EnvVariableManager from "../env_variable_manager";
+import FactGenerator from "../fact_generator";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -23,6 +32,7 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
+import i18n from "../helpers/localization_manager";
 import {
     delay,
     extractErrorString,
@@ -31,34 +41,24 @@ import {
     truncatedString,
     underline,
 } from "../helpers/utils";
-import { sql } from "kysely";
-import ClipAction from "../enums/clip_action";
-import EnvVariableManager from "../env_variable_manager";
-import Eris from "eris";
-import FactGenerator from "../fact_generator";
-import GameRound from "./game_round";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import KmqConfiguration from "../kmq_configuration";
-import ListeningRound from "./listening_round";
-import LocaleType from "../enums/locale_type";
-import MessageContext from "./message_context";
-import SeekType from "../enums/option_types/seek_type";
-import SongSelector from "./song_selector";
-import State from "../state";
-import dbContext from "../database_context";
-import i18n from "../helpers/localization_manager";
 import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type ClipGameRound from "./clip_game_round";
 import type EmbedPayload from "../interfaces/embed_payload";
+import type KmqClient from "../kmq_client";
+import KmqConfiguration from "../kmq_configuration";
+import { IPCLogger } from "../logger";
+import State from "../state";
+import type ClipGameRound from "./clip_game_round";
+import GameRound from "./game_round";
 import type GameSession from "./game_session";
 import type GuildPreference from "./guild_preference";
-import type KmqClient from "../kmq_client";
 import type KmqMember from "./kmq_member";
+import ListeningRound from "./listening_round";
 import type ListeningSession from "./listening_session";
+import MessageContext from "./message_context";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
-
 import { SessionState, SessionStateMachine } from "./session_state";
+import SongSelector from "./song_selector";
 
 const logger = new IPCLogger("session");
 
@@ -388,7 +388,7 @@ export default abstract class Session {
      * @param _messageContext - unused
      * @param _isError - unused
      */
-    // eslint-disable-next-line @typescript-eslint/require-await
+
     async endRound(
         isError: boolean,
         _messageContext?: MessageContext,
@@ -914,7 +914,6 @@ export default abstract class Session {
                             ).toString(),
                         ];
 
-                        // eslint-disable-next-line no-await-in-loop
                         const averageVolume = await getAverageVolume(
                             songLocation,
                             inputArgs,
@@ -1174,7 +1173,7 @@ export default abstract class Session {
      * @param timeRemaining - The time remaining
      * @returns the message
      */
-    // eslint-disable-next-line @typescript-eslint/member-ordering
+
     protected async sendRoundMessage(
         messageContext: MessageContext,
         fields: Eris.EmbedField[],

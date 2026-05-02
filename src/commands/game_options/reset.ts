@@ -1,27 +1,27 @@
+import Eris from "eris";
+import _ from "lodash";
+
+import CommandPrechecks from "../../command_prechecks";
 import { GameOptionInternalToGameOption } from "../../constants";
-import { IPCLogger } from "../../logger";
+import type GameOption from "../../enums/game_option_name";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
+import i18n from "../../helpers/localization_manager";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import _ from "lodash";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type GameOption from "../../enums/game_option_name";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "reset";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ResetCommand implements BaseCommand {
     preRunChecks = [{ checkFn: CommandPrechecks.competitionPrecheck }];
 

@@ -1,10 +1,12 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+
 import { KmqImages, LEADERBOARD_ENTRIES_PER_PAGE } from "../../constants";
-import {
-    arrayToString,
-    chooseRandom,
-    friendlyFormattedNumber,
-} from "../../helpers/utils";
+import dbContext from "../../database_context";
+import EnvType from "../../enums/env_type";
+import LocaleType from "../../enums/locale_type";
+import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
+import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
+import LeaderboardType from "../../enums/option_types/leaderboard_type";
 import {
     clickableSlashCommand,
     getAllClickableSlashCommands,
@@ -15,24 +17,23 @@ import {
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import { sendValidationErrorMessage } from "../../helpers/validate";
-import EnvType from "../../enums/env_type";
-import Eris from "eris";
-import KmqMember from "../../structures/kmq_member";
-import LeaderboardDuration from "../../enums/option_types/leaderboard_duration";
-import LeaderboardScope from "../../enums/option_types/leaderboard_scope";
-import LeaderboardType from "../../enums/option_types/leaderboard_type";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import ProfileCommand from "./profile";
-import State from "../../state";
-import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type { EmbedGenerator, GuildTextableMessage } from "../../types";
-import type BaseCommand from "../interfaces/base_command";
+import {
+    arrayToString,
+    chooseRandom,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
+import { sendValidationErrorMessage } from "../../helpers/validate";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import type { EmbedGenerator, GuildTextableMessage } from "../../types";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
+import ProfileCommand from "./profile";
 
 const COMMAND_NAME = "leaderboard";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -666,7 +667,6 @@ export default class LeaderboardCommand implements BaseCommand {
         for (let i = 0; i < pageCount; i++) {
             const offset = i * LEADERBOARD_ENTRIES_PER_PAGE;
             embedsFns.push(
-                // eslint-disable-next-line @typescript-eslint/no-loop-func
                 () =>
                     new Promise(async (resolve) => {
                         let topPlayers: (

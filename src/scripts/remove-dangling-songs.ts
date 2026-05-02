@@ -1,11 +1,12 @@
-/* eslint-disable node/no-sync */
+/* eslint-disable n/no-sync */
 import { Command } from "@commander-js/extra-typings";
-import { IPCLogger } from "../logger";
 import { config } from "dotenv";
-import { getNewConnection } from "../database_context";
-import _ from "lodash";
 import fs from "fs";
+import _ from "lodash";
 import path from "path";
+
+import { getNewConnection } from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("remove-dangling-songs");
 

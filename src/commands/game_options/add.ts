@@ -1,10 +1,13 @@
+import type Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import {
     EMBED_ERROR_COLOR,
     GroupAction,
     KmqImages,
     OptionAction,
 } from "../../constants";
-import { IPCLogger } from "../../logger";
+import GameOption from "../../enums/game_option_name";
 import {
     clickableSlashCommand,
     generateOptionsMessage,
@@ -17,19 +20,17 @@ import {
     getMatchingGroupNames,
     getSimilarGroupNames,
 } from "../../helpers/game_utils";
+import i18n from "../../helpers/localization_manager";
 import { setIntersection } from "../../helpers/utils";
-import CommandPrechecks from "../../command_prechecks";
-import GameOption from "../../enums/game_option_name";
+import type CommandArgs from "../../interfaces/command_args";
+import type EmbedPayload from "../../interfaces/embed_payload";
+import type MatchedArtist from "../../interfaces/matched_artist";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type EmbedPayload from "../../interfaces/embed_payload";
-import type Eris from "eris";
-import type MatchedArtist from "../../interfaces/matched_artist";
 
 const COMMAND_NAME = "add";
 const logger = new IPCLogger(COMMAND_NAME);

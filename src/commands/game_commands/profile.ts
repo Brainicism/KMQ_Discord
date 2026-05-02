@@ -1,6 +1,8 @@
-/* eslint-disable @typescript-eslint/dot-notation */
+import Eris from "eris";
+
 import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
-import { IPCLogger } from "../../logger";
+import dbContext from "../../database_context";
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     fetchUser,
@@ -11,21 +13,19 @@ import {
     sendInfoMessage,
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
+import i18n from "../../helpers/localization_manager";
 import {
     discordDateFormat,
     friendlyFormattedNumber,
     romanize,
     visualProgressBar,
 } from "../../helpers/utils";
-import Eris from "eris";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "profile";
 const logger = new IPCLogger(COMMAND_NAME);

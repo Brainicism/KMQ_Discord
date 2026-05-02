@@ -1,27 +1,27 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+
 import { OptionAction } from "../../constants";
-import { bold } from "../../helpers/utils";
+import AdvancedCommandActionName from "../../enums/advanced_setting_action_name";
+import LocaleType from "../../enums/locale_type";
 import {
     getDebugLogHeader,
     getInteractionValue,
     sendDeprecatedTextCommandMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
-import AdvancedCommandActionName from "../../enums/advanced_setting_action_name";
-import Eris from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
+import { bold } from "../../helpers/utils";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "advanced";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class AdvancedSettingCommand implements BaseCommand {
     static MAX_MULTIGUESS_DELAY = 60;
     static MAX_SONG_START_DELAY = 60;

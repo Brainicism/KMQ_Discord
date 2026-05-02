@@ -1,34 +1,34 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+import fs from "fs";
+import { sql } from "kysely";
+import os from "os";
+
 import { KmqImages, LATEST_DAISUKI_DUMP } from "../../constants";
+import dbContext from "../../database_context";
+import {
+    getDebugLogHeader,
+    sendErrorMessage,
+    sendInfoMessage,
+} from "../../helpers/discord_utils";
+import { userIsAdmin } from "../../helpers/game_utils";
+import i18n from "../../helpers/localization_manager";
 import {
     friendlyFormattedDate,
     friendlyFormattedNumber,
     measureExecutionTime,
     pathExists,
 } from "../../helpers/utils";
-import {
-    getDebugLogHeader,
-    sendErrorMessage,
-    sendInfoMessage,
-} from "../../helpers/discord_utils";
-import { sql } from "kysely";
-import { userIsAdmin } from "../../helpers/game_utils";
-import Eris from "eris";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import dbContext from "../../database_context";
-import fs from "fs";
-import i18n from "../../helpers/localization_manager";
-import os from "os";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "stats";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class StatsCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,

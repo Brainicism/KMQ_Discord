@@ -1,18 +1,18 @@
-/* eslint-disable no-await-in-loop */
-import * as cp from "child_process";
-import { BGUTIL_PROVIDER_URL, DataFiles, YT_DLP_LOCATION } from "../constants";
-import { IPCLogger } from "../logger";
-import { getAverageVolume } from "./discord_utils";
-import { getNewConnection } from "../database_context";
-import { pathExists, pathExistsSync, validateYouTubeID } from "./utils";
 import Axios from "axios";
-import KmqConfiguration from "../kmq_configuration";
-import YoutubeOnesieProvider from "../youtube_onesie_provider";
+import * as cp from "child_process";
 import ffmpeg from "fluent-ffmpeg";
 import fs from "fs";
 import path from "path";
 import util from "util";
+
+import { BGUTIL_PROVIDER_URL, DataFiles, YT_DLP_LOCATION } from "../constants";
 import type { DatabaseContext } from "../database_context";
+import { getNewConnection } from "../database_context";
+import KmqConfiguration from "../kmq_configuration";
+import { IPCLogger } from "../logger";
+import YoutubeOnesieProvider from "../youtube_onesie_provider";
+import { getAverageVolume } from "./discord_utils";
+import { pathExists, pathExistsSync, validateYouTubeID } from "./utils";
 
 const exec = util.promisify(cp.exec);
 
@@ -30,7 +30,7 @@ export default class KmqSongDownloader {
             logger.warn("Proxy file doesn't exist");
             this.proxies = [];
         } else {
-            // eslint-disable-next-line node/no-sync
+            // eslint-disable-next-line n/no-sync
             this.proxies = fs
                 .readFileSync(DataFiles.PROXY_FILE)
                 .toString()

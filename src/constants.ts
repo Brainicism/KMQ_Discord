@@ -1,12 +1,14 @@
-/* eslint-disable no-return-assign */
+import path from "path";
+
 import AdvancedCommandAction from "./enums/advanced_setting_action_name";
-import AnswerType from "./enums/option_types/answer_type";
-import ArtistType from "./enums/option_types/artist_type";
 import ExpBonusModifier from "./enums/exp_bonus_modifier";
 import GameOption from "./enums/game_option_name";
+import LocaleType from "./enums/locale_type";
+import AnswerType from "./enums/option_types/answer_type";
+import ArtistType from "./enums/option_types/artist_type";
+import type { GenderModeOptions } from "./enums/option_types/gender";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
-import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
 import OstPreference from "./enums/option_types/ost_preference";
 import ReleaseType from "./enums/option_types/release_type";
@@ -14,8 +16,6 @@ import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
-import path from "path";
-import type { GenderModeOptions } from "./enums/option_types/gender";
 
 export class KmqImages {
     public static READING_BOOK =
@@ -357,7 +357,6 @@ export const DiscordPreferredLocaleToInternal: {
     hi: LocaleType.HI,
 };
 
-// eslint-disable-next-line import/no-unused-modules
 export const KMQ_EMOJI = "<:kmq:761624775843905546>";
 export const YT_DLP_LOCATION = path.resolve(__dirname, "../bin", "yt-dlp");
 export const BGUTIL_PROVIDER_URL =

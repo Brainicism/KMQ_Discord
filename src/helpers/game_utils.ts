@@ -1,17 +1,18 @@
-import { IPCLogger } from "../logger";
-import { containsHangul, md5Hash } from "./utils";
 import { sql } from "kysely";
-import AnswerType from "../enums/option_types/answer_type";
-import GameRound from "../structures/game_round";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import LocaleType from "../enums/locale_type";
 import _ from "lodash";
+
 import dbContext from "../database_context";
+import LocaleType from "../enums/locale_type";
+import AnswerType from "../enums/option_types/answer_type";
 import type { AvailableGenders } from "../enums/option_types/gender";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import type MatchedArtist from "../interfaces/matched_artist";
+import { IPCLogger } from "../logger";
+import GameRound from "../structures/game_round";
 import type GameSession from "../structures/game_session";
 import type ListeningSession from "../structures/listening_session";
-import type MatchedArtist from "../interfaces/matched_artist";
 import type QueriedSong from "../structures/queried_song";
+import { containsHangul, md5Hash } from "./utils";
 
 const GAME_SESSION_INACTIVE_THRESHOLD = 10;
 const logger = new IPCLogger("game_utils");

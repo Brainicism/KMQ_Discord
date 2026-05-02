@@ -1,10 +1,9 @@
 import CommandPrechecks from "../../command_prechecks";
-import MessageContext from "../../structures/message_context";
-import PlayCommand from "./play";
-import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import PlayCommand from "./play";
 
-// eslint-disable-next-line import/no-unused-modules
 export default class BeginCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.competitionPrecheck },

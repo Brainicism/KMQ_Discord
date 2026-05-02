@@ -1,35 +1,35 @@
-import { IPCLogger } from "../../logger";
+import type { CommandInteraction, EmbedOptions } from "eris";
+import Eris from "eris";
+
 import { KmqImages } from "../../constants";
-import {
-    chunkArray,
-    discordDateFormat,
-    friendlyFormattedNumber,
-} from "../../helpers/utils";
+import dbContext from "../../database_context";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
     sendInfoMessage,
     sendPaginationedEmbed,
 } from "../../helpers/discord_utils";
-import Eris from "eris";
+import i18n from "../../helpers/localization_manager";
+import {
+    chunkArray,
+    discordDateFormat,
+    friendlyFormattedNumber,
+} from "../../helpers/utils";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import KmqMember from "../../structures/kmq_member";
 import MessageContext from "../../structures/message_context";
 import QueriedSong from "../../structures/queried_song";
 import SongSelector from "../../structures/song_selector";
-import State from "../../state";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { CommandInteraction, EmbedOptions } from "eris";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "recentlyadded";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class RecentlyAddedCommand implements BaseCommand {
     static FIELDS_PER_EMBED = 9;
     aliases = ["recent"];

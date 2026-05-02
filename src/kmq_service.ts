@@ -1,26 +1,26 @@
-import * as schedule from "node-schedule";
 import { BaseServiceWorker } from "eris-fleet";
-import { IPCLogger } from "./logger";
-import { RedditClient } from "./helpers/reddit_client";
-import { chooseRandom, retryJob } from "./helpers/utils";
-import BotListingManager from "./helpers/bot_listing_manager";
+import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
+import type { Insertable } from "kysely";
+import * as schedule from "node-schedule";
+
+import dbContext from "./database_context";
 import EnvType from "./enums/env_type";
-import EnvVariableManager from "./env_variable_manager";
-import FactGenerator from "./fact_generator";
-import GeminiClient from "./helpers/gemini_client";
-import KmqConfiguration from "./kmq_configuration";
 import LocaleType from "./enums/locale_type";
 import NewsRange from "./enums/news_range";
-import dbContext from "./database_context";
-import type { Insertable } from "kysely";
+import EnvVariableManager from "./env_variable_manager";
+import FactGenerator from "./fact_generator";
+import BotListingManager from "./helpers/bot_listing_manager";
+import GeminiClient from "./helpers/gemini_client";
 import type { KpopNewsRedditPost } from "./helpers/reddit_client";
-import type { News } from "./typings/kmq_db";
-import type { Setup } from "eris-fleet/dist/services/BaseServiceWorker";
+import { RedditClient } from "./helpers/reddit_client";
+import { chooseRandom, retryJob } from "./helpers/utils";
 import type FactCache from "./interfaces/fact_cache";
+import KmqConfiguration from "./kmq_configuration";
+import { IPCLogger } from "./logger";
+import type { News } from "./typings/kmq_db";
 
 const logger = new IPCLogger("kmq_service");
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ServiceWorker extends BaseServiceWorker {
     facts: { [locale: string]: FactCache };
 
@@ -65,7 +65,6 @@ export default class ServiceWorker extends BaseServiceWorker {
         }
     };
 
-    // eslint-disable-next-line @typescript-eslint/require-await
     handleCommand = async (commandName: string): Promise<any> => {
         logger.info(`Received command: ${commandName}`);
         const components = commandName.split("|");
@@ -181,7 +180,7 @@ export default class ServiceWorker extends BaseServiceWorker {
         for (const locale of Object.values(LocaleType)) {
             for (const range of Object.values(NewsRange)) {
                 const newsIdentifier = `${locale}-${range}`;
-                // eslint-disable-next-line no-await-in-loop
+
                 const latestEntry = await dbContext.kmq
                     .selectFrom("news")
                     .select("generated_at")
@@ -201,7 +200,6 @@ export default class ServiceWorker extends BaseServiceWorker {
                 }
 
                 try {
-                    // eslint-disable-next-line no-await-in-loop
                     await retryJob<void | Error>(
                         async () => {
                             const topPosts = rangeToTopPosts[range];

@@ -1,5 +1,7 @@
+import Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
 import { EMBED_SUCCESS_BONUS_COLOR, KmqImages } from "../../constants";
-import { IPCLogger } from "../../logger";
 import {
     clickableSlashCommand,
     fetchChannel,
@@ -12,24 +14,22 @@ import {
     sendInfoMessage,
     voicePermissionsCheck,
 } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import Eris from "eris";
+import i18n from "../../helpers/localization_manager";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GuildPreference from "../../structures/guild_preference";
 import KmqMember from "../../structures/kmq_member";
 import ListeningSession from "../../structures/listening_session";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "listen";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ListenCommand implements BaseCommand {
     preRunChecks = [
         { checkFn: CommandPrechecks.notRestartingPrecheck },

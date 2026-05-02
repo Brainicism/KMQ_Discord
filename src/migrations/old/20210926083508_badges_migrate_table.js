@@ -8,6 +8,7 @@ exports.up = function (knex) {
                 ["user_id", "badge_name"],
                 "badges_user_id_badge_name_unique",
             );
+
             table
                 .integer("badge_id")
                 .references("id")

@@ -1,7 +1,19 @@
+import Eris, { CommandInteraction } from "eris";
 import * as uuid from "uuid";
+
+import CommandPrechecks from "../../command_prechecks";
+import HelpCommand from "../../commands/game_commands/help";
+import PlayCommand from "../../commands/game_commands/play";
+import PresetCommand from "../../commands/game_commands/preset";
+import ProfileCommand from "../../commands/game_commands/profile";
+import ExcludeCommand from "../../commands/game_options/exclude";
+import GroupsCommand from "../../commands/game_options/groups";
+import IncludeCommand from "../../commands/game_options/include";
+import BookmarksCommand from "../../commands/misc_commands/bookmarks";
+import FeedbackCommand from "../../commands/misc_commands/feedback";
+import LookupCommand from "../../commands/misc_commands/lookup";
 import { BOOKMARK_BUTTON_PREFIX, PROFILE_COMMAND_NAME } from "../../constants";
-import { IPCLogger } from "../../logger";
-import { extractErrorString } from "../../helpers/utils";
+import LocaleType from "../../enums/locale_type";
 import {
     getDebugLogHeader,
     getInteractionValue,
@@ -9,25 +21,14 @@ import {
     tryCreateInteractionErrorAcknowledgement,
     tryInteractionAcknowledge,
 } from "../../helpers/discord_utils";
-import BookmarksCommand from "../../commands/misc_commands/bookmarks";
-import CommandPrechecks from "../../command_prechecks";
-import Eris, { CommandInteraction } from "eris";
-import ExcludeCommand from "../../commands/game_options/exclude";
-import FeedbackCommand from "../../commands/misc_commands/feedback";
-import GroupsCommand from "../../commands/game_options/groups";
-import HelpCommand from "../../commands/game_commands/help";
-import IncludeCommand from "../../commands/game_options/include";
-import KmqMember from "../../structures/kmq_member";
-import LocaleType from "../../enums/locale_type";
-import LookupCommand from "../../commands/misc_commands/lookup";
-import MessageContext from "../../structures/message_context";
-import PlayCommand from "../../commands/game_commands/play";
-import PresetCommand from "../../commands/game_commands/preset";
-import ProfileCommand from "../../commands/game_commands/profile";
-import Session from "../../structures/session";
-import State from "../../state";
 import i18n from "../../helpers/localization_manager";
+import { extractErrorString } from "../../helpers/utils";
 import type PrecheckArgs from "../../interfaces/precheck_args";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import KmqMember from "../../structures/kmq_member";
+import MessageContext from "../../structures/message_context";
+import Session from "../../structures/session";
 
 const logger = new IPCLogger("interactionCreate");
 
@@ -212,7 +213,6 @@ export default async function interactionCreateHandler(
 
                     for (const precheck of prechecks) {
                         if (
-                            // eslint-disable-next-line no-await-in-loop
                             !(await precheck.checkFn({
                                 messageContext,
                                 session,

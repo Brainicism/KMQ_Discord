@@ -46,5 +46,4 @@ export class SessionRegistry {
 
 /** Singleton instance */
 const sessionRegistry = new SessionRegistry();
-// eslint-disable-next-line import/no-unused-modules
 export default sessionRegistry;

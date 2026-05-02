@@ -1,4 +1,5 @@
-/* eslint-disable @typescript-eslint/dot-notation */
+import Eris from "eris";
+
 import {
     ExpBonusModifierValues,
     GUESS_STREAK_THRESHOLD,
@@ -6,7 +7,10 @@ import {
     PARTICIPANT_MODIFIER_MAX_PARTICIPANTS,
     QUICK_GUESS_MS,
 } from "../../constants";
-import { IPCLogger } from "../../logger";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
+import AnswerType from "../../enums/option_types/answer_type";
+import GuessModeType from "../../enums/option_types/guess_mode_type";
+import ShuffleType from "../../enums/option_types/shuffle_type";
 import {
     getDebugLogHeader,
     sendInfoMessage,
@@ -16,21 +20,17 @@ import {
     isPowerHour,
     userBonusIsActive,
 } from "../../helpers/game_utils";
+import i18n from "../../helpers/localization_manager";
 import { isWeekend } from "../../helpers/utils";
-import AnswerType from "../../enums/option_types/answer_type";
-import Eris from "eris";
-import ExpBonusModifier from "../../enums/exp_bonus_modifier";
-import GuessModeType from "../../enums/option_types/guess_mode_type";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import type GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
 import MessageContext from "../../structures/message_context";
-import ShuffleType from "../../enums/option_types/shuffle_type";
-import State from "../../state";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type GameRound from "../../structures/game_round";
-import type HelpDocumentation from "../../interfaces/help";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "exp";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -41,7 +41,6 @@ interface ExpModifier {
     isPenalty: boolean;
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ExpCommand implements BaseCommand {
     help = (guildID: string): HelpDocumentation => ({
         name: COMMAND_NAME,

@@ -1,4 +1,6 @@
-import { IPCLogger } from "../../logger";
+import Eris from "eris";
+
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     getDebugLogHeader,
@@ -7,16 +9,15 @@ import {
     sendInfoMessage,
     sendMessage,
 } from "../../helpers/discord_utils";
-import { standardDateFormat } from "../../helpers/utils";
-import Eris from "eris";
-import GuildPreference from "../../structures/guild_preference";
-import LocaleType from "../../enums/locale_type";
-import MessageContext from "../../structures/message_context";
 import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type BaseCommand from "../interfaces/base_command";
+import { standardDateFormat } from "../../helpers/utils";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import GuildPreference from "../../structures/guild_preference";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "list";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -37,7 +38,6 @@ enum ListType {
     INCLUDES = "includes",
 }
 
-// eslint-disable-next-line import/no-unused-modules
 export default class ListCommand implements BaseCommand {
     validations = {
         minArgCount: 1,

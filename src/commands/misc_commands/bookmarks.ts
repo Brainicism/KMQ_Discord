@@ -1,10 +1,10 @@
-import { IPCLogger } from "../../logger";
-import {
-    chunkArray,
-    containsHangul,
-    discordDateFormat,
-    truncatedString,
-} from "../../helpers/utils";
+import type { EmbedOptions } from "eris";
+import Eris from "eris";
+import _ from "lodash";
+import type MatchedArtist from "src/interfaces/matched_artist";
+
+import dbContext from "../../database_context";
+import LocaleType from "../../enums/locale_type";
 import {
     clickableSlashCommand,
     getInteractionValue,
@@ -16,27 +16,27 @@ import {
     tryCreateInteractionErrorAcknowledgement,
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
-import Eris from "eris";
+import i18n from "../../helpers/localization_manager";
+import {
+    chunkArray,
+    containsHangul,
+    discordDateFormat,
+    truncatedString,
+} from "../../helpers/utils";
+import type CommandArgs from "../../interfaces/command_args";
+import type HelpDocumentation from "../../interfaces/help";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
 import GameRound from "../../structures/game_round";
-import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import QueriedSongWithBookmarkDate from "../../structures/queried_song_with_bookmark_date";
 import SongSelector from "../../structures/song_selector";
-import State from "../../state";
-import _ from "lodash";
-import dbContext from "../../database_context";
-import i18n from "../../helpers/localization_manager";
-import type { DefaultSlashCommand } from "../interfaces/base_command";
-import type { EmbedOptions } from "eris";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
-import type HelpDocumentation from "../../interfaces/help";
-import type MatchedArtist from "src/interfaces/matched_artist";
+import type { DefaultSlashCommand } from "../interfaces/base_command";
 
 const COMMAND_NAME = "bookmarks";
 const logger = new IPCLogger(COMMAND_NAME);
 
-// eslint-disable-next-line import/no-unused-modules
 export default class BookmarksCommand implements BaseCommand {
     static ENTRIES_PER_PAGE = 10;
     static SONG_NAME = "song_name";

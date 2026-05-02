@@ -1,9 +1,10 @@
-/* eslint-disable node/no-sync */
-/* eslint-disable no-await-in-loop */
-import { IPCLogger } from "../logger";
-import dbContext from "../database_context";
+/* eslint-disable n/no-sync */
+
 import fs from "fs";
 import path from "path";
+
+import dbContext from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("game-message-converter");
 

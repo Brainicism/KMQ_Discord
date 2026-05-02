@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-console */
-import { config } from "dotenv";
-import DailyRotateFile from "winston-daily-rotate-file";
 import isMaster from "cluster";
+import { config } from "dotenv";
 import path, { resolve } from "path";
 import winston from "winston";
+import DailyRotateFile from "winston-daily-rotate-file";
 
 config({ path: resolve(__dirname, "../.env") });
 

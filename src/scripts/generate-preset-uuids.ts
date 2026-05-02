@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
-import { IPCLogger } from "../logger";
+
 import { getNewConnection } from "../database_context";
+import { IPCLogger } from "../logger";
 
 const logger = new IPCLogger("generate_preset_uuids");
 

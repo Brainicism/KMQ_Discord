@@ -1,8 +1,9 @@
+import assert from "assert";
+
 import {
     SessionState,
     SessionStateMachine,
 } from "../../../structures/session_state";
-import assert from "assert";
 
 describe("SessionStateMachine", () => {
     let sm: SessionStateMachine;

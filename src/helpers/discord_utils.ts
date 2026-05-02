@@ -1,10 +1,12 @@
-/* eslint-disable @typescript-eslint/no-use-before-define */
+import axios from "axios";
+import { exec } from "child_process";
+import type { GuildTextableChannel } from "eris";
+import Eris, { DiscordHTTPError, DiscordRESTError } from "eris";
+import EmbedPaginator from "eris-pagination";
+import fs from "fs";
+import _ from "lodash";
 import * as uuid from "uuid";
-import {
-    ConflictingGameOptions,
-    GameOptionCommand,
-    PriorityGameOption,
-} from "../types";
+
 import {
     DataFiles,
     EMBED_DESCRIPTION_MAX_LENGTH,
@@ -19,7 +21,32 @@ import {
     SPOTIFY_BASE_URL,
     YOUTUBE_PLAYLIST_BASE_URL,
 } from "../constants";
+import dbContext from "../database_context";
+import AppCommandsAction from "../enums/app_command_action";
+import EnvType from "../enums/env_type";
+import GameOption from "../enums/game_option_name";
+import GameType from "../enums/game_type";
+import LocaleType from "../enums/locale_type";
+import type AutocompleteEntry from "../interfaces/autocomplete_entry";
+import type BookmarkedSong from "../interfaces/bookmarked_song";
+import type EmbedPayload from "../interfaces/embed_payload";
+import type GameInfoMessage from "../interfaces/game_info_message";
+import type GameOptions from "../interfaces/game_options";
+import type MatchedArtist from "../interfaces/matched_artist";
 import { IPCLogger } from "../logger";
+import State from "../state";
+import GameRound from "../structures/game_round";
+import type GuildPreference from "../structures/guild_preference";
+import MessageContext from "../structures/message_context";
+import type Session from "../structures/session";
+import type { EmbedGenerator, GuildTextableMessage } from "../types";
+import {
+    ConflictingGameOptions,
+    GameOptionCommand,
+    PriorityGameOption,
+} from "../types";
+import { userBonusIsActive } from "./game_utils";
+import i18n from "./localization_manager";
 import {
     bold,
     chooseWeightedRandom,
@@ -37,33 +64,6 @@ import {
     truncatedString,
     underline,
 } from "./utils";
-import { exec } from "child_process";
-import { userBonusIsActive } from "./game_utils";
-import AppCommandsAction from "../enums/app_command_action";
-import EmbedPaginator from "eris-pagination";
-import EnvType from "../enums/env_type";
-import Eris, { DiscordHTTPError, DiscordRESTError } from "eris";
-import GameOption from "../enums/game_option_name";
-import GameRound from "../structures/game_round";
-import GameType from "../enums/game_type";
-import LocaleType from "../enums/locale_type";
-import MessageContext from "../structures/message_context";
-import State from "../state";
-import _ from "lodash";
-import axios from "axios";
-import dbContext from "../database_context";
-import fs from "fs";
-import i18n from "./localization_manager";
-import type { EmbedGenerator, GuildTextableMessage } from "../types";
-import type { GuildTextableChannel } from "eris";
-import type AutocompleteEntry from "../interfaces/autocomplete_entry";
-import type BookmarkedSong from "../interfaces/bookmarked_song";
-import type EmbedPayload from "../interfaces/embed_payload";
-import type GameInfoMessage from "../interfaces/game_info_message";
-import type GameOptions from "../interfaces/game_options";
-import type GuildPreference from "../structures/guild_preference";
-import type MatchedArtist from "../interfaces/matched_artist";
-import type Session from "../structures/session";
 
 const logger = new IPCLogger("discord_utils");
 
@@ -1847,9 +1847,8 @@ export async function sendBookmarkedSongs(
                 },
             };
 
-            // eslint-disable-next-line no-await-in-loop
             await sendDmMessage(userID, { embeds: [embed] });
-            // eslint-disable-next-line no-await-in-loop
+
             await delay(1000);
         }
     }

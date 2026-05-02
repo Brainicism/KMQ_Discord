@@ -1,3 +1,6 @@
+import type Eris from "eris";
+import type { Expression, SqlBool } from "kysely";
+
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
     FOREIGN_LANGUAGE_TAGS,
@@ -6,36 +9,34 @@ import {
     SELECTION_WEIGHT_VALUES_HARD,
     SHADOW_BANNED_ARTIST_IDS,
 } from "../constants";
-import { IPCLogger } from "../logger";
+import dbContext from "../database_context";
+import GameOption from "../enums/game_option_name";
+import ArtistType from "../enums/option_types/artist_type";
+import type {
+    AvailableGenders,
+    GenderModeOptions,
+} from "../enums/option_types/gender";
+import LanguageType from "../enums/option_types/language_type";
+import OstPreference from "../enums/option_types/ost_preference";
+import ReleaseType from "../enums/option_types/release_type";
+import ShuffleType from "../enums/option_types/shuffle_type";
+import SubunitsPreference from "../enums/option_types/subunit_preference";
+import EnvVariableManager from "../env_variable_manager";
+import { getDebugLogHeader } from "../helpers/discord_utils";
 import {
     chooseWeightedRandom,
     parseKmqPlaylistIdentifier,
     setDifference,
     shufflePartitionedArray,
 } from "../helpers/utils";
-import { getDebugLogHeader } from "../helpers/discord_utils";
-import ArtistType from "../enums/option_types/artist_type";
-import EnvVariableManager from "../env_variable_manager";
-import GameOption from "../enums/game_option_name";
-import GameRound from "./game_round";
-import LanguageType from "../enums/option_types/language_type";
-import OstPreference from "../enums/option_types/ost_preference";
-import QueriedSong from "./queried_song";
-import ReleaseType from "../enums/option_types/release_type";
-import ShuffleType from "../enums/option_types/shuffle_type";
-import State from "../state";
-import SubunitsPreference from "../enums/option_types/subunit_preference";
-import dbContext from "../database_context";
-import type {
-    AvailableGenders,
-    GenderModeOptions,
-} from "../enums/option_types/gender";
-import type { Expression, SqlBool } from "kysely";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
-import type Eris from "eris";
+import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { IPCLogger } from "../logger";
+import State from "../state";
+import GameRound from "./game_round";
 import type GuildPreference from "./guild_preference";
 import type MessageContext from "./message_context";
-import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import QueriedSong from "./queried_song";
 
 const logger = new IPCLogger("song_selector");
 

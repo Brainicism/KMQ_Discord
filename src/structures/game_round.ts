@@ -1,3 +1,7 @@
+import levenshtien from "damerau-levenshtein";
+import Eris from "eris";
+import _ from "lodash";
+
 import {
     BOOKMARK_BUTTON_PREFIX,
     CORRECT_GUESS_EMOJI,
@@ -11,26 +15,23 @@ import {
     ROUND_MAX_RUNNERS_UP,
     SKIP_BUTTON_PREFIX,
 } from "../constants";
-import { IPCLogger } from "../logger";
+import ExpBonusModifier from "../enums/exp_bonus_modifier";
+import LocaleType from "../enums/locale_type";
+import GuessModeType from "../enums/option_types/guess_mode_type";
+import i18n from "../helpers/localization_manager";
 import {
     codeLine,
     friendlyFormattedNumber,
     getMention,
 } from "../helpers/utils";
-import Eris from "eris";
-import ExpBonusModifier from "../enums/exp_bonus_modifier";
-import GuessModeType from "../enums/option_types/guess_mode_type";
-import KmqMember from "./kmq_member";
-import LocaleType from "../enums/locale_type";
-import Round from "./round";
-import State from "../state";
-import _ from "lodash";
-import i18n from "../helpers/localization_manager";
-import levenshtien from "damerau-levenshtein";
-import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
-import type QueriedSong from "./queried_song";
 import type UniqueSongCounter from "../interfaces/unique_song_counter";
+import { IPCLogger } from "../logger";
+import State from "../state";
+import KmqMember from "./kmq_member";
+import type MessageContext from "./message_context";
+import type QueriedSong from "./queried_song";
+import Round from "./round";
 
 const logger = new IPCLogger("game_round");
 
@@ -103,7 +104,7 @@ export default class GameRound extends Round {
     private static MAX_DISPLAYED_GUESS_LENGTH = 50;
 
     /** List of characters to remove from song/artist names/guesses */
-    // eslint-disable-next-line no-useless-escape
+
     private static REMOVED_CHARACTERS = /[\|’\ '?!.\-,:;★*´\(\)\+\u200B…]/g;
 
     /** Set of characters to replace in song names/guesses */

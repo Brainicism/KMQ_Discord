@@ -1,11 +1,12 @@
-import { IPCLogger } from "../../logger";
-import { sendInfoMessage } from "../../helpers/discord_utils";
-import CommandPrechecks from "../../command_prechecks";
-import MessageContext from "../../structures/message_context";
-import State from "../../state";
-import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "../../interfaces/command_args";
 import type Eris from "eris";
+
+import CommandPrechecks from "../../command_prechecks";
+import { sendInfoMessage } from "../../helpers/discord_utils";
+import type CommandArgs from "../../interfaces/command_args";
+import { IPCLogger } from "../../logger";
+import State from "../../state";
+import MessageContext from "../../structures/message_context";
+import type BaseCommand from "../interfaces/base_command";
 
 const logger = new IPCLogger("eval");
 
@@ -38,7 +39,6 @@ export default class EvalCommand implements BaseCommand {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const evalFunc = function executeEval(command: string) {
                 try {
-                    // eslint-disable-next-line no-eval
                     const result = eval(command);
                     resolve(result);
                 } catch (e) {
