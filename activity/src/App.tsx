@@ -21,6 +21,10 @@ import {
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
+import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
+import { makeTranslator } from "./i18n/translator";
+import kmqLogoUrl from "./assets/kmq_logo.png";
+import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { ActivityArtist } from "./types/activity_options_snapshot";
 import type {
     ActivityGender,
@@ -29,10 +33,6 @@ import type {
 } from "./types/activity_options_snapshot";
 import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
 import type { SetOptionRequest } from "./api";
-import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
-import { makeTranslator } from "./i18n/translator";
-import kmqLogoUrl from "./assets/kmq_logo.png";
-import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
@@ -86,9 +86,9 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
         session: snapshot.session ?? null,
         scoreboard: snapshot.scoreboard ?? null,
         currentRound: snapshot.currentRound ?? null,
+        options: snapshot.options,
         sessionEnded: !snapshot.hasSession,
         hadSession: prev.hadSession || snapshot.hasSession,
-        options: snapshot.options,
     };
 }
 
@@ -221,12 +221,17 @@ function CurrentRound({
                         <div className="reveal-header">
                             <h3>
                                 {t("roundLabel", { num: round.roundIndex + 1 })}
+                                <span className="live-badge">
+                                    <span className="live-dot" />
+                                    LIVE
+                                </span>
                             </h3>
                             {bookmarkSlot}
                         </div>
                         <RoundTimer startedAt={round.songStartedAt} />
                         {round.guessTimeoutSec && (
                             <span className="timeout">
+                                ⏱{" "}
                                 {t("roundTimeoutLabel", {
                                     sec: round.guessTimeoutSec,
                                 })}
@@ -234,7 +239,11 @@ function CurrentRound({
                         )}
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
-                        <span>🎵</span>
+                        <span className="note-float">♪</span>
+                        <span className="note-float">♫</span>
+                        <span className="note-float">♩</span>
+                        <span className="note-main">🎵</span>
+                        <span className="listening-text">listening...</span>
                     </div>
                 </div>
             ) : reveal ? (
@@ -345,7 +354,11 @@ function CurrentRound({
                         </div>
                     ) : (
                         <div className="thumbnail-slot placeholder" aria-hidden>
-                            <span>🎵</span>
+                            <span className="note-float">♪</span>
+                            <span className="note-float">♫</span>
+                            <span className="note-float">♩</span>
+                            <span className="note-main">🎵</span>
+                            <span className="listening-text">waiting...</span>
                         </div>
                     )}
                 </div>
@@ -823,7 +836,6 @@ function OptionsPanel({
     const isAlternating = options.gender[0] === "alternating";
 
     const toggleGender = (g: ActivityGender): void => {
-        // Alternating is mutually exclusive with the flat genders.
         const set = new Set<ActivityGender>(
             isAlternating ? [] : options.gender,
         );
@@ -904,70 +916,61 @@ function OptionsPanel({
     };
 
     return (
-        <details className="options-panel">
-            <summary>{t("options.heading")}</summary>
+        <div className="options-panel">
+            <div className="option-label">{t("options.gender")}</div>
+            <div className="pills">
+                {GENDER_OPTIONS.map((g) => {
+                    const active = !isAlternating && options.gender.includes(g);
 
-            <div className="options-group">
-                <span className="options-label">{t("options.gender")}</span>
-                <div className="options-row">
-                    {GENDER_OPTIONS.map((g) => {
-                        const active =
-                            !isAlternating && options.gender.includes(g);
-
-                        return (
-                            <button
-                                key={g}
-                                type="button"
-                                className={`option-chip ${active ? "active" : ""}`}
-                                onClick={() => toggleGender(g)}
-                            >
-                                {t(`options.${g}`)}
-                            </button>
-                        );
-                    })}
-                    <button
-                        type="button"
-                        className={`option-chip ${isAlternating ? "active" : ""}`}
-                        onClick={toggleAlternating}
-                    >
-                        {t("options.alternating")}
-                    </button>
-                </div>
-            </div>
-
-            <div className="options-group">
-                <span className="options-label">{t("options.guessMode")}</span>
-                <div className="options-row">
-                    {GUESS_MODE_OPTIONS.map((mode) => (
+                    return (
                         <button
-                            key={mode}
+                            key={g}
                             type="button"
-                            className={`option-chip ${
-                                options.guessMode === mode ? "active" : ""
-                            }`}
-                            onClick={() => pickGuessMode(mode)}
+                            className={`pill ${active ? "on" : ""}`}
+                            onClick={() => toggleGender(g)}
                         >
-                            {t(`options.${mode}`)}
+                            {t(`options.${g}`)}
                         </button>
-                    ))}
-                </div>
+                    );
+                })}
+                <button
+                    type="button"
+                    className={`pill ${isAlternating ? "on" : ""}`}
+                    onClick={toggleAlternating}
+                >
+                    {t("options.alternating")}
+                </button>
             </div>
 
-            <div className="options-group">
-                <span className="options-label">{t("options.multiguess")}</span>
-                <div className="options-row">
+            <div className="option-label">{t("options.guessMode")}</div>
+            <div className="pills">
+                {GUESS_MODE_OPTIONS.map((mode) => (
                     <button
+                        key={mode}
                         type="button"
-                        className={`option-chip ${
-                            options.multiguess === "on" ? "active" : ""
+                        className={`pill ${
+                            options.guessMode === mode ? "on" : ""
                         }`}
-                        onClick={toggleMultiguess}
+                        onClick={() => pickGuessMode(mode)}
                     >
-                        {options.multiguess === "on"
-                            ? t("options.on")
-                            : t("options.off")}
+                        {t(`options.${mode}`)}
                     </button>
-                </div>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.multiguess")}</div>
+            <div className="pills">
+                <button
+                    type="button"
+                    className={`pill ${
+                        options.multiguess === "on" ? "on" : ""
+                    }`}
+                    onClick={toggleMultiguess}
+                >
+                    {options.multiguess === "on"
+                        ? t("options.on")
+                        : t("options.off")}
+                </button>
             </div>
 
             <NumberRangeGroup
@@ -1041,7 +1044,7 @@ function OptionsPanel({
             />
 
             {feedback && <span className="options-feedback">{feedback}</span>}
-        </details>
+        </div>
     );
 }
 
@@ -1072,8 +1075,6 @@ function ArtistListGroup({
                         accessToken,
                         trimmed,
                     );
-                    // Hide any artists already selected so the user can't
-                    // add a duplicate.
                     const selectedIDs = new Set(artists.map((a) => a.id));
                     setSuggestions(
                         results
@@ -1099,21 +1100,23 @@ function ArtistListGroup({
 
     return (
         <div className="options-group">
-            <span className="options-label">{label}</span>
-            <div className="options-chips">
-                {artists.map((a) => (
-                    <button
-                        key={a.id}
-                        type="button"
-                        className="artist-chip"
-                        onClick={() => removeArtist(a.id)}
-                        title="Remove"
-                    >
-                        {a.name}
-                        <span className="artist-chip-x">×</span>
-                    </button>
-                ))}
-            </div>
+            <div className="option-label">{label}</div>
+            {artists.length > 0 && (
+                <div className="artist-chips">
+                    {artists.map((a) => (
+                        <button
+                            key={a.id}
+                            type="button"
+                            className="artist-chip"
+                            onClick={() => removeArtist(a.id)}
+                            title="Remove"
+                        >
+                            {a.name}
+                            <span className="artist-chip-x">×</span>
+                        </button>
+                    ))}
+                </div>
+            )}
             <div className="artist-autocomplete">
                 <input
                     type="text"
@@ -1122,8 +1125,6 @@ function ArtistListGroup({
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() =>
-                        // Delay so a mousedown on a suggestion registers
-                        // before the dropdown unmounts.
                         setTimeout(() => setShowSuggestions(false), 150)
                     }
                     placeholder="Add artist..."
@@ -1172,8 +1173,6 @@ function NumberRangeGroup({
     const [start, setStart] = useState(String(startValue));
     const [end, setEnd] = useState(String(endValue));
 
-    // Re-sync when the wire-side value changes (optimistic write, or a
-    // slash-command-driven optionsChanged event).
     useEffect(() => setStart(String(startValue)), [startValue]);
     useEffect(() => setEnd(String(endValue)), [endValue]);
 
@@ -1191,8 +1190,8 @@ function NumberRangeGroup({
 
     return (
         <div className="options-group">
-            <span className="options-label">{label}</span>
-            <div className="options-row">
+            <div className="option-label">{label}</div>
+            <div className="number-row">
                 <input
                     type="number"
                     className="option-number"
@@ -1232,8 +1231,6 @@ function NullableNumberGroup({
     onCommit: (next: number | null) => void;
     offLabel: string;
 }) {
-    // Keep a local text state so typing doesn't immediately fire a write.
-    // Commit on blur, or on clicking the Off chip.
     const [text, setText] = useState(value === null ? "" : String(value));
 
     useEffect(() => {
@@ -1256,8 +1253,8 @@ function NullableNumberGroup({
 
     return (
         <div className="options-group">
-            <span className="options-label">{label}</span>
-            <div className="options-row">
+            <div className="option-label">{label}</div>
+            <div className="number-row">
                 <input
                     type="number"
                     className="option-number"
@@ -1270,7 +1267,7 @@ function NullableNumberGroup({
                 />
                 <button
                     type="button"
-                    className={`option-chip ${value === null ? "active" : ""}`}
+                    className={`pill ${value === null ? "on" : ""}`}
                     onClick={() => onCommit(null)}
                 >
                     {offLabel}
@@ -1307,6 +1304,7 @@ export default function App() {
         userID: string;
     } | null>(null);
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for
@@ -1425,193 +1423,327 @@ export default function App() {
     }
 
     return (
-        <div className="kmq-app">
-            <header>
-                <h1>{t("appTitle")}</h1>
-                {ui.session &&
-                    (() => {
-                        const completed = ui.session.roundsPlayed;
-                        const inProgress = ui.currentRound !== null;
-                        const displayed = inProgress
-                            ? completed + 1
-                            : completed;
-                        const showRatio = completed > 0;
-                        if (displayed === 0 && ui.bookmarkedLinks.size === 0) {
-                            return null;
-                        }
-                        return (
-                            <span className="meta">
-                                {displayed > 0 && (
-                                    <>
-                                        {t("headerRound", { num: displayed })}
-                                        {showRatio && (
-                                            <>
-                                                {" · "}
-                                                {t("headerCorrectRatio", {
-                                                    correct:
-                                                        ui.session
-                                                            .correctGuesses,
-                                                    total: completed,
-                                                })}
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                                {ui.bookmarkedLinks.size > 0 && (
-                                    <span className="bookmark-chip">
-                                        🔖 {ui.bookmarkedLinks.size}
-                                    </span>
-                                )}
-                            </span>
-                        );
-                    })()}
-            </header>
+        <>
+            {/* Decorative background stars */}
+            <span
+                className="deco-star"
+                style={{ top: "12%", left: "8%" }}
+                aria-hidden
+            >
+                ✦
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "45%", left: "3%" }}
+                aria-hidden
+            >
+                ♡
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "30%", right: "15%" }}
+                aria-hidden
+            >
+                ✧
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "70%", left: "12%" }}
+                aria-hidden
+            >
+                ✦
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "85%", right: "8%" }}
+                aria-hidden
+            >
+                ♡
+            </span>
 
-            {authState && (
-                <ControlButtons
-                    accessToken={authState.accessToken}
-                    instanceId={authState.instanceId}
-                    hasSession={ui.session !== null && !ui.sessionEnded}
-                    t={t}
-                />
-            )}
+            {/* Sidebar toggle */}
+            <button
+                type="button"
+                className={`sidebar-toggle ${sidebarOpen ? "active" : ""}`}
+                onClick={() => setSidebarOpen((o) => !o)}
+                title={t("scoreboardHeading")}
+            >
+                <span>🏆</span>
+            </button>
 
-            {ui.sessionEnded && (
-                <div className="banner">
-                    {t("sessionEndedBanner", { playSlash: "/play" })}
-                </div>
-            )}
+            <div className="kmq-layout">
+                <div className="kmq-main">
+                    <div className="kmq-app">
+                        <header>
+                            <div className="header-left">
+                                <h1>
+                                    {t("appTitle")}{" "}
+                                    <span className="logo-heart">♥</span>
+                                </h1>
+                                {ui.session &&
+                                    (() => {
+                                        const completed =
+                                            ui.session.roundsPlayed;
+                                        const inProgress =
+                                            ui.currentRound !== null;
+                                        const displayed = inProgress
+                                            ? completed + 1
+                                            : completed;
+                                        const showRatio = completed > 0;
+                                        if (
+                                            displayed === 0 &&
+                                            ui.bookmarkedLinks.size === 0
+                                        ) {
+                                            return null;
+                                        }
+                                        return (
+                                            <span className="meta">
+                                                {displayed > 0 && (
+                                                    <>
+                                                        {t("headerRound", {
+                                                            num: displayed,
+                                                        })}
+                                                        {showRatio && (
+                                                            <>
+                                                                {" · "}
+                                                                {t(
+                                                                    "headerCorrectRatio",
+                                                                    {
+                                                                        correct:
+                                                                            ui
+                                                                                .session
+                                                                                .correctGuesses,
+                                                                        total: completed,
+                                                                    },
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {ui.bookmarkedLinks.size >
+                                                    0 && (
+                                                    <span className="bookmark-chip">
+                                                        🔖{" "}
+                                                        {
+                                                            ui.bookmarkedLinks
+                                                                .size
+                                                        }
+                                                    </span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
+                            </div>
 
-            <CurrentRound
-                round={ui.currentRound}
-                reveal={ui.lastReveal}
-                t={t}
-                winnerText={
-                    ui.sessionEnded && ui.hadSession && !ui.lastReveal
-                        ? resolveWinnerText(
-                              t,
-                              ui.scoreboard,
-                              authState?.userID ?? null,
-                          )
-                        : null
-                }
-                bookmarkSlot={
-                    authState && (ui.currentRound || ui.lastReveal) ? (
-                        <BookmarkStar
-                            // Force a fresh component (and its optimistic
-                            // state) on every round transition so the icon
-                            // resets cleanly.
-                            key={
-                                ui.currentRound
-                                    ? `round-${ui.currentRound.roundIndex}`
-                                    : `reveal-${ui.lastReveal?.song.youtubeLink}`
-                            }
-                            accessToken={authState.accessToken}
-                            instanceId={authState.instanceId}
-                            youtubeLink={
-                                ui.lastReveal?.song.youtubeLink ?? null
-                            }
-                            isBookmarked={
-                                ui.lastReveal
-                                    ? ui.bookmarkedLinks.has(
-                                          ui.lastReveal.song.youtubeLink,
-                                      )
-                                    : ui.currentRoundBookmarked
-                            }
+                            {authState && (
+                                <ControlButtons
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hasSession={
+                                        ui.session !== null && !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                            )}
+                        </header>
+
+                        {ui.sessionEnded && (
+                            <div className="banner">
+                                {t("sessionEndedBanner", {
+                                    playSlash: "/play",
+                                })}
+                            </div>
+                        )}
+
+                        <CurrentRound
+                            round={ui.currentRound}
+                            reveal={ui.lastReveal}
                             t={t}
-                            onBookmarked={(link) =>
-                                setUi((prev) => ({
-                                    ...prev,
-                                    bookmarkedLinks: new Set([
-                                        ...prev.bookmarkedLinks,
-                                        link,
-                                    ]),
-                                    currentRoundBookmarked: true,
-                                }))
+                            winnerText={
+                                ui.sessionEnded &&
+                                ui.hadSession &&
+                                !ui.lastReveal
+                                    ? resolveWinnerText(
+                                          t,
+                                          ui.scoreboard,
+                                          authState?.userID ?? null,
+                                      )
+                                    : null
+                            }
+                            bookmarkSlot={
+                                authState &&
+                                (ui.currentRound || ui.lastReveal) ? (
+                                    <BookmarkStar
+                                        // Force a fresh component (and its optimistic
+                                        // state) on every round transition so the icon
+                                        // resets cleanly.
+                                        key={
+                                            ui.currentRound
+                                                ? `round-${ui.currentRound.roundIndex}`
+                                                : `reveal-${ui.lastReveal?.song.youtubeLink}`
+                                        }
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        youtubeLink={
+                                            ui.lastReveal?.song.youtubeLink ??
+                                            null
+                                        }
+                                        isBookmarked={
+                                            ui.lastReveal
+                                                ? ui.bookmarkedLinks.has(
+                                                      ui.lastReveal.song
+                                                          .youtubeLink,
+                                                  )
+                                                : ui.currentRoundBookmarked
+                                        }
+                                        t={t}
+                                        onBookmarked={(link) =>
+                                            setUi((prev) => ({
+                                                ...prev,
+                                                bookmarkedLinks: new Set([
+                                                    ...prev.bookmarkedLinks,
+                                                    link,
+                                                ]),
+                                                currentRoundBookmarked: true,
+                                            }))
+                                        }
+                                    />
+                                ) : null
                             }
                         />
-                    ) : null
-                }
-            />
 
-            {authState && (
-                <GuessInput
-                    accessToken={authState.accessToken}
-                    instanceId={authState.instanceId}
-                    enabled={ui.currentRound !== null && !ui.sessionEnded}
-                    t={t}
-                />
-            )}
-
-            {authState && (
-                <div className="vote-row">
-                    <HintControl
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        hint={ui.hint}
-                        enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        t={t}
-                    />
-                    <SkipControl
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        skip={ui.skip}
-                        enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        roundKey={ui.currentRound?.roundIndex ?? null}
-                        t={t}
-                        onVoteStart={() =>
-                            setUi((prev) => ({
-                                ...prev,
-                                skip: { ...prev.skip, userVoted: true },
-                            }))
-                        }
-                        onVoteFailed={(clickedRoundKey) =>
-                            setUi((prev) => {
-                                // Only roll back if we're still on the round
-                                // the user clicked — a roundStart between
-                                // click and reply has already reset userVoted
-                                // cleanly for the new round.
-                                const currentKey =
-                                    prev.currentRound?.roundIndex ?? null;
-                                if (currentKey !== clickedRoundKey) {
-                                    return prev;
+                        {authState && (
+                            <GuessInput
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                enabled={
+                                    ui.currentRound !== null && !ui.sessionEnded
                                 }
-                                return {
-                                    ...prev,
-                                    skip: { ...prev.skip, userVoted: false },
-                                };
-                            })
-                        }
-                    />
+                                t={t}
+                            />
+                        )}
+
+                        {authState && (
+                            <div className="vote-row">
+                                <HintControl
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hint={ui.hint}
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                                <SkipControl
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    skip={ui.skip}
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    roundKey={
+                                        ui.currentRound?.roundIndex ?? null
+                                    }
+                                    t={t}
+                                    onVoteStart={() =>
+                                        setUi((prev) => ({
+                                            ...prev,
+                                            skip: {
+                                                ...prev.skip,
+                                                userVoted: true,
+                                            },
+                                        }))
+                                    }
+                                    onVoteFailed={(clickedRoundKey) =>
+                                        setUi((prev) => {
+                                            // Only roll back if we're still on the round
+                                            // the user clicked — a roundStart between
+                                            // click and reply has already reset userVoted
+                                            // cleanly for the new round.
+                                            const currentKey =
+                                                prev.currentRound?.roundIndex ??
+                                                null;
+                                            if (
+                                                currentKey !== clickedRoundKey
+                                            ) {
+                                                return prev;
+                                            }
+                                            return {
+                                                ...prev,
+                                                skip: {
+                                                    ...prev.skip,
+                                                    userVoted: false,
+                                                },
+                                            };
+                                        })
+                                    }
+                                />
+                            </div>
+                        )}
+
+                        <GuessTicker guesses={ui.recentGuesses} />
+                    </div>
                 </div>
-            )}
 
-            {authState && ui.options && (
-                <OptionsPanel
-                    accessToken={authState.accessToken}
-                    instanceId={authState.instanceId}
-                    options={ui.options}
-                    t={t}
-                    onOptimistic={(next) =>
-                        setUi((prev) => ({ ...prev, options: next }))
-                    }
-                    onRollback={(prevOptions) =>
-                        setUi((prev) => ({ ...prev, options: prevOptions }))
-                    }
-                />
-            )}
-
-            <section className="scoreboard-section">
-                <h3>{t("scoreboardHeading")}</h3>
-                {ui.scoreboard ? (
-                    <Scoreboard scoreboard={ui.scoreboard} t={t} />
-                ) : (
-                    <p className="empty">{t("scoreboardEmpty")}</p>
-                )}
-            </section>
-
-            <GuessTicker guesses={ui.recentGuesses} />
-        </div>
+                {/* Sidebar — scoreboard */}
+                <aside
+                    className={`kmq-sidebar ${sidebarOpen ? "open" : ""}`}
+                    aria-label={t("scoreboardHeading")}
+                >
+                    <div className="sidebar-header">
+                        <span className="sidebar-title">
+                            {t("scoreboardHeading")}
+                        </span>
+                        <button
+                            type="button"
+                            className="sidebar-close"
+                            onClick={() => setSidebarOpen(false)}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="sidebar-body">
+                        <div>
+                            <h3 className="sb-section-title">
+                                {t("scoreboardHeading")}
+                            </h3>
+                            {ui.scoreboard ? (
+                                <Scoreboard scoreboard={ui.scoreboard} t={t} />
+                            ) : (
+                                <p className="empty">{t("scoreboardEmpty")}</p>
+                            )}
+                        </div>
+                        {authState && ui.options && (
+                            <div>
+                                <h3 className="sb-section-title">
+                                    {t("options.heading")}
+                                </h3>
+                                <OptionsPanel
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    options={ui.options}
+                                    t={t}
+                                    onOptimistic={(next) =>
+                                        setUi((prev) => ({
+                                            ...prev,
+                                            options: next,
+                                        }))
+                                    }
+                                    onRollback={(prevOpts) =>
+                                        setUi((prev) => ({
+                                            ...prev,
+                                            options: prevOpts,
+                                        }))
+                                    }
+                                />
+                            </div>
+                        )}
+                    </div>
+                </aside>
+            </div>
+        </>
     );
 }
 
@@ -1706,8 +1838,6 @@ function reduce(
             };
         case "scoreboardUpdate":
             return { ...prev, scoreboard: msg.scoreboard };
-        case "optionsChanged":
-            return { ...prev, options: msg.options };
         case "guessReceived":
             return {
                 ...prev,
@@ -1735,6 +1865,8 @@ function reduce(
                 hint: initialHint,
                 skip: initialSkip,
             };
+        case "optionsChanged":
+            return { ...prev, options: msg.options };
         default:
             return prev;
     }
