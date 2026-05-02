@@ -40,6 +40,7 @@ describe("TimerManager", () => {
                 },
                 50,
             );
+
             tm.set(
                 "test",
                 () => {
@@ -94,6 +95,7 @@ describe("TimerManager", () => {
                 },
                 10,
             );
+
             setTimeout(() => {
                 const firstCount = count;
                 tm.setInterval("test", () => {}, 10000);
@@ -118,6 +120,7 @@ describe("TimerManager", () => {
                 },
                 50,
             );
+
             tm.set(
                 "timer2",
                 () => {
@@ -125,6 +128,7 @@ describe("TimerManager", () => {
                 },
                 50,
             );
+
             tm.setInterval(
                 "interval1",
                 () => {
