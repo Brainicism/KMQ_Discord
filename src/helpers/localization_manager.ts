@@ -18,7 +18,7 @@ class LocalizationManager {
         this.internalLocalizer.init({
             preload: Object.values(LocaleType),
             supportedLngs: Object.values(LocaleType),
-            initImmediate: false,
+            initAsync: false,
             saveMissing: true,
             fallbackLng: DEFAULT_LOCALE,
             interpolation: {
