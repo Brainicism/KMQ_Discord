@@ -143,7 +143,9 @@ export default class KmqWebServer {
                         const result = eval(command);
                         await reply.code(200).send({ result });
                     } catch (e) {
-                        await reply.code(400).send(`Error: ${(e as Error).message}`);
+                        await reply
+                            .code(400)
+                            .send(`Error: ${(e as Error).message}`);
                     }
                 }).call(fleet.eris.requestHandler, query);
             },

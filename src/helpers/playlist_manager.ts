@@ -856,8 +856,9 @@ export default class PlaylistManager {
                 } catch (err) {
                     if ((err as any).response?.status === 429) {
                         const rateLimit =
-                            Number((err as any).response.headers["retry-after"]) ||
-                            DEFAULT_RATE_LIMIT_SECS;
+                            Number(
+                                (err as any).response.headers["retry-after"],
+                            ) || DEFAULT_RATE_LIMIT_SECS;
 
                         logger.warn(
                             `Spotify rate limit exceeded, waiting ${rateLimit} seconds...`,
