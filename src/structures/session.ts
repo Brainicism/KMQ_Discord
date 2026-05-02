@@ -563,8 +563,6 @@ export default abstract class Session extends EventEmitter {
             .execute();
 
         this.stateMachine.transition(SessionState.ENDED);
-
-        // Clean up all timers and event listeners
         this.timers.clearAll();
         this.events.emit("sessionEnd", { reason });
         this.events.removeAllListeners();

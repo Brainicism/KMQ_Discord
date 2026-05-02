@@ -1,11 +1,6 @@
-import { IPCLogger } from "../logger";
-
-const logger = new IPCLogger("timer_manager");
-
 /**
  * Manages named timers and intervals with automatic cleanup.
- * Replaces scattered setTimeout/setInterval/clearTimeout calls
- * and ensures all timers are cleaned up when the session ends.
+ * All timers are cleaned up when clearAll() is called on session end.
  */
 export class TimerManager {
     private timers = new Map<string, NodeJS.Timeout>();
@@ -29,7 +24,6 @@ export class TimerManager {
         this.intervals.set(name, global.setInterval(callback, intervalMs));
     }
 
-    /** Clear a specific timeout by name. */
     clear(name: string): void {
         const timer = this.timers.get(name);
         if (timer) {
@@ -38,7 +32,6 @@ export class TimerManager {
         }
     }
 
-    /** Clear a specific interval by name. */
     clearInterval(name: string): void {
         const interval = this.intervals.get(name);
         if (interval) {
@@ -47,7 +40,7 @@ export class TimerManager {
         }
     }
 
-    /** Clear ALL timers and intervals. Called on session end. */
+    /** Clear ALL timers and intervals. */
     clearAll(): void {
         for (const timer of this.timers.values()) {
             clearTimeout(timer);
@@ -60,11 +53,8 @@ export class TimerManager {
         }
 
         this.intervals.clear();
-
-        logger.info("All timers and intervals cleared");
     }
 
-    /** Check if a named timer or interval is active. */
     has(name: string): boolean {
         return this.timers.has(name) || this.intervals.has(name);
     }

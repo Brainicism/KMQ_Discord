@@ -32,7 +32,6 @@ export class TypedEventEmitter<T extends Record<string, any>> {
         this.emitter.off(event, listener);
     }
 
-    /** Remove ALL listeners. Called on session dispose. */
     removeAllListeners(): void {
         this.emitter.removeAllListeners();
     }
