@@ -63,8 +63,13 @@ const program = new Command()
         parseFloat(x),
     );
 
-program.parse();
-const options = program.opts();
+// Use defaults when imported as a module; only parse CLI args when running directly
+let options = program.opts();
+
+if (require.main === module) {
+    program.parse();
+    options = program.opts();
+}
 
 const failedTests: string[] = [];
 let TEST_SUITE: TestSuite = BASIC_OPTIONS_TEST_SUITE;

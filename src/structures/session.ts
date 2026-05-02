@@ -8,8 +8,9 @@ import {
     SKIP_BUTTON_PREFIX,
     specialFfmpegArgs,
 } from "../constants";
+import { EventEmitter } from "events";
 import { IPCLogger } from "../logger";
-import { Mutex } from "async-mutex";
+import { Mutex, withTimeout } from "async-mutex";
 import {
     clickableSlashCommand,
     generateEmbed,
@@ -62,7 +63,7 @@ import { SessionState, SessionStateMachine } from "./session_state";
 
 const logger = new IPCLogger("session");
 
-export default abstract class Session {
+export default abstract class Session extends EventEmitter {
     /** The ID of text channel in which the Session was started in, and will be active in */
     public readonly textChannelID: string;
 
@@ -96,8 +97,10 @@ export default abstract class Session {
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
-    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession) */
-    protected lifecycleMutex = new Mutex();
+    /** Mutex to serialize lifecycle operations (startRound, endRound, endSession).
+     *  Wrapped with a 30s timeout to prevent permanent deadlocks from blocking
+     *  the session indefinitely — legitimate holds complete well within this. */
+    protected lifecycleMutex = withTimeout(new Mutex(), 30_000);
 
     /** The guild preference */
     protected guildPreference: GuildPreference;
@@ -120,6 +123,7 @@ export default abstract class Session {
         guildID: string,
         sessionCreator: KmqMember,
     ) {
+        super();
         this.guildPreference = guildPreference;
         this.textChannelID = textChannelID;
         this.voiceChannelID = voiceChannelID;
@@ -169,6 +173,13 @@ export default abstract class Session {
         return false;
     }
 
+    /** @returns the timer-mode timeout in seconds, or null if disabled */
+    getGuessTimeoutSec(): number | null {
+        return this.guildPreference.isGuessTimeoutSet()
+            ? this.guildPreference.gameOptions.guessTimeout
+            : null;
+    }
+
     /**
      * Starting a new Round
      * @param messageContext - An object containing relevant parts of Eris.Message
@@ -193,7 +204,11 @@ export default abstract class Session {
                     messageContext,
                 )} | Session ending due to maintenance mode `,
             );
-            await this.endSession("Maintenance mode enabled", true);
+
+            await this.endSessionFromLifecycle(
+                "Maintenance mode enabled",
+                true,
+            );
             return null;
         }
 
@@ -219,11 +234,15 @@ export default abstract class Session {
                 logger.error(
                     `${getDebugLogHeader(
                         messageContext,
-                    )} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(
-                        this.guildPreference,
+                    )} | Error querying song: ${err.toString()}. guildOptions = ${JSON.stringify(
+                        this.guildPreference.gameOptions,
                     )}`,
                 );
-                await this.endSession("Error reloading songs", true);
+
+                await this.endSessionFromLifecycle(
+                    "Error reloading songs",
+                    true,
+                );
                 return null;
             }
         }
@@ -266,7 +285,11 @@ export default abstract class Session {
                     "misc.failure.songQuery.description",
                 ),
             });
-            await this.endSession("Error querying random song", true);
+
+            await this.endSessionFromLifecycle(
+                "Error querying random song",
+                true,
+            );
             return null;
         }
 
@@ -279,7 +302,7 @@ export default abstract class Session {
         ) as Eris.VoiceChannel | null;
 
         if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
-            await this.endSession(
+            await this.endSessionFromLifecycle(
                 "Voice channel is empty, during startRound",
                 false,
             );
@@ -303,7 +326,10 @@ export default abstract class Session {
             //     }
             // }
         } catch (err) {
-            await this.endSession("Unable to obtain voice connection", true);
+            await this.endSessionFromLifecycle(
+                "Unable to obtain voice connection",
+                true,
+            );
             if (err instanceof Error) {
                 const knownErrorStrings = [
                     "Voice connection timeout",
@@ -398,7 +424,10 @@ export default abstract class Session {
 
         if (remainingDuration && remainingDuration < 0) {
             logger.info(`gid: ${this.guildID} | Game session duration reached`);
-            await this.endSession("Game session duration reached", isError);
+            await this.endSessionFromLifecycle(
+                "Game session duration reached",
+                isError,
+            );
         }
     }
 
@@ -700,6 +729,46 @@ export default abstract class Session {
     }
 
     /**
+     * Lifecycle hooks for internal calls within startRound/endRound/endSession.
+     * These are called from within Session's own lifecycle methods (startRound,
+     * endRound, playSong, errorRestartRound) when one lifecycle method needs to
+     * trigger another. The base implementation calls the public methods directly,
+     * which is correct for non-mutex subclasses (e.g. ListeningSession).
+     *
+     * GameSession overrides these to call the Core methods directly, bypassing
+     * the mutex since the caller already holds it. Without these overrides,
+     * the non-re-entrant mutex would deadlock.
+     * @param reason - The reason for the session end
+     * @param endedDueToError - Whether the session ended due to an error
+     */
+    protected async endSessionFromLifecycle(
+        reason: string,
+        endedDueToError: boolean,
+    ): Promise<void> {
+        await this.endSession(reason, endedDueToError);
+    }
+
+    /**
+     * @param isError - Whether the round ended due to an error
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async endRoundFromLifecycle(
+        isError: boolean,
+        messageContext: MessageContext,
+    ): Promise<void> {
+        await this.endRound(isError, messageContext);
+    }
+
+    /**
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async startRoundFromLifecycle(
+        messageContext: MessageContext,
+    ): Promise<Round | null> {
+        return this.startRound(messageContext);
+    }
+
+    /**
      * Prepares a new Round
      * @param randomSong - The queried song
      * @returns the new Round
@@ -878,6 +947,13 @@ export default abstract class Session {
             // Only set songStartedAt for clip mode at the start of the round
             if (!isClipMode || round.songStartedAt === null) {
                 round.songStartedAt = Date.now();
+                this.emit("roundStart", {
+                    roundIndex: this.roundsPlayed,
+                    songStartedAt: round.songStartedAt,
+                    guessTimeoutSec: this.guildPreference.isGuessTimeoutSet()
+                        ? this.guildPreference.gameOptions.guessTimeout
+                        : null,
+                });
             }
 
             await this.ensureConnectionReady();
@@ -1265,7 +1341,7 @@ export default abstract class Session {
             this.guildID,
         );
 
-        await this.endRound(true, messageContext);
+        await this.endRoundFromLifecycle(true, messageContext);
 
         await sendErrorMessage(messageContext, {
             title: i18n.translate(
@@ -1278,7 +1354,7 @@ export default abstract class Session {
             ),
         });
         this.roundsPlayed--;
-        await this.startRound(messageContext);
+        await this.startRoundFromLifecycle(messageContext);
     }
 
     private getAliasFooter(

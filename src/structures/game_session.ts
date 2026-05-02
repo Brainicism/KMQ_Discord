@@ -3,6 +3,7 @@ import * as uuid from "uuid";
 import Eris from "eris";
 import _ from "lodash";
 
+import { E_TIMEOUT } from "async-mutex";
 import {
     bold,
     chunkArray,
@@ -133,6 +134,10 @@ export default class GameSession extends Session {
     /** Manages updating a message with current guessers with hidden enabled */
     private hiddenUpdateTimer: NodeJS.Timeout | null;
 
+    /** Set immediately when endSession is requested, before the mutex is acquired.
+     *  Allows startRoundCore to abort its between-round delay even while the mutex is held. */
+    private pendingEndSession = false;
+
     constructor(
         guildPreference: GuildPreference,
         textChannelID: string,
@@ -221,9 +226,30 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.startRoundCore(messageContext),
-        );
+        const waitStart = Date.now();
+        try {
+            return await this.lifecycleMutex.runExclusive(() => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | startRound() waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                return this.startRoundCore(messageContext);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: startRound() could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return null;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -238,9 +264,30 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         gameRound?: GameRound,
     ): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.endRoundCore(isError, messageContext, gameRound),
-        );
+        const waitStart = Date.now();
+        try {
+            await this.lifecycleMutex.runExclusive(async () => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | endRound() waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                await this.endRoundCore(isError, messageContext, gameRound);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: endRound() could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -250,9 +297,31 @@ export default class GameSession extends Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.endSessionCore(reason, endedDueToError),
-        );
+        this.pendingEndSession = true;
+        const waitStart = Date.now();
+        try {
+            await this.lifecycleMutex.runExclusive(async () => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | endSession("${reason}") waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                await this.endSessionCore(reason, endedDueToError);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: endSession("${reason}") could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -284,6 +353,12 @@ export default class GameSession extends Session {
             this.isMultipleChoiceMode(),
             this.guildPreference.typosAllowed(),
         );
+
+        this.emit("guessReceived", {
+            userID: messageContext.author.id,
+            isCorrect: pointsEarned > 0,
+            ts: createdAt,
+        });
 
         if (pointsEarned) {
             logger.info(
@@ -564,51 +639,48 @@ export default class GameSession extends Session {
     }
 
     /**
-     * Add all players in VC that aren't tracked to the scoreboard, and update those who left
+     * Sync scoreboard with current VC members.
+     * Sequential iteration prevents concurrent addPlayer/setPlayerInVC interleaving.
      */
     async syncAllVoiceMembers(): Promise<void> {
         const currentVoiceMemberIds = getCurrentVoiceMembers(
             this.voiceChannelID,
         ).map((x) => x.id);
 
-        await Promise.allSettled(
-            this.scoreboard
-                .getPlayerIDs()
-                .filter((x) => !currentVoiceMemberIds.includes(x))
-                .map(async (player) => {
-                    await this.setPlayerInVC(player, false);
-                }),
-        );
+        const departedPlayers = this.scoreboard
+            .getPlayerIDs()
+            .filter((x) => !currentVoiceMemberIds.includes(x));
+
+        for (const player of departedPlayers) {
+            // eslint-disable-next-line no-await-in-loop
+            await this.setPlayerInVC(player, false);
+        }
 
         if (this.gameType === GameType.TEAMS) {
-            // Players join teams manually with /join
             return;
         }
 
-        await Promise.allSettled(
-            currentVoiceMemberIds
-                .filter((x) => x !== process.env.BOT_CLIENT_ID)
-                .map(async (playerId) => {
-                    const firstGameOfDay = await isFirstGameOfDay(playerId);
-                    const player = (await fetchUser(playerId)) as Eris.User;
-                    this.scoreboard.addPlayer(
-                        this.gameType === GameType.ELIMINATION
-                            ? EliminationPlayer.fromUser(
-                                  player,
-                                  this.guildID,
-                                  (this.scoreboard as EliminationScoreboard)
-                                      .startingLives,
-                                  firstGameOfDay,
-                              )
-                            : Player.fromUser(
-                                  player,
-                                  this.guildID,
-                                  0,
-                                  firstGameOfDay,
-                              ),
-                    );
-                }),
+        const newPlayers = currentVoiceMemberIds.filter(
+            (x) => x !== process.env.BOT_CLIENT_ID,
         );
+
+        for (const playerId of newPlayers) {
+            // eslint-disable-next-line no-await-in-loop
+            const firstGameOfDay = await isFirstGameOfDay(playerId);
+            // eslint-disable-next-line no-await-in-loop
+            const player = (await fetchUser(playerId)) as Eris.User;
+            this.scoreboard.addPlayer(
+                this.gameType === GameType.ELIMINATION
+                    ? EliminationPlayer.fromUser(
+                          player,
+                          this.guildID,
+                          (this.scoreboard as EliminationScoreboard)
+                              .startingLives,
+                          firstGameOfDay,
+                      )
+                    : Player.fromUser(player, this.guildID, 0, firstGameOfDay),
+            );
+        }
     }
 
     /**
@@ -895,6 +967,40 @@ export default class GameSession extends Session {
     }
 
     /**
+     * Lifecycle hook overrides: bypass the mutex for calls originating from
+     * within startRoundCore/endRoundCore/endSessionCore (which already hold it).
+     * Without these, the non-re-entrant mutex would deadlock.
+     * @param reason - The reason for the session end
+     * @param endedDueToError - Whether the session ended due to an error
+     */
+    protected async endSessionFromLifecycle(
+        reason: string,
+        endedDueToError: boolean,
+    ): Promise<void> {
+        await this.endSessionCore(reason, endedDueToError);
+    }
+
+    /**
+     * @param isError - Whether the round ended due to an error
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async endRoundFromLifecycle(
+        isError: boolean,
+        messageContext: MessageContext,
+    ): Promise<void> {
+        await this.endRoundCore(isError, messageContext);
+    }
+
+    /**
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async startRoundFromLifecycle(
+        messageContext: MessageContext,
+    ): Promise<Round | null> {
+        return this.startRoundCore(messageContext);
+    }
+
+    /**
      * Internal startRound logic. Must only be called while holding lifecycleMutex.
      * @param messageContext - The message context for the round
      */
@@ -921,7 +1027,7 @@ export default class GameSession extends Session {
             );
         }
 
-        if (this.finished || this.round) {
+        if (this.finished || this.round || this.pendingEndSession) {
             return null;
         }
 
@@ -967,6 +1073,14 @@ export default class GameSession extends Session {
         }
 
         round.finished = true;
+
+        if (this.pendingEndSession) {
+            // Session end was requested while we held the mutex — skip round scoring/messages
+            // and leave the state at ROUND_ACTIVE so endSession can transition directly to ENDING.
+            this.round = null;
+            this.stopGuessTimeout();
+            return;
+        }
 
         // sets the round to null
         await super.endRound(false, messageContext);
@@ -1029,6 +1143,14 @@ export default class GameSession extends Session {
             round.hintUsed,
             timePlayed,
         );
+
+        this.emit("roundEnd", {
+            song: round.song,
+            correctGuessers,
+            playerRoundResults: round.playerRoundResults,
+            isCorrectGuess,
+            guesses: round.getGuesses(),
+        });
 
         const remainingDuration = this.getRemainingDuration(
             this.guildPreference,
@@ -1144,6 +1266,7 @@ export default class GameSession extends Session {
         }
 
         this.finished = true;
+        this.emit("sessionEnd", { reason });
         if (this.gameType === GameType.COMPETITION) {
             // log scoreboard
             logger.info("Scoreboard:");
@@ -1795,6 +1918,7 @@ export default class GameSession extends Session {
             }));
 
         this.scoreboard.update(scoreboardUpdatePayload);
+        this.emit("scoreboardUpdate");
     }
 
     private startHiddenUpdateTimer(): void {

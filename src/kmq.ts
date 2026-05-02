@@ -25,6 +25,7 @@ import dbContext from "./database_context";
 import fs from "fs";
 
 import { sendInfoWebhook } from "./helpers/discord_utils";
+import ActivityHub from "./activity_hub";
 import KmqWebServer from "./kmq_web_server";
 import path from "path";
 import schedule from "node-schedule";
@@ -233,8 +234,14 @@ function registerProcessEvents(fleet: Fleet): void {
                 "Kimiqo",
             );
 
+            logger.info("Starting ActivityHub...");
+            const activityHub = new ActivityHub(fleet);
+            await activityHub.start();
+
             logger.info("Starting web server...");
-            await new KmqWebServer(dbContext).startWebServer(fleet);
+            await new KmqWebServer(dbContext, activityHub).startWebServer(
+                fleet,
+            );
 
             // notify that the current instance is now ready
             await fs.promises.writeFile(STATUS_COOKIE, "ready");

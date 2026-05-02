@@ -42,5 +42,7 @@ declare namespace NodeJS {
         GOD_MODE: string | undefined;
         DEBUG_CHANNEL_WEBHOOK_URL: string | undefined;
         POWER_HOUR_NOTIF_WEBHOOK_URL: string | undefined;
+        DISCORD_CLIENT_SECRET?: string | undefined;
+        ACTIVITY_PUBLIC_BASE_URL?: string | undefined;
     }
 }

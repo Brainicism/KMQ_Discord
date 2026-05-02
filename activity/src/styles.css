@@ -1,0 +1,614 @@
+:root {
+    color-scheme: dark;
+    font-family: ui-sans-serif, system-ui, sans-serif;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+    min-height: 100vh;
+}
+
+body {
+    margin: 0;
+    background: #1e1f22;
+    color: #f2f3f5;
+}
+
+.kmq-app {
+    width: 100%;
+    /* Activities can be wide (1280-1920px in expanded mode) — use most of it. */
+    max-width: 1400px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: clamp(8px, 2vw, 24px);
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.5vw, 16px);
+    box-sizing: border-box;
+}
+
+.kmq-app header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    border-bottom: 1px solid #2b2d31;
+    padding-bottom: 8px;
+}
+
+.kmq-app .meta {
+    color: #b5bac1;
+    font-size: 0.9rem;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.bookmark-chip {
+    background: #404249;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+}
+
+.reveal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.bookmark-star {
+    background: transparent;
+    border: 1px solid #3f4147;
+    color: inherit;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bookmark-star:hover:not(:disabled) {
+    border-color: #fbb03b;
+    transform: scale(1.05);
+}
+
+.bookmark-star.filled {
+    background: #fbb03b;
+    border-color: #fbb03b;
+    cursor: default;
+    animation: bookmark-pop 0.4s ease;
+}
+
+@keyframes bookmark-pop {
+    0% {
+        transform: scale(1);
+    }
+    40% {
+        transform: scale(1.25);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.bookmark-feedback {
+    position: absolute;
+    background: #2b2d31;
+    padding: 4px 8px;
+    border-radius: 4px;
+    margin-top: 40px;
+    font-size: 0.75rem;
+    color: #f23f42;
+}
+
+.hint-control {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hint-control button {
+    position: relative;
+    overflow: hidden;
+    background: #2b2d31;
+    border: 1px solid #3f4147;
+    color: inherit;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.95rem;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.hint-control button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.hint-control button.revealed {
+    background: #404a28;
+    border-color: #fbb03b;
+}
+
+.hint-icon {
+    font-size: 1.2rem;
+}
+
+.hint-label {
+    flex: 1;
+    z-index: 1;
+}
+
+.hint-progress {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: rgba(251, 176, 59, 0.25);
+    transition: width 0.3s ease;
+    pointer-events: none;
+}
+
+.hint-text {
+    background: #404a28;
+    border-left: 3px solid #fbb03b;
+    padding: 10px 14px;
+    border-radius: 4px;
+    font-size: 0.95rem;
+    animation: hint-slide-in 0.4s ease;
+}
+
+@keyframes hint-slide-in {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hint-feedback {
+    color: #f23f42;
+    font-size: 0.85rem;
+}
+
+.vote-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 8px;
+}
+
+.vote-row .hint-control {
+    margin: 0;
+}
+
+.skip-button {
+    border-color: #3f4147;
+}
+
+.skip-button.voted {
+    background: #4a2628;
+    border-color: #dc323c;
+}
+
+.skip-bar {
+    background: rgba(220, 50, 60, 0.2) !important;
+}
+
+.bookmark-button .hint-icon {
+    font-size: 1.1rem;
+}
+
+.bookmark-button.revealed {
+    background: #404a28;
+    border-color: #fbb03b;
+}
+
+.thumbnail-link {
+    position: relative;
+    display: block;
+    background: transparent;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    border-radius: 8px;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.thumbnail-link img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+    transition: transform 0.2s ease;
+}
+
+.thumbnail-link:hover img {
+    transform: scale(1.03);
+}
+
+.thumbnail-overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    padding: 6px 10px;
+    background: linear-gradient(
+        180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+    color: #fff;
+    font-size: 0.8rem;
+    text-align: right;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+}
+
+.thumbnail-link:hover .thumbnail-overlay {
+    opacity: 1;
+}
+
+.last-reveal img {
+    border-radius: 8px;
+}
+
+.all-guesses {
+    margin-top: 12px;
+    background: #1e1f22;
+    border-radius: 4px;
+    padding: 8px 12px;
+}
+
+.all-guesses summary {
+    cursor: pointer;
+    color: #b5bac1;
+    font-size: 0.85rem;
+    user-select: none;
+}
+
+.all-guesses ul {
+    list-style: none;
+    margin: 8px 0 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.all-guesses li {
+    display: flex;
+    gap: 8px;
+    padding: 4px 6px;
+    border-radius: 3px;
+    background: #2b2d31;
+    font-size: 0.85rem;
+    align-items: baseline;
+}
+
+.all-guesses li.correct {
+    background: #2c3a23;
+    border-left: 2px solid #23a55a;
+}
+
+.all-guesses .g-name {
+    color: #b5bac1;
+    min-width: 100px;
+    flex-shrink: 0;
+}
+
+.all-guesses .g-text {
+    flex: 1;
+    word-break: break-word;
+}
+
+.all-guesses .g-mark {
+    color: #23a55a;
+    font-weight: bold;
+}
+
+.banner {
+    background: #2b2d31;
+    border-left: 3px solid #5865f2;
+    padding: 8px 12px;
+    border-radius: 4px;
+}
+
+.session-winner {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: #fbb03b;
+    text-align: center;
+    padding: 24px 12px;
+    line-height: 1.4;
+}
+
+.current-round,
+.last-reveal,
+.round-area {
+    background: #2b2d31;
+    padding: 16px;
+    border-radius: 6px;
+}
+
+/* Reserve enough vertical space that the layout doesn't shift between
+   round (no thumbnail) and reveal (thumbnail) states. Chosen to fit the
+   16:9 thumbnail at the desktop grid's 400px column width plus padding. */
+.round-area {
+    min-height: 260px;
+}
+
+.round-area-body {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    align-items: start;
+}
+
+@media (min-width: 720px) {
+    .round-area-body {
+        grid-template-columns: minmax(0, 1fr) 320px;
+    }
+}
+
+@media (min-width: 1100px) {
+    .round-area-body {
+        grid-template-columns: minmax(0, 1fr) 400px;
+    }
+}
+
+.round-area-text {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.round-area-text h3 {
+    margin: 0;
+}
+
+.round-area-text .artist-line {
+    margin: 0;
+    color: #b5bac1;
+}
+
+.thumbnail-slot {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.thumbnail-slot.placeholder {
+    background: #1e1f22;
+    border: 1px dashed #3f4147;
+    color: #4e5058;
+    font-size: 3rem;
+}
+
+.thumbnail-slot.session-winner-art img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.round-timer {
+    font-variant-numeric: tabular-nums;
+    font-size: 1.4rem;
+    color: #5865f2;
+}
+
+.timeout {
+    margin-left: 12px;
+    color: #b5bac1;
+}
+
+.last-reveal img {
+    border-radius: 4px;
+}
+
+.scoreboard {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.scoreboard li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: #2b2d31;
+    border-radius: 4px;
+}
+
+.scoreboard li.winner {
+    background: #404249;
+    border-left: 3px solid #fbb03b;
+}
+
+.scoreboard .rank {
+    width: 32px;
+    color: #b5bac1;
+}
+
+.scoreboard .avatar {
+    border-radius: 50%;
+}
+
+.scoreboard .name {
+    flex: 1;
+}
+
+.scoreboard .afk {
+    color: #80848e;
+    font-style: italic;
+}
+
+.scoreboard .score {
+    font-weight: bold;
+    font-variant-numeric: tabular-nums;
+}
+
+.scoreboard .exp {
+    color: #5865f2;
+    font-size: 0.85rem;
+}
+
+.control-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+}
+
+.control-buttons button {
+    background: #4e5058;
+    border: 0;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.control-buttons button.primary {
+    background: #5865f2;
+}
+
+.control-buttons button.danger {
+    background: #6d4040;
+}
+
+.control-buttons button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.control-feedback {
+    color: #f23f42;
+    font-size: 0.85rem;
+}
+
+.guess-input {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    background: #2b2d31;
+    padding: 12px;
+    border-radius: 6px;
+}
+
+.guess-input input {
+    flex: 1;
+    min-width: 200px;
+    background: #1e1f22;
+    border: 1px solid #3f4147;
+    border-radius: 4px;
+    padding: 8px 10px;
+    color: inherit;
+    font-size: 1rem;
+}
+
+.guess-input input:disabled {
+    opacity: 0.5;
+}
+
+.guess-input button {
+    background: #5865f2;
+    border: 0;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.guess-input button:disabled {
+    background: #3f4147;
+    cursor: not-allowed;
+}
+
+.guess-feedback {
+    flex-basis: 100%;
+    color: #f23f42;
+    font-size: 0.85rem;
+}
+
+.guess-ticker {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    color: #b5bac1;
+    font-size: 0.85rem;
+}
+
+.guess-ticker li.correct {
+    color: #23a55a;
+}
+
+.guess-ticker li.incorrect {
+    color: #80848e;
+}
+
+.empty {
+    color: #b5bac1;
+    font-style: italic;
+}
+
+.kmq-app.loading,
+.kmq-app.error {
+    text-align: center;
+    padding-top: 80px;
+}
+
+.kmq-app.error p {
+    color: #f23f42;
+}
+
+.kmq-splash-logo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    margin: 0 auto 16px;
+    display: block;
+    animation: kmq-splash-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes kmq-splash-pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.75;
+        transform: scale(0.96);
+    }
+}
