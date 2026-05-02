@@ -29,6 +29,17 @@ RUN chmod u+x bin/yt-dlp
 COPY src/ src/
 RUN npx tsc
 
+# Build the Discord Activity SPA. Vite reads VITE_DISCORD_CLIENT_ID at
+# build time and bakes it into the bundle, so the build arg has to be
+# passed through to the build command's environment. The activity bundle
+# is stored unbuilt in the source tree; its dist/ is produced here.
+ARG VITE_DISCORD_CLIENT_ID=""
+ENV VITE_DISCORD_CLIENT_ID=$VITE_DISCORD_CLIENT_ID
+COPY activity/package.json activity/yarn.lock activity/tsconfig.json \
+     activity/vite.config.ts activity/index.html activity/
+COPY activity/src/ activity/src/
+RUN cd activity && yarn install --frozen-lockfile && yarn build
+
 # ================================================================= #
 FROM node:22-slim
 RUN apt-get update && apt-get install -y default-mysql-client \
