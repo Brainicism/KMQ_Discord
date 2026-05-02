@@ -383,6 +383,7 @@ export const ACTIVITY_WS_TICKET_TTL_MS = 10_000;
 export const ACTIVITY_REQUEST_TIMEOUT_MS = 10_000;
 export const ACTIVITY_HTTP_TIMEOUT_MS = 5_000;
 export const ACTIVITY_GUESS_MAX_LENGTH = 500;
+export const ACTIVITY_AUTOCOMPLETE_LIMIT = 25;
 
 // Per-route rate limits (requests / minute / IP). Lifecycle endpoints (token,
 // start, end) get tighter limits because they touch Discord's OAuth quota or

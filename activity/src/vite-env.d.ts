@@ -1,7 +1,8 @@
 /// <reference types="vite/client" />
 
 interface ImportMetaEnv {
-    readonly VITE_DISCORD_CLIENT_ID: string;
+    /** Discord application ID. Must equal the server's BOT_CLIENT_ID. */
+    readonly BOT_CLIENT_ID: string;
 }
 
 interface ImportMeta {

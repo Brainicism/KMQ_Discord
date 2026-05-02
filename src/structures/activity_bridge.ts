@@ -14,7 +14,9 @@ import {
     getCurrentVoiceMembers,
     getMajorityCount,
 } from "../helpers/discord_utils";
+import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
+import GameOption from "../enums/game_option_name";
 import GameType from "../enums/game_type";
 import GuildPreference from "./guild_preference";
 import HintCommand from "../commands/game_commands/hint";
@@ -32,15 +34,18 @@ import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser"
 import type ActivityEvent from "../interfaces/activity_event";
 import type ActivityGuessArgs from "../interfaces/activity_guess_args";
 import type ActivityGuessResponse from "../interfaces/activity_guess_response";
+import type ActivityOptionsSnapshot from "../interfaces/activity_options_snapshot";
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
 import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "../interfaces/activity_session_meta";
+import type ActivitySetOptionArgs from "../interfaces/activity_set_option_args";
 import type ActivitySnapshot from "../interfaces/activity_snapshot";
 import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
 import type GameSession from "./game_session";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -102,12 +107,66 @@ function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
     };
 }
 
-function buildSessionSnapshot(session: GameSession): ActivitySnapshot {
+/**
+ * Resolve Activity-supplied artist IDs into MatchedArtist[] the
+ * GuildPreference setters expect. Unknown IDs are silently dropped; an
+ * empty input becomes an empty output which GuildPreference treats as
+ * "no groups selected" (and the subsequent length check in
+ * isGroupsMode/isIncludesMode/isExcludesMode returns false).
+ * @param artistIDs - IDs as submitted by the client
+ * @returns the cached MatchedArtist entries, in input order
+ */
+function resolveArtistIDs(artistIDs: number[]): MatchedArtist[] {
+    const byID = new Map<number, MatchedArtist>();
+    for (const a of Object.values(State.artistToEntry)) {
+        byID.set(a.id, a);
+    }
+
+    const out: MatchedArtist[] = [];
+    for (const id of artistIDs) {
+        const match = byID.get(id);
+        if (match) out.push(match);
+    }
+
+    return out;
+}
+
+function snapshotOptions(
+    guildPreference: GuildPreference,
+): ActivityOptionsSnapshot {
+    const opts = guildPreference.gameOptions;
+    const toActivity = (
+        list: { id: number; name: string }[] | null,
+    ): { id: number; name: string }[] | null =>
+        list === null ? null : list.map((a) => ({ id: a.id, name: a.name }));
+
+    return {
+        gender: [...opts.gender],
+        guessMode: opts.guessModeType,
+        multiguess: opts.multiGuessType,
+        limitStart: opts.limitStart,
+        limitEnd: opts.limitEnd,
+        beginningYear: opts.beginningYear,
+        endYear: opts.endYear,
+        goal: opts.goal,
+        timer: opts.guessTimeout,
+        duration: opts.duration,
+        groups: toActivity(opts.groups),
+        includes: toActivity(opts.includes),
+        excludes: toActivity(opts.excludes),
+    };
+}
+
+function buildSessionSnapshot(
+    session: GameSession,
+    guildPreference: GuildPreference,
+): ActivitySnapshot {
     const round = session.round;
     return {
         hasSession: true,
         session: snapshotSessionMeta(session),
         scoreboard: snapshotScoreboard(session.scoreboard),
+        options: snapshotOptions(guildPreference),
         currentRound:
             round && round.songStartedAt !== null
                 ? {
@@ -173,6 +232,70 @@ function pushEvent(guildID: string, event: ActivityEvent): void {
     }
 }
 
+async function broadcastOptionsChangedCore(guildID: string): Promise<void> {
+    try {
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
+
+        pushEvent(guildID, {
+            type: "optionsChanged",
+            options: snapshotOptions(guildPreference),
+        });
+    } catch (e) {
+        logger.warn(
+            `Failed to broadcast optionsChanged for gid=${guildID}. err=${e}`,
+        );
+    }
+}
+
+/**
+ * Fires a standalone optionsChanged wire event for the given guild. Fire-
+ * and-forget by design — the GuildPreference write that triggered this has
+ * already persisted, so any broadcast failure is just dropped with a log.
+ * @param guildID - The guild whose options changed.
+ */
+function broadcastOptionsChanged(guildID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    broadcastOptionsChangedCore(guildID);
+}
+
+async function handleSnapshotRequestCore(
+    cid: string,
+    guildID: string,
+): Promise<void> {
+    try {
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
+
+        const options = snapshotOptions(guildPreference);
+        const session = Session.getSession(guildID);
+
+        const payload: ActivitySnapshot =
+            session && session.isGameSession()
+                ? buildSessionSnapshot(session, guildPreference)
+                : { hasSession: false, options };
+
+        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, { cid, payload });
+    } catch (e) {
+        logger.warn(`snapshot op failed for gid=${guildID}. err=${e}`);
+        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+            cid,
+            error: "snapshot_failed",
+        });
+    }
+}
+
+/**
+ * Dispatches the async body of the "snapshot" IPC op. Fire-and-forget; the
+ * reply goes back through State.ipc inside the core.
+ * @param cid - Correlation ID to tag the reply with.
+ * @param guildID - Guild the snapshot is for.
+ */
+function handleSnapshotRequest(cid: string, guildID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    handleSnapshotRequestCore(cid, guildID);
+}
+
 interface RoundStartPayload {
     roundIndex: number;
     songStartedAt: number;
@@ -222,26 +345,26 @@ function ensureWorkerHandlerRegistered(): void {
     }
 
     workerHandlerRegistered = true;
+
+    // Any GuildPreference write (slash command or Activity IPC op) gets
+    // broadcast to Activity sockets for that guild. Loading the preference
+    // again is cheap — the setter's just persisted it, so the static cache
+    // is warm.
+    onGuildPreferenceChanged((guildID) => {
+        broadcastOptionsChanged(guildID);
+    });
+
     State.ipc.register(ACTIVITY_IPC_REQUEST, (msg: ActivityRequestMessage) => {
         const { cid, op, args } = msg;
         try {
             switch (op) {
                 case "snapshot": {
                     const snapshotArgs = args as ActivitySnapshotArgs;
-                    const session = Session.getSession(snapshotArgs.guildID);
-                    if (!session || !session.isGameSession()) {
-                        const payload: ActivitySnapshot = { hasSession: false };
-                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
-                            cid,
-                            payload,
-                        });
-                        return;
-                    }
-
-                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
-                        cid,
-                        payload: buildSessionSnapshot(session),
-                    });
+                    // Every snapshot reply carries the current options, so
+                    // load GuildPreference upfront (hits the DB when not
+                    // cached — intentional per Q2 of the Phase 4 plan so
+                    // the Activity sees persisted state).
+                    handleSnapshotRequest(cid, snapshotArgs.guildID);
                     return;
                 }
 
@@ -529,6 +652,180 @@ function ensureWorkerHandlerRegistered(): void {
                         } catch (e) {
                             logger.error(
                                 `Error in activity hint for gid=${hintArgs.guildID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
+                    return;
+                }
+
+                case "setOption": {
+                    const optionArgs = args as ActivitySetOptionArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    runLocked(optionArgs.guildID, async () => {
+                        if (
+                            KmqConfiguration.Instance.maintenanceModeEnabled()
+                        ) {
+                            reply({ ok: false, reason: "maintenance" });
+                            return;
+                        }
+
+                        if (State.bannedPlayers.has(optionArgs.userID)) {
+                            reply({ ok: false, reason: "banned" });
+                            return;
+                        }
+
+                        // Require the caller to be in the session's VC (when
+                        // a session exists) OR the bot voice channel (when
+                        // configuring from a lobby before /play is called).
+                        // For the lobby case we can't cheaply verify a
+                        // specific VC, so permit any caller in the guild.
+                        const session = Session.getSession(optionArgs.guildID);
+                        if (session) {
+                            const inVC = getCurrentVoiceMembers(
+                                session.voiceChannelID,
+                            ).some((m) => m.id === optionArgs.userID);
+
+                            if (!inVC) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+                        }
+
+                        try {
+                            const guildPreference =
+                                await GuildPreference.getGuildPreference(
+                                    optionArgs.guildID,
+                                );
+
+                            switch (optionArgs.kind) {
+                                case "gender": {
+                                    if (optionArgs.genders.length === 0) {
+                                        await guildPreference.reset(
+                                            GameOption.GENDER,
+                                        );
+                                    } else {
+                                        // Alternating is mutually exclusive.
+                                        const genders =
+                                            optionArgs.genders.includes(
+                                                "alternating",
+                                            )
+                                                ? ["alternating" as const]
+                                                : optionArgs.genders;
+
+                                        await guildPreference.setGender(
+                                            genders,
+                                        );
+                                    }
+
+                                    break;
+                                }
+
+                                case "guessMode": {
+                                    await guildPreference.setGuessModeType(
+                                        optionArgs.guessMode,
+                                    );
+                                    break;
+                                }
+
+                                case "multiguess": {
+                                    await guildPreference.setMultiGuessType(
+                                        optionArgs.multiguess,
+                                    );
+                                    break;
+                                }
+
+                                case "limit": {
+                                    await guildPreference.setLimit(
+                                        optionArgs.limitStart,
+                                        optionArgs.limitEnd,
+                                    );
+                                    break;
+                                }
+
+                                case "cutoff": {
+                                    // Two setters + two DB writes, but each
+                                    // one funnels through updateGuildPreferences
+                                    // → guildPreferenceChanged, so clients get
+                                    // two back-to-back optionsChanged events.
+                                    // Acceptable for now; reducer overwrites.
+                                    await guildPreference.setBeginningCutoffYear(
+                                        optionArgs.beginningYear,
+                                    );
+
+                                    await guildPreference.setEndCutoffYear(
+                                        optionArgs.endYear,
+                                    );
+                                    break;
+                                }
+
+                                case "goal": {
+                                    await guildPreference.setGoal(
+                                        optionArgs.goal,
+                                    );
+                                    break;
+                                }
+
+                                case "timer": {
+                                    await guildPreference.setGuessTimeout(
+                                        optionArgs.timer,
+                                    );
+                                    break;
+                                }
+
+                                case "duration": {
+                                    // Activity exposes set + clear. The
+                                    // slash-command's add/remove delta UX
+                                    // is intentionally not mirrored; it's
+                                    // a CLI convenience that doesn't suit
+                                    // a point-and-click panel.
+                                    await guildPreference.setDuration(
+                                        optionArgs.duration as number,
+                                    );
+                                    break;
+                                }
+
+                                case "groups":
+                                case "includes":
+                                case "excludes": {
+                                    const artists = resolveArtistIDs(
+                                        optionArgs.artistIDs,
+                                    );
+
+                                    if (optionArgs.kind === "groups") {
+                                        await guildPreference.setGroups(
+                                            artists,
+                                        );
+                                    } else if (optionArgs.kind === "includes") {
+                                        await guildPreference.setIncludes(
+                                            artists,
+                                        );
+                                    } else {
+                                        await guildPreference.setExcludes(
+                                            artists,
+                                        );
+                                    }
+
+                                    break;
+                                }
+
+                                default:
+                                    // The discriminated union is exhaustive;
+                                    // this branch is unreachable but the
+                                    // linter wants an explicit default.
+                                    break;
+                            }
+
+                            reply({ ok: true });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity setOption for gid=${optionArgs.guildID}, kind=${optionArgs.kind}. err=${e}`,
                             );
                             reply({ ok: false, reason: "internal" });
                         }

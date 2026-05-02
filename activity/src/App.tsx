@@ -11,14 +11,24 @@ import {
 import {
     bookmarkSong,
     endGame as apiEndGame,
+    fetchArtistAutocomplete,
     fetchI18nBundle,
     fetchSnapshot,
     hintVote as apiHintVote,
     openActivityStream,
+    setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
+import type { ActivityArtist } from "./types/activity_options_snapshot";
+import type {
+    ActivityGender,
+    ActivityGuessMode,
+    ActivityMultiguess,
+} from "./types/activity_options_snapshot";
+import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
+import type { SetOptionRequest } from "./api";
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
@@ -67,6 +77,7 @@ const initialUi: UiState = {
     bookmarkedLinks: new Set(),
     currentRoundBookmarked: false,
     hadSession: false,
+    options: null,
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -77,6 +88,7 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
         currentRound: snapshot.currentRound ?? null,
         sessionEnded: !snapshot.hasSession,
         hadSession: prev.hadSession || snapshot.hasSession,
+        options: snapshot.options,
     };
 }
 
@@ -753,6 +765,507 @@ function resolveWinnerText(
     });
 }
 
+const GENDER_OPTIONS: ActivityGender[] = ["male", "female", "coed"];
+const GUESS_MODE_OPTIONS: ActivityGuessMode[] = ["song", "artist", "both"];
+
+function OptionsPanel({
+    accessToken,
+    instanceId,
+    options,
+    t,
+    onOptimistic,
+    onRollback,
+}: {
+    accessToken: string;
+    instanceId: string;
+    options: ActivityOptionsSnapshot;
+    t: Translator;
+    /** Applied instantly on click so the UI doesn't stall for the server
+     *  round-trip. Rolled back to the pre-click value if the request fails. */
+    onOptimistic: (next: ActivityOptionsSnapshot) => void;
+    onRollback: (prev: ActivityOptionsSnapshot) => void;
+}) {
+    const [feedback, setFeedback] = useState<string | null>(null);
+
+    const submit = async (
+        req: SetOptionRequest,
+        nextOptions: ActivityOptionsSnapshot,
+    ): Promise<void> => {
+        const prev = options;
+        onOptimistic(nextOptions);
+        setFeedback(null);
+        try {
+            const result = await apiSetOption(accessToken, instanceId, req);
+            if (!result.ok) {
+                setFeedback(rejectReasonText(t, result.reason));
+                onRollback(prev);
+            }
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+            onRollback(prev);
+        }
+    };
+
+    const isAlternating = options.gender[0] === "alternating";
+
+    const toggleGender = (g: ActivityGender): void => {
+        // Alternating is mutually exclusive with the flat genders.
+        const set = new Set<ActivityGender>(
+            isAlternating ? [] : options.gender,
+        );
+        if (set.has(g)) {
+            set.delete(g);
+        } else {
+            set.add(g);
+        }
+
+        const next = Array.from(set);
+        void submit(
+            { kind: "gender", genders: next },
+            { ...options, gender: next },
+        );
+    };
+
+    const toggleAlternating = (): void => {
+        const next: ActivityGender[] = isAlternating ? [] : ["alternating"];
+        void submit(
+            { kind: "gender", genders: next },
+            { ...options, gender: next },
+        );
+    };
+
+    const pickGuessMode = (mode: ActivityGuessMode): void => {
+        if (mode === options.guessMode) return;
+        void submit(
+            { kind: "guessMode", guessMode: mode },
+            { ...options, guessMode: mode },
+        );
+    };
+
+    const toggleMultiguess = (): void => {
+        const next: ActivityMultiguess =
+            options.multiguess === "on" ? "off" : "on";
+        void submit(
+            { kind: "multiguess", multiguess: next },
+            { ...options, multiguess: next },
+        );
+    };
+
+    const submitLimit = (start: number, end: number): void => {
+        if (start >= end) return;
+        void submit(
+            { kind: "limit", limitStart: start, limitEnd: end },
+            { ...options, limitStart: start, limitEnd: end },
+        );
+    };
+
+    const submitCutoff = (beginning: number, end: number): void => {
+        if (beginning > end) return;
+        void submit(
+            { kind: "cutoff", beginningYear: beginning, endYear: end },
+            { ...options, beginningYear: beginning, endYear: end },
+        );
+    };
+
+    const submitGoal = (goal: number | null): void => {
+        void submit({ kind: "goal", goal }, { ...options, goal });
+    };
+
+    const submitTimer = (timer: number | null): void => {
+        void submit({ kind: "timer", timer }, { ...options, timer });
+    };
+
+    const submitDuration = (duration: number | null): void => {
+        void submit({ kind: "duration", duration }, { ...options, duration });
+    };
+
+    const submitArtistList = (
+        listKind: "groups" | "includes" | "excludes",
+        next: ActivityArtist[],
+    ): void => {
+        void submit(
+            { kind: listKind, artistIDs: next.map((a) => a.id) },
+            { ...options, [listKind]: next.length === 0 ? null : next },
+        );
+    };
+
+    return (
+        <details className="options-panel">
+            <summary>{t("options.heading")}</summary>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.gender")}</span>
+                <div className="options-row">
+                    {GENDER_OPTIONS.map((g) => {
+                        const active =
+                            !isAlternating && options.gender.includes(g);
+
+                        return (
+                            <button
+                                key={g}
+                                type="button"
+                                className={`option-chip ${active ? "active" : ""}`}
+                                onClick={() => toggleGender(g)}
+                            >
+                                {t(`options.${g}`)}
+                            </button>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        className={`option-chip ${isAlternating ? "active" : ""}`}
+                        onClick={toggleAlternating}
+                    >
+                        {t("options.alternating")}
+                    </button>
+                </div>
+            </div>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.guessMode")}</span>
+                <div className="options-row">
+                    {GUESS_MODE_OPTIONS.map((mode) => (
+                        <button
+                            key={mode}
+                            type="button"
+                            className={`option-chip ${
+                                options.guessMode === mode ? "active" : ""
+                            }`}
+                            onClick={() => pickGuessMode(mode)}
+                        >
+                            {t(`options.${mode}`)}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            <div className="options-group">
+                <span className="options-label">{t("options.multiguess")}</span>
+                <div className="options-row">
+                    <button
+                        type="button"
+                        className={`option-chip ${
+                            options.multiguess === "on" ? "active" : ""
+                        }`}
+                        onClick={toggleMultiguess}
+                    >
+                        {options.multiguess === "on"
+                            ? t("options.on")
+                            : t("options.off")}
+                    </button>
+                </div>
+            </div>
+
+            <NumberRangeGroup
+                label={t("options.limit")}
+                startValue={options.limitStart}
+                endValue={options.limitEnd}
+                startMin={0}
+                startMax={100000}
+                endMin={1}
+                endMax={100000}
+                onCommit={submitLimit}
+            />
+
+            <NumberRangeGroup
+                label={t("options.cutoff")}
+                startValue={options.beginningYear}
+                endValue={options.endYear}
+                startMin={1900}
+                startMax={new Date().getFullYear()}
+                endMin={1900}
+                endMax={new Date().getFullYear()}
+                onCommit={submitCutoff}
+            />
+
+            <NullableNumberGroup
+                label={t("options.goal")}
+                value={options.goal}
+                min={1}
+                max={100000}
+                onCommit={submitGoal}
+                offLabel={t("options.off")}
+            />
+
+            <NullableNumberGroup
+                label={t("options.timer")}
+                value={options.timer}
+                min={2}
+                max={180}
+                onCommit={submitTimer}
+                offLabel={t("options.off")}
+            />
+
+            <NullableNumberGroup
+                label={t("options.duration")}
+                value={options.duration}
+                min={2}
+                max={600}
+                onCommit={submitDuration}
+                offLabel={t("options.off")}
+            />
+
+            <ArtistListGroup
+                label={t("options.groups")}
+                accessToken={accessToken}
+                artists={options.groups ?? []}
+                onCommit={(next) => submitArtistList("groups", next)}
+            />
+
+            <ArtistListGroup
+                label={t("options.includes")}
+                accessToken={accessToken}
+                artists={options.includes ?? []}
+                onCommit={(next) => submitArtistList("includes", next)}
+            />
+
+            <ArtistListGroup
+                label={t("options.excludes")}
+                accessToken={accessToken}
+                artists={options.excludes ?? []}
+                onCommit={(next) => submitArtistList("excludes", next)}
+            />
+
+            {feedback && <span className="options-feedback">{feedback}</span>}
+        </details>
+    );
+}
+
+function ArtistListGroup({
+    label,
+    accessToken,
+    artists,
+    onCommit,
+}: {
+    label: string;
+    accessToken: string;
+    artists: ActivityArtist[];
+    onCommit: (next: ActivityArtist[]) => void;
+}) {
+    const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<ActivityArtist[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Debounce the autocomplete fetch so typing doesn't hammer the server.
+    // 200ms is the shortest delay that feels like "instant" in practice.
+    useEffect(() => {
+        if (!showSuggestions) return;
+        const trimmed = query.trim();
+        const id = setTimeout(() => {
+            void (async () => {
+                try {
+                    const results = await fetchArtistAutocomplete(
+                        accessToken,
+                        trimmed,
+                    );
+                    // Hide any artists already selected so the user can't
+                    // add a duplicate.
+                    const selectedIDs = new Set(artists.map((a) => a.id));
+                    setSuggestions(
+                        results
+                            .filter((r) => !selectedIDs.has(r.id))
+                            .map((r) => ({ id: r.id, name: r.name })),
+                    );
+                } catch {
+                    setSuggestions([]);
+                }
+            })();
+        }, 200);
+        return () => clearTimeout(id);
+    }, [query, accessToken, showSuggestions, artists]);
+
+    const addArtist = (a: ActivityArtist): void => {
+        onCommit([...artists, a]);
+        setQuery("");
+    };
+
+    const removeArtist = (id: number): void => {
+        onCommit(artists.filter((a) => a.id !== id));
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-chips">
+                {artists.map((a) => (
+                    <button
+                        key={a.id}
+                        type="button"
+                        className="artist-chip"
+                        onClick={() => removeArtist(a.id)}
+                        title="Remove"
+                    >
+                        {a.name}
+                        <span className="artist-chip-x">×</span>
+                    </button>
+                ))}
+            </div>
+            <div className="artist-autocomplete">
+                <input
+                    type="text"
+                    className="option-number"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() =>
+                        // Delay so a mousedown on a suggestion registers
+                        // before the dropdown unmounts.
+                        setTimeout(() => setShowSuggestions(false), 150)
+                    }
+                    placeholder="Add artist..."
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                    <ul className="artist-suggestions">
+                        {suggestions.map((s) => (
+                            <li key={s.id}>
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        addArtist(s);
+                                    }}
+                                >
+                                    {s.name}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </div>
+    );
+}
+
+function NumberRangeGroup({
+    label,
+    startValue,
+    endValue,
+    startMin,
+    startMax,
+    endMin,
+    endMax,
+    onCommit,
+}: {
+    label: string;
+    startValue: number;
+    endValue: number;
+    startMin: number;
+    startMax: number;
+    endMin: number;
+    endMax: number;
+    onCommit: (start: number, end: number) => void;
+}) {
+    const [start, setStart] = useState(String(startValue));
+    const [end, setEnd] = useState(String(endValue));
+
+    // Re-sync when the wire-side value changes (optimistic write, or a
+    // slash-command-driven optionsChanged event).
+    useEffect(() => setStart(String(startValue)), [startValue]);
+    useEffect(() => setEnd(String(endValue)), [endValue]);
+
+    const commit = (): void => {
+        const s = parseInt(start, 10);
+        const e = parseInt(end, 10);
+        if (!Number.isInteger(s) || !Number.isInteger(e)) {
+            setStart(String(startValue));
+            setEnd(String(endValue));
+            return;
+        }
+        if (s === startValue && e === endValue) return;
+        onCommit(s, e);
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-row">
+                <input
+                    type="number"
+                    className="option-number"
+                    value={start}
+                    min={startMin}
+                    max={startMax}
+                    onChange={(e) => setStart(e.target.value)}
+                    onBlur={commit}
+                />
+                <span className="option-range-sep">–</span>
+                <input
+                    type="number"
+                    className="option-number"
+                    value={end}
+                    min={endMin}
+                    max={endMax}
+                    onChange={(e) => setEnd(e.target.value)}
+                    onBlur={commit}
+                />
+            </div>
+        </div>
+    );
+}
+
+function NullableNumberGroup({
+    label,
+    value,
+    min,
+    max,
+    onCommit,
+    offLabel,
+}: {
+    label: string;
+    value: number | null;
+    min: number;
+    max: number;
+    onCommit: (next: number | null) => void;
+    offLabel: string;
+}) {
+    // Keep a local text state so typing doesn't immediately fire a write.
+    // Commit on blur, or on clicking the Off chip.
+    const [text, setText] = useState(value === null ? "" : String(value));
+
+    useEffect(() => {
+        setText(value === null ? "" : String(value));
+    }, [value]);
+
+    const commit = (): void => {
+        if (text.trim() === "") {
+            if (value !== null) onCommit(null);
+            return;
+        }
+        const n = parseInt(text, 10);
+        if (!Number.isInteger(n) || n < min || n > max) {
+            setText(value === null ? "" : String(value));
+            return;
+        }
+        if (n === value) return;
+        onCommit(n);
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-row">
+                <input
+                    type="number"
+                    className="option-number"
+                    value={text}
+                    min={min}
+                    max={max}
+                    placeholder={offLabel}
+                    onChange={(e) => setText(e.target.value)}
+                    onBlur={commit}
+                />
+                <button
+                    type="button"
+                    className={`option-chip ${value === null ? "active" : ""}`}
+                    onClick={() => onCommit(null)}
+                >
+                    {offLabel}
+                </button>
+            </div>
+        </div>
+    );
+}
+
 function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
     if (guesses.length === 0) return null;
 
@@ -1059,6 +1572,21 @@ export default function App() {
                 </div>
             )}
 
+            {authState && ui.options && (
+                <OptionsPanel
+                    accessToken={authState.accessToken}
+                    instanceId={authState.instanceId}
+                    options={ui.options}
+                    t={t}
+                    onOptimistic={(next) =>
+                        setUi((prev) => ({ ...prev, options: next }))
+                    }
+                    onRollback={(prevOptions) =>
+                        setUi((prev) => ({ ...prev, options: prevOptions }))
+                    }
+                />
+            )}
+
             <section className="scoreboard-section">
                 <h3>{t("scoreboardHeading")}</h3>
                 {ui.scoreboard ? (
@@ -1164,6 +1692,8 @@ function reduce(
             };
         case "scoreboardUpdate":
             return { ...prev, scoreboard: msg.scoreboard };
+        case "optionsChanged":
+            return { ...prev, options: msg.options };
         case "guessReceived":
             return {
                 ...prev,

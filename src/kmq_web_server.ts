@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
 import {
     ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+    ACTIVITY_AUTOCOMPLETE_LIMIT,
     ACTIVITY_GUESS_MAX_LENGTH,
     ACTIVITY_HTTP_TIMEOUT_MS,
     ACTIVITY_INSTANCE_CACHE_TTL_MS,
@@ -15,12 +16,17 @@ import {
     DISCORD_ACTIVITY_INSTANCE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
+    EARLIEST_BEGINNING_SEARCH_YEAR,
 } from "./constants";
 import { IPCLogger } from "./logger";
+import { availableGenders } from "./enums/option_types/gender";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { searchArtists } from "./helpers/discord_utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
+import GuessModeType from "./enums/option_types/guess_mode_type";
 import LocaleType from "./enums/locale_type";
+import MultiGuessType from "./enums/option_types/multiguess_type";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -36,6 +42,7 @@ import path from "path";
 import type { ActivitySubscriber } from "./activity_hub";
 import type { DatabaseContext } from "./database_context";
 import type { Fleet, Stats } from "eris-fleet";
+import type { GenderModeOptions } from "./enums/option_types/gender";
 import type ActivityHub from "./activity_hub";
 
 const logger = new IPCLogger("web_server");
@@ -110,6 +117,187 @@ function resolveServerLocale(raw: string | undefined): LocaleType {
     }
 
     return DEFAULT_LOCALE;
+}
+
+const GENDER_VALUES: ReadonlySet<string> = new Set(availableGenders);
+const GUESS_MODE_VALUES: ReadonlySet<string> = new Set(
+    Object.values(GuessModeType),
+);
+
+const MULTIGUESS_VALUES: ReadonlySet<string> = new Set(
+    Object.values(MultiGuessType),
+);
+
+// Numeric bounds for the Activity options panel. Kept in sync with the
+// slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
+// validated server-side so a malicious client can't persist out-of-range
+// values.
+const LIMIT_MIN = 0;
+const LIMIT_MAX = 100_000;
+const GOAL_MIN = 1;
+const GOAL_MAX = 100_000;
+const TIMER_MIN = 2;
+const TIMER_MAX = 180;
+const DURATION_MIN = 2;
+const DURATION_MAX = 600;
+// Cap artist-list writes; the slash-command UX tops out at a similar
+// size and anything larger is almost certainly abuse or a client bug.
+const ARTIST_LIST_MAX = 200;
+
+// Subset of ActivitySetOptionArgs that the client supplies — guildID /
+// userID are filled in server-side from the auth context.
+type SetOptionBody =
+    | { kind: "gender"; genders: GenderModeOptions[] }
+    | { kind: "guessMode"; guessMode: GuessModeType }
+    | { kind: "multiguess"; multiguess: MultiGuessType }
+    | { kind: "limit"; limitStart: number; limitEnd: number }
+    | { kind: "cutoff"; beginningYear: number; endYear: number }
+    | { kind: "goal"; goal: number | null }
+    | { kind: "timer"; timer: number | null }
+    | { kind: "duration"; duration: number | null }
+    | { kind: "groups"; artistIDs: number[] }
+    | { kind: "includes"; artistIDs: number[] }
+    | { kind: "excludes"; artistIDs: number[] };
+
+function intInRange(v: unknown, min: number, max: number): number | null {
+    if (typeof v !== "number" || !Number.isInteger(v)) return null;
+    if (v < min || v > max) return null;
+    return v;
+}
+
+function nullableIntInRange(
+    v: unknown,
+    min: number,
+    max: number,
+): number | null | undefined {
+    if (v === null) return null;
+    return intInRange(v, min, max);
+}
+
+/**
+ * Parses + whitelists the JSON body of POST /api/activity/option. Never
+ * trust the client: only accept `kind` + the typed value for that kind,
+ * and reject everything else.
+ * @param body - Raw JSON body supplied by the request.
+ * @returns A validated SetOptionBody, or null if the shape/enum mismatch
+ * means the caller should respond 400.
+ */
+function parseSetOptionBody(body: unknown): SetOptionBody | null {
+    if (!body || typeof body !== "object") return null;
+    const obj = body as Record<string, unknown>;
+    switch (obj["kind"]) {
+        case "gender": {
+            const raw = obj["genders"];
+            if (!Array.isArray(raw)) return null;
+            if (raw.length > 4) return null;
+            const genders: GenderModeOptions[] = [];
+            for (const g of raw) {
+                if (typeof g !== "string" || !GENDER_VALUES.has(g)) {
+                    return null;
+                }
+
+                genders.push(g as GenderModeOptions);
+            }
+
+            return { kind: "gender", genders };
+        }
+
+        case "guessMode": {
+            const v = obj["guessMode"];
+            if (typeof v !== "string" || !GUESS_MODE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "guessMode", guessMode: v as GuessModeType };
+        }
+
+        case "multiguess": {
+            const v = obj["multiguess"];
+            if (typeof v !== "string" || !MULTIGUESS_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "multiguess", multiguess: v as MultiGuessType };
+        }
+
+        case "limit": {
+            const start = intInRange(obj["limitStart"], LIMIT_MIN, LIMIT_MAX);
+            const end = intInRange(obj["limitEnd"], LIMIT_MIN, LIMIT_MAX);
+            if (start === null || end === null) return null;
+            if (start >= end) return null;
+            return { kind: "limit", limitStart: start, limitEnd: end };
+        }
+
+        case "cutoff": {
+            const now = new Date().getFullYear();
+            const begin = intInRange(
+                obj["beginningYear"],
+                EARLIEST_BEGINNING_SEARCH_YEAR,
+                now,
+            );
+
+            const end = intInRange(
+                obj["endYear"],
+                EARLIEST_BEGINNING_SEARCH_YEAR,
+                now,
+            );
+
+            if (begin === null || end === null) return null;
+            if (begin > end) return null;
+            return { kind: "cutoff", beginningYear: begin, endYear: end };
+        }
+
+        case "goal": {
+            const v = nullableIntInRange(obj["goal"], GOAL_MIN, GOAL_MAX);
+            if (v === undefined) return null;
+            return { kind: "goal", goal: v };
+        }
+
+        case "timer": {
+            const v = nullableIntInRange(obj["timer"], TIMER_MIN, TIMER_MAX);
+            if (v === undefined) return null;
+            return { kind: "timer", timer: v };
+        }
+
+        case "duration": {
+            const v = nullableIntInRange(
+                obj["duration"],
+                DURATION_MIN,
+                DURATION_MAX,
+            );
+
+            if (v === undefined) return null;
+            return { kind: "duration", duration: v };
+        }
+
+        case "groups":
+        case "includes":
+        case "excludes": {
+            const raw = obj["artistIDs"];
+            if (!Array.isArray(raw)) return null;
+            if (raw.length > ARTIST_LIST_MAX) return null;
+            const artistIDs: number[] = [];
+            for (const id of raw) {
+                if (
+                    typeof id !== "number" ||
+                    !Number.isInteger(id) ||
+                    id <= 0
+                ) {
+                    return null;
+                }
+
+                artistIDs.push(id);
+            }
+
+            return {
+                kind: obj["kind"] as "groups" | "includes" | "excludes",
+                artistIDs,
+            };
+        }
+
+        default:
+            return null;
+    }
 }
 
 export default class KmqWebServer {
@@ -862,6 +1050,75 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity hint failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.get(
+            "/api/activity/artist-autocomplete",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const user = await this.resolveAccessToken(
+                    extractBearer(request),
+                );
+
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                const q = (request.query as any)?.q;
+                const query =
+                    typeof q === "string" ? q.trim().toLowerCase() : "";
+
+                // Reuse the slash-command's in-memory artist lookup. No
+                // DB hit — State.artistToEntry / State.topArtists are
+                // populated once at worker startup.
+                const results = searchArtists(query, [])
+                    .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
+                    .map((a) => ({
+                        id: a.id,
+                        name: a.name,
+                        hangulName: a.hangulName ?? null,
+                    }));
+
+                await reply.code(200).send({ results });
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/option",
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const parsed = parseSetOptionBody(request.body);
+                if (!parsed) {
+                    await reply
+                        .code(400)
+                        .send({ error: "Invalid option payload" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.setOption({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        ...parsed,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity setOption failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }

@@ -20,6 +20,7 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
+import { emitGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import { extractErrorString, mapTo } from "../helpers/utils";
 import AdvancedCommandActionName from "../enums/advanced_setting_action_name";
 import AnswerType from "../enums/option_types/answer_type";
@@ -1013,6 +1014,11 @@ export default class GuildPreference {
                 await this.answerTypeChangeCallback();
             }
         }
+
+        // Let Activity tabs re-fetch / re-hydrate their options panel. Emit
+        // after the persistence + reload so subscribers only observe the
+        // committed state.
+        emitGuildPreferenceChanged(this.guildID);
     }
 
     /**

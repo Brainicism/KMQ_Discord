@@ -8,6 +8,12 @@ services:
             dockerfile: docker/kmq/Dockerfile
             args:
                 NODE_ENV: ${NODE_ENV}
+                # Baked into the Activity JS bundle at build time. Same
+                # value as the runtime BOT_CLIENT_ID (shared across the
+                # bot and its embedded iframe). Leave unset to skip
+                # Activity wiring; the backend routes still exist but the
+                # iframe bundle can't authenticate without it.
+                BOT_CLIENT_ID: ${BOT_CLIENT_ID:-}
         env_file: .env
         environment:
             SONG_DOWNLOAD_DIR: /songs
