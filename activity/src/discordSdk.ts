@@ -8,9 +8,7 @@ const CLIENT_ID = import.meta.env.BOT_CLIENT_ID as string | undefined;
 export function getDiscordSdk(): Promise<DiscordSDK> {
     if (sdkPromise !== null) return sdkPromise;
     if (!CLIENT_ID) {
-        return Promise.reject(
-            new Error("BOT_CLIENT_ID is not configured"),
-        );
+        return Promise.reject(new Error("BOT_CLIENT_ID is not configured"));
     }
 
     const sdk = new DiscordSDK(CLIENT_ID);
