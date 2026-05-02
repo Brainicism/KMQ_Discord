@@ -436,6 +436,20 @@ function GuessInput({
     const [feedback, setFeedback] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
 
+    // Clear any leftover text the instant a new round starts, so a stale
+    // wrong guess from the previous round doesn't carry over. Only clears
+    // on the false→true transition (when `enabled` becomes true again),
+    // not on every re-render.
+    const prevEnabledRef = useRef(enabled);
+    useEffect(() => {
+        if (!prevEnabledRef.current && enabled) {
+            setText("");
+            setFeedback(null);
+        }
+
+        prevEnabledRef.current = enabled;
+    }, [enabled]);
+
     // Refocus whenever the input becomes typable: on round start (enabled
     // flips true) and after a submit resolves (busy flips false). Running
     // from an effect is important — focusing inside the submit's finally
