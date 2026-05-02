@@ -209,12 +209,17 @@ function CurrentRound({
                         <div className="reveal-header">
                             <h3>
                                 {t("roundLabel", { num: round.roundIndex + 1 })}
+                                <span className="live-badge">
+                                    <span className="live-dot" />
+                                    LIVE
+                                </span>
                             </h3>
                             {bookmarkSlot}
                         </div>
                         <RoundTimer startedAt={round.songStartedAt} />
                         {round.guessTimeoutSec && (
                             <span className="timeout">
+                                ⏱{" "}
                                 {t("roundTimeoutLabel", {
                                     sec: round.guessTimeoutSec,
                                 })}
@@ -222,7 +227,11 @@ function CurrentRound({
                         )}
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
-                        <span>🎵</span>
+                        <span className="note-float">♪</span>
+                        <span className="note-float">♫</span>
+                        <span className="note-float">♩</span>
+                        <span className="note-main">🎵</span>
+                        <span className="listening-text">listening...</span>
                     </div>
                 </div>
             ) : reveal ? (
@@ -333,7 +342,11 @@ function CurrentRound({
                         </div>
                     ) : (
                         <div className="thumbnail-slot placeholder" aria-hidden>
-                            <span>🎵</span>
+                            <span className="note-float">♪</span>
+                            <span className="note-float">♫</span>
+                            <span className="note-float">♩</span>
+                            <span className="note-main">🎵</span>
+                            <span className="listening-text">waiting...</span>
                         </div>
                     )}
                 </div>
@@ -780,6 +793,7 @@ export default function App() {
         userID: string;
     } | null>(null);
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for
@@ -898,178 +912,302 @@ export default function App() {
     }
 
     return (
-        <div className="kmq-app">
-            <header>
-                <h1>{t("appTitle")}</h1>
-                {ui.session &&
-                    (() => {
-                        const completed = ui.session.roundsPlayed;
-                        const inProgress = ui.currentRound !== null;
-                        const displayed = inProgress
-                            ? completed + 1
-                            : completed;
-                        const showRatio = completed > 0;
-                        if (displayed === 0 && ui.bookmarkedLinks.size === 0) {
-                            return null;
-                        }
-                        return (
-                            <span className="meta">
-                                {displayed > 0 && (
-                                    <>
-                                        {t("headerRound", { num: displayed })}
-                                        {showRatio && (
-                                            <>
-                                                {" · "}
-                                                {t("headerCorrectRatio", {
-                                                    correct:
-                                                        ui.session
-                                                            .correctGuesses,
-                                                    total: completed,
-                                                })}
-                                            </>
-                                        )}
-                                    </>
-                                )}
-                                {ui.bookmarkedLinks.size > 0 && (
-                                    <span className="bookmark-chip">
-                                        🔖 {ui.bookmarkedLinks.size}
-                                    </span>
-                                )}
-                            </span>
-                        );
-                    })()}
-            </header>
+        <>
+            {/* Decorative background stars */}
+            <span
+                className="deco-star"
+                style={{ top: "12%", left: "8%" }}
+                aria-hidden
+            >
+                ✦
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "45%", left: "3%" }}
+                aria-hidden
+            >
+                ♡
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "30%", right: "15%" }}
+                aria-hidden
+            >
+                ✧
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "70%", left: "12%" }}
+                aria-hidden
+            >
+                ✦
+            </span>
+            <span
+                className="deco-star"
+                style={{ top: "85%", right: "8%" }}
+                aria-hidden
+            >
+                ♡
+            </span>
 
-            {authState && (
-                <ControlButtons
-                    accessToken={authState.accessToken}
-                    instanceId={authState.instanceId}
-                    hasSession={ui.session !== null && !ui.sessionEnded}
-                    t={t}
-                />
-            )}
+            {/* Sidebar toggle */}
+            <button
+                type="button"
+                className={`sidebar-toggle ${sidebarOpen ? "active" : ""}`}
+                onClick={() => setSidebarOpen((o) => !o)}
+                title={t("scoreboardHeading")}
+            >
+                <span>🏆</span>
+            </button>
 
-            {ui.sessionEnded && (
-                <div className="banner">
-                    {t("sessionEndedBanner", { playSlash: "/play" })}
-                </div>
-            )}
+            <div className="kmq-layout">
+                <div className="kmq-main">
+                    <div className="kmq-app">
+                        <header>
+                            <div className="header-left">
+                                <h1>
+                                    {t("appTitle")}{" "}
+                                    <span className="logo-heart">♥</span>
+                                </h1>
+                                {ui.session &&
+                                    (() => {
+                                        const completed =
+                                            ui.session.roundsPlayed;
+                                        const inProgress =
+                                            ui.currentRound !== null;
+                                        const displayed = inProgress
+                                            ? completed + 1
+                                            : completed;
+                                        const showRatio = completed > 0;
+                                        if (
+                                            displayed === 0 &&
+                                            ui.bookmarkedLinks.size === 0
+                                        ) {
+                                            return null;
+                                        }
+                                        return (
+                                            <span className="meta">
+                                                {displayed > 0 && (
+                                                    <>
+                                                        {t("headerRound", {
+                                                            num: displayed,
+                                                        })}
+                                                        {showRatio && (
+                                                            <>
+                                                                {" · "}
+                                                                {t(
+                                                                    "headerCorrectRatio",
+                                                                    {
+                                                                        correct:
+                                                                            ui
+                                                                                .session
+                                                                                .correctGuesses,
+                                                                        total: completed,
+                                                                    },
+                                                                )}
+                                                            </>
+                                                        )}
+                                                    </>
+                                                )}
+                                                {ui.bookmarkedLinks.size >
+                                                    0 && (
+                                                    <span className="bookmark-chip">
+                                                        🔖{" "}
+                                                        {
+                                                            ui.bookmarkedLinks
+                                                                .size
+                                                        }
+                                                    </span>
+                                                )}
+                                            </span>
+                                        );
+                                    })()}
+                            </div>
 
-            <CurrentRound
-                round={ui.currentRound}
-                reveal={ui.lastReveal}
-                t={t}
-                winnerText={
-                    ui.sessionEnded && ui.hadSession && !ui.lastReveal
-                        ? resolveWinnerText(
-                              t,
-                              ui.scoreboard,
-                              authState?.userID ?? null,
-                          )
-                        : null
-                }
-                bookmarkSlot={
-                    authState && (ui.currentRound || ui.lastReveal) ? (
-                        <BookmarkStar
-                            // Force a fresh component (and its optimistic
-                            // state) on every round transition so the icon
-                            // resets cleanly.
-                            key={
-                                ui.currentRound
-                                    ? `round-${ui.currentRound.roundIndex}`
-                                    : `reveal-${ui.lastReveal?.song.youtubeLink}`
-                            }
-                            accessToken={authState.accessToken}
-                            instanceId={authState.instanceId}
-                            youtubeLink={
-                                ui.lastReveal?.song.youtubeLink ?? null
-                            }
-                            isBookmarked={
-                                ui.lastReveal
-                                    ? ui.bookmarkedLinks.has(
-                                          ui.lastReveal.song.youtubeLink,
-                                      )
-                                    : ui.currentRoundBookmarked
-                            }
+                            {authState && (
+                                <ControlButtons
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hasSession={
+                                        ui.session !== null && !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                            )}
+                        </header>
+
+                        {ui.sessionEnded && (
+                            <div className="banner">
+                                {t("sessionEndedBanner", {
+                                    playSlash: "/play",
+                                })}
+                            </div>
+                        )}
+
+                        <CurrentRound
+                            round={ui.currentRound}
+                            reveal={ui.lastReveal}
                             t={t}
-                            onBookmarked={(link) =>
-                                setUi((prev) => ({
-                                    ...prev,
-                                    bookmarkedLinks: new Set([
-                                        ...prev.bookmarkedLinks,
-                                        link,
-                                    ]),
-                                    currentRoundBookmarked: true,
-                                }))
+                            winnerText={
+                                ui.sessionEnded &&
+                                ui.hadSession &&
+                                !ui.lastReveal
+                                    ? resolveWinnerText(
+                                          t,
+                                          ui.scoreboard,
+                                          authState?.userID ?? null,
+                                      )
+                                    : null
+                            }
+                            bookmarkSlot={
+                                authState &&
+                                (ui.currentRound || ui.lastReveal) ? (
+                                    <BookmarkStar
+                                        // Force a fresh component (and its optimistic
+                                        // state) on every round transition so the icon
+                                        // resets cleanly.
+                                        key={
+                                            ui.currentRound
+                                                ? `round-${ui.currentRound.roundIndex}`
+                                                : `reveal-${ui.lastReveal?.song.youtubeLink}`
+                                        }
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        youtubeLink={
+                                            ui.lastReveal?.song.youtubeLink ??
+                                            null
+                                        }
+                                        isBookmarked={
+                                            ui.lastReveal
+                                                ? ui.bookmarkedLinks.has(
+                                                      ui.lastReveal.song
+                                                          .youtubeLink,
+                                                  )
+                                                : ui.currentRoundBookmarked
+                                        }
+                                        t={t}
+                                        onBookmarked={(link) =>
+                                            setUi((prev) => ({
+                                                ...prev,
+                                                bookmarkedLinks: new Set([
+                                                    ...prev.bookmarkedLinks,
+                                                    link,
+                                                ]),
+                                                currentRoundBookmarked: true,
+                                            }))
+                                        }
+                                    />
+                                ) : null
                             }
                         />
-                    ) : null
-                }
-            />
 
-            {authState && (
-                <GuessInput
-                    accessToken={authState.accessToken}
-                    instanceId={authState.instanceId}
-                    enabled={ui.currentRound !== null && !ui.sessionEnded}
-                    t={t}
-                />
-            )}
-
-            {authState && (
-                <div className="vote-row">
-                    <HintControl
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        hint={ui.hint}
-                        enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        t={t}
-                    />
-                    <SkipControl
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        skip={ui.skip}
-                        enabled={ui.currentRound !== null && !ui.sessionEnded}
-                        roundKey={ui.currentRound?.roundIndex ?? null}
-                        t={t}
-                        onVoteStart={() =>
-                            setUi((prev) => ({
-                                ...prev,
-                                skip: { ...prev.skip, userVoted: true },
-                            }))
-                        }
-                        onVoteFailed={(clickedRoundKey) =>
-                            setUi((prev) => {
-                                // Only roll back if we're still on the round
-                                // the user clicked — a roundStart between
-                                // click and reply has already reset userVoted
-                                // cleanly for the new round.
-                                const currentKey =
-                                    prev.currentRound?.roundIndex ?? null;
-                                if (currentKey !== clickedRoundKey) {
-                                    return prev;
+                        {authState && (
+                            <GuessInput
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                enabled={
+                                    ui.currentRound !== null && !ui.sessionEnded
                                 }
-                                return {
-                                    ...prev,
-                                    skip: { ...prev.skip, userVoted: false },
-                                };
-                            })
-                        }
-                    />
+                                t={t}
+                            />
+                        )}
+
+                        {authState && (
+                            <div className="vote-row">
+                                <HintControl
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hint={ui.hint}
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                                <SkipControl
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    skip={ui.skip}
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    roundKey={
+                                        ui.currentRound?.roundIndex ?? null
+                                    }
+                                    t={t}
+                                    onVoteStart={() =>
+                                        setUi((prev) => ({
+                                            ...prev,
+                                            skip: {
+                                                ...prev.skip,
+                                                userVoted: true,
+                                            },
+                                        }))
+                                    }
+                                    onVoteFailed={(clickedRoundKey) =>
+                                        setUi((prev) => {
+                                            // Only roll back if we're still on the round
+                                            // the user clicked — a roundStart between
+                                            // click and reply has already reset userVoted
+                                            // cleanly for the new round.
+                                            const currentKey =
+                                                prev.currentRound?.roundIndex ??
+                                                null;
+                                            if (
+                                                currentKey !== clickedRoundKey
+                                            ) {
+                                                return prev;
+                                            }
+                                            return {
+                                                ...prev,
+                                                skip: {
+                                                    ...prev.skip,
+                                                    userVoted: false,
+                                                },
+                                            };
+                                        })
+                                    }
+                                />
+                            </div>
+                        )}
+
+                        <GuessTicker guesses={ui.recentGuesses} />
+                    </div>
                 </div>
-            )}
 
-            <section className="scoreboard-section">
-                <h3>{t("scoreboardHeading")}</h3>
-                {ui.scoreboard ? (
-                    <Scoreboard scoreboard={ui.scoreboard} t={t} />
-                ) : (
-                    <p className="empty">{t("scoreboardEmpty")}</p>
-                )}
-            </section>
-
-            <GuessTicker guesses={ui.recentGuesses} />
-        </div>
+                {/* Sidebar — scoreboard */}
+                <aside
+                    className={`kmq-sidebar ${sidebarOpen ? "open" : ""}`}
+                    aria-label={t("scoreboardHeading")}
+                >
+                    <div className="sidebar-header">
+                        <span className="sidebar-title">
+                            {t("scoreboardHeading")}
+                        </span>
+                        <button
+                            type="button"
+                            className="sidebar-close"
+                            onClick={() => setSidebarOpen(false)}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="sidebar-body">
+                        <div>
+                            <h3 className="sb-section-title">
+                                {t("scoreboardHeading")}
+                            </h3>
+                            {ui.scoreboard ? (
+                                <Scoreboard scoreboard={ui.scoreboard} t={t} />
+                            ) : (
+                                <p className="empty">{t("scoreboardEmpty")}</p>
+                            )}
+                        </div>
+                    </div>
+                </aside>
+            </div>
+        </>
     );
 }
 
