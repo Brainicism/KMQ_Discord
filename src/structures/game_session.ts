@@ -131,9 +131,6 @@ export default class GameSession extends Session {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser | null;
 
-    /** Manages updating a message with current guessers with hidden enabled */
-    private hiddenUpdateTimer: NodeJS.Timeout | null;
-
     /** Set immediately when endSession is requested, before the mutex is acquired.
      *  Allows startRoundCore to abort its between-round delay even while the mutex is held. */
     private pendingEndSession = false;
@@ -164,7 +161,6 @@ export default class GameSession extends Session {
         this.round = null;
         this.songStats = {};
         this.lastGuesser = null;
-        this.hiddenUpdateTimer = null;
         this.clipDurationLength = clipDurationLength || null;
         this.clipPlayNewClip = clipPlayNewClip || null;
 
@@ -1922,15 +1918,18 @@ export default class GameSession extends Session {
     }
 
     private startHiddenUpdateTimer(): void {
-        this.hiddenUpdateTimer = setInterval(async () => {
-            await this.updateGuessedMembersMessage();
-        }, HIDDEN_UPDATE_INTERVAL);
+        this.timers.setInterval(
+            "hiddenUpdate",
+            async () => {
+                await this.updateGuessedMembersMessage();
+            },
+            HIDDEN_UPDATE_INTERVAL,
+        );
     }
 
     private async stopHiddenUpdateTimer(): Promise<void> {
-        if (this.hiddenUpdateTimer) {
-            clearInterval(this.hiddenUpdateTimer);
-            this.hiddenUpdateTimer = null;
+        if (this.timers.has("hiddenUpdate")) {
+            this.timers.clearInterval("hiddenUpdate");
             const round = this.round;
             try {
                 await round?.interactionMessage?.delete();

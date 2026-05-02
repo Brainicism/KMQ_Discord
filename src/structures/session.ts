@@ -60,6 +60,9 @@ import type QueriedSong from "./queried_song";
 import type Round from "./round";
 
 import { SessionState, SessionStateMachine } from "./session_state";
+import { TypedEventEmitter } from "./typed_event_emitter";
+import { TimerManager } from "./timer_manager";
+import type { SessionEvents } from "./session_events";
 
 const logger = new IPCLogger("session");
 
@@ -102,6 +105,12 @@ export default abstract class Session extends EventEmitter {
      *  the session indefinitely — legitimate holds complete well within this. */
     protected lifecycleMutex = withTimeout(new Mutex(), 30_000);
 
+    /** Typed event emitter for session lifecycle events */
+    public readonly events = new TypedEventEmitter<SessionEvents>();
+
+    /** Centralized timer management — all timers cleaned up on session end */
+    protected readonly timers = new TimerManager();
+
     /** The guild preference */
     protected guildPreference: GuildPreference;
 
@@ -112,9 +121,6 @@ export default abstract class Session extends EventEmitter {
     private bookmarkedSongs: {
         [userID: string]: Map<string, BookmarkedSong>;
     };
-
-    /** Timer function used to for /timer command */
-    private guessTimeoutFunc: NodeJS.Timeout | undefined;
 
     constructor(
         guildPreference: GuildPreference,
@@ -557,6 +563,11 @@ export default abstract class Session extends EventEmitter {
             .execute();
 
         this.stateMachine.transition(SessionState.ENDED);
+
+        // Clean up all timers and event listeners
+        this.timers.clearAll();
+        this.events.emit("sessionEnd", { reason });
+        this.events.removeAllListeners();
     }
 
     /**
@@ -573,34 +584,36 @@ export default abstract class Session extends EventEmitter {
         }
 
         const time = this.guildPreference.gameOptions.guessTimeout;
-        this.guessTimeoutFunc = setTimeout(async () => {
-            if (this.finished || !this.round || this.round.finished) return;
-            logger.info(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Song finished without being guessed, timer of: ${time} seconds.`,
-            );
+        this.timers.set(
+            "guessTimeout",
+            async () => {
+                if (this.finished || !this.round || this.round.finished) return;
+                logger.info(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Song finished without being guessed, timer of: ${time} seconds.`,
+                );
 
-            if (this.isGameSession() && this.isClipMode()) {
-                return;
-            }
+                if (this.isGameSession() && this.isClipMode()) {
+                    return;
+                }
 
-            await this.endRound(
-                false,
-                new MessageContext(this.textChannelID, null, this.guildID),
-            );
+                await this.endRound(
+                    false,
+                    new MessageContext(this.textChannelID, null, this.guildID),
+                );
 
-            await this.startRound(messageContext);
-        }, time * 1000);
+                await this.startRound(messageContext);
+            },
+            time * 1000,
+        );
     }
 
     /**
      * Stops the timer set in timer mode
      */
     stopGuessTimeout(): void {
-        if (this.guessTimeoutFunc) {
-            clearTimeout(this.guessTimeoutFunc);
-        }
+        this.timers.clear("guessTimeout");
     }
 
     /**
