@@ -45,6 +45,7 @@ import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
 import type GameSession from "./game_session";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -106,10 +107,39 @@ function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
     };
 }
 
+/**
+ * Resolve Activity-supplied artist IDs into MatchedArtist[] the
+ * GuildPreference setters expect. Unknown IDs are silently dropped; an
+ * empty input becomes an empty output which GuildPreference treats as
+ * "no groups selected" (and the subsequent length check in
+ * isGroupsMode/isIncludesMode/isExcludesMode returns false).
+ * @param artistIDs - IDs as submitted by the client
+ * @returns the cached MatchedArtist entries, in input order
+ */
+function resolveArtistIDs(artistIDs: number[]): MatchedArtist[] {
+    const byID = new Map<number, MatchedArtist>();
+    for (const a of Object.values(State.artistToEntry)) {
+        byID.set(a.id, a);
+    }
+
+    const out: MatchedArtist[] = [];
+    for (const id of artistIDs) {
+        const match = byID.get(id);
+        if (match) out.push(match);
+    }
+
+    return out;
+}
+
 function snapshotOptions(
     guildPreference: GuildPreference,
 ): ActivityOptionsSnapshot {
     const opts = guildPreference.gameOptions;
+    const toActivity = (
+        list: { id: number; name: string }[] | null,
+    ): { id: number; name: string }[] | null =>
+        list === null ? null : list.map((a) => ({ id: a.id, name: a.name }));
+
     return {
         gender: [...opts.gender],
         guessMode: opts.guessModeType,
@@ -120,6 +150,10 @@ function snapshotOptions(
         endYear: opts.endYear,
         goal: opts.goal,
         timer: opts.guessTimeout,
+        duration: opts.duration,
+        groups: toActivity(opts.groups),
+        includes: toActivity(opts.includes),
+        excludes: toActivity(opts.excludes),
     };
 }
 
@@ -742,6 +776,42 @@ function ensureWorkerHandlerRegistered(): void {
                                     await guildPreference.setGuessTimeout(
                                         optionArgs.timer,
                                     );
+                                    break;
+                                }
+
+                                case "duration": {
+                                    // Activity exposes set + clear. The
+                                    // slash-command's add/remove delta UX
+                                    // is intentionally not mirrored; it's
+                                    // a CLI convenience that doesn't suit
+                                    // a point-and-click panel.
+                                    await guildPreference.setDuration(
+                                        optionArgs.duration as number,
+                                    );
+                                    break;
+                                }
+
+                                case "groups":
+                                case "includes":
+                                case "excludes": {
+                                    const artists = resolveArtistIDs(
+                                        optionArgs.artistIDs,
+                                    );
+
+                                    if (optionArgs.kind === "groups") {
+                                        await guildPreference.setGroups(
+                                            artists,
+                                        );
+                                    } else if (optionArgs.kind === "includes") {
+                                        await guildPreference.setIncludes(
+                                            artists,
+                                        );
+                                    } else {
+                                        await guildPreference.setExcludes(
+                                            artists,
+                                        );
+                                    }
+
                                     break;
                                 }
 

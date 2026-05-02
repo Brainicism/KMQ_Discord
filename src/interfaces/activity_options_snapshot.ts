@@ -7,6 +7,15 @@ import type MultiGuessType from "../enums/option_types/multiguess_type";
  * flat-enum options (Slice 1 of Phase 4); numeric and autocomplete-driven
  * options land in later slices.
  */
+/**
+ * Minimal shape the Activity needs to render an artist chip — id + name.
+ * Matches MatchedArtist but drops the hangulName field the UI doesn't use.
+ */
+interface ActivityArtist {
+    id: number;
+    name: string;
+}
+
 export default interface ActivityOptionsSnapshot {
     gender: GenderModeOptions[];
     guessMode: GuessModeType;
@@ -19,4 +28,10 @@ export default interface ActivityOptionsSnapshot {
     goal: number | null;
     /** Seconds until a round times out; null when disabled. */
     timer: number | null;
+    /** Session duration in minutes; null when unset (no time limit). */
+    duration: number | null;
+    /** Null (not in groups mode) or the selected artist list. */
+    groups: ActivityArtist[] | null;
+    includes: ActivityArtist[] | null;
+    excludes: ActivityArtist[] | null;
 }

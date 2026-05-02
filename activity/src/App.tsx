@@ -11,6 +11,7 @@ import {
 import {
     bookmarkSong,
     endGame as apiEndGame,
+    fetchArtistAutocomplete,
     fetchI18nBundle,
     fetchSnapshot,
     hintVote as apiHintVote,
@@ -20,6 +21,7 @@ import {
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
+import type { ActivityArtist } from "./types/activity_options_snapshot";
 import type {
     ActivityGender,
     ActivityGuessMode,
@@ -873,6 +875,20 @@ function OptionsPanel({
         void submit({ kind: "timer", timer }, { ...options, timer });
     };
 
+    const submitDuration = (duration: number | null): void => {
+        void submit({ kind: "duration", duration }, { ...options, duration });
+    };
+
+    const submitArtistList = (
+        listKind: "groups" | "includes" | "excludes",
+        next: ActivityArtist[],
+    ): void => {
+        void submit(
+            { kind: listKind, artistIDs: next.map((a) => a.id) },
+            { ...options, [listKind]: next.length === 0 ? null : next },
+        );
+    };
+
     return (
         <details className="options-panel">
             <summary>{t("options.heading")}</summary>
@@ -980,8 +996,143 @@ function OptionsPanel({
                 offLabel={t("options.off")}
             />
 
+            <NullableNumberGroup
+                label={t("options.duration")}
+                value={options.duration}
+                min={2}
+                max={600}
+                onCommit={submitDuration}
+                offLabel={t("options.off")}
+            />
+
+            <ArtistListGroup
+                label={t("options.groups")}
+                accessToken={accessToken}
+                artists={options.groups ?? []}
+                onCommit={(next) => submitArtistList("groups", next)}
+            />
+
+            <ArtistListGroup
+                label={t("options.includes")}
+                accessToken={accessToken}
+                artists={options.includes ?? []}
+                onCommit={(next) => submitArtistList("includes", next)}
+            />
+
+            <ArtistListGroup
+                label={t("options.excludes")}
+                accessToken={accessToken}
+                artists={options.excludes ?? []}
+                onCommit={(next) => submitArtistList("excludes", next)}
+            />
+
             {feedback && <span className="options-feedback">{feedback}</span>}
         </details>
+    );
+}
+
+function ArtistListGroup({
+    label,
+    accessToken,
+    artists,
+    onCommit,
+}: {
+    label: string;
+    accessToken: string;
+    artists: ActivityArtist[];
+    onCommit: (next: ActivityArtist[]) => void;
+}) {
+    const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState<ActivityArtist[]>([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Debounce the autocomplete fetch so typing doesn't hammer the server.
+    // 200ms is the shortest delay that feels like "instant" in practice.
+    useEffect(() => {
+        if (!showSuggestions) return;
+        const trimmed = query.trim();
+        const id = setTimeout(() => {
+            void (async () => {
+                try {
+                    const results = await fetchArtistAutocomplete(
+                        accessToken,
+                        trimmed,
+                    );
+                    // Hide any artists already selected so the user can't
+                    // add a duplicate.
+                    const selectedIDs = new Set(artists.map((a) => a.id));
+                    setSuggestions(
+                        results
+                            .filter((r) => !selectedIDs.has(r.id))
+                            .map((r) => ({ id: r.id, name: r.name })),
+                    );
+                } catch {
+                    setSuggestions([]);
+                }
+            })();
+        }, 200);
+        return () => clearTimeout(id);
+    }, [query, accessToken, showSuggestions, artists]);
+
+    const addArtist = (a: ActivityArtist): void => {
+        onCommit([...artists, a]);
+        setQuery("");
+    };
+
+    const removeArtist = (id: number): void => {
+        onCommit(artists.filter((a) => a.id !== id));
+    };
+
+    return (
+        <div className="options-group">
+            <span className="options-label">{label}</span>
+            <div className="options-chips">
+                {artists.map((a) => (
+                    <button
+                        key={a.id}
+                        type="button"
+                        className="artist-chip"
+                        onClick={() => removeArtist(a.id)}
+                        title="Remove"
+                    >
+                        {a.name}
+                        <span className="artist-chip-x">×</span>
+                    </button>
+                ))}
+            </div>
+            <div className="artist-autocomplete">
+                <input
+                    type="text"
+                    className="option-number"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() =>
+                        // Delay so a mousedown on a suggestion registers
+                        // before the dropdown unmounts.
+                        setTimeout(() => setShowSuggestions(false), 150)
+                    }
+                    placeholder="Add artist..."
+                />
+                {showSuggestions && suggestions.length > 0 && (
+                    <ul className="artist-suggestions">
+                        {suggestions.map((s) => (
+                            <li key={s.id}>
+                                <button
+                                    type="button"
+                                    onMouseDown={(e) => {
+                                        e.preventDefault();
+                                        addArtist(s);
+                                    }}
+                                >
+                                    {s.name}
+                                </button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </div>
     );
 }
 

@@ -1,6 +1,7 @@
 import * as uuid from "uuid";
 import {
     ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+    ACTIVITY_AUTOCOMPLETE_LIMIT,
     ACTIVITY_GUESS_MAX_LENGTH,
     ACTIVITY_HTTP_TIMEOUT_MS,
     ACTIVITY_INSTANCE_CACHE_TTL_MS,
@@ -20,6 +21,7 @@ import {
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { searchArtists } from "./helpers/discord_utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import GuessModeType from "./enums/option_types/guess_mode_type";
@@ -136,6 +138,11 @@ const GOAL_MIN = 1;
 const GOAL_MAX = 100_000;
 const TIMER_MIN = 2;
 const TIMER_MAX = 180;
+const DURATION_MIN = 2;
+const DURATION_MAX = 600;
+// Cap artist-list writes; the slash-command UX tops out at a similar
+// size and anything larger is almost certainly abuse or a client bug.
+const ARTIST_LIST_MAX = 200;
 
 // Subset of ActivitySetOptionArgs that the client supplies — guildID /
 // userID are filled in server-side from the auth context.
@@ -146,7 +153,11 @@ type SetOptionBody =
     | { kind: "limit"; limitStart: number; limitEnd: number }
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
-    | { kind: "timer"; timer: number | null };
+    | { kind: "timer"; timer: number | null }
+    | { kind: "duration"; duration: number | null }
+    | { kind: "groups"; artistIDs: number[] }
+    | { kind: "includes"; artistIDs: number[] }
+    | { kind: "excludes"; artistIDs: number[] };
 
 function intInRange(v: unknown, min: number, max: number): number | null {
     if (typeof v !== "number" || !Number.isInteger(v)) return null;
@@ -246,6 +257,42 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             const v = nullableIntInRange(obj["timer"], TIMER_MIN, TIMER_MAX);
             if (v === undefined) return null;
             return { kind: "timer", timer: v };
+        }
+
+        case "duration": {
+            const v = nullableIntInRange(
+                obj["duration"],
+                DURATION_MIN,
+                DURATION_MAX,
+            );
+
+            if (v === undefined) return null;
+            return { kind: "duration", duration: v };
+        }
+
+        case "groups":
+        case "includes":
+        case "excludes": {
+            const raw = obj["artistIDs"];
+            if (!Array.isArray(raw)) return null;
+            if (raw.length > ARTIST_LIST_MAX) return null;
+            const artistIDs: number[] = [];
+            for (const id of raw) {
+                if (
+                    typeof id !== "number" ||
+                    !Number.isInteger(id) ||
+                    id <= 0
+                ) {
+                    return null;
+                }
+
+                artistIDs.push(id);
+            }
+
+            return {
+                kind: obj["kind"] as "groups" | "includes" | "excludes",
+                artistIDs,
+            };
         }
 
         default:
@@ -1006,6 +1053,38 @@ export default class KmqWebServer {
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }
+            },
+        );
+
+        httpServer.get(
+            "/api/activity/artist-autocomplete",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const user = await this.resolveAccessToken(
+                    extractBearer(request),
+                );
+
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                const q = (request.query as any)?.q;
+                const query =
+                    typeof q === "string" ? q.trim().toLowerCase() : "";
+
+                // Reuse the slash-command's in-memory artist lookup. No
+                // DB hit — State.artistToEntry / State.topArtists are
+                // populated once at worker startup.
+                const results = searchArtists(query, [])
+                    .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
+                    .map((a) => ({
+                        id: a.id,
+                        name: a.name,
+                        hangulName: a.hangulName ?? null,
+                    }));
+
+                await reply.code(200).send({ results });
             },
         );
 

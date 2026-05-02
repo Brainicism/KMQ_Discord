@@ -6,6 +6,11 @@ export type ActivityGender = "male" | "female" | "coed" | "alternating";
 export type ActivityGuessMode = "song" | "artist" | "both";
 export type ActivityMultiguess = "on" | "off";
 
+export interface ActivityArtist {
+    id: number;
+    name: string;
+}
+
 export default interface ActivityOptionsSnapshot {
     gender: ActivityGender[];
     guessMode: ActivityGuessMode;
@@ -16,4 +21,8 @@ export default interface ActivityOptionsSnapshot {
     endYear: number;
     goal: number | null;
     timer: number | null;
+    duration: number | null;
+    groups: ActivityArtist[] | null;
+    includes: ActivityArtist[] | null;
+    excludes: ActivityArtist[] | null;
 }
