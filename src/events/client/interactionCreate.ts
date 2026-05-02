@@ -323,7 +323,7 @@ export default async function interactionCreateHandler(
         logger.error(
             `${getDebugLogHeader(
                 messageContext,
-            )} | Error while invoking command (${interactionName})| id = ${interaction.id} | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | ${extractErrorString(err)}.`,
+            )} | Error while invoking command (${interactionName})| id = ${interaction.id} | ${debugId} |  Data: ${JSON.stringify(interaction.data)} | ${extractErrorString(err as Error)}.`,
         );
 
         if (interaction instanceof CommandInteraction) {

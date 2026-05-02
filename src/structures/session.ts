@@ -219,7 +219,7 @@ export default abstract class Session {
                 logger.error(
                     `${getDebugLogHeader(
                         messageContext,
-                    )} | Error querying song: ${err.toString()}. guildPreference = ${JSON.stringify(
+                    )} | Error querying song: ${String(err)}. guildPreference = ${JSON.stringify(
                         this.guildPreference,
                     )}`,
                 );
@@ -337,7 +337,7 @@ export default abstract class Session {
                 logger.error(
                     `${getDebugLogHeader(
                         messageContext,
-                    )} | Error obtaining voice connection. Unexpected error type. err = ${err.toString()}`,
+                    )} | Error obtaining voice connection. Unexpected error type. err = ${String(err)}`,
                 );
             }
 

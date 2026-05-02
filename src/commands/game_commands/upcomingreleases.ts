@@ -21,7 +21,7 @@ import type { CommandInteraction, EmbedOptions } from "eris";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type { GuildTextableMessage } from "../../types";
 import type BaseCommand from "../interfaces/base_command";
-import type CommandArgs from "src/interfaces/command_args";
+import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "upcomingreleases";

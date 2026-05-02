@@ -31,7 +31,7 @@ import type { EmbedOptions } from "eris";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
-import type MatchedArtist from "src/interfaces/matched_artist";
+import type MatchedArtist from "../../interfaces/matched_artist";
 
 const COMMAND_NAME = "bookmarks";
 const logger = new IPCLogger(COMMAND_NAME);

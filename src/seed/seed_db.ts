@@ -444,7 +444,7 @@ async function validateSqlDump(
         }
     } catch (e) {
         throw new Error(
-            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}. stack = ${new Error().stack}`,
+            `SQL dump validation failed. ${(e as any).sqlMessage || (e as any).stderr || e}. stack = ${new Error().stack}`,
         );
     }
 
@@ -769,7 +769,7 @@ export async function seedAndDownloadNewSongs(
         await sendInfoWebhook(
             process.env.ALERT_WEBHOOK_URL!,
             "Download and seed failure",
-            e.toString(),
+            String(e),
             EMBED_ERROR_COLOR,
             KmqImages.NOT_IMPRESSED,
             "Kimiqo",
@@ -967,7 +967,7 @@ async function reloadAutocompleteData(): Promise<void> {
                 }
             }
         } catch (e) {
-            logger.error(e);
+            logger.error(e as Error);
             process.exit(1);
         } finally {
             await db.destroy();
