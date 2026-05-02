@@ -10,4 +10,10 @@ export default interface ActivityOptionsSnapshot {
     gender: ActivityGender[];
     guessMode: ActivityGuessMode;
     multiguess: ActivityMultiguess;
+    limitStart: number;
+    limitEnd: number;
+    beginningYear: number;
+    endYear: number;
+    goal: number | null;
+    timer: number | null;
 }

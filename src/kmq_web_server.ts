@@ -15,6 +15,7 @@ import {
     DISCORD_ACTIVITY_INSTANCE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
+    EARLIEST_BEGINNING_SEARCH_YEAR,
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
@@ -125,12 +126,42 @@ const MULTIGUESS_VALUES: ReadonlySet<string> = new Set(
     Object.values(MultiGuessType),
 );
 
+// Numeric bounds for the Activity options panel. Kept in sync with the
+// slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
+// validated server-side so a malicious client can't persist out-of-range
+// values.
+const LIMIT_MIN = 0;
+const LIMIT_MAX = 100_000;
+const GOAL_MIN = 1;
+const GOAL_MAX = 100_000;
+const TIMER_MIN = 2;
+const TIMER_MAX = 180;
+
 // Subset of ActivitySetOptionArgs that the client supplies — guildID /
 // userID are filled in server-side from the auth context.
 type SetOptionBody =
     | { kind: "gender"; genders: GenderModeOptions[] }
     | { kind: "guessMode"; guessMode: GuessModeType }
-    | { kind: "multiguess"; multiguess: MultiGuessType };
+    | { kind: "multiguess"; multiguess: MultiGuessType }
+    | { kind: "limit"; limitStart: number; limitEnd: number }
+    | { kind: "cutoff"; beginningYear: number; endYear: number }
+    | { kind: "goal"; goal: number | null }
+    | { kind: "timer"; timer: number | null };
+
+function intInRange(v: unknown, min: number, max: number): number | null {
+    if (typeof v !== "number" || !Number.isInteger(v)) return null;
+    if (v < min || v > max) return null;
+    return v;
+}
+
+function nullableIntInRange(
+    v: unknown,
+    min: number,
+    max: number,
+): number | null | undefined {
+    if (v === null) return null;
+    return intInRange(v, min, max);
+}
 
 /**
  * Parses + whitelists the JSON body of POST /api/activity/option. Never
@@ -176,6 +207,45 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             }
 
             return { kind: "multiguess", multiguess: v as MultiGuessType };
+        }
+
+        case "limit": {
+            const start = intInRange(obj["limitStart"], LIMIT_MIN, LIMIT_MAX);
+            const end = intInRange(obj["limitEnd"], LIMIT_MIN, LIMIT_MAX);
+            if (start === null || end === null) return null;
+            if (start >= end) return null;
+            return { kind: "limit", limitStart: start, limitEnd: end };
+        }
+
+        case "cutoff": {
+            const now = new Date().getFullYear();
+            const begin = intInRange(
+                obj["beginningYear"],
+                EARLIEST_BEGINNING_SEARCH_YEAR,
+                now,
+            );
+
+            const end = intInRange(
+                obj["endYear"],
+                EARLIEST_BEGINNING_SEARCH_YEAR,
+                now,
+            );
+
+            if (begin === null || end === null) return null;
+            if (begin > end) return null;
+            return { kind: "cutoff", beginningYear: begin, endYear: end };
+        }
+
+        case "goal": {
+            const v = nullableIntInRange(obj["goal"], GOAL_MIN, GOAL_MAX);
+            if (v === undefined) return null;
+            return { kind: "goal", goal: v };
+        }
+
+        case "timer": {
+            const v = nullableIntInRange(obj["timer"], TIMER_MIN, TIMER_MAX);
+            if (v === undefined) return null;
+            return { kind: "timer", timer: v };
         }
 
         default:

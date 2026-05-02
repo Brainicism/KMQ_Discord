@@ -107,10 +107,17 @@ function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
 function snapshotOptions(
     guildPreference: GuildPreference,
 ): ActivityOptionsSnapshot {
+    const opts = guildPreference.gameOptions;
     return {
-        gender: [...guildPreference.gameOptions.gender],
-        guessMode: guildPreference.gameOptions.guessModeType,
-        multiguess: guildPreference.gameOptions.multiGuessType,
+        gender: [...opts.gender],
+        guessMode: opts.guessModeType,
+        multiguess: opts.multiGuessType,
+        limitStart: opts.limitStart,
+        limitEnd: opts.limitEnd,
+        beginningYear: opts.beginningYear,
+        endYear: opts.endYear,
+        goal: opts.goal,
+        timer: opts.guessTimeout,
     };
 }
 
@@ -741,6 +748,44 @@ function ensureWorkerHandlerRegistered(): void {
                                 case "multiguess": {
                                     await guildPreference.setMultiGuessType(
                                         optionArgs.multiguess,
+                                    );
+                                    break;
+                                }
+
+                                case "limit": {
+                                    await guildPreference.setLimit(
+                                        optionArgs.limitStart,
+                                        optionArgs.limitEnd,
+                                    );
+                                    break;
+                                }
+
+                                case "cutoff": {
+                                    // Two setters + two DB writes, but each
+                                    // one funnels through updateGuildPreferences
+                                    // → guildPreferenceChanged, so clients get
+                                    // two back-to-back optionsChanged events.
+                                    // Acceptable for now; reducer overwrites.
+                                    await guildPreference.setBeginningCutoffYear(
+                                        optionArgs.beginningYear,
+                                    );
+
+                                    await guildPreference.setEndCutoffYear(
+                                        optionArgs.endYear,
+                                    );
+                                    break;
+                                }
+
+                                case "goal": {
+                                    await guildPreference.setGoal(
+                                        optionArgs.goal,
+                                    );
+                                    break;
+                                }
+
+                                case "timer": {
+                                    await guildPreference.setGuessTimeout(
+                                        optionArgs.timer,
                                     );
                                     break;
                                 }

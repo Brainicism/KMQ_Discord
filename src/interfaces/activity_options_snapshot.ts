@@ -11,4 +11,12 @@ export default interface ActivityOptionsSnapshot {
     gender: GenderModeOptions[];
     guessMode: GuessModeType;
     multiguess: MultiGuessType;
+    limitStart: number;
+    limitEnd: number;
+    beginningYear: number;
+    endYear: number;
+    /** Null when the goal option isn't set (default). */
+    goal: number | null;
+    /** Seconds until a round times out; null when disabled. */
+    timer: number | null;
 }

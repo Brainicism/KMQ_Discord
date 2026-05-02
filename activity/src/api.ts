@@ -20,7 +20,11 @@ import type GuessResult from "./types/guess_result";
 export type SetOptionRequest =
     | { kind: "gender"; genders: ActivityGender[] }
     | { kind: "guessMode"; guessMode: ActivityGuessMode }
-    | { kind: "multiguess"; multiguess: ActivityMultiguess };
+    | { kind: "multiguess"; multiguess: ActivityMultiguess }
+    | { kind: "limit"; limitStart: number; limitEnd: number }
+    | { kind: "cutoff"; beginningYear: number; endYear: number }
+    | { kind: "goal"; goal: number | null }
+    | { kind: "timer"; timer: number | null };
 
 export interface ActivityI18nBundle {
     locale: string;
