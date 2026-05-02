@@ -3,6 +3,7 @@ import * as uuid from "uuid";
 import Eris from "eris";
 import _ from "lodash";
 
+import { E_TIMEOUT } from "async-mutex";
 import {
     bold,
     chunkArray,
@@ -221,9 +222,30 @@ export default class GameSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.startRoundCore(messageContext),
-        );
+        const waitStart = Date.now();
+        try {
+            return await this.lifecycleMutex.runExclusive(() => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | startRound() waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                return this.startRoundCore(messageContext);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: startRound() could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return null;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -238,9 +260,30 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         gameRound?: GameRound,
     ): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.endRoundCore(isError, messageContext, gameRound),
-        );
+        const waitStart = Date.now();
+        try {
+            await this.lifecycleMutex.runExclusive(async () => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | endRound() waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                await this.endRoundCore(isError, messageContext, gameRound);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: endRound() could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -250,9 +293,30 @@ export default class GameSession extends Session {
      * @param endedDueToError - Whether the session ended due to an error
      */
     async endSession(reason: string, endedDueToError: boolean): Promise<void> {
-        return this.lifecycleMutex.runExclusive(() =>
-            this.endSessionCore(reason, endedDueToError),
-        );
+        const waitStart = Date.now();
+        try {
+            await this.lifecycleMutex.runExclusive(async () => {
+                const waitMs = Date.now() - waitStart;
+                if (waitMs > 5000) {
+                    logger.warn(
+                        `gid: ${this.guildID} | endSession("${reason}") waited ${waitMs}ms for lifecycleMutex`,
+                    );
+                }
+
+                await this.endSessionCore(reason, endedDueToError);
+            });
+        } catch (e) {
+            if (e === E_TIMEOUT) {
+                logger.error(
+                    `gid: ${this.guildID} | DEADLOCK: endSession("${reason}") could not acquire lifecycleMutex after 30s — force-removing session`,
+                );
+
+                Session.deleteSession(this.guildID);
+                return;
+            }
+
+            throw e;
+        }
     }
 
     /**
@@ -895,6 +959,40 @@ export default class GameSession extends Session {
             : new GameRound(randomSong, this.calculateBaseExp(), this.guildID);
 
         return gameRound;
+    }
+
+    /**
+     * Lifecycle hook overrides: bypass the mutex for calls originating from
+     * within startRoundCore/endRoundCore/endSessionCore (which already hold it).
+     * Without these, the non-re-entrant mutex would deadlock.
+     * @param reason - The reason for the session end
+     * @param endedDueToError - Whether the session ended due to an error
+     */
+    protected async endSessionFromLifecycle(
+        reason: string,
+        endedDueToError: boolean,
+    ): Promise<void> {
+        await this.endSessionCore(reason, endedDueToError);
+    }
+
+    /**
+     * @param isError - Whether the round ended due to an error
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async endRoundFromLifecycle(
+        isError: boolean,
+        messageContext: MessageContext,
+    ): Promise<void> {
+        await this.endRoundCore(isError, messageContext);
+    }
+
+    /**
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     */
+    protected async startRoundFromLifecycle(
+        messageContext: MessageContext,
+    ): Promise<Round | null> {
+        return this.startRoundCore(messageContext);
     }
 
     /**
