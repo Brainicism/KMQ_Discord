@@ -874,7 +874,7 @@ function OptionsPanel({
     };
 
     return (
-        <details className="options-panel" open>
+        <details className="options-panel">
             <summary>{t("options.heading")}</summary>
 
             <div className="options-group">
