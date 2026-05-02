@@ -1315,6 +1315,8 @@ export default abstract class Session extends EventEmitter {
      * Resolves the audio file path for a song, preferring the better_audio file.
      * Files are saved by their actual YouTube ID, so a song with betterAudioLink
      * will have its file named after the betterAudioLink ID.
+     * @param song - The queried song to resolve the audio path for
+     * @returns the resolved file path to the song's audio
      */
     private static resolveSongAudioPath(song: QueriedSong): string {
         const dir = process.env.SONG_DOWNLOAD_DIR!;

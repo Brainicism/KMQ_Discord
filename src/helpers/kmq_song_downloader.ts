@@ -511,6 +511,10 @@ export default class KmqSongDownloader {
      * Downloads audio, preferring the better audio link if available.
      * Files are saved under the actual downloaded YouTube ID so that
      * filenames on disk reflect the real audio source.
+     * @param db - The database context
+     * @param videoId - The original video ID
+     * @param videoIdBetterAudio - The better audio video ID, if any
+     * @param proxy - Optional proxy to use for downloading
      * @returns the YouTube ID that was actually downloaded
      */
     private async downloadYouTubeAudioWithFallback(
