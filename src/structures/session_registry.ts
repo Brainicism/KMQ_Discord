@@ -1,11 +1,67 @@
+import { IPCLogger } from "../logger";
 import { Mutex } from "async-mutex";
+import type GameSession from "./game_session";
+import type ListeningSession from "./listening_session";
+import type Session from "./session";
+
+const logger = new IPCLogger("session_registry");
 
 /**
  * Global registry of active sessions, with per-guild creation locks.
- * Provides per-guild creation locks to prevent TOCTOU double-creation.
+ * Canonical source of truth for session lookups. State.gameSessions and
+ * State.listeningSessions are still written to for backward compatibility.
  */
 export class SessionRegistry {
     private creationLocks = new Map<string, Mutex>();
+    private sessions = new Map<string, Session>();
+
+    // ── Session Map ────────────────────────────────────────────────
+
+    get(guildID: string): Session | undefined {
+        return this.sessions.get(guildID);
+    }
+
+    set(guildID: string, session: Session): void {
+        this.sessions.set(guildID, session);
+        logger.info(
+            `gid: ${guildID} | Registered ${session.sessionName()} session`,
+        );
+    }
+
+    delete(guildID: string): boolean {
+        const existed = this.sessions.delete(guildID);
+        if (existed) {
+            logger.info(`gid: ${guildID} | Session removed from registry`);
+        }
+
+        return existed;
+    }
+
+    has(guildID: string): boolean {
+        return this.sessions.has(guildID);
+    }
+
+    getAllSessions(): Session[] {
+        return Array.from(this.sessions.values());
+    }
+
+    getGameSessions(): GameSession[] {
+        return this.getAllSessions().filter((s): s is GameSession =>
+            s.isGameSession(),
+        );
+    }
+
+    getListeningSessions(): ListeningSession[] {
+        return this.getAllSessions().filter((s): s is ListeningSession =>
+            s.isListeningSession(),
+        );
+    }
+
+    get size(): number {
+        return this.sessions.size;
+    }
+
+    // ── Creation Locks ──────────────────────────────────────────────
 
     /**
      * Get or create a per-guild creation lock.
@@ -21,6 +77,31 @@ export class SessionRegistry {
         }
 
         return lock;
+    }
+
+    /**
+     * Atomically check-and-create a session for a guild.
+     * The factory runs while holding the per-guild lock.
+     * Preferred over manual get + set for /play to avoid race conditions.
+     */
+    async getOrCreate(
+        guildID: string,
+        factory: () => Promise<Session>,
+    ): Promise<{ session: Session; created: boolean }> {
+        const lock = this.getOrCreateLock(guildID);
+        return lock.runExclusive(async () => {
+            const existing = this.sessions.get(guildID);
+            if (existing) {
+                return { session: existing, created: false };
+            }
+
+            const session = await factory();
+            this.sessions.set(guildID, session);
+            logger.info(
+                `gid: ${guildID} | Created ${session.sessionName()} session via getOrCreate`,
+            );
+            return { session, created: true };
+        });
     }
 
     /**
