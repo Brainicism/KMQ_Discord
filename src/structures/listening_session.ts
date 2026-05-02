@@ -124,6 +124,7 @@ export default class ListeningSession extends Session {
         return round;
     }
 
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     async endRound(
         isError: boolean,
         messageContext?: MessageContext,
@@ -141,6 +142,7 @@ export default class ListeningSession extends Session {
         await super.endRound(isError, messageContext);
     }
 
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     async endSession(reason: string): Promise<void> {
         await this.withLifecycleLock(() => this.endSessionCore(reason));
     }
@@ -164,6 +166,7 @@ export default class ListeningSession extends Session {
         await super.endSession(reason, false);
     }
 
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     async handleComponentInteraction(
         interaction: Eris.ComponentInteraction,
         messageContext: MessageContext,
@@ -241,6 +244,7 @@ export default class ListeningSession extends Session {
      * @param randomSong - The queried song
      * @returns the new GameRound
      */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
     protected prepareRound(randomSong: QueriedSong): Round {
         return new ListeningRound(randomSong, this.guildID);
     }

@@ -93,6 +93,8 @@ export class SessionStateMachine {
     /**
      * Attempt a state transition. Returns true if valid and applied,
      * false if rejected (invalid transition).
+     * @param to - The target state to transition to
+     * @returns whether the transition was valid and applied
      */
     transition(to: SessionState): boolean {
         const allowed = VALID_TRANSITIONS[this.currentState];

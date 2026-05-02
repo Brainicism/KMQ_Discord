@@ -101,15 +101,11 @@ export default abstract class Session extends EventEmitter {
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
-    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
-    protected sessionAbortController = new AbortController();
-
-    protected get abortSignal(): AbortSignal {
-        return this.sessionAbortController.signal;
-    }
-
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
+
+    /** Aborted in endSession to cancel in-flight cancellableDelay() calls */
+    protected sessionAbortController = new AbortController();
 
     /** Mutex to serialize lifecycle operations (startRound, endRound, endSession).
      *  Wrapped with a 30s timeout to prevent permanent deadlocks from blocking
@@ -173,21 +169,6 @@ export default abstract class Session extends EventEmitter {
             this.stateMachine.state !== SessionState.CREATED &&
             this.stateMachine.state !== SessionState.INITIALIZING
         );
-    }
-
-    /** Run fn while holding the lifecycle mutex. Returns null if session is ending/ended. */
-    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
-        if (!this.stateMachine.isAlive) {
-            return Promise.resolve(null);
-        }
-
-        return this.lifecycleMutex.runExclusive(async () => {
-            if (!this.stateMachine.isAlive) {
-                return null;
-            }
-
-            return fn();
-        });
     }
 
     static getSession(guildID: string): Session | undefined {
@@ -836,6 +817,29 @@ export default abstract class Session extends EventEmitter {
         }
 
         return false;
+    }
+
+    protected get abortSignal(): AbortSignal {
+        return this.sessionAbortController.signal;
+    }
+
+    /**
+     * Run fn while holding the lifecycle mutex.
+     * @param fn - The async function to execute under the lock
+     * @returns The result of fn, or null if session is ending/ended
+     */
+    protected withLifecycleLock<T>(fn: () => Promise<T>): Promise<T | null> {
+        if (!this.stateMachine.isAlive) {
+            return Promise.resolve(null);
+        }
+
+        return this.lifecycleMutex.runExclusive(async () => {
+            if (!this.stateMachine.isAlive) {
+                return null;
+            }
+
+            return fn();
+        });
     }
 
     /**
