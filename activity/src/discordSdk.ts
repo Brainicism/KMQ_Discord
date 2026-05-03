@@ -69,7 +69,34 @@ export async function authenticate(): Promise<AuthedSession> {
     });
 
     if (!tokenResp.ok) {
-        throw new Error(`Token exchange failed: ${tokenResp.status}`);
+        let details = "";
+        try {
+            const payload = (await tokenResp.json()) as {
+                error?: string;
+                message?: string;
+                missing?: { clientId?: boolean; clientSecret?: boolean };
+            };
+
+            const parts: string[] = [];
+            if (payload.error) parts.push(payload.error);
+            if (payload.message) parts.push(payload.message);
+            if (payload.missing?.clientId) {
+                parts.push("missing client ID configuration");
+            }
+            if (payload.missing?.clientSecret) {
+                parts.push("missing client secret configuration");
+            }
+
+            if (parts.length > 0) {
+                details = ` (${parts.join("; ")})`;
+            }
+        } catch {
+            // Response may not be JSON; keep status-only message.
+        }
+
+        throw new Error(
+            `Token exchange failed: ${tokenResp.status}${details}`,
+        );
     }
 
     const { access_token } = (await tokenResp.json()) as {
