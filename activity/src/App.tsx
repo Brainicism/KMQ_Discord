@@ -436,6 +436,48 @@ function GuessInput({
         }
     }, [enabled, busy]);
 
+    // Clear guess text when a new round starts (enabled: false → true).
+    useEffect(() => {
+        if (enabled) {
+            setText("");
+            setFeedback(null);
+        }
+    }, [enabled]);
+
+    // Redirect all keystrokes to the guess input so users can type from
+    // anywhere without clicking the text box first. Focusing the input on
+    // a printable keydown also prevents Space from scrolling the page.
+    useEffect(() => {
+        const redirect = (e: KeyboardEvent) => {
+            if (!enabled || busy) return;
+            const el = inputRef.current;
+            if (!el || document.activeElement === el) return;
+            if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                el.focus({ preventScroll: true });
+            }
+        };
+
+        const blockSpaceScroll = (e: KeyboardEvent) => {
+            if (
+                e.key === " " &&
+                enabled &&
+                !(
+                    document.activeElement instanceof HTMLInputElement ||
+                    document.activeElement instanceof HTMLTextAreaElement
+                )
+            ) {
+                e.preventDefault();
+            }
+        };
+
+        document.addEventListener("keydown", redirect);
+        document.addEventListener("keydown", blockSpaceScroll);
+        return () => {
+            document.removeEventListener("keydown", redirect);
+            document.removeEventListener("keydown", blockSpaceScroll);
+        };
+    }, [enabled, busy]);
+
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = text.trim();
