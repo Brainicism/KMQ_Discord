@@ -94,9 +94,7 @@ export async function authenticate(): Promise<AuthedSession> {
             // Response may not be JSON; keep status-only message.
         }
 
-        throw new Error(
-            `Token exchange failed: ${tokenResp.status}${details}`,
-        );
+        throw new Error(`Token exchange failed: ${tokenResp.status}${details}`);
     }
 
     const { access_token } = (await tokenResp.json()) as {
