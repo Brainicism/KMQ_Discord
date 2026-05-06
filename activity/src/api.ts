@@ -1,4 +1,9 @@
 import { ACTIVITY_PROXY_BASE, ACTIVITY_WS_PATH } from "./constants";
+import type {
+    ActivityGender,
+    ActivityGuessMode,
+    ActivityMultiguess,
+} from "./types/activity_options_snapshot";
 import type ActivityEvent from "./types/activity_event";
 import type ActivitySessionResponse from "./types/activity_session_response";
 import type ActivitySnapshot from "./types/activity_snapshot";
@@ -6,6 +11,47 @@ import type ActivityStreamHandle from "./types/activity_stream_handle";
 import type BookmarkResult from "./types/bookmark_result";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type GuessResult from "./types/guess_result";
+
+/**
+ * Discriminated payload the client posts to /api/activity/option. Matches
+ * the server-side schema (see src/kmq_web_server.ts::parseSetOptionBody)
+ * so the server accepts exactly these shapes.
+ */
+export type SetOptionRequest =
+    | { kind: "gender"; genders: ActivityGender[] }
+    | { kind: "guessMode"; guessMode: ActivityGuessMode }
+    | { kind: "multiguess"; multiguess: ActivityMultiguess }
+    | { kind: "limit"; limitStart: number; limitEnd: number }
+    | { kind: "cutoff"; beginningYear: number; endYear: number }
+    | { kind: "goal"; goal: number | null }
+    | { kind: "timer"; timer: number | null }
+    | { kind: "duration"; duration: number | null }
+    | { kind: "groups"; artistIDs: number[] }
+    | { kind: "includes"; artistIDs: number[] }
+    | { kind: "excludes"; artistIDs: number[] };
+
+export interface AutocompleteArtist {
+    id: number;
+    name: string;
+    hangulName: string | null;
+}
+
+/**
+ * Typeahead lookup for groups / includes / excludes. Empty q returns the
+ * top artists; typed prefix returns a small prefix-match result set.
+ */
+export async function fetchArtistAutocomplete(
+    accessToken: string,
+    q: string,
+): Promise<AutocompleteArtist[]> {
+    const url = `${ACTIVITY_PROXY_BASE}/artist-autocomplete?q=${encodeURIComponent(q)}`;
+    const resp = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+    if (!resp.ok) return [];
+    const body = (await resp.json()) as { results: AutocompleteArtist[] };
+    return body.results;
+}
 
 export interface ActivityI18nBundle {
     locale: string;
@@ -88,6 +134,39 @@ export const endGame = (accessToken: string, instanceId: string) =>
 
 export const hintVote = (accessToken: string, instanceId: string) =>
     postAction(accessToken, instanceId, "hint");
+
+/**
+ * Submit a GuildPreference change. Server validates the shape and accepts
+ * only the typed value matching the kind; other fields are ignored.
+ */
+export async function setOption(
+    accessToken: string,
+    instanceId: string,
+    option: SetOptionRequest,
+): Promise<GuessResult> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/option`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId, ...option }),
+    });
+
+    if (resp.ok) return { ok: true };
+    if (resp.status === 401) return { ok: false, reason: "unauthorized" };
+    if (resp.status === 403) return { ok: false, reason: "forbidden" };
+    if (resp.status === 400) return { ok: false, reason: "bad_request" };
+
+    let parsed: { error?: GuessRejectReason } = {};
+    try {
+        parsed = (await resp.json()) as { error?: GuessRejectReason };
+    } catch {
+        // ignore
+    }
+
+    return { ok: false, reason: parsed.error ?? "internal" };
+}
 
 /**
  * Bookmark a song. If `youtubeLink` is omitted, the server bookmarks whatever

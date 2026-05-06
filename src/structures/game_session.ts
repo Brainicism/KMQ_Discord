@@ -9,6 +9,7 @@ import {
     chunkArray,
     codeLine,
     delay,
+    getMention,
     getOrdinalNum,
     setDifference,
 } from "../helpers/utils";
@@ -63,6 +64,7 @@ import GameRound from "./game_round";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
 import GuildPreference from "./guild_preference";
+import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import MultiGuessType from "../enums/option_types/multiguess_type";
@@ -75,6 +77,7 @@ import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
+import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
 import type SuccessfulGuessResult from "../interfaces/success_guess_result";
@@ -785,6 +788,11 @@ export default class GameSession extends Session {
             },
         );
 
+        if (KmqConfiguration.Instance.activityReducedEmbeds()) {
+            await this.sendActivityReducedEndGame(footerText);
+            return;
+        }
+
         if (this.scoreboard.getWinners().length === 0) {
             await sendInfoMessage(
                 new MessageContext(this.textChannelID, null, this.guildID),
@@ -1001,6 +1009,105 @@ export default class GameSession extends Session {
     }
 
     /**
+     * Phase-5 compact round reveal: a single line with song, artist, and
+     * who got it (if anyone), pointing users at the Activity for the full
+     * reveal. Activity subscribers already have the rich reveal rendered
+     * in the iframe, so the channel message just needs to stay out of the
+     * way for the rest of the guild.
+     * @param messageContext - the round's message context
+     * @param round - the ending round
+     * @param playerRoundResults - winners (possibly empty) for the round
+     * @param embedColor - color to preserve the correct/incorrect hue
+     */
+    private async sendActivityReducedRoundReveal(
+        messageContext: MessageContext,
+        round: GameRound,
+        playerRoundResults: Array<PlayerRoundResult>,
+        embedColor: number | undefined,
+    ): Promise<void> {
+        const locale = State.getGuildLocale(this.guildID);
+        const song = round.song.getLocalizedSongName(locale);
+        const artist = round.song.getLocalizedArtistName(locale);
+        const key =
+            playerRoundResults.length > 0
+                ? "misc.inGame.activityRoundRevealCorrect"
+                : "misc.inGame.activityRoundRevealNoCorrect";
+
+        const winner =
+            playerRoundResults.length > 0
+                ? playerRoundResults
+                      .map((r) => getMention(r.player.id))
+                      .join(", ")
+                : "";
+
+        await sendInfoMessage(messageContext, {
+            color: embedColor,
+            title: i18n.translate(this.guildID, "misc.inGame.roundNumber", {
+                roundNum: String(this.roundsPlayed + 1),
+            }),
+            description: i18n.translate(this.guildID, key, {
+                song,
+                artist,
+                winner,
+            }),
+        });
+    }
+
+    /**
+     * Phase-5 compact end-of-game message. Wins / ties / no-winner states
+     * are still distinguishable, but the scoreboard and level-ups live in
+     * the Activity instead of a multi-field embed.
+     * @param footerText - localized "X/Y songs correctly guessed" footer
+     *  reused from the full embed so stats stay visible.
+     */
+    private async sendActivityReducedEndGame(
+        footerText: string,
+    ): Promise<void> {
+        const winners = this.scoreboard.getWinners();
+        if (winners.length === 0) {
+            await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    title: i18n.translate(
+                        this.guildID,
+                        "misc.inGame.noWinners",
+                    ),
+                    description: i18n.translate(
+                        this.guildID,
+                        "misc.inGame.activitySessionEndNoWinners",
+                        { footer: footerText },
+                    ),
+                },
+            );
+            return;
+        }
+
+        const winnerMessage =
+            this.gameType === GameType.SUDDEN_DEATH
+                ? i18n.translateN(
+                      this.guildID,
+                      "misc.plural.suddenDeathEnd",
+                      this.roundsPlayed - 1,
+                  )
+                : this.scoreboard.getWinnerMessage(
+                      State.getGuildLocale(this.guildID),
+                  );
+
+        await sendInfoMessage(
+            new MessageContext(this.textChannelID, null, this.guildID),
+            {
+                color: EMBED_SUCCESS_COLOR,
+                title: `🎉 ${winnerMessage} 🎉`,
+                description: i18n.translate(
+                    this.guildID,
+                    "misc.inGame.activitySessionEndWinners",
+                    { winnerMessage, footer: footerText },
+                ),
+            },
+        );
+    }
+
+    /**
      * Internal startRound logic. Must only be called while holding lifecycleMutex.
      * @param messageContext - The message context for the round
      */
@@ -1204,15 +1311,24 @@ export default class GameSession extends Session {
             ),
         );
 
-        await this.sendRoundMessage(
-            messageContext,
-            fields,
-            round,
-            description,
-            embedColor,
-            correctGuess && !this.isMultipleChoiceMode(),
-            remainingDuration,
-        );
+        if (KmqConfiguration.Instance.activityReducedEmbeds()) {
+            await this.sendActivityReducedRoundReveal(
+                messageContext,
+                round,
+                playerRoundResults,
+                embedColor,
+            );
+        } else {
+            await this.sendRoundMessage(
+                messageContext,
+                fields,
+                round,
+                description,
+                embedColor,
+                correctGuess && !this.isMultipleChoiceMode(),
+                remainingDuration,
+            );
+        }
 
         const gameFinishedDueToGameOptions = this.scoreboard.gameFinished(
             this.guildPreference,

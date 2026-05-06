@@ -3,3 +3,7 @@ build/
 logs/
 docker/
 .env
+
+# Activity bundle artifacts — regenerated inside the build stage.
+activity/dist/
+activity/.vite/
