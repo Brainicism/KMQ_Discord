@@ -39,6 +39,8 @@
         "hintRevealed": "Hint onthuld",
         "hintTitle": "Stem voor een hint",
         "hintVoteFallback": "stem",
+        "historyEmpty": "Nog geen nummers.",
+        "historyHeading": "Geschiedenis van nummers",
         "networkError": "Netwerkfout",
         "openOnYouTube": "Openen op YouTube",
         "options": {

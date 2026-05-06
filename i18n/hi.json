@@ -39,6 +39,8 @@
         "hintRevealed": "संकेत दिखाया गया",
         "hintTitle": "संकेत के लिए वोट दें",
         "hintVoteFallback": "वोट",
+        "historyEmpty": "अभी तक कोई गाना नहीं।",
+        "historyHeading": "गाने का इतिहास",
         "networkError": "नेटवर्क त्रुटि",
         "openOnYouTube": "YouTube पर खोलें",
         "options": {

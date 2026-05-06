@@ -39,6 +39,8 @@
         "hintRevealed": "ヒント公開",
         "hintTitle": "ヒントに投票",
         "hintVoteFallback": "投票",
+        "historyEmpty": "まだ曲がありません。",
+        "historyHeading": "曲の履歴",
         "networkError": "ネットワークエラー",
         "openOnYouTube": "YouTubeで開く",
         "options": {

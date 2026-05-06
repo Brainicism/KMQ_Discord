@@ -39,6 +39,8 @@
         "hintRevealed": "힌트 공개",
         "hintTitle": "힌트 투표",
         "hintVoteFallback": "투표",
+        "historyEmpty": "아직 노래가 없습니다.",
+        "historyHeading": "노래 기록",
         "networkError": "네트워크 오류",
         "openOnYouTube": "YouTube에서 열기",
         "options": {

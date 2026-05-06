@@ -39,6 +39,8 @@
         "hintRevealed": "Подсказка открыта",
         "hintTitle": "Голосовать за подсказку",
         "hintVoteFallback": "голос",
+        "historyEmpty": "Песен пока нет.",
+        "historyHeading": "История песен",
         "networkError": "Ошибка сети",
         "openOnYouTube": "Открыть на YouTube",
         "options": {

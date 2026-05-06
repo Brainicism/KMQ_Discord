@@ -78,6 +78,7 @@ const initialUi: UiState = {
     currentRoundBookmarked: false,
     hadSession: false,
     options: null,
+    roundHistory: [],
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -1277,6 +1278,53 @@ function NullableNumberGroup({
     );
 }
 
+function SongHistory({
+    history,
+    bookmarkedLinks,
+    t,
+}: {
+    history: UiState["roundHistory"];
+    bookmarkedLinks: Set<string>;
+    t: Translator;
+}) {
+    if (history.length === 0) {
+        return <p className="empty">{t("historyEmpty")}</p>;
+    }
+
+    // Newest first feels more natural when the list starts growing past the
+    // fold — the last revealed song is always at the top.
+    const ordered = [...history].reverse();
+
+    return (
+        <ol className="song-history">
+            {ordered.map((song, i) => {
+                const roundNum = history.length - i;
+                const isBookmarked = bookmarkedLinks.has(song.youtubeLink);
+                return (
+                    <li key={`${roundNum}-${song.youtubeLink}`}>
+                        <span className="history-round">#{roundNum}</span>
+                        <div className="history-text">
+                            <div className="history-song">{song.songName}</div>
+                            <div className="history-artist">
+                                {song.artistName} ({song.publishYear})
+                            </div>
+                        </div>
+                        {isBookmarked && (
+                            <span
+                                className="history-bookmark"
+                                aria-hidden
+                                title={t("bookmarkTitleDone")}
+                            >
+                                🔖
+                            </span>
+                        )}
+                    </li>
+                );
+            })}
+        </ol>
+    );
+}
+
 function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
     if (guesses.length === 0) return null;
 
@@ -1304,7 +1352,8 @@ export default function App() {
         userID: string;
     } | null>(null);
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+    const [historyOpen, setHistoryOpen] = useState(true);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for
@@ -1461,7 +1510,17 @@ export default function App() {
                 ♡
             </span>
 
-            {/* Sidebar toggle */}
+            {/* Left sidebar toggle — song history */}
+            <button
+                type="button"
+                className={`sidebar-toggle left ${historyOpen ? "active" : ""}`}
+                onClick={() => setHistoryOpen((o) => !o)}
+                title={t("historyHeading")}
+            >
+                <span>🎵</span>
+            </button>
+
+            {/* Right sidebar toggle — scoreboard + options */}
             <button
                 type="button"
                 className={`sidebar-toggle ${sidebarOpen ? "active" : ""}`}
@@ -1471,7 +1530,37 @@ export default function App() {
                 <span>🏆</span>
             </button>
 
-            <div className="kmq-layout">
+            <div
+                className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
+                    sidebarOpen ? "right-open" : ""
+                }`}
+            >
+                {/* Left sidebar — song history */}
+                <aside
+                    className={`kmq-sidebar left ${historyOpen ? "open" : ""}`}
+                    aria-label={t("historyHeading")}
+                >
+                    <div className="sidebar-header">
+                        <span className="sidebar-title">
+                            {t("historyHeading")}
+                        </span>
+                        <button
+                            type="button"
+                            className="sidebar-close"
+                            onClick={() => setHistoryOpen(false)}
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div className="sidebar-body">
+                        <SongHistory
+                            history={ui.roundHistory}
+                            bookmarkedLinks={ui.bookmarkedLinks}
+                            t={t}
+                        />
+                    </div>
+                </aside>
+
                 <div className="kmq-main">
                     <div className="kmq-app">
                         <header>
@@ -1774,6 +1863,7 @@ function reduce(
                 bookmarkedLinks: new Set(),
                 currentRoundBookmarked: false,
                 hadSession: true,
+                roundHistory: [],
             };
         case "roundStart":
             return {
@@ -1795,6 +1885,7 @@ function reduce(
                     allGuesses: msg.allGuesses,
                 },
                 scoreboard: msg.scoreboard,
+                roundHistory: [...prev.roundHistory, msg.song],
                 // Bump the local session counters so the header advances. The
                 // server doesn't re-broadcast session metadata after each
                 // round, so we mirror Session.getRoundsPlayed here.

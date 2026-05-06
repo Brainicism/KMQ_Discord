@@ -39,6 +39,8 @@
         "hintRevealed": "提示已揭示",
         "hintTitle": "投票获取提示",
         "hintVoteFallback": "投票",
+        "historyEmpty": "暂无歌曲。",
+        "historyHeading": "歌曲历史",
         "networkError": "网络错误",
         "openOnYouTube": "在 YouTube 中打开",
         "options": {

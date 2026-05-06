@@ -39,6 +39,8 @@
         "hintRevealed": "Petunjuk ditampilkan",
         "hintTitle": "Pilih untuk petunjuk",
         "hintVoteFallback": "pilih",
+        "historyEmpty": "Belum ada lagu.",
+        "historyHeading": "Riwayat Lagu",
         "networkError": "Kesalahan jaringan",
         "openOnYouTube": "Buka di YouTube",
         "options": {

@@ -39,6 +39,8 @@
         "hintRevealed": "Dica revelada",
         "hintTitle": "Votar por uma dica",
         "hintVoteFallback": "votar",
+        "historyEmpty": "Nenhuma música ainda.",
+        "historyHeading": "Histórico de Músicas",
         "networkError": "Erro de rede",
         "openOnYouTube": "Abrir no YouTube",
         "options": {

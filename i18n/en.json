@@ -39,6 +39,8 @@
         "hintRevealed": "Hint revealed",
         "hintTitle": "Vote for a hint",
         "hintVoteFallback": "vote",
+        "historyEmpty": "No songs yet.",
+        "historyHeading": "Song History",
         "networkError": "Network error",
         "openOnYouTube": "Open on YouTube",
         "options": {

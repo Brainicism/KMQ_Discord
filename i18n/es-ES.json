@@ -39,6 +39,8 @@
         "hintRevealed": "Pista revelada",
         "hintTitle": "Vota para recibir una pista",
         "hintVoteFallback": "votar",
+        "historyEmpty": "Aún no hay canciones.",
+        "historyHeading": "Historial de canciones",
         "networkError": "Error de red",
         "openOnYouTube": "Abrir en YouTube",
         "options": {

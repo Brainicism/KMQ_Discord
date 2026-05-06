@@ -32,4 +32,7 @@ export default interface UiState {
     /** Current GuildPreference values surfaced by the Activity options panel.
      *  Null until the first snapshot/optionsChanged arrives. */
     options: ActivityOptionsSnapshot | null;
+    /** Rounds revealed so far in the current session, oldest-first. Populated
+     *  on roundEnd and reset on sessionStart. */
+    roundHistory: ActivityRoundReveal[];
 }

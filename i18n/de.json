@@ -39,6 +39,8 @@
         "hintRevealed": "Hinweis angezeigt",
         "hintTitle": "Für einen Hinweis abstimmen",
         "hintVoteFallback": "abstimmen",
+        "historyEmpty": "Noch keine Songs.",
+        "historyHeading": "Songverlauf",
         "networkError": "Netzwerkfehler",
         "openOnYouTube": "Auf YouTube öffnen",
         "options": {

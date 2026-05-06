@@ -39,6 +39,8 @@
         "hintRevealed": "Indice révélé",
         "hintTitle": "Voter pour un indice",
         "hintVoteFallback": "voter",
+        "historyEmpty": "Aucune chanson pour l'instant.",
+        "historyHeading": "Historique des chansons",
         "networkError": "Erreur réseau",
         "openOnYouTube": "Ouvrir sur YouTube",
         "options": {
