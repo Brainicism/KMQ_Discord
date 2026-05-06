@@ -1665,6 +1665,10 @@
         },
         "guessRate": "अनुमान दर",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} ने सही जवाब दिया। पूरे खुलासे के लिए Activity खोलें।",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. किसी ने सही जवाब नहीं दिया। पूरे खुलासे के लिए Activity खोलें।",
+            "activitySessionEndNoWinners": "खेल समाप्त — कोई अंक नहीं मिला। {{footer}} अंतिम सारांश के लिए गतिविधि खोलें।",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} अंतिम स्कोरबोर्ड के लिए Activity खोलें।",
             "aliases": "उपनाम",
             "bonusArtistRound": "बोनस कलाकार राउंड",
             "bonusExpArtistRound": "बोनस EXP और कलाकार राउंड",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} राउंड समाप्त होने से पहले {{timestamp}}!",
             "noCorrectGuesses": "किसी को नहीं मिला।",
             "noWinners": "कोई नहीं जीता",
+            "roundNumber": "राउंड {{roundNum}}",
             "runnersUp": "उपविजेता",
             "songsCorrectlyGuessed": "{{songCount}} गाने सही तरीके से अनुमानित किए गए!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} अद्वितीय गाने बजाए गए।"

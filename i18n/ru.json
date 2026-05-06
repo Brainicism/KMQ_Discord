@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Частота Угадывания",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} угадал(а). Откройте Активность для полного раскрытия.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Никто не угадал. Откройте Активность для полного раскрытия.",
+            "activitySessionEndNoWinners": "Игра окончена — очки не набраны. {{footer}} Откройте Активность для итогового резюме.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Откройте Активность для финальной таблицы результатов.",
             "aliases": "Псевдонимы",
             "bonusArtistRound": "БОНУСНЫЙ РАУНД С АРТИСТОМ",
             "bonusExpArtistRound": "БОНУСНЫЙ РАУНД ОПЫТА И АРТИСТОВ",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} до окончания раунда {{timestamp}}!",
             "noCorrectGuesses": "Никто не угадал.",
             "noWinners": "Никто не выиграл",
+            "roundNumber": "Раунд {{roundNum}}",
             "runnersUp": "Финалисты",
             "songsCorrectlyGuessed": "{{songCount}} песен угадано верно!",
             "uniqueSongsPlayed": "Сыграно {{uniqueSongCount}} уникальных песен."

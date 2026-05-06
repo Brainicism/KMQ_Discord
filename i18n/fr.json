@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Taux de supposition",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} l'a trouvé. Ouvre l'Activité pour la révélation complète.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Personne ne l'a trouvé. Ouvre l'Activité pour la révélation complète.",
+            "activitySessionEndNoWinners": "Partie terminée — aucun point marqué. {{footer}} Ouvre l'Activité pour le résumé final.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Ouvrez l'activité pour le classement final.",
             "aliases": "Alias",
             "bonusArtistRound": "TOUR ARTISTE BONUS",
             "bonusExpArtistRound": "TOUR EXP ET ARTISTE BONUS",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} avant la fin du tour {{timestamp}}!",
             "noCorrectGuesses": "Personne n'a trouvé.",
             "noWinners": "Personne n'a gagné.",
+            "roundNumber": "Manche {{roundNum}}",
             "runnersUp": "Finalistes",
             "songsCorrectlyGuessed": "{{songCount}} chansons correctement devinées !",
             "uniqueSongsPlayed": "{{uniqueSongCount}} chansons uniques jouées."

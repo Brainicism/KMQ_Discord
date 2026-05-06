@@ -1665,6 +1665,10 @@
         },
         "guessRate": "추측 비율",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}}님이 맞혔습니다. 전체 결과를 보려면 액티비티를 여세요.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. 아무도 맞히지 못했습니다. 전체 결과를 보려면 액티비티를 여세요.",
+            "activitySessionEndNoWinners": "게임 종료 — 획득한 점수가 없습니다. {{footer}} 최종 요약을 보려면 활동을 여세요.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} 최종 점수판을 보려면 활동을 여세요.",
             "aliases": "별칭",
             "bonusArtistRound": "보너스 아티스트 라운드",
             "bonusExpArtistRound": "보너스 경험치 및 아티스트 라운드",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} 라운드 종료 전 {{timestamp}}!",
             "noCorrectGuesses": "아무도 맞추지 못했습니다.",
             "noWinners": "아무도 우승하지 못했습니다.",
+            "roundNumber": "라운드 {{roundNum}}",
             "runnersUp": "준우승",
             "songsCorrectlyGuessed": "{{songCount}}곡을 정확히 추측을 하였습니다!",
             "uniqueSongsPlayed": "{{uniqueSongCount}}개의 노래가 재생되었습니다."

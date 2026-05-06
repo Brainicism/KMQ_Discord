@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Schätzrate",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} hat es erraten. Öffne die Aktivität für die vollständige Auflösung.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Niemand hat es erraten. Öffne die Aktivität für die vollständige Auflösung.",
+            "activitySessionEndNoWinners": "Spiel beendet — keine Punkte erzielt. {{footer}} Öffne die Aktivität für die abschließende Zusammenfassung.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Öffne die Aktivität für die abschließende Rangliste.",
             "aliases": "Aliase",
             "bonusArtistRound": "BONUS-KÜNSTLER-RUNDE",
             "bonusExpArtistRound": "BONUS-EXP-UND-KÜNSTLER-RUNDE",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}}, bevor die Runde {{timestamp}} endet!",
             "noCorrectGuesses": "Niemand hat's geschafft.",
             "noWinners": "Niemand hat gewonnen",
+            "roundNumber": "Runde {{roundNum}}",
             "runnersUp": "Zweiter/Zweite",
             "songsCorrectlyGuessed": "{{songCount}} Songs richtig geraten!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} einzigartige Songs gespielt."

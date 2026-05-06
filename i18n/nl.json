@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Raadspercentage",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} had het goed. Open de Activiteit voor de volledige onthulling.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Niemand had het goed. Open de Activiteit voor de volledige onthulling.",
+            "activitySessionEndNoWinners": "Spel voorbij — geen punten gescoord. {{footer}} Open de Activiteit voor de definitieve samenvatting.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Open de Activiteit voor het eindklassement.",
             "aliases": "Aliassen",
             "bonusArtistRound": "BONUSRONDE ARTIEST",
             "bonusExpArtistRound": "BONUS-EXP EN ARTIESTENRONDES",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} voordat de ronde eindigt {{timestamp}}!",
             "noCorrectGuesses": "Niemand heeft het.",
             "noWinners": "Niemand heeft gewonnen",
+            "roundNumber": "Ronde {{roundNum}}",
             "runnersUp": "Runners-up",
             "songsCorrectlyGuessed": "{{songCount}} nummers correct geraden!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} unieke nummers afgespeeld."

@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Guess Rate",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} got it. Open the Activity for the full reveal.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Nobody got it. Open the Activity for the full reveal.",
+            "activitySessionEndNoWinners": "Game over — no points scored. {{footer}} Open the Activity for the final summary.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Open the Activity for the final scoreboard.",
             "aliases": "Aliases",
             "bonusArtistRound": "BONUS ARTIST ROUND",
             "bonusExpArtistRound": "BONUS EXP AND ARTIST ROUND",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} before the round ends {{timestamp}}!",
             "noCorrectGuesses": "Nobody got it.",
             "noWinners": "Nobody Won",
+            "roundNumber": "Round {{roundNum}}",
             "runnersUp": "Runners Up",
             "songsCorrectlyGuessed": "{{songCount}} songs correctly guessed!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} unique songs played."

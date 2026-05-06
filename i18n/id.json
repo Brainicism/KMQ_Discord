@@ -1665,6 +1665,10 @@
         },
         "guessRate": "Rate Tebakan",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**. {{winner}} berhasil menebaknya. Buka Aktivitas untuk pengungkapan penuh.",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**. Tidak ada yang berhasil menebaknya. Buka Aktivitas untuk pengungkapan penuh.",
+            "activitySessionEndNoWinners": "Permainan selesai — tidak ada poin yang dicetak. {{footer}} Buka Aktivitas untuk ringkasan akhir.",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} Buka Aktivitas untuk papan skor akhir.",
             "aliases": "Alias",
             "bonusArtistRound": "RONDE ARTIS BONUS",
             "bonusExpArtistRound": "BONUS EXP DAN RONDE ARTIS",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}} sebelum ronde berakhir {{timestamp}}!",
             "noCorrectGuesses": "Tidak ada yang mendapatkannya.",
             "noWinners": "Tidak Ada yang Menang",
+            "roundNumber": "Ronde {{roundNum}}",
             "runnersUp": "Juara Kedua",
             "songsCorrectlyGuessed": "{{songCount}} lagu ditebak dengan benar!",
             "uniqueSongsPlayed": "{{uniqueSongCount}} lagu unik dimainkan."

@@ -1665,6 +1665,10 @@
         },
         "guessRate": "猜测率",
         "inGame": {
+            "activityRoundRevealCorrect": "**{{song}}** — **{{artist}}**。{{winner}} 猜对了。打开活动查看完整揭晓。",
+            "activityRoundRevealNoCorrect": "**{{song}}** — **{{artist}}**。没有人猜对。打开活动查看完整揭晓。",
+            "activitySessionEndNoWinners": "游戏结束 — 没有得分。{{footer}} 打开活动以查看最终摘要。",
+            "activitySessionEndWinners": "🎉 {{winnerMessage}} 🎉 {{footer}} 打开活动以查看最终排行榜。",
             "aliases": "别名",
             "bonusArtistRound": "额外艺术家回合",
             "bonusExpArtistRound": "额外经验和艺术家回合",
@@ -1674,6 +1678,7 @@
             "hiddenTimerInfo": "{{guessButton}}在回合结束前{{timestamp}}之前点击！",
             "noCorrectGuesses": "没有人猜中。",
             "noWinners": "没有获胜者",
+            "roundNumber": "第 {{roundNum}} 轮",
             "runnersUp": "亚军",
             "songsCorrectlyGuessed": "{{songCount}} 首歌曲猜对了！",
             "uniqueSongsPlayed": "{{uniqueSongCount}} 首独特的歌曲播放了。"

@@ -91,4 +91,16 @@ export default class KmqConfiguration {
     downloadWithOnesieRequest(): boolean {
         return this.config["downloadWithOnesieRequest"] ?? false;
     }
+
+    /**
+     * When on, suppress the channel embeds the bot normally sends during a
+     * game (round start, round end / reveal, scoreboard, end-of-game
+     * summary) in favour of one-line "open the Activity" pointers. Users who
+     * don't open the Activity can still play by guessing in the text
+     * channel — the reduction is cosmetic, not functional.
+     * @returns whether channel embeds should be reduced to Activity pointers.
+     */
+    activityReducedEmbeds(): boolean {
+        return this.config["activityReducedEmbeds"] ?? false;
+    }
 }
