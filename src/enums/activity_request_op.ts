@@ -6,6 +6,7 @@ type ActivityRequestOp =
     | "endGame"
     | "hint"
     | "bookmark"
-    | "setOption";
+    | "setOption"
+    | "autocompleteArtists";
 
 export default ActivityRequestOp;

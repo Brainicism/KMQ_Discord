@@ -1,7 +1,6 @@
 import * as uuid from "uuid";
 import {
     ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
-    ACTIVITY_AUTOCOMPLETE_LIMIT,
     ACTIVITY_GUESS_MAX_LENGTH,
     ACTIVITY_HTTP_TIMEOUT_MS,
     ACTIVITY_INSTANCE_CACHE_TTL_MS,
@@ -21,7 +20,6 @@ import {
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
-import { searchArtists } from "./helpers/discord_utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import GuessModeType from "./enums/option_types/guess_mode_type";
@@ -1060,6 +1058,13 @@ export default class KmqWebServer {
             "/api/activity/artist-autocomplete",
             limit(ACTIVITY_RATE_LIMIT_READ),
             async (request, reply) => {
+                if (!this.activityHub) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Activity not enabled" });
+                    return;
+                }
+
                 const user = await this.resolveAccessToken(
                     extractBearer(request),
                 );
@@ -1070,21 +1075,23 @@ export default class KmqWebServer {
                 }
 
                 const q = (request.query as any)?.q;
-                const query =
-                    typeof q === "string" ? q.trim().toLowerCase() : "";
+                const query = typeof q === "string" ? q : "";
 
-                // Reuse the slash-command's in-memory artist lookup. No
-                // DB hit — State.artistToEntry / State.topArtists are
-                // populated once at worker startup.
-                const results = searchArtists(query, [])
-                    .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
-                    .map((a) => ({
-                        id: a.id,
-                        name: a.name,
-                        hangulName: a.hangulName ?? null,
-                    }));
+                // Route to a worker — State.artistToEntry / State.topArtists
+                // are populated per-worker at boot via reloadCaches(), so the
+                // admiral has to ask one. Worker returns prefix matches
+                // capped at ACTIVITY_AUTOCOMPLETE_LIMIT.
+                try {
+                    const response =
+                        await this.activityHub.autocompleteArtists(query);
 
-                await reply.code(200).send({ results });
+                    await reply.code(200).send(response);
+                } catch (e) {
+                    logger.warn(
+                        `Activity artist-autocomplete failed. err=${(e as Error).message}`,
+                    );
+                    await reply.code(200).send({ results: [] });
+                }
             },
         );
 

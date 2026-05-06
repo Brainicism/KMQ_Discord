@@ -7,6 +7,8 @@ import {
 } from "./constants";
 import { IPCLogger } from "./logger";
 import type { Fleet } from "eris-fleet";
+import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomplete_artists_args";
+import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
@@ -226,6 +228,34 @@ export default class ActivityHub {
     }
 
     /**
+     * Looks up artists matching a query prefix. Dispatched to any available
+     * worker — the artist cache is identical across workers, so routing by
+     * guild isn't needed. Falls back to an empty result set if no worker
+     * is up yet.
+     * @param query - raw (untrimmed, any case) user input
+     * @returns the worker's top-N matches
+     */
+    async autocompleteArtists(
+        query: string,
+    ): Promise<ActivityAutocompleteArtistsResponse> {
+        if (this.clusterRanges.length === 0) {
+            await this.refreshClusterMap();
+        }
+
+        const target = this.clusterRanges[0]?.clusterID;
+        if (target === undefined) {
+            return { results: [] };
+        }
+
+        const args: ActivityAutocompleteArtistsArgs = { query };
+        return this.sendRequest<ActivityAutocompleteArtistsResponse>(
+            target,
+            "autocompleteArtists",
+            args,
+        );
+    }
+
+    /**
      * Adds a subscriber to receive live events for a guild.
      * @param guildID - the guild whose events to forward
      * @param subscriber - the subscriber's send/close handles
@@ -342,7 +372,8 @@ export default class ActivityHub {
             | ActivityStartGameArgs
             | ActivityUserActionArgs
             | ActivityBookmarkArgs
-            | ActivitySetOptionArgs,
+            | ActivitySetOptionArgs
+            | ActivityAutocompleteArtistsArgs,
     ): Promise<T> {
         const cid = uuid.v4();
         return new Promise<T>((resolve, reject) => {

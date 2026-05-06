@@ -1,4 +1,5 @@
 import {
+    ACTIVITY_AUTOCOMPLETE_LIMIT,
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
@@ -9,6 +10,7 @@ import { IPCLogger } from "../logger";
 import {
     getCurrentVoiceMembers,
     getMajorityCount,
+    searchArtists,
 } from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
@@ -27,6 +29,8 @@ import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
+import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
+import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
 import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
@@ -983,6 +987,34 @@ function ensureWorkerHandlerRegistered(): void {
                             );
                             reply({ ok: false, reason: "internal" });
                         }
+                    });
+                    return;
+                }
+
+                case "autocompleteArtists": {
+                    // Reads from this worker's already-populated artist
+                    // caches (State.artistToEntry / State.topArtists seeded
+                    // by reloadCaches at worker boot). No guild / session
+                    // context; the data is process-wide.
+                    const autocompleteArgs =
+                        args as ActivityAutocompleteArtistsArgs;
+
+                    const query = autocompleteArgs.query.trim().toLowerCase();
+                    const results = searchArtists(query, [])
+                        .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
+                        .map((a) => ({
+                            id: a.id,
+                            name: a.name,
+                            hangulName: a.hangulName ?? null,
+                        }));
+
+                    const payload: ActivityAutocompleteArtistsResponse = {
+                        results,
+                    };
+
+                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                        cid,
+                        payload,
                     });
                     return;
                 }
