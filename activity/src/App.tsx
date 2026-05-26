@@ -129,6 +129,65 @@ function proxyImageUrl(url: string): string {
     );
 }
 
+// YouTube doesn't generate every size for every video. maxresdefault.jpg is
+// missing for pre-720p uploads, and even sd/hq can 404 on older clips. Walk
+// down the chain until something loads, then stop. default.jpg is the only
+// size guaranteed to exist for every video.
+const THUMBNAIL_FALLBACK_CHAIN = [
+    "maxresdefault.jpg",
+    "sddefault.jpg",
+    "hqdefault.jpg",
+    "mqdefault.jpg",
+    "default.jpg",
+] as const;
+
+function RevealThumbnail({
+    thumbnailUrl,
+    alt,
+}: {
+    thumbnailUrl: string;
+    alt: string;
+}): React.ReactElement | null {
+    // Preload candidates via off-DOM Image() so the visible <img> only mounts
+    // once we know a good URL. Otherwise the user sees a brief flash of
+    // YouTube's 120x90 "no preview" placeholder before the chain advances
+    // (the Discord URL Mapping proxy can rewrite the 404 to a 200).
+    const [resolvedUrl, setResolvedUrl] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        setResolvedUrl(null);
+        const proxied = proxyImageUrl(thumbnailUrl);
+
+        (async () => {
+            for (const size of THUMBNAIL_FALLBACK_CHAIN) {
+                if (cancelled) return;
+                const candidate = proxied.replace(/\/[^/]+\.jpg$/, `/${size}`);
+                const ok = await new Promise<boolean>((resolve) => {
+                    const probe = new Image();
+                    probe.onload = () =>
+                        resolve(
+                            size === "default.jpg" || probe.naturalWidth > 120,
+                        );
+                    probe.onerror = () => resolve(false);
+                    probe.src = candidate;
+                });
+                if (ok && !cancelled) {
+                    setResolvedUrl(candidate);
+                    return;
+                }
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [thumbnailUrl]);
+
+    if (!resolvedUrl) return null;
+    return <img src={resolvedUrl} alt={alt} />;
+}
+
 function rejectReasonText(
     t: Translator,
     reason: GuessRejectReason | undefined,
@@ -340,25 +399,10 @@ function CurrentRound({
                             }
                             title={t("openOnYouTube")}
                         >
-                            <img
-                                src={proxyImageUrl(reveal.song.thumbnailUrl)}
+                            <RevealThumbnail
+                                key={reveal.song.thumbnailUrl}
+                                thumbnailUrl={reveal.song.thumbnailUrl}
                                 alt=""
-                                onError={(e) => {
-                                    // maxresdefault.jpg isn't generated for
-                                    // pre-720p uploads — fall back to the
-                                    // always-present hqdefault.jpg. Guard
-                                    // against a re-trigger loop by swapping
-                                    // only once.
-                                    const img = e.currentTarget;
-                                    if (
-                                        img.src.includes("/maxresdefault.jpg")
-                                    ) {
-                                        img.src = img.src.replace(
-                                            "/maxresdefault.jpg",
-                                            "/hqdefault.jpg",
-                                        );
-                                    }
-                                }}
                             />
                             <span className="thumbnail-overlay">
                                 {t("youtubePlayLabel")}
