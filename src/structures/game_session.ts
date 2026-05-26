@@ -1028,11 +1028,6 @@ export default class GameSession extends Session {
         const locale = State.getGuildLocale(this.guildID);
         const song = round.song.getLocalizedSongName(locale);
         const artist = round.song.getLocalizedArtistName(locale);
-        const key =
-            playerRoundResults.length > 0
-                ? "misc.inGame.activityRoundRevealCorrect"
-                : "misc.inGame.activityRoundRevealNoCorrect";
-
         const winner =
             playerRoundResults.length > 0
                 ? playerRoundResults
@@ -1045,11 +1040,13 @@ export default class GameSession extends Session {
             title: i18n.translate(this.guildID, "misc.inGame.roundNumber", {
                 roundNum: String(this.roundsPlayed + 1),
             }),
-            description: i18n.translate(this.guildID, key, {
-                song,
-                artist,
-                winner,
-            }),
+            description: i18n.translate(
+                this.guildID,
+                playerRoundResults.length > 0
+                    ? "misc.inGame.activityRoundRevealCorrect"
+                    : "misc.inGame.activityRoundRevealNoCorrect",
+                { song, artist, winner },
+            ),
         });
     }
 
