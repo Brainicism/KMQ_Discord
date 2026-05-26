@@ -102,6 +102,8 @@
         "startGameButton": "Start game",
         "statusConnecting": "Connecting...",
         "statusDisconnected": "Disconnected from KMQ. Refresh to retry.",
+        "themeToggleDark": "Switch to dark mode",
+        "themeToggleLight": "Switch to light mode",
         "waitingForNextRound": "Waiting for the next round...",
         "youtubePlayLabel": "▶ YouTube"
     },

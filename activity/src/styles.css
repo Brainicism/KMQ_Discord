@@ -5,7 +5,8 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap");
 
-:root {
+:root,
+:root[data-theme="light"] {
     color-scheme: light;
     font-family: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
 
@@ -50,6 +51,55 @@
     --shadow-md: 0 4px 16px rgba(100, 60, 60, 0.08);
     --shadow-card: 0 2px 12px rgba(100, 60, 60, 0.06);
     --shadow-glow: 0 4px 20px rgba(230, 57, 70, 0.12);
+
+    --body-radial-color: rgba(255, 143, 163, 0.08);
+}
+
+/* Dark theme — warm near-black palette; brand red stays; "light" tint vars
+ * flip from near-white to near-black equivalents so pill backgrounds,
+ * hint-revealed glows, winner highlights, etc. stay legible without any
+ * rule-level changes. */
+:root[data-theme="dark"] {
+    color-scheme: dark;
+
+    --bg-base: #161012;
+    --bg-surface: #1f1a1c;
+    --bg-elevated: #272022;
+    --bg-hover: #30282a;
+    --bg-sidebar: #1b1517;
+
+    --red-primary: #ff5666;
+    --red-glow: rgba(255, 86, 102, 0.18);
+    --red-soft: #ff8999;
+    --red-light: #2d1a1f;
+    --red-muted: rgba(255, 86, 102, 0.12);
+
+    --pink: #ff8fa3;
+    --pink-light: #2b1a22;
+    --pink-soft: rgba(255, 143, 163, 0.18);
+
+    --rose: #f9a8b8;
+    --rose-light: #2a1c23;
+
+    --gold: #ffc261;
+    --gold-light: #2c2417;
+
+    --green: #4be29a;
+    --green-light: #152b22;
+
+    --text-primary: #f5ecea;
+    --text-secondary: #b8a5a5;
+    --text-tertiary: #8a7a7a;
+
+    --border: rgba(255, 255, 255, 0.08);
+    --border-red: rgba(255, 86, 102, 0.22);
+
+    --shadow-sm: 0 1px 4px rgba(0, 0, 0, 0.4);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.45);
+    --shadow-card: 0 2px 12px rgba(0, 0, 0, 0.4);
+    --shadow-glow: 0 4px 20px rgba(255, 86, 102, 0.28);
+
+    --body-radial-color: rgba(255, 86, 102, 0.06);
 }
 
 * {
@@ -81,7 +131,7 @@ body::before {
     height: 500px;
     background: radial-gradient(
         ellipse,
-        rgba(255, 143, 163, 0.08) 0%,
+        var(--body-radial-color) 0%,
         transparent 70%
     );
     pointer-events: none;
@@ -230,6 +280,11 @@ body::before {
 .sidebar-toggle.left {
     right: auto;
     left: 16px;
+}
+
+.sidebar-toggle.theme {
+    top: 64px;
+    font-size: 1.2rem;
 }
 
 .sidebar-toggle:hover {

@@ -102,6 +102,8 @@
         "startGameButton": "게임 시작",
         "statusConnecting": "연결 중…",
         "statusDisconnected": "KMQ와의 연결이 끊어졌습니다. 새로고침하여 다시 시도하세요.",
+        "themeToggleDark": "다크 모드로 전환",
+        "themeToggleLight": "라이트 모드로 전환",
         "waitingForNextRound": "다음 라운드를 기다리는 중…",
         "youtubePlayLabel": "▶ YouTube"
     },

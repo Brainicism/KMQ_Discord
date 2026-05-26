@@ -65,6 +65,32 @@ const PRE_HYDRATE_STRINGS: Record<string, string> = {
     statusConnecting: "Connecting...",
 };
 
+type Theme = "light" | "dark";
+
+const THEME_STORAGE_KEY = "kmq:theme";
+
+function readInitialTheme(): Theme {
+    // localStorage can throw in sandboxed contexts (rare inside Discord's
+    // iframe but not impossible). Fall back to the OS preference.
+    try {
+        const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+        if (stored === "dark" || stored === "light") return stored;
+    } catch {
+        // ignore
+    }
+
+    // Discord's client defaults to dark; matching it is the better first
+    // impression for most users.
+    if (
+        typeof window.matchMedia === "function" &&
+        window.matchMedia("(prefers-color-scheme: dark)").matches
+    ) {
+        return "dark";
+    }
+
+    return "dark";
+}
+
 const initialUi: UiState = {
     session: null,
     scoreboard: null,
@@ -1354,6 +1380,18 @@ export default function App() {
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [historyOpen, setHistoryOpen] = useState(true);
+    const [theme, setTheme] = useState<Theme>(readInitialTheme);
+
+    // Mirror theme → <html data-theme>. Persist to localStorage so the
+    // next iframe load doesn't flash the other theme while React boots.
+    useEffect(() => {
+        document.documentElement.setAttribute("data-theme", theme);
+        try {
+            window.localStorage.setItem(THEME_STORAGE_KEY, theme);
+        } catch {
+            // ignore
+        }
+    }, [theme]);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for
@@ -1528,6 +1566,23 @@ export default function App() {
                 title={t("scoreboardHeading")}
             >
                 <span>🏆</span>
+            </button>
+
+            {/* Theme toggle — sun/moon */}
+            <button
+                type="button"
+                className="sidebar-toggle theme"
+                onClick={() =>
+                    setTheme((prev) => (prev === "dark" ? "light" : "dark"))
+                }
+                title={t(
+                    theme === "dark" ? "themeToggleLight" : "themeToggleDark",
+                )}
+                aria-label={t(
+                    theme === "dark" ? "themeToggleLight" : "themeToggleDark",
+                )}
+            >
+                <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
 
             <div

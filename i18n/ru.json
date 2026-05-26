@@ -102,6 +102,8 @@
         "startGameButton": "Начать игру",
         "statusConnecting": "Подключение…",
         "statusDisconnected": "Отключено от KMQ. Обновите для повтора.",
+        "themeToggleDark": "Переключиться на тёмный режим",
+        "themeToggleLight": "Переключиться на светлый режим",
         "waitingForNextRound": "Ожидание следующего раунда…",
         "youtubePlayLabel": "▶ YouTube"
     },

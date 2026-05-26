@@ -102,6 +102,8 @@
         "startGameButton": "Spel starten",
         "statusConnecting": "Verbinden…",
         "statusDisconnected": "Verbinding met KMQ verbroken. Ververs om opnieuw te proberen.",
+        "themeToggleDark": "Overschakelen naar de donkere modus",
+        "themeToggleLight": "Overschakelen naar de lichte modus",
         "waitingForNextRound": "Wachten op volgende ronde…",
         "youtubePlayLabel": "▶ YouTube"
     },

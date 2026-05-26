@@ -102,6 +102,8 @@
         "startGameButton": "ゲーム開始",
         "statusConnecting": "接続中…",
         "statusDisconnected": "KMQから切断されました。再試行するには更新してください。",
+        "themeToggleDark": "ダークモードに切り替え",
+        "themeToggleLight": "ライトモードに切り替え",
         "waitingForNextRound": "次のラウンドを待機中…",
         "youtubePlayLabel": "▶ YouTube"
     },

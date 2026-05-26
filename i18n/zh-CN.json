@@ -102,6 +102,8 @@
         "startGameButton": "开始游戏",
         "statusConnecting": "连接中…",
         "statusDisconnected": "与 KMQ 断开连接。刷新重试。",
+        "themeToggleDark": "切换到深色模式",
+        "themeToggleLight": "切换到浅色模式",
         "waitingForNextRound": "等待下一回合…",
         "youtubePlayLabel": "▶ YouTube"
     },

@@ -102,6 +102,8 @@
         "startGameButton": "Mulai permainan",
         "statusConnecting": "Menghubungkan…",
         "statusDisconnected": "Terputus dari KMQ. Refresh untuk mencoba lagi.",
+        "themeToggleDark": "Beralih ke mode gelap",
+        "themeToggleLight": "Beralih ke mode terang",
         "waitingForNextRound": "Menunggu ronde berikutnya…",
         "youtubePlayLabel": "▶ YouTube"
     },

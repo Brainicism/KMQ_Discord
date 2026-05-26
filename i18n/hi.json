@@ -102,6 +102,8 @@
         "startGameButton": "खेल शुरू करें",
         "statusConnecting": "कनेक्ट हो रहा है…",
         "statusDisconnected": "KMQ से डिस्कनेक्ट। पुनः प्रयास के लिए रीफ्रेश करें।",
+        "themeToggleDark": "डार्क मोड में स्विच करें",
+        "themeToggleLight": "लाइट मोड में स्विच करें",
         "waitingForNextRound": "अगले राउंड का इंतज़ार है…",
         "youtubePlayLabel": "▶ YouTube"
     },
