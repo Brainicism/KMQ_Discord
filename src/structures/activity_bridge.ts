@@ -1043,13 +1043,33 @@ function ensureWorkerHandlerRegistered(): void {
                         autocompleteArgs.query.trim(),
                     );
 
-                    const results = searchArtists(query, [])
-                        .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
-                        .map((a) => ({
+                    // searchArtists can return the same artist more than once
+                    // when several of its aliases share the typed prefix (e.g.
+                    // "loona"/"loonatheworld"). Dedupe by id so the client
+                    // never renders two suggestions with the same React key
+                    // (duplicate keys corrupt list reconciliation, leaving
+                    // stale rows until the list remounts), and so the limit
+                    // counts distinct artists.
+                    const seen = new Set<number>();
+                    const results: ActivityAutocompleteArtistsResponse["results"] =
+                        [];
+
+                    for (const a of searchArtists(query, [])) {
+                        if (seen.has(a.id)) {
+                            continue;
+                        }
+
+                        seen.add(a.id);
+                        results.push({
                             id: a.id,
                             name: a.name,
                             hangulName: a.hangulName ?? null,
-                        }));
+                        });
+
+                        if (results.length >= ACTIVITY_AUTOCOMPLETE_LIMIT) {
+                            break;
+                        }
+                    }
 
                     const payload: ActivityAutocompleteArtistsResponse = {
                         results,
