@@ -300,11 +300,44 @@ function Scoreboard({
     );
 }
 
+// Tiles up to 9 of the game's songs into the end-of-game box. A square grid
+// keeps each cell at the slot's 16:9 aspect ratio so the dynamic YouTube
+// thumbnails crop minimally under object-fit: cover (handled in CSS). Songs
+// are sampled evenly across the session so the montage spans the whole game
+// rather than just its opening rounds.
+function SongMontage({ history }: { history: UiState["roundHistory"] }) {
+    const tileCount =
+        history.length >= 9 ? 9 : history.length >= 4 ? 4 : history.length;
+    const cols = tileCount >= 9 ? 3 : tileCount >= 4 ? 2 : tileCount;
+
+    const tiles: UiState["roundHistory"] = [];
+    for (let i = 0; i < tileCount; i++) {
+        tiles.push(history[Math.floor((i * history.length) / tileCount)]!);
+    }
+
+    return (
+        <div
+            className="song-montage"
+            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+            aria-hidden
+        >
+            {tiles.map((song, i) => (
+                <RevealThumbnail
+                    key={`${song.youtubeLink}-${i}`}
+                    thumbnailUrl={song.thumbnailUrl}
+                    alt=""
+                />
+            ))}
+        </div>
+    );
+}
+
 function CurrentRound({
     round,
     reveal,
     bookmarkSlot,
     winnerText,
+    history,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -313,6 +346,8 @@ function CurrentRound({
     /** If non-null, the round-area idle state renders the session-end winner
      *  line in place of "Waiting for next round". */
     winnerText: string | null;
+    /** Songs played this session, used to build the end-of-game montage. */
+    history: UiState["roundHistory"];
     t: Translator;
 }) {
     return (
@@ -432,9 +467,15 @@ function CurrentRound({
                         )}
                     </div>
                     {winnerText ? (
-                        <div className="thumbnail-slot session-winner-art">
-                            <img src={thumbsUpUrl} alt="" />
-                        </div>
+                        history.length > 0 ? (
+                            <div className="thumbnail-slot session-montage">
+                                <SongMontage history={history} />
+                            </div>
+                        ) : (
+                            <div className="thumbnail-slot session-winner-art">
+                                <img src={thumbsUpUrl} alt="" />
+                            </div>
+                        )
                     ) : (
                         <div className="thumbnail-slot placeholder" aria-hidden>
                             <span className="note-float">♪</span>
@@ -1766,6 +1807,7 @@ export default function App() {
                         <CurrentRound
                             round={ui.currentRound}
                             reveal={ui.lastReveal}
+                            history={ui.roundHistory}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
