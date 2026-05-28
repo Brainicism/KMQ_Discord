@@ -300,15 +300,16 @@ function Scoreboard({
     );
 }
 
-// Tiles up to 9 of the game's songs into the end-of-game box. A square grid
-// keeps each cell at the slot's 16:9 aspect ratio so the dynamic YouTube
-// thumbnails crop minimally under object-fit: cover (handled in CSS). Songs
-// are sampled evenly across the session so the montage spans the whole game
-// rather than just its opening rounds.
+// Tiles up to 4 of the game's songs (2x2) into the end-of-game box. The
+// dynamic YouTube thumbnails crop to fill each cell under object-fit: cover
+// (handled in CSS). Songs are sampled evenly across the session so the
+// montage spans the whole game rather than just its opening rounds.
 function SongMontage({ history }: { history: UiState["roundHistory"] }) {
-    const tileCount =
-        history.length >= 9 ? 9 : history.length >= 4 ? 4 : history.length;
-    const cols = tileCount >= 9 ? 3 : tileCount >= 4 ? 2 : tileCount;
+    // Cap at a 2x2 grid — 3x3 tiles are small enough that the thumbnails
+    // look pixelated in the box.
+    const tileCount = history.length >= 4 ? 4 : history.length;
+    const cols = tileCount >= 4 ? 2 : tileCount;
+    const rows = Math.ceil(tileCount / cols);
 
     const tiles: UiState["roundHistory"] = [];
     for (let i = 0; i < tileCount; i++) {
@@ -318,7 +319,10 @@ function SongMontage({ history }: { history: UiState["roundHistory"] }) {
     return (
         <div
             className="song-montage"
-            style={{ gridTemplateColumns: `repeat(${cols}, 1fr)` }}
+            style={{
+                gridTemplateColumns: `repeat(${cols}, 1fr)`,
+                gridTemplateRows: `repeat(${rows}, 1fr)`,
+            }}
             aria-hidden
         >
             {tiles.map((song, i) => (

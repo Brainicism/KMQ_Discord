@@ -664,13 +664,14 @@ body::before {
     display: block;
 }
 
-/* end-of-game montage: tiled song thumbnails filling the 16:9 box */
+/* end-of-game montage: tiled song thumbnails filling the 16:9 box. Absolute
+   positioning gives the grid a definite height (the slot's aspect-ratio box)
+   so the 1fr row tracks divide evenly and the bottom row isn't clipped. */
 .song-montage {
+    position: absolute;
+    inset: 0;
     display: grid;
-    grid-auto-rows: 1fr;
     gap: 2px;
-    width: 100%;
-    height: 100%;
     background: var(--border-red);
 }
 
