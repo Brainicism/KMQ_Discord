@@ -542,11 +542,6 @@ body::before {
     line-height: 1;
 }
 
-.timeout {
-    font-size: 0.76rem;
-    color: var(--text-tertiary);
-}
-
 .round-area-text .artist-line {
     margin: 0;
     color: var(--text-secondary);

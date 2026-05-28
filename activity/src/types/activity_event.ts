@@ -31,6 +31,11 @@ type ActivityEvent =
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }
     | { type: "skipped" }
-    | { type: "optionsChanged"; options: ActivityOptionsSnapshot };
+    | { type: "optionsChanged"; options: ActivityOptionsSnapshot }
+    | {
+          type: "roundTimerChanged";
+          guessTimeoutSec: number | null;
+          timerStartedAt: number;
+      };
 
 export default ActivityEvent;

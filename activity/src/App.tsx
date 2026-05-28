@@ -218,17 +218,33 @@ function rejectReasonText(
     }
 }
 
-function RoundTimer({ startedAt }: { startedAt: number }) {
-    const [elapsedMs, setElapsedMs] = useState(Date.now() - startedAt);
+function RoundTimer({
+    songStartedAt,
+    timerStartedAt,
+    guessTimeoutSec,
+}: {
+    songStartedAt: number;
+    timerStartedAt: number;
+    guessTimeoutSec: number | null;
+}) {
+    const [now, setNow] = useState(Date.now());
     useEffect(() => {
-        const id = setInterval(
-            () => setElapsedMs(Date.now() - startedAt),
-            ROUND_TIMER_TICK_MS,
-        );
+        const id = setInterval(() => setNow(Date.now()), ROUND_TIMER_TICK_MS);
         return () => clearInterval(id);
-    }, [startedAt]);
+    }, []);
 
-    const seconds = Math.max(0, Math.floor(elapsedMs / 1000));
+    // With a guess-timer set, the main counter counts down to 0 from the
+    // moment the timer started (which resets if the timer is changed mid-
+    // round). Without a timer, it counts elapsed time up from song start.
+    if (guessTimeoutSec !== null) {
+        const remaining = Math.max(
+            0,
+            Math.ceil(guessTimeoutSec - (now - timerStartedAt) / 1000),
+        );
+        return <span className="round-timer counting-down">{remaining}s</span>;
+    }
+
+    const seconds = Math.max(0, Math.floor((now - songStartedAt) / 1000));
     return <span className="round-timer">{seconds}s</span>;
 }
 
@@ -314,15 +330,11 @@ function CurrentRound({
                             </h3>
                             {bookmarkSlot}
                         </div>
-                        <RoundTimer startedAt={round.songStartedAt} />
-                        {round.guessTimeoutSec && (
-                            <span className="timeout">
-                                ⏱{" "}
-                                {t("roundTimeoutLabel", {
-                                    sec: round.guessTimeoutSec,
-                                })}
-                            </span>
-                        )}
+                        <RoundTimer
+                            songStartedAt={round.songStartedAt}
+                            timerStartedAt={round.timerStartedAt}
+                            guessTimeoutSec={round.guessTimeoutSec}
+                        />
                     </div>
                     <div className="thumbnail-slot placeholder" aria-hidden>
                         <span className="note-float">♪</span>
@@ -1139,6 +1151,10 @@ function ArtistListGroup({
     useEffect(() => {
         if (!showSuggestions) return;
         const trimmed = query.trim();
+        // Guard against out-of-order responses: a slower fetch for an earlier
+        // query must not overwrite the results of the query the user has since
+        // typed. Cleanup marks this run stale so its response is dropped.
+        let cancelled = false;
         const id = setTimeout(() => {
             void (async () => {
                 try {
@@ -1146,6 +1162,7 @@ function ArtistListGroup({
                         accessToken,
                         trimmed,
                     );
+                    if (cancelled) return;
                     const selectedIDs = new Set(artists.map((a) => a.id));
                     setSuggestions(
                         results
@@ -1153,11 +1170,14 @@ function ArtistListGroup({
                             .map((r) => ({ id: r.id, name: r.name })),
                     );
                 } catch {
-                    setSuggestions([]);
+                    if (!cancelled) setSuggestions([]);
                 }
             })();
         }, 200);
-        return () => clearTimeout(id);
+        return () => {
+            cancelled = true;
+            clearTimeout(id);
+        };
     }, [query, accessToken, showSuggestions, artists]);
 
     const addArtist = (a: ActivityArtist): void => {
@@ -2057,6 +2077,19 @@ function reduce(
             };
         case "optionsChanged":
             return { ...prev, options: msg.options };
+        case "roundTimerChanged":
+            // Mid-round timer change: update only the live round's countdown
+            // reference so the main timer reflects the new value immediately.
+            return prev.currentRound
+                ? {
+                      ...prev,
+                      currentRound: {
+                          ...prev.currentRound,
+                          guessTimeoutSec: msg.guessTimeoutSec,
+                          timerStartedAt: msg.timerStartedAt,
+                      },
+                  }
+                : prev;
         default:
             return prev;
     }

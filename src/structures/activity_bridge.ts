@@ -18,6 +18,7 @@ import GameOption from "../enums/game_option_name";
 // Not a cycle: game_session.ts no longer imports this module — the
 // attachActivityBridge call was moved to PlayCommand alongside the
 // State.gameSessions write, so this import is a one-way edge.
+import GameRound from "./game_round";
 import GameSession from "./game_session";
 import GameType from "../enums/game_type";
 import GuildPreference from "./guild_preference";
@@ -175,6 +176,7 @@ function buildSessionSnapshot(
                       roundIndex: session.getRoundsPlayed(),
                       songStartedAt: round.songStartedAt,
                       guessTimeoutSec: session.getGuessTimeoutSec(),
+                      timerStartedAt: round.timerStartedAt,
                   }
                 : undefined,
     };
@@ -302,6 +304,7 @@ interface RoundStartPayload {
     roundIndex: number;
     songStartedAt: number;
     guessTimeoutSec: number | null;
+    timerStartedAt: number;
 }
 
 interface RoundEndPayload {
@@ -825,6 +828,39 @@ function ensureWorkerHandlerRegistered(): void {
                                     await guildPreference.setGuessTimeout(
                                         optionArgs.timer,
                                     );
+
+                                    // Apply to the live round immediately,
+                                    // mirroring the /timer command: restart
+                                    // the guess-timeout from now and push the
+                                    // new countdown reference so the Activity
+                                    // timer reflects the change mid-round
+                                    // instead of waiting for the next round.
+                                    if (
+                                        session &&
+                                        session.isGameSession() &&
+                                        session.round &&
+                                        session.connection?.playing
+                                    ) {
+                                        session.stopGuessTimeout();
+                                        session.startGuessTimeout(
+                                            new MessageContext(
+                                                session.textChannelID,
+                                                null,
+                                                optionArgs.guildID,
+                                            ),
+                                        );
+                                        const timerStartedAt = Date.now();
+                                        session.round.timerStartedAt =
+                                            timerStartedAt;
+
+                                        pushEvent(optionArgs.guildID, {
+                                            type: "roundTimerChanged",
+                                            guessTimeoutSec:
+                                                session.getGuessTimeoutSec(),
+                                            timerStartedAt,
+                                        });
+                                    }
+
                                     break;
                                 }
 
@@ -999,7 +1035,14 @@ function ensureWorkerHandlerRegistered(): void {
                     const autocompleteArgs =
                         args as ActivityAutocompleteArtistsArgs;
 
-                    const query = autocompleteArgs.query.trim().toLowerCase();
+                    // searchArtists matches against keys normalized via
+                    // normalizePunctuationInName (which strips spaces and
+                    // punctuation), so the query must be normalized the same
+                    // way — otherwise "red velvet" never matches "redvelvet".
+                    const query = GameRound.normalizePunctuationInName(
+                        autocompleteArgs.query.trim(),
+                    );
+
                     const results = searchArtists(query, [])
                         .slice(0, ACTIVITY_AUTOCOMPLETE_LIMIT)
                         .map((a) => ({
@@ -1076,6 +1119,7 @@ export function attachActivityBridge(session: GameSession): void {
                 roundIndex: payload.roundIndex,
                 songStartedAt: payload.songStartedAt,
                 guessTimeoutSec: payload.guessTimeoutSec,
+                timerStartedAt: payload.timerStartedAt,
             },
         });
     });
