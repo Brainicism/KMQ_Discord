@@ -1037,21 +1037,35 @@ function OptionLabel({
     label: React.ReactNode;
     help?: string;
 }) {
+    // Tap/click toggles an inline help line. The native `title` tooltip only
+    // appears on desktop hover (touch devices never fire it), so the visible
+    // bubble is what makes the help reachable on mobile. Expanding inline
+    // (rather than an absolutely-positioned popover) keeps it on-screen in the
+    // narrow options grid without risking overflow / a horizontal scrollbar.
+    const [open, setOpen] = useState(false);
+
     return (
-        <div className="option-label">
-            <span>{label}</span>
-            {help && (
-                <button
-                    type="button"
-                    className="option-info"
-                    aria-label={help}
-                    title={help}
-                    onClick={(e) => e.preventDefault()}
-                >
-                    ?
-                </button>
-            )}
-        </div>
+        <>
+            <div className="option-label">
+                <span>{label}</span>
+                {help && (
+                    <button
+                        type="button"
+                        className="option-info"
+                        aria-label={help}
+                        aria-expanded={open}
+                        title={help}
+                        onClick={(e) => {
+                            e.preventDefault();
+                            setOpen((o) => !o);
+                        }}
+                    >
+                        ?
+                    </button>
+                )}
+            </div>
+            {help && open && <p className="option-help-text">{help}</p>}
+        </>
     );
 }
 
@@ -1834,6 +1848,34 @@ export default function App() {
             // ignore
         }
     }, [theme]);
+
+    // Pin the layout height to the tallest viewport we've seen and never let
+    // it shrink. Discord's Android WebView can resize its window when the soft
+    // keyboard opens (adjustResize, outside our control and below the CSS
+    // interactive-widget hint); a plain 100vh would follow that shrink and
+    // reflow the page mid keyboard-open, knocking focus off the guess input and
+    // closing the keyboard (the "opens then closes, takes a few taps" bug).
+    // Holding the height constant means the keyboard just overlays our content
+    // and the browser scrolls the focused input into view — no reflow. Grows
+    // for genuine viewport changes (orientation), ignores keyboard shrink.
+    useEffect(() => {
+        const apply = (): void => {
+            const h = window.innerHeight;
+            const current = parseFloat(
+                document.documentElement.style.getPropertyValue("--app-vh"),
+            );
+            if (!Number.isFinite(current) || h > current) {
+                document.documentElement.style.setProperty(
+                    "--app-vh",
+                    `${h}px`,
+                );
+            }
+        };
+
+        apply();
+        window.addEventListener("resize", apply);
+        return () => window.removeEventListener("resize", apply);
+    }, []);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for

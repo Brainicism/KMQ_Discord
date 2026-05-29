@@ -144,11 +144,13 @@ body::before {
  * an on-demand overlay drawer. */
 .kmq-layout {
     display: block;
-    /* Stable full-height shell. The Android keyboard overlays the page
-       (interactive-widget=overlays-content in index.html) rather than resizing
-       the viewport, so the layout doesn't reflow when it opens — the browser
-       scrolls the focused input into the visible area instead. */
-    height: 100vh;
+    /* --app-vh is pinned (in App) to the tallest viewport height we've seen
+       and never shrinks. When Discord's Android WebView shrinks for the soft
+       keyboard, our layout height stays put instead of reflowing (which knocked
+       focus off the guess input and closed the keyboard). The browser scrolls
+       the focused input up into the visible area. Falls back to 100vh before
+       the effect runs / on desktop. */
+    height: var(--app-vh, 100vh);
     overflow: hidden;
     position: relative;
 }
@@ -1318,7 +1320,7 @@ body::before {
     border-radius: 50%;
     background: transparent;
     color: var(--text-tertiary);
-    cursor: help;
+    cursor: pointer;
     font-size: 0.62rem;
     font-weight: 700;
     line-height: 1;
@@ -1339,10 +1341,21 @@ body::before {
     background: var(--red-light);
 }
 
-/* The description is shown via the native title tooltip (see App.tsx) rather
-   than a CSS box — the options panel sits in the narrow right-edge sidebar,
-   where a custom absolutely-positioned tooltip either ran off-screen or added
-   a horizontal scrollbar. The browser positions title tooltips for us. */
+/* Tapping the "?" expands this inline help line (the native title tooltip only
+   shows on desktop hover, so touch users need a visible bubble). Inline rather
+   than an absolutely-positioned popover so it can't run off-screen / add a
+   horizontal scrollbar in the narrow options grid. */
+.option-help-text {
+    margin: -2px 0 8px;
+    padding: 7px 9px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+}
 
 .pills {
     display: flex;
