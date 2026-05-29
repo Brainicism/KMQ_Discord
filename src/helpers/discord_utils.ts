@@ -1537,7 +1537,15 @@ export function getCurrentVoiceMembers(
     voiceChannelID: string,
 ): Array<Eris.Member> {
     const voiceChannel = getVoiceChannel(voiceChannelID);
-    if (!voiceChannel) {
+    // getVoiceChannel casts whatever getChannel returns to VoiceChannel, so a
+    // missing/uncached channel (null) OR a channel that isn't actually a voice
+    // channel (text/category/stale ID → voiceMembers is undefined) both land
+    // here. Guard voiceMembers explicitly; otherwise `.filter` throws
+    // "Cannot read properties of undefined (reading 'filter')" and escapes
+    // into callers (e.g. the Activity guild-lock handlers). The cast makes the
+    // type claim voiceMembers is always present, so silence the linter here.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!voiceChannel || !voiceChannel.voiceMembers) {
         logger.warn(`Voice channel not in cache: ${voiceChannelID}`);
         return [];
     }
