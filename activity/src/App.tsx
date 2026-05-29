@@ -1797,14 +1797,20 @@ function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
 
     return (
         <ul className="guess-ticker">
-            {guesses.slice(-RECENT_GUESS_DISPLAY_LIMIT).map((g) => (
-                <li
-                    key={`${g.userID}-${g.ts}`}
-                    className={g.isCorrect ? "correct" : "incorrect"}
-                >
-                    {g.isCorrect ? "✓" : "·"} {g.username}
-                </li>
-            ))}
+            {/* Newest first so the just-submitted guess is always on the top
+                row — the feed slot is a fixed two-row height and older guesses
+                past it clip out of view. */}
+            {guesses
+                .slice(-RECENT_GUESS_DISPLAY_LIMIT)
+                .reverse()
+                .map((g) => (
+                    <li
+                        key={`${g.userID}-${g.ts}`}
+                        className={g.isCorrect ? "correct" : "incorrect"}
+                    >
+                        {g.isCorrect ? "✓" : "·"} {g.username}
+                    </li>
+                ))}
         </ul>
     );
 }

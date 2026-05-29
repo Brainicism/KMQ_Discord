@@ -611,17 +611,27 @@ body::before {
     font-size: 4rem;
 }
 
-/* Decorative floating notes shown until the first guess arrives. The notes
-   are absolutely positioned, so give them a sized relative box to float in. */
+/* The feed slot below the countdown is a fixed height so swapping the
+   decorative notes for the live guess ticker (and the ticker filling up as
+   guesses arrive) never changes the stage's total height — otherwise the
+   vertically-centered countdown / round label / LIVE badge jump when the
+   first guess shows up. Both the notes and the ticker fill this same box. */
 .stage-notes {
     position: relative;
     width: 140px;
-    height: 44px;
+    height: 60px;
 }
 
 .stage .guess-ticker {
     width: 100%;
     max-width: 360px;
+    /* Same fixed height as .stage-notes so the swap doesn't shift the stage.
+       Newest guesses pack from the top; older ones past two rows clip out of
+       view (the full list is in the round reveal). */
+    height: 60px;
+    overflow: hidden;
+    align-content: flex-start;
+    justify-content: center;
 }
 
 .round-area-text .artist-line {
