@@ -565,10 +565,12 @@ function ControlButtons({
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
 
-    // Only gate when we positively know the user isn't in VC. When unknown
-    // (null) the button stays enabled and the server's not_in_vc reply is the
-    // backstop.
-    const startBlocked = selfInVC === false;
+    // Advisory only: when we believe the user isn't in VC we show a hint, but
+    // we do NOT disable the button. The SDK participant signal isn't reliable
+    // enough to hard-block on (it can lag a user who just joined voice), and a
+    // greyed-out button that won't recover is worse than a click that bounces
+    // with the server's not_in_vc message. The server is the source of truth.
+    const showVCHint = selfInVC === false;
 
     const run = async (
         action: "start" | "end",
@@ -593,7 +595,7 @@ function ControlButtons({
                 <button
                     type="button"
                     className="primary"
-                    disabled={busy !== null || startBlocked}
+                    disabled={busy !== null}
                     onClick={() =>
                         run("start", () =>
                             apiStartGame(accessToken, instanceId),
@@ -605,7 +607,7 @@ function ControlButtons({
                         : t("startGameButton")}
                 </button>
             )}
-            {!hasSession && startBlocked && (
+            {!hasSession && showVCHint && (
                 <span className="control-feedback">{t("notInVCWarning")}</span>
             )}
             {hasSession && (
@@ -1087,7 +1089,14 @@ function OptionsPanel({
     };
 
     const submitLimit = (start: number, end: number): void => {
-        if (start >= end) return;
+        // The game engine requires end > start (a zero/negative-width range
+        // selects no songs), matching the /limit slash command. Surface a
+        // message instead of silently dropping the change (e.g. "1 - 1").
+        if (start >= end) {
+            setFeedback(t("options.limitRangeError"));
+            return;
+        }
+
         void submit(
             { kind: "limit", limitStart: start, limitEnd: end },
             { ...options, limitStart: start, limitEnd: end },
@@ -1095,7 +1104,11 @@ function OptionsPanel({
     };
 
     const submitCutoff = (beginning: number, end: number): void => {
-        if (beginning > end) return;
+        if (beginning > end) {
+            setFeedback(t("options.cutoffRangeError"));
+            return;
+        }
+
         void submit(
             { kind: "cutoff", beginningYear: beginning, endYear: end },
             { ...options, beginningYear: beginning, endYear: end },
@@ -1845,6 +1858,36 @@ export default function App() {
         // tear down and rebuild the stream, so it's intentionally omitted.
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connectNonce]);
+
+    // Self-heal the VC gate. The participants subscription can miss the case
+    // where the user joins voice *after* the Activity loads, and the initial
+    // fetch can race an unpopulated participant list — both leave selfInVC
+    // stuck at false. Re-check whenever the iframe regains focus/visibility,
+    // plus one delayed retry after load, so the warning clears on its own.
+    useEffect(() => {
+        const userID = authState?.userID;
+        if (!userID) return undefined;
+
+        const refresh = async (): Promise<void> => {
+            const ids = await getConnectedParticipantIds();
+            if (ids !== null) setSelfInVC(ids.includes(userID));
+        };
+
+        const onFocus = (): void => void refresh();
+        const onVisible = (): void => {
+            if (document.visibilityState === "visible") void refresh();
+        };
+
+        window.addEventListener("focus", onFocus);
+        document.addEventListener("visibilitychange", onVisible);
+        const retry = window.setTimeout(() => void refresh(), 1500);
+
+        return () => {
+            window.removeEventListener("focus", onFocus);
+            document.removeEventListener("visibilitychange", onVisible);
+            window.clearTimeout(retry);
+        };
+    }, [authState?.userID]);
 
     const reconnect = (): void => {
         setReconnecting(true);

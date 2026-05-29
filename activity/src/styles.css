@@ -966,9 +966,22 @@ body::before {
     border-left: 3px solid var(--gold);
     padding: 9px 14px;
     border-radius: var(--radius-sm);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
     animation: hint-slide-in 0.3s ease;
     color: var(--text-primary);
+    /* Code-formatted: a monospace font keeps each masked character the same
+       width, and the letter-spacing separates the underscores so you can
+       count the hidden letters (otherwise "_A___" reads as one blob). */
+    font-family: var(
+        --font-mono,
+        ui-monospace,
+        "SFMono-Regular",
+        Menlo,
+        Consolas,
+        monospace
+    );
+    letter-spacing: 0.22em;
+    font-weight: 600;
 }
 
 @keyframes hint-slide-in {
