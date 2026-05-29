@@ -557,6 +557,15 @@ function ControlButtons({
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
 
+    // Auto-clear the action feedback so a stale message (e.g. "join the voice
+    // channel first" after the user has since joined) doesn't linger and look
+    // like a persistent error. Re-clicking re-evaluates regardless.
+    useEffect(() => {
+        if (!feedback) return undefined;
+        const id = window.setTimeout(() => setFeedback(null), 6000);
+        return () => window.clearTimeout(id);
+    }, [feedback]);
+
     const run = async (
         action: "start" | "end",
         fn: () => Promise<{ ok: boolean; reason?: GuessRejectReason }>,
