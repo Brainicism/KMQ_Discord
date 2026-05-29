@@ -1055,6 +1055,25 @@ function OptionLabel({
     );
 }
 
+/** One option in the grid: a label (+ help) over its pill controls. The
+ *  .options-group wrapper makes it a single grid cell in the options panel. */
+function PillField({
+    label,
+    help,
+    children,
+}: {
+    label: string;
+    help: string;
+    children: React.ReactNode;
+}) {
+    return (
+        <div className="options-group">
+            <OptionLabel label={label} help={help} />
+            <div className="pills">{children}</div>
+        </div>
+    );
+}
+
 function OptionsPanel({
     accessToken,
     instanceId,
@@ -1221,11 +1240,10 @@ function OptionsPanel({
 
     return (
         <div className="options-panel">
-            <OptionLabel
+            <PillField
                 label={t("options.gender")}
                 help={t("options.help.gender")}
-            />
-            <div className="pills">
+            >
                 {GENDER_OPTIONS.map((g) => {
                     const active = !isAlternating && options.gender.includes(g);
 
@@ -1247,13 +1265,12 @@ function OptionsPanel({
                 >
                     {t("options.alternating")}
                 </button>
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.guessMode")}
                 help={t("options.help.guessMode")}
-            />
-            <div className="pills">
+            >
                 {GUESS_MODE_OPTIONS.map((mode) => (
                     <button
                         key={mode}
@@ -1266,13 +1283,12 @@ function OptionsPanel({
                         {t(`options.${mode}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.multiguess")}
                 help={t("options.help.multiguess")}
-            />
-            <div className="pills">
+            >
                 <button
                     type="button"
                     className={`pill ${
@@ -1284,13 +1300,12 @@ function OptionsPanel({
                         ? t("options.on")
                         : t("options.off")}
                 </button>
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.shuffle")}
                 help={t("options.help.shuffle")}
-            />
-            <div className="pills">
+            >
                 {SHUFFLE_OPTIONS.map((s) => (
                     <button
                         key={s}
@@ -1301,13 +1316,9 @@ function OptionsPanel({
                         {t(`options.${s}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
-                label={t("options.seek")}
-                help={t("options.help.seek")}
-            />
-            <div className="pills">
+            <PillField label={t("options.seek")} help={t("options.help.seek")}>
                 {SEEK_OPTIONS.map((s) => (
                     <button
                         key={s}
@@ -1318,13 +1329,12 @@ function OptionsPanel({
                         {t(`options.${s}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.language")}
                 help={t("options.help.language")}
-            />
-            <div className="pills">
+            >
                 {LANGUAGE_OPTIONS.map((l) => (
                     <button
                         key={l}
@@ -1335,13 +1345,12 @@ function OptionsPanel({
                         {t(`options.${l}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.release")}
                 help={t("options.help.release")}
-            />
-            <div className="pills">
+            >
                 {RELEASE_OPTIONS.map((r) => (
                     <button
                         key={r}
@@ -1352,13 +1361,12 @@ function OptionsPanel({
                         {t(`options.${r}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.artisttype")}
                 help={t("options.help.artisttype")}
-            />
-            <div className="pills">
+            >
                 {ARTIST_TYPE_OPTIONS.map((a) => (
                     <button
                         key={a}
@@ -1371,13 +1379,12 @@ function OptionsPanel({
                         {t(`options.${a}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
-            <OptionLabel
+            <PillField
                 label={t("options.subunits")}
                 help={t("options.help.subunits")}
-            />
-            <div className="pills">
+            >
                 {SUBUNITS_OPTIONS.map((s) => (
                     <button
                         key={s}
@@ -1388,7 +1395,7 @@ function OptionsPanel({
                         {t(`options.${s}`)}
                     </button>
                 ))}
-            </div>
+            </PillField>
 
             <NumberRangeGroup
                 label={t("options.limit")}
@@ -1534,7 +1541,7 @@ function ArtistListGroup({
     };
 
     return (
-        <div className="options-group">
+        <div className="options-group options-group-wide">
             <OptionLabel label={label} help={help} />
             {artists.length > 0 && (
                 <div className="artist-chips">
@@ -1785,51 +1792,6 @@ function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
                 </li>
             ))}
         </ul>
-    );
-}
-
-/** Centered overlay dialog. Closes on backdrop click or Escape. */
-function Modal({
-    title,
-    onClose,
-    children,
-}: {
-    title: string;
-    onClose: () => void;
-    children: React.ReactNode;
-}) {
-    useEffect(() => {
-        const onKey = (e: KeyboardEvent): void => {
-            if (e.key === "Escape") onClose();
-        };
-
-        window.addEventListener("keydown", onKey);
-        return () => window.removeEventListener("keydown", onKey);
-    }, [onClose]);
-
-    return (
-        <div className="modal-backdrop" onClick={onClose}>
-            <div
-                className="modal"
-                role="dialog"
-                aria-modal="true"
-                aria-label={title}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="modal-header">
-                    <h3>{title}</h3>
-                    <button
-                        type="button"
-                        className="modal-close"
-                        onClick={onClose}
-                        aria-label="Close"
-                    >
-                        ✕
-                    </button>
-                </div>
-                <div className="modal-body">{children}</div>
-            </div>
-        </div>
     );
 }
 
@@ -2130,26 +2092,6 @@ export default function App() {
                 <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
 
-            {optionsOpen && authState && ui.options && (
-                <Modal
-                    title={t("options.heading")}
-                    onClose={() => setOptionsOpen(false)}
-                >
-                    <OptionsPanel
-                        accessToken={authState.accessToken}
-                        instanceId={authState.instanceId}
-                        options={ui.options}
-                        t={t}
-                        onOptimistic={(next) =>
-                            setUi((prev) => ({ ...prev, options: next }))
-                        }
-                        onRollback={(prevOpts) =>
-                            setUi((prev) => ({ ...prev, options: prevOpts }))
-                        }
-                    />
-                </Modal>
-            )}
-
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -2262,30 +2204,14 @@ export default function App() {
                             </div>
 
                             {authState && (
-                                <div className="header-actions">
-                                    {ui.options && (
-                                        <button
-                                            type="button"
-                                            className="header-gear"
-                                            onClick={() =>
-                                                setOptionsOpen((o) => !o)
-                                            }
-                                            title={t("options.heading")}
-                                            aria-label={t("options.heading")}
-                                        >
-                                            ⚙
-                                        </button>
-                                    )}
-                                    <ControlButtons
-                                        accessToken={authState.accessToken}
-                                        instanceId={authState.instanceId}
-                                        hasSession={
-                                            ui.session !== null &&
-                                            !ui.sessionEnded
-                                        }
-                                        t={t}
-                                    />
-                                </div>
+                                <ControlButtons
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hasSession={
+                                        ui.session !== null && !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
                             )}
                         </header>
 
@@ -2442,6 +2368,42 @@ export default function App() {
                                         })
                                     }
                                 />
+                            </div>
+                        )}
+
+                        {authState && ui.options && (
+                            <div className="options-section">
+                                <button
+                                    type="button"
+                                    className={`options-toggle ${
+                                        optionsOpen ? "open" : ""
+                                    }`}
+                                    onClick={() => setOptionsOpen((o) => !o)}
+                                    aria-expanded={optionsOpen}
+                                >
+                                    <span>⚙ {t("options.heading")}</span>
+                                    <span className="options-chevron">▾</span>
+                                </button>
+                                {optionsOpen && (
+                                    <OptionsPanel
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        options={ui.options}
+                                        t={t}
+                                        onOptimistic={(next) =>
+                                            setUi((prev) => ({
+                                                ...prev,
+                                                options: next,
+                                            }))
+                                        }
+                                        onRollback={(prevOpts) =>
+                                            setUi((prev) => ({
+                                                ...prev,
+                                                options: prevOpts,
+                                            }))
+                                        }
+                                    />
+                                )}
                             </div>
                         )}
                     </div>

@@ -408,36 +408,6 @@ body::before {
     font-weight: 600;
 }
 
-/* ---- HEADER ACTIONS (gear + start/end) ---- */
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.header-gear {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border-radius: 50%;
-    border: 1px solid var(--border-red);
-    background: var(--bg-surface);
-    color: var(--text-secondary);
-    cursor: pointer;
-    font-size: 1.05rem;
-    line-height: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
-}
-
-.header-gear:hover {
-    background: var(--red-light);
-    border-color: var(--red-primary);
-    color: var(--red-primary);
-}
-
 /* ---- CONTROL BUTTONS ---- */
 .control-buttons {
     display: flex;
@@ -1313,9 +1283,12 @@ body::before {
 
 /* ---- SIDEBAR OPTIONS PANEL ---- */
 .options-panel {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    /* Spread options across the available width: compact fields flow into as
+       many columns as fit; wide fields (artist lists, feedback) span all. */
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    gap: 16px 20px;
+    align-items: start;
 }
 
 .option-label {
@@ -1401,8 +1374,26 @@ body::before {
     box-shadow: 0 2px 8px rgba(230, 57, 70, 0.2);
 }
 
+/* Each option is a grid cell; the grid's gap handles spacing. */
 .options-group {
+    min-width: 0;
+}
+
+/* Artist lists need the full row (chips + autocomplete + dropdown). */
+.options-group-wide {
+    grid-column: 1 / -1;
+}
+
+/* Tighten the label spacing now that the grid gap separates fields. */
+.options-group .option-label {
+    margin-top: 0;
     margin-bottom: 6px;
+}
+
+/* Pills sit directly in their cell; the panel grid spaces the fields. */
+.options-group .pills,
+.options-group .number-row {
+    margin-bottom: 0;
 }
 
 .number-row {
@@ -1519,6 +1510,7 @@ body::before {
 
 .options-feedback {
     display: block;
+    grid-column: 1 / -1;
     color: var(--red-primary);
     font-size: 0.72rem;
     margin-top: 4px;
@@ -1663,87 +1655,49 @@ body::before {
     font-size: 1.2rem;
 }
 
-/* ---- MODAL (settings / options) ---- */
-.modal-backdrop {
-    position: fixed;
-    inset: 0;
-    z-index: 200;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    animation: modal-fade 0.12s ease;
-}
-
-.modal {
-    width: 100%;
-    max-width: 420px;
-    max-height: 85vh;
-    display: flex;
-    flex-direction: column;
+/* ---- OPTIONS (inline collapsible under the controls) ---- */
+.options-section {
     background: var(--bg-surface);
-    border: 1px solid var(--border-red);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
     overflow: hidden;
-    animation: modal-pop 0.14s ease;
 }
 
-.modal-header {
+.options-toggle {
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 14px 18px;
-    border-bottom: 1px solid var(--border);
-    position: sticky;
-    top: 0;
-    background: var(--bg-surface);
-}
-
-.modal-header h3 {
-    margin: 0;
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.modal-close {
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
+    gap: 8px;
+    padding: 11px 16px;
     border: none;
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 0.8rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.15s;
+    transition: background 0.12s;
 }
 
-.modal-close:hover {
-    background: var(--red-light);
-    color: var(--red-primary);
+.options-toggle:hover {
+    background: var(--bg-hover);
 }
 
-.modal-body {
-    padding: 16px 18px;
-    overflow-y: auto;
+.options-chevron {
+    color: var(--text-tertiary);
+    transition: transform 0.18s ease;
 }
 
-@keyframes modal-fade {
-    from {
-        opacity: 0;
-    }
+.options-toggle.open .options-chevron {
+    transform: rotate(180deg);
 }
 
-@keyframes modal-pop {
-    from {
-        opacity: 0;
-        transform: translateY(6px) scale(0.98);
-    }
+/* The panel grid lives inside the section, below the toggle bar. */
+.options-section .options-panel {
+    padding: 4px 16px 16px;
+    border-top: 1px solid var(--border);
 }
 
 /* ---- RESPONSIVE ---- */
