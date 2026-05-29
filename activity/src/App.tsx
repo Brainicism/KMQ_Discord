@@ -1904,9 +1904,19 @@ export default function App() {
                                     onVoteStart={() =>
                                         setUi((prev) => ({
                                             ...prev,
+                                            // Optimistically count the user's own
+                                            // vote so the tally/progress bar moves
+                                            // immediately, the same way the hint
+                                            // button shows progress on click. The
+                                            // server's skipProgress (absolute count)
+                                            // overwrites this on the round-trip, and
+                                            // roundStart resets it if the vote ends
+                                            // the round — so there's no double count.
                                             skip: {
                                                 ...prev.skip,
                                                 userVoted: true,
+                                                requesters:
+                                                    prev.skip.requesters + 1,
                                             },
                                         }))
                                     }
@@ -1924,11 +1934,19 @@ export default function App() {
                                             ) {
                                                 return prev;
                                             }
+                                            // Undo the optimistic vote: a failed vote
+                                            // never reached the server's skip count, so
+                                            // back out both the flag and the +1 tally.
                                             return {
                                                 ...prev,
                                                 skip: {
                                                     ...prev.skip,
                                                     userVoted: false,
+                                                    requesters: Math.max(
+                                                        0,
+                                                        prev.skip.requesters -
+                                                            1,
+                                                    ),
                                                 },
                                             };
                                         })
