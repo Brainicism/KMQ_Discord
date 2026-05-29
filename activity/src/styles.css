@@ -1386,8 +1386,12 @@ body::before {
     white-space: nowrap;
 }
 
-.history-bookmark {
-    font-size: 0.9rem;
+/* Per-row bookmark button — a slightly smaller bookmark-star that never
+   shrinks even when the song/artist text is long. */
+.song-history .bookmark-star {
+    width: 26px;
+    height: 26px;
+    font-size: 0.78rem;
     flex-shrink: 0;
 }
 

@@ -1434,10 +1434,16 @@ function NullableNumberGroup({
 function SongHistory({
     history,
     bookmarkedLinks,
+    auth,
+    onBookmarked,
     t,
 }: {
     history: UiState["roundHistory"];
     bookmarkedLinks: Set<string>;
+    /** Auth context for bookmarking from the list; null before auth resolves
+     *  (no buttons rendered then). */
+    auth: { accessToken: string; instanceId: string } | null;
+    onBookmarked: (link: string) => void;
     t: Translator;
 }) {
     if (history.length === 0) {
@@ -1452,7 +1458,6 @@ function SongHistory({
         <ol className="song-history">
             {ordered.map((song, i) => {
                 const roundNum = history.length - i;
-                const isBookmarked = bookmarkedLinks.has(song.youtubeLink);
                 return (
                     <li key={`${roundNum}-${song.youtubeLink}`}>
                         <span className="history-round">#{roundNum}</span>
@@ -1462,14 +1467,17 @@ function SongHistory({
                                 {song.artistName} ({song.publishYear})
                             </div>
                         </div>
-                        {isBookmarked && (
-                            <span
-                                className="history-bookmark"
-                                aria-hidden
-                                title={t("bookmarkTitleDone")}
-                            >
-                                🔖
-                            </span>
+                        {auth && (
+                            <BookmarkStar
+                                accessToken={auth.accessToken}
+                                instanceId={auth.instanceId}
+                                youtubeLink={song.youtubeLink}
+                                isBookmarked={bookmarkedLinks.has(
+                                    song.youtubeLink,
+                                )}
+                                onBookmarked={onBookmarked}
+                                t={t}
+                            />
                         )}
                     </li>
                 );
@@ -1796,6 +1804,23 @@ export default function App() {
                         <SongHistory
                             history={ui.roundHistory}
                             bookmarkedLinks={ui.bookmarkedLinks}
+                            auth={
+                                authState
+                                    ? {
+                                          accessToken: authState.accessToken,
+                                          instanceId: authState.instanceId,
+                                      }
+                                    : null
+                            }
+                            onBookmarked={(link) =>
+                                setUi((prev) => ({
+                                    ...prev,
+                                    bookmarkedLinks: new Set([
+                                        ...prev.bookmarkedLinks,
+                                        link,
+                                    ]),
+                                }))
+                            }
                             t={t}
                         />
                     </div>
