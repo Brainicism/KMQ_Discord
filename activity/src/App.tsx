@@ -2427,16 +2427,11 @@ export default function App() {
                         </button>
                     </div>
                     <div className="sidebar-body">
-                        <div>
-                            <h3 className="sb-section-title">
-                                {t("scoreboardHeading")}
-                            </h3>
-                            {ui.scoreboard ? (
-                                <Scoreboard scoreboard={ui.scoreboard} t={t} />
-                            ) : (
-                                <p className="empty">{t("scoreboardEmpty")}</p>
-                            )}
-                        </div>
+                        {ui.scoreboard ? (
+                            <Scoreboard scoreboard={ui.scoreboard} t={t} />
+                        ) : (
+                            <p className="empty">{t("scoreboardEmpty")}</p>
+                        )}
                     </div>
                 </aside>
             </div>
