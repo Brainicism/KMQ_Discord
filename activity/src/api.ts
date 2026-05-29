@@ -3,6 +3,8 @@ import type {
     ActivityGender,
     ActivityGuessMode,
     ActivityMultiguess,
+    ActivitySeek,
+    ActivityShuffle,
 } from "./types/activity_options_snapshot";
 import type ActivityEvent from "./types/activity_event";
 import type ActivitySessionResponse from "./types/activity_session_response";
@@ -26,6 +28,8 @@ export type SetOptionRequest =
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
     | { kind: "duration"; duration: number | null }
+    | { kind: "shuffle"; shuffle: ActivityShuffle }
+    | { kind: "seek"; seek: ActivitySeek }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] };

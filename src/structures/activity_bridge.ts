@@ -154,6 +154,8 @@ function snapshotOptions(
         goal: opts.goal,
         timer: opts.guessTimeout,
         duration: opts.duration,
+        shuffle: opts.shuffleType,
+        seek: opts.seekType,
         groups: toActivity(opts.groups),
         includes: toActivity(opts.includes),
         excludes: toActivity(opts.excludes),
@@ -874,6 +876,20 @@ function ensureWorkerHandlerRegistered(): void {
                                     // a point-and-click panel.
                                     await guildPreference.setDuration(
                                         optionArgs.duration as number,
+                                    );
+                                    break;
+                                }
+
+                                case "shuffle": {
+                                    await guildPreference.setShuffleType(
+                                        optionArgs.shuffle,
+                                    );
+                                    break;
+                                }
+
+                                case "seek": {
+                                    await guildPreference.setSeekType(
+                                        optionArgs.seek,
                                     );
                                     break;
                                 }

@@ -1,6 +1,8 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
+import type SeekType from "../enums/option_types/seek_type";
+import type ShuffleType from "../enums/option_types/shuffle_type";
 
 /**
  * Subset of GuildPreference the Activity panel surfaces today. Starts with
@@ -30,6 +32,10 @@ export default interface ActivityOptionsSnapshot {
     timer: number | null;
     /** Session duration in minutes; null when unset (no time limit). */
     duration: number | null;
+    /** How the eligible song pool is ordered/sampled each round. */
+    shuffle: ShuffleType;
+    /** Where in each song playback starts. */
+    seek: SeekType;
     /** Null (not in groups mode) or the selected artist list. */
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;

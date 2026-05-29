@@ -1,6 +1,8 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
+import type SeekType from "../enums/option_types/seek_type";
+import type ShuffleType from "../enums/option_types/shuffle_type";
 
 /**
  * Discriminated payload for the "setOption" admiral-to-worker IPC op. Each
@@ -20,6 +22,8 @@ type ActivitySetOptionArgs = {
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
     | { kind: "duration"; duration: number | null }
+    | { kind: "shuffle"; shuffle: ShuffleType }
+    | { kind: "seek"; seek: SeekType }
     // Artist-list kinds: empty array is treated as "reset to null" to
     // mirror the slash-command `/groups reset` flow.
     | { kind: "groups"; artistIDs: number[] }

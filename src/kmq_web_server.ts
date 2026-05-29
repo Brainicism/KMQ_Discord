@@ -25,6 +25,8 @@ import { userVoted } from "./helpers/bot_listing_manager";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
+import SeekType from "./enums/option_types/seek_type";
+import ShuffleType from "./enums/option_types/shuffle_type";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -126,6 +128,9 @@ const MULTIGUESS_VALUES: ReadonlySet<string> = new Set(
     Object.values(MultiGuessType),
 );
 
+const SHUFFLE_VALUES: ReadonlySet<string> = new Set(Object.values(ShuffleType));
+const SEEK_VALUES: ReadonlySet<string> = new Set(Object.values(SeekType));
+
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
 // validated server-side so a malicious client can't persist out-of-range
@@ -153,6 +158,8 @@ type SetOptionBody =
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
     | { kind: "duration"; duration: number | null }
+    | { kind: "shuffle"; shuffle: ShuffleType }
+    | { kind: "seek"; seek: SeekType }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] };
@@ -266,6 +273,24 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
 
             if (v === undefined) return null;
             return { kind: "duration", duration: v };
+        }
+
+        case "shuffle": {
+            const v = obj["shuffle"];
+            if (typeof v !== "string" || !SHUFFLE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "shuffle", shuffle: v as ShuffleType };
+        }
+
+        case "seek": {
+            const v = obj["seek"];
+            if (typeof v !== "string" || !SEEK_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "seek", seek: v as SeekType };
         }
 
         case "groups":

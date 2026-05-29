@@ -36,6 +36,8 @@ import type {
     ActivityGender,
     ActivityGuessMode,
     ActivityMultiguess,
+    ActivitySeek,
+    ActivityShuffle,
 } from "./types/activity_options_snapshot";
 import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
 import type { SetOptionRequest } from "./api";
@@ -980,6 +982,15 @@ function resolveWinnerText(
 
 const GENDER_OPTIONS: ActivityGender[] = ["male", "female", "coed"];
 const GUESS_MODE_OPTIONS: ActivityGuessMode[] = ["song", "artist", "both"];
+const SHUFFLE_OPTIONS: ActivityShuffle[] = [
+    "random",
+    "weighted_easy",
+    "weighted_hard",
+    "popularity",
+    "chronological",
+    "reversechronological",
+];
+const SEEK_OPTIONS: ActivitySeek[] = ["random", "beginning", "middle"];
 
 function OptionsPanel({
     accessToken,
@@ -1091,6 +1102,16 @@ function OptionsPanel({
         void submit({ kind: "duration", duration }, { ...options, duration });
     };
 
+    const pickShuffle = (shuffle: ActivityShuffle): void => {
+        if (shuffle === options.shuffle) return;
+        void submit({ kind: "shuffle", shuffle }, { ...options, shuffle });
+    };
+
+    const pickSeek = (seek: ActivitySeek): void => {
+        if (seek === options.seek) return;
+        void submit({ kind: "seek", seek }, { ...options, seek });
+    };
+
     const submitArtistList = (
         listKind: "groups" | "includes" | "excludes",
         next: ActivityArtist[],
@@ -1157,6 +1178,34 @@ function OptionsPanel({
                         ? t("options.on")
                         : t("options.off")}
                 </button>
+            </div>
+
+            <div className="option-label">{t("options.shuffle")}</div>
+            <div className="pills">
+                {SHUFFLE_OPTIONS.map((s) => (
+                    <button
+                        key={s}
+                        type="button"
+                        className={`pill ${options.shuffle === s ? "on" : ""}`}
+                        onClick={() => pickShuffle(s)}
+                    >
+                        {t(`options.${s}`)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.seek")}</div>
+            <div className="pills">
+                {SEEK_OPTIONS.map((s) => (
+                    <button
+                        key={s}
+                        type="button"
+                        className={`pill ${options.seek === s ? "on" : ""}`}
+                        onClick={() => pickSeek(s)}
+                    >
+                        {t(`options.${s}`)}
+                    </button>
+                ))}
             </div>
 
             <NumberRangeGroup

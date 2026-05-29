@@ -5,6 +5,14 @@
 export type ActivityGender = "male" | "female" | "coed" | "alternating";
 export type ActivityGuessMode = "song" | "artist" | "both";
 export type ActivityMultiguess = "on" | "off";
+export type ActivityShuffle =
+    | "random"
+    | "weighted_easy"
+    | "weighted_hard"
+    | "popularity"
+    | "chronological"
+    | "reversechronological";
+export type ActivitySeek = "beginning" | "random" | "middle";
 
 export interface ActivityArtist {
     id: number;
@@ -22,6 +30,8 @@ export default interface ActivityOptionsSnapshot {
     goal: number | null;
     timer: number | null;
     duration: number | null;
+    shuffle: ActivityShuffle;
+    seek: ActivitySeek;
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;
     excludes: ActivityArtist[] | null;
