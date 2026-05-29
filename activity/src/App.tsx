@@ -1873,6 +1873,30 @@ export default function App() {
         }
     }, [theme]);
 
+    // Track the visual viewport so the layout shrinks to fit when the mobile
+    // soft keyboard opens (plain 100vh ignores the keyboard, which forces a
+    // scroll/reflow that can flicker the keyboard shut on first open). The
+    // layout height reads var(--app-vh). No-op on desktop (no soft keyboard).
+    useEffect(() => {
+        const vv = window.visualViewport;
+        if (!vv) return undefined;
+
+        const apply = (): void => {
+            document.documentElement.style.setProperty(
+                "--app-vh",
+                `${vv.height}px`,
+            );
+        };
+
+        apply();
+        vv.addEventListener("resize", apply);
+        vv.addEventListener("scroll", apply);
+        return () => {
+            vv.removeEventListener("resize", apply);
+            vv.removeEventListener("scroll", apply);
+        };
+    }, []);
+
     const streamRef = useRef<{ close: () => void } | null>(null);
     // Translator is stable for a given bundle. Seed with an English stub for
     // the two strings rendered before the /api/activity/i18n fetch resolves,
@@ -2106,21 +2130,6 @@ export default function App() {
                 <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
 
-            {/* Options / settings */}
-            {authState && ui.options && (
-                <button
-                    type="button"
-                    className={`sidebar-toggle options ${
-                        optionsOpen ? "active" : ""
-                    }`}
-                    onClick={() => setOptionsOpen((o) => !o)}
-                    title={t("options.heading")}
-                    aria-label={t("options.heading")}
-                >
-                    <span>⚙</span>
-                </button>
-            )}
-
             {optionsOpen && authState && ui.options && (
                 <Modal
                     title={t("options.heading")}
@@ -2253,14 +2262,30 @@ export default function App() {
                             </div>
 
                             {authState && (
-                                <ControlButtons
-                                    accessToken={authState.accessToken}
-                                    instanceId={authState.instanceId}
-                                    hasSession={
-                                        ui.session !== null && !ui.sessionEnded
-                                    }
-                                    t={t}
-                                />
+                                <div className="header-actions">
+                                    {ui.options && (
+                                        <button
+                                            type="button"
+                                            className="header-gear"
+                                            onClick={() =>
+                                                setOptionsOpen((o) => !o)
+                                            }
+                                            title={t("options.heading")}
+                                            aria-label={t("options.heading")}
+                                        >
+                                            ⚙
+                                        </button>
+                                    )}
+                                    <ControlButtons
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        hasSession={
+                                            ui.session !== null &&
+                                            !ui.sessionEnded
+                                        }
+                                        t={t}
+                                    />
+                                </div>
                             )}
                         </header>
 

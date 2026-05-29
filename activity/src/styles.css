@@ -144,7 +144,9 @@ body::before {
  * an on-demand overlay drawer. */
 .kmq-layout {
     display: block;
-    height: 100vh;
+    /* --app-vh tracks window.visualViewport so the layout shrinks when the
+       mobile keyboard opens (set in App); falls back to 100vh on desktop. */
+    height: var(--app-vh, 100vh);
     overflow: hidden;
     position: relative;
 }
@@ -218,8 +220,13 @@ body::before {
         z-index: auto;
     }
 
-    /* The right toggle is pointless when the rail is always shown. */
+    /* The right toggle is pointless when the rail is always shown... */
     .sidebar-toggle:not(.left):not(.theme) {
+        display: none;
+    }
+
+    /* ...and so is the rail's close (✕) button — it can't be dismissed. */
+    .kmq-sidebar:not(.left) .sidebar-close {
         display: none;
     }
 }
@@ -303,13 +310,6 @@ body::before {
     left: 16px;
     top: 64px;
     font-size: 1.2rem;
-}
-
-.sidebar-toggle.options {
-    right: auto;
-    left: 16px;
-    top: 112px;
-    font-size: 1.15rem;
 }
 
 .sidebar-toggle:hover {
@@ -406,6 +406,36 @@ body::before {
     border-radius: var(--radius-pill);
     font-size: 0.75rem;
     font-weight: 600;
+}
+
+/* ---- HEADER ACTIONS (gear + start/end) ---- */
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-gear {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 1px solid var(--border-red);
+    background: var(--bg-surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 1.05rem;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.header-gear:hover {
+    background: var(--red-light);
+    border-color: var(--red-primary);
+    color: var(--red-primary);
 }
 
 /* ---- CONTROL BUTTONS ---- */
@@ -906,6 +936,8 @@ body::before {
     padding: 10px 12px;
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-sm);
+    /* Leave room above the mobile keyboard when scrolled into view. */
+    scroll-margin-bottom: 16px;
 }
 
 .guess-input input {
