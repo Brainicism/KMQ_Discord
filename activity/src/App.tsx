@@ -663,7 +663,7 @@ function GuessInput({
     const onSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const trimmed = text.trim();
-        if (!trimmed || busy) return;
+        if (!enabled || !trimmed || busy) return;
         setBusy(true);
         setFeedback(null);
         try {
@@ -682,9 +682,16 @@ function GuessInput({
 
     return (
         <form className="guess-input" onSubmit={onSubmit}>
+            {/* Intentionally never `disabled`: a disabled input loses focus,
+                which closes the mobile soft keyboard on every round transition
+                / submit (and programmatic .focus() can't reliably reopen it
+                without a user gesture). Gate guessing via onSubmit + the
+                button; show the inactive state with a class instead. */}
             <input
                 ref={inputRef}
                 type="text"
+                inputMode="text"
+                enterKeyHint="send"
                 placeholder={
                     enabled
                         ? t("guessPlaceholderActive")
@@ -692,7 +699,8 @@ function GuessInput({
                 }
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                disabled={!enabled || busy}
+                className={enabled ? undefined : "waiting"}
+                aria-disabled={!enabled}
                 maxLength={MAX_GUESS_LENGTH}
             />
             <button type="submit" disabled={!enabled || busy || !text.trim()}>
