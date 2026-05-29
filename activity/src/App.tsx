@@ -355,6 +355,7 @@ function CurrentRound({
     bookmarkSlot,
     winnerText,
     history,
+    guesses,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -365,35 +366,49 @@ function CurrentRound({
     winnerText: string | null;
     /** Songs played this session, used to build the end-of-game montage. */
     history: UiState["roundHistory"];
+    /** Live guesses, shown in the in-round stage as they come in. */
+    guesses: UiState["recentGuesses"];
     t: Translator;
 }) {
     return (
         <section className="round-area">
             {round ? (
                 <div className="round-area-body in-round">
-                    <div className="round-area-text">
-                        <div className="reveal-header">
-                            <h3>
-                                {t("roundLabel", { num: round.roundIndex + 1 })}
-                                <span className="live-badge">
-                                    <span className="live-dot" />
-                                    LIVE
-                                </span>
-                            </h3>
-                            {bookmarkSlot}
+                    {/* Full-width "stage": big countdown is the focal point,
+                        with the live guess feed below — replaces the old
+                        decorative listening animation that left this space
+                        doing nothing while the round was most active. */}
+                    <div className="stage">
+                        {bookmarkSlot && (
+                            <div className="stage-bookmark">{bookmarkSlot}</div>
+                        )}
+                        <div className="stage-header">
+                            <span className="stage-round-label">
+                                {t("roundLabel", {
+                                    num: round.roundIndex + 1,
+                                })}
+                            </span>
+                            <span className="live-badge">
+                                <span className="live-dot" />
+                                LIVE
+                            </span>
                         </div>
-                        <RoundTimer
-                            songStartedAt={round.songStartedAt}
-                            timerStartedAt={round.timerStartedAt}
-                            guessTimeoutSec={round.guessTimeoutSec}
-                        />
-                    </div>
-                    <div className="thumbnail-slot placeholder" aria-hidden>
-                        <span className="note-float">♪</span>
-                        <span className="note-float">♫</span>
-                        <span className="note-float">♩</span>
-                        <span className="note-main">🎵</span>
-                        <span className="listening-text">listening...</span>
+                        <div className="stage-countdown">
+                            <RoundTimer
+                                songStartedAt={round.songStartedAt}
+                                timerStartedAt={round.timerStartedAt}
+                                guessTimeoutSec={round.guessTimeoutSec}
+                            />
+                        </div>
+                        {guesses.length > 0 ? (
+                            <GuessTicker guesses={guesses} />
+                        ) : (
+                            <div className="stage-notes" aria-hidden>
+                                <span className="note-float">♪</span>
+                                <span className="note-float">♫</span>
+                                <span className="note-float">♩</span>
+                            </div>
+                        )}
                     </div>
                 </div>
             ) : reveal ? (
@@ -2261,6 +2276,7 @@ export default function App() {
                             round={ui.currentRound}
                             reveal={ui.lastReveal}
                             history={ui.roundHistory}
+                            guesses={ui.recentGuesses}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
@@ -2403,8 +2419,6 @@ export default function App() {
                                 />
                             </div>
                         )}
-
-                        <GuessTicker guesses={ui.recentGuesses} />
                     </div>
                 </div>
 
@@ -2555,12 +2569,16 @@ function reduce(
             };
         case "sessionEnd":
             // Clear stale per-session metadata so the header / vote bars don't
-            // show ghost state until the next /play.
+            // show ghost state until the next /play. Also clear lastReveal:
+            // if the game ends while a round reveal is on screen, a lingering
+            // reveal would keep the reveal branch rendering and hide the
+            // game-over winner screen.
             return {
                 ...prev,
                 sessionEnded: true,
                 session: null,
                 currentRound: null,
+                lastReveal: null,
                 hint: initialHint,
                 skip: initialSkip,
             };

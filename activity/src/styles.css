@@ -567,6 +567,59 @@ body::before {
     line-height: 1;
 }
 
+/* In-round "stage": a full-width focal area (overrides the text|thumbnail
+   split that the reveal/idle states use). Big countdown is the centerpiece,
+   with the live guess feed below. */
+.round-area-body.in-round {
+    grid-template-columns: 1fr;
+}
+
+.stage {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    min-height: 200px;
+    padding: 22px 16px;
+}
+
+.stage-bookmark {
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+.stage-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.stage-round-label {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.stage-countdown .round-timer {
+    font-size: 4rem;
+}
+
+/* Decorative floating notes shown until the first guess arrives. The notes
+   are absolutely positioned, so give them a sized relative box to float in. */
+.stage-notes {
+    position: relative;
+    width: 140px;
+    height: 44px;
+}
+
+.stage .guess-ticker {
+    width: 100%;
+    max-width: 360px;
+}
+
 .round-area-text .artist-line {
     margin: 0;
     color: var(--text-secondary);
