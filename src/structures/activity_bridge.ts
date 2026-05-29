@@ -1172,12 +1172,20 @@ export function attachActivityBridge(session: GameSession): void {
         const correctGuessers: ActivityCorrectGuesser[] =
             payload.playerRoundResults.map((r) => {
                 const { username, avatarUrl } = lookupName(r.player.id);
+                // Time to guess: the player's last correct guess in this round.
+                const playerGuesses = payload.guesses[r.player.id];
+                const correctGuess = playerGuesses
+                    ?.filter((g) => g.correct)
+                    .at(-1);
+
                 return {
                     id: r.player.id,
                     username,
                     avatarUrl,
                     pointsEarned: r.pointsEarned,
                     expGain: r.expGain,
+                    streak: r.streak,
+                    timeToGuessMs: correctGuess?.timeToGuessMs ?? null,
                 };
             });
 
@@ -1203,6 +1211,8 @@ export function attachActivityBridge(session: GameSession): void {
             },
         );
 
+        const counter = session.getUniqueSongCounter();
+
         pushEvent(guildID, {
             type: "roundEnd",
             song: snapshotSong(payload.song),
@@ -1210,6 +1220,10 @@ export function attachActivityBridge(session: GameSession): void {
             allGuesses,
             isCorrectGuess: payload.isCorrectGuess,
             scoreboard: snapshotScoreboard(session.scoreboard),
+            songCounter: {
+                uniqueSongsPlayed: counter.uniqueSongsPlayed,
+                totalSongs: counter.totalSongs,
+            },
         });
     });
 

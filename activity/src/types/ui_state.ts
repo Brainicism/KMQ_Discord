@@ -17,6 +17,7 @@ export default interface UiState {
         song: ActivityRoundReveal;
         correctGuessers: ActivityCorrectGuesser[];
         allGuesses: ActivityRoundGuess[];
+        songCounter: { uniqueSongsPlayed: number; totalSongs: number };
     } | null;
     recentGuesses: RecentGuess[];
     sessionEnded: boolean;

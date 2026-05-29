@@ -74,6 +74,11 @@ const PRE_HYDRATE_STRINGS: Record<string, string> = {
 type Theme = "light" | "dark";
 
 const THEME_STORAGE_KEY = "kmq:theme";
+// Mirrors the bot's QUICK_GUESS_MS (src/constants.ts) — guesses at or under
+// this get a ⚡ in the round-end reveal, matching the legacy text-chat look.
+const QUICK_GUESS_MS = 3500;
+// Legacy shows the 🔥 streak flair starting at 5 in a row.
+const STREAK_DISPLAY_THRESHOLD = 5;
 
 function readInitialTheme(): Theme {
     // localStorage can throw in sandboxed contexts (rare inside Discord's
@@ -400,16 +405,51 @@ function CurrentRound({
                             {reveal.song.artistName} ({reveal.song.publishYear})
                         </p>
                         <ul className="winners">
-                            {reveal.correctGuessers.map((g) => (
-                                <li key={g.id}>
-                                    {t("revealWinners", {
-                                        username: g.username,
-                                        points: g.pointsEarned,
-                                        exp: g.expGain,
-                                    })}
-                                </li>
-                            ))}
+                            {reveal.correctGuessers.map((g) => {
+                                const quick =
+                                    g.timeToGuessMs !== null &&
+                                    g.timeToGuessMs <= QUICK_GUESS_MS;
+                                return (
+                                    <li key={g.id}>
+                                        {t("revealWinners", {
+                                            username: g.username,
+                                            points: g.pointsEarned,
+                                            exp: g.expGain,
+                                        })}
+                                        {g.streak >=
+                                            STREAK_DISPLAY_THRESHOLD && (
+                                            <span
+                                                className="winner-streak"
+                                                title={t("streakTitle", {
+                                                    streak: g.streak,
+                                                })}
+                                            >
+                                                🔥{g.streak}
+                                            </span>
+                                        )}
+                                        {g.timeToGuessMs !== null && (
+                                            <span
+                                                className={`winner-time ${
+                                                    quick ? "quick" : ""
+                                                }`}
+                                            >
+                                                {quick ? "⚡" : ""}
+                                                {(
+                                                    g.timeToGuessMs / 1000
+                                                ).toFixed(1)}
+                                                s
+                                            </span>
+                                        )}
+                                    </li>
+                                );
+                            })}
                         </ul>
+                        <p className="song-counter">
+                            {t("songCounterLine", {
+                                played: reveal.songCounter.uniqueSongsPlayed,
+                                total: reveal.songCounter.totalSongs,
+                            })}
+                        </p>
                         {reveal.allGuesses.length > 0 && (
                             <details className="all-guesses" open>
                                 <summary>
@@ -2168,6 +2208,7 @@ function reduce(
                     song: msg.song,
                     correctGuessers: msg.correctGuessers,
                     allGuesses: msg.allGuesses,
+                    songCounter: msg.songCounter,
                 },
                 scoreboard: msg.scoreboard,
                 roundHistory: [...prev.roundHistory, msg.song],

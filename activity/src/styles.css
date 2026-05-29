@@ -569,6 +569,32 @@ body::before {
     color: var(--pink);
 }
 
+/* streak / time-to-guess flair on each winner line */
+.winner-streak,
+.winner-time {
+    margin-left: 6px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: var(--text-tertiary);
+}
+
+.winner-streak {
+    color: var(--gold);
+}
+
+.winner-time.quick {
+    color: var(--gold);
+}
+
+/* unique-songs-played counter under the reveal (fills the bottom space and
+   mirrors the legacy round-end "X songs played" line) */
+.song-counter {
+    margin: 6px 0 0 0;
+    font-size: 0.74rem;
+    color: var(--text-tertiary);
+    font-weight: 600;
+}
+
 /* ---- THUMBNAIL SLOT ---- */
 .thumbnail-slot {
     width: 100%;

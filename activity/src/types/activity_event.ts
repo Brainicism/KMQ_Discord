@@ -16,6 +16,7 @@ type ActivityEvent =
           allGuesses: ActivityRoundGuess[];
           isCorrectGuess: boolean;
           scoreboard: ActivityScoreboardSnapshot;
+          songCounter: { uniqueSongsPlayed: number; totalSongs: number };
       }
     | { type: "scoreboardUpdate"; scoreboard: ActivityScoreboardSnapshot }
     | {

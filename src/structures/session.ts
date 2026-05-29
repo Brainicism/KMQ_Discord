@@ -707,6 +707,15 @@ export default abstract class Session extends EventEmitter {
     }
 
     /**
+     * @returns how many unique songs have been played this session vs. the
+     *  total eligible song pool. Exposed for the Activity round-end summary
+     *  (guildPreference itself is protected).
+     */
+    getUniqueSongCounter(): { uniqueSongsPlayed: number; totalSongs: number } {
+        return this.guildPreference.songSelector.getUniqueSongCounter();
+    }
+
+    /**
      * @param interaction - The interaction
      * @param _messageContext - Unused
      * @returns whether the interaction has been handled
