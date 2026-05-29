@@ -1790,21 +1790,34 @@ export default function App() {
 
     useEffect(() => {
         let cancelled = false;
+        // Captured per run: present on a reconnect, null on the first connect.
+        const existingAuth = authState;
         (async () => {
             try {
-                const auth = await authenticate();
-                if (cancelled) return;
-                const instanceId = auth.sdk.instanceId;
+                // First connect: run the full OAuth handshake. Reconnect: reuse
+                // the existing token/instance instead of re-running
+                // sdk.commands.authorize() — re-authorizing in the same Activity
+                // session can reject (with a non-Error, which surfaced as the
+                // old "Unknown error"), and the access token is still valid.
+                let accessToken: string;
+                let instanceId: string;
+                let userID: string;
+                if (existingAuth) {
+                    accessToken = existingAuth.accessToken;
+                    instanceId = existingAuth.instanceId;
+                    userID = existingAuth.userID;
+                } else {
+                    const auth = await authenticate();
+                    if (cancelled) return;
+                    accessToken = auth.accessToken;
+                    instanceId = auth.sdk.instanceId;
+                    userID = auth.user.id;
+                }
 
-                // Fetch the snapshot and initial i18n bundle in parallel —
-                // they don't depend on each other. The i18n endpoint is
-                // public; seeding from the snapshot's viewerLocale (OAuth
-                // user.locale) avoids an extra SDK round-trip on first
-                // render.
-                const snapshot = await fetchSnapshot(
-                    auth.accessToken,
-                    instanceId,
-                );
+                // Fetch the snapshot and initial i18n bundle. The i18n endpoint
+                // is public; seeding from the snapshot's viewerLocale (OAuth
+                // user.locale) avoids an extra SDK round-trip on first render.
+                const snapshot = await fetchSnapshot(accessToken, instanceId);
 
                 if (cancelled) return;
                 const initialBundle = await fetchI18nBundle(
@@ -1814,11 +1827,7 @@ export default function App() {
                 if (cancelled) return;
                 setBundle(initialBundle.strings);
                 setUi((prev) => applySnapshot(prev, snapshot));
-                setAuthState({
-                    accessToken: auth.accessToken,
-                    instanceId,
-                    userID: auth.user.id,
-                });
+                setAuthState({ accessToken, instanceId, userID });
                 setReady(true);
 
                 // The SDK exposes the live Discord client locale, which can
@@ -1839,7 +1848,7 @@ export default function App() {
                 }
 
                 const stream = await openActivityStream(
-                    auth.accessToken,
+                    accessToken,
                     instanceId,
                     (event) => {
                         setUi((prev) => reduce(prev, event));
@@ -1866,7 +1875,23 @@ export default function App() {
                 console.error(e);
                 if (!cancelled) {
                     setReconnecting(false);
-                    setError(e instanceof Error ? e.message : "Unknown error");
+                    // SDK/Discord rejections aren't always Error instances
+                    // (often plain {code, message}); pull a useful message out
+                    // rather than showing a bare "Unknown error".
+                    let message = "Unknown error";
+                    if (e instanceof Error) {
+                        message = e.message;
+                    } else if (typeof e === "string") {
+                        message = e;
+                    } else if (
+                        e &&
+                        typeof e === "object" &&
+                        typeof (e as { message?: unknown }).message === "string"
+                    ) {
+                        message = (e as { message: string }).message;
+                    }
+
+                    setError(message);
                 }
             }
         })();
