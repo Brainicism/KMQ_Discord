@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "이 곡을 북마크",
         "bookmarkTitleDone": "북마크됨 — 세션 종료 시 DM 발송",
+        "connectFailed": "KMQ에 연결할 수 없습니다. 다시 시도해 주세요.",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
         "guessButton": "정답",

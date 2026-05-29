@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "收藏这首歌",
         "bookmarkTitleDone": "已收藏 — 会在会话结束时私信发送",
+        "connectFailed": "无法连接到KMQ。请再试一次。",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
         "guessButton": "猜",

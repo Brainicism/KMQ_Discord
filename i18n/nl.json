@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Dit nummer bladwijzeren",
         "bookmarkTitleDone": "Bladwijzer gezet — wordt aan het eind van de sessie ge-DM'd",
+        "connectFailed": "Kon geen verbinding maken met KMQ. Probeer het opnieuw.",
         "endGameBusy": "Beëindigen…",
         "endGameButton": "Spel beëindigen",
         "guessButton": "Raden",

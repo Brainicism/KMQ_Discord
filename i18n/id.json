@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Bookmark lagu ini",
         "bookmarkTitleDone": "Di-bookmark — akan di-DM di akhir sesi",
+        "connectFailed": "Tidak dapat terhubung ke KMQ. Silakan coba lagi.",
         "endGameBusy": "Mengakhiri…",
         "endGameButton": "Akhiri permainan",
         "guessButton": "Tebak",

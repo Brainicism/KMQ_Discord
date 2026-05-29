@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Сохранить песню в закладки",
         "bookmarkTitleDone": "В закладках — будет отправлено в ЛС в конце сессии",
+        "connectFailed": "Не удалось подключиться к KMQ. Пожалуйста, попробуйте снова.",
         "endGameBusy": "Завершение…",
         "endGameButton": "Завершить игру",
         "guessButton": "Ответить",

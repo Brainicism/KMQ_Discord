@@ -1759,8 +1759,15 @@ function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
     );
 }
 
+/** A connection problem to surface on the error screen. Both are rendered
+ *  with the current i18n bundle at render time (never a string captured when
+ *  the error happened): "disconnected" = the socket dropped after connecting;
+ *  "fatal" = connect/reconnect failed. The underlying error/status is logged
+ *  to the console rather than shown, so users see a friendly line. */
+type ConnectionError = { kind: "disconnected" } | { kind: "fatal" };
+
 export default function App() {
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
     const [authState, setAuthState] = useState<{
@@ -1863,12 +1870,14 @@ export default function App() {
                         setUi((prev) => reduce(prev, event));
                     },
                     () => {
-                        // Socket closed (often a flaky connection). Surface a
-                        // readable message; the error screen offers Reconnect,
-                        // which re-runs this flow without reloading the iframe.
+                        // Socket closed (often a flaky connection). Record the
+                        // state (not a translated string — `t` here is captured
+                        // from when the effect ran); the render translates it
+                        // with the current bundle. The error screen offers
+                        // Reconnect, which re-runs this flow.
                         if (!cancelled) {
                             setReconnecting(false);
-                            setError(t("statusDisconnected"));
+                            setError({ kind: "disconnected" });
                         }
                     },
                 );
@@ -1881,26 +1890,12 @@ export default function App() {
                 streamRef.current = stream;
                 setReconnecting(false);
             } catch (e) {
+                // Log the real error/status for debugging; show the user a
+                // friendly, generic line instead of "Snapshot failed: 502" etc.
                 console.error(e);
                 if (!cancelled) {
                     setReconnecting(false);
-                    // SDK/Discord rejections aren't always Error instances
-                    // (often plain {code, message}); pull a useful message out
-                    // rather than showing a bare "Unknown error".
-                    let message = "Unknown error";
-                    if (e instanceof Error) {
-                        message = e.message;
-                    } else if (typeof e === "string") {
-                        message = e;
-                    } else if (
-                        e &&
-                        typeof e === "object" &&
-                        typeof (e as { message?: unknown }).message === "string"
-                    ) {
-                        message = (e as { message: string }).message;
-                    }
-
-                    setError(message);
+                    setError({ kind: "fatal" });
                 }
             }
         })();
@@ -1927,7 +1922,11 @@ export default function App() {
         return (
             <div className="kmq-app error">
                 <h2>{t("appTitle")}</h2>
-                <p>{error}</p>
+                <p>
+                    {error.kind === "disconnected"
+                        ? t("statusDisconnected")
+                        : t("connectFailed")}
+                </p>
                 <button
                     type="button"
                     className="primary"

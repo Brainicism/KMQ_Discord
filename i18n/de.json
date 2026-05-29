@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Diesen Song als Lesezeichen speichern",
         "bookmarkTitleDone": "Gespeichert — per DM am Ende der Sitzung",
+        "connectFailed": "Konnte keine Verbindung zu KMQ herstellen. Bitte versuche es erneut.",
         "endGameBusy": "Wird beendet…",
         "endGameButton": "Spiel beenden",
         "guessButton": "Raten",

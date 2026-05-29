@@ -28,6 +28,7 @@
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Mettre cette chanson en favori",
         "bookmarkTitleDone": "Mise en favori — envoyée en MP en fin de session",
+        "connectFailed": "Impossible de se connecter à KMQ. Veuillez réessayer.",
         "endGameBusy": "Fin en cours…",
         "endGameButton": "Terminer la partie",
         "guessButton": "Deviner",
