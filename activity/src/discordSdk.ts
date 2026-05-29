@@ -49,54 +49,6 @@ export async function readSdkLocale(): Promise<string | null> {
     }
 }
 
-/**
- * Returns the IDs of the (non-bot) users currently connected to this Activity
- * instance — i.e. who's actually in the voice channel the Activity is running
- * in. Returns null if the SDK can't supply it, in which case callers should
- * fall back to the server's own voice-channel enforcement rather than guess.
- */
-export async function getConnectedParticipantIds(): Promise<string[] | null> {
-    try {
-        const sdk = await getDiscordSdk();
-        const result = await sdk.commands.getInstanceConnectedParticipants();
-        return result.participants.filter((p) => !p.bot).map((p) => p.id);
-    } catch (e) {
-        console.warn("getInstanceConnectedParticipants failed", e);
-        return null;
-    }
-}
-
-/**
- * Subscribes to live participant changes for this Activity instance, invoking
- * `cb` with the current (non-bot) participant IDs on each update. Resolves to
- * an unsubscribe function (a no-op if the subscription couldn't be set up).
- */
-export async function subscribeParticipants(
-    cb: (ids: string[]) => void,
-): Promise<() => void> {
-    try {
-        const sdk = await getDiscordSdk();
-        const handler = (data: {
-            participants: { id: string; bot: boolean }[];
-        }): void => {
-            cb(data.participants.filter((p) => !p.bot).map((p) => p.id));
-        };
-
-        await sdk.subscribe("ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE", handler);
-        return () => {
-            void sdk.unsubscribe(
-                "ACTIVITY_INSTANCE_PARTICIPANTS_UPDATE",
-                handler,
-            );
-        };
-    } catch (e) {
-        console.warn("subscribeParticipants failed", e);
-        return () => {
-            /* no-op */
-        };
-    }
-}
-
 export async function authenticate(): Promise<AuthedSession> {
     const sdk = await getDiscordSdk();
 

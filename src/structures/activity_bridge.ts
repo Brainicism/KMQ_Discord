@@ -7,11 +7,7 @@ import {
     youtubeThumbnailUrl,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import {
-    getCurrentVoiceMembers,
-    getMajorityCount,
-    searchArtists,
-} from "../helpers/discord_utils";
+import { getMajorityCount, searchArtists } from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
@@ -409,15 +405,6 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
-                    const inVC = getCurrentVoiceMembers(
-                        session.voiceChannelID,
-                    ).some((m) => m.id === guessArgs.userID);
-
-                    if (!inVC) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
-                    }
-
                     const messageContext = new MessageContext(
                         session.textChannelID,
                         new KmqMember(guessArgs.userID),
@@ -470,15 +457,6 @@ function ensureWorkerHandlerRegistered(): void {
                                 ok: false,
                                 reason: "session_already_running",
                             });
-                            return;
-                        }
-
-                        const inVC = getCurrentVoiceMembers(
-                            startArgs.voiceChannelID,
-                        ).some((m) => m.id === startArgs.userID);
-
-                        if (!inVC) {
-                            reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
 
@@ -576,15 +554,6 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === skipArgs.userID);
-
-                        if (!inVC) {
-                            reply({ ok: false, reason: "not_in_vc" });
-                            return;
-                        }
-
                         const messageContext = new MessageContext(
                             session.textChannelID,
                             new KmqMember(skipArgs.userID),
@@ -647,15 +616,6 @@ function ensureWorkerHandlerRegistered(): void {
                         const originalRound = session.round;
                         if (!originalRound || originalRound.finished) {
                             reply({ ok: false, reason: "no_round" });
-                            return;
-                        }
-
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === hintArgs.userID);
-
-                        if (!inVC) {
-                            reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
 
@@ -741,22 +701,11 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Require the caller to be in the session's VC (when
-                        // a session exists) OR the bot voice channel (when
-                        // configuring from a lobby before /play is called).
-                        // For the lobby case we can't cheaply verify a
-                        // specific VC, so permit any caller in the guild.
+                        // Voice-channel membership is already enforced at the
+                        // web layer (requireAuthedInstance gates on Discord's
+                        // authoritative activity participant list), so there's
+                        // no need to re-check the bot's voice cache here.
                         const session = Session.getSession(optionArgs.guildID);
-                        if (session) {
-                            const inVC = getCurrentVoiceMembers(
-                                session.voiceChannelID,
-                            ).some((m) => m.id === optionArgs.userID);
-
-                            if (!inVC) {
-                                reply({ ok: false, reason: "not_in_vc" });
-                                return;
-                            }
-                        }
 
                         try {
                             const guildPreference =
@@ -1046,18 +995,10 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Only the session owner (or someone in VC) can end —
-                        // matches the relaxed posture of the existing /end
-                        // command, which has no explicit owner check.
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === endArgs.userID);
-
-                        if (!inVC) {
-                            reply({ ok: false, reason: "not_in_vc" });
-                            return;
-                        }
-
+                        // Any authenticated activity participant may end the
+                        // game (matches the relaxed /end command, which has no
+                        // owner check). Participation is already verified at the
+                        // web layer, so no voice re-check is needed here.
                         const messageContext = new MessageContext(
                             session.textChannelID,
                             new KmqMember(endArgs.userID),

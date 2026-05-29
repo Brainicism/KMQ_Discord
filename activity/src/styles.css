@@ -1213,6 +1213,64 @@ body::before {
     color: var(--text-tertiary);
     margin-bottom: 6px;
     margin-top: 4px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* ⓘ info trigger + hover/focus tooltip describing the option (the gist of
+   /help). Pure CSS: the description lives in data-tip and renders in a
+   floating box on hover or keyboard focus. */
+.option-info {
+    border: none;
+    background: none;
+    padding: 0;
+    margin: 0;
+    color: var(--text-tertiary);
+    cursor: help;
+    font-size: 0.78rem;
+    line-height: 1;
+    position: relative;
+    display: inline-flex;
+}
+
+.option-info:hover,
+.option-info:focus-visible {
+    color: var(--red-primary);
+}
+
+.option-info::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 0;
+    top: 150%;
+    width: max-content;
+    max-width: 230px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-red);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    font-size: 0.72rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--text-primary);
+    text-transform: none;
+    letter-spacing: normal;
+    white-space: normal;
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-2px);
+    transition:
+        opacity 0.12s ease,
+        transform 0.12s ease;
+    z-index: 30;
+}
+
+.option-info:hover::after,
+.option-info:focus-visible::after {
+    opacity: 1;
+    transform: translateY(0);
 }
 
 .pills {

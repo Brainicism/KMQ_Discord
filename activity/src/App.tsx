@@ -21,13 +21,7 @@ import {
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
-import {
-    authenticate,
-    getConnectedParticipantIds,
-    openExternalUrl,
-    readSdkLocale,
-    subscribeParticipants,
-} from "./discordSdk";
+import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
@@ -551,26 +545,15 @@ function ControlButtons({
     accessToken,
     instanceId,
     hasSession,
-    selfInVC,
     t,
 }: {
     accessToken: string;
     instanceId: string;
     hasSession: boolean;
-    /** Whether the local user is in the Activity's voice channel. null = the
-     *  SDK couldn't tell us, so don't gate — let the server enforce it. */
-    selfInVC: boolean | null;
     t: Translator;
 }) {
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
-
-    // Advisory only: when we believe the user isn't in VC we show a hint, but
-    // we do NOT disable the button. The SDK participant signal isn't reliable
-    // enough to hard-block on (it can lag a user who just joined voice), and a
-    // greyed-out button that won't recover is worse than a click that bounces
-    // with the server's not_in_vc message. The server is the source of truth.
-    const showVCHint = selfInVC === false;
 
     const run = async (
         action: "start" | "end",
@@ -606,9 +589,6 @@ function ControlButtons({
                         ? t("startGameBusy")
                         : t("startGameButton")}
                 </button>
-            )}
-            {!hasSession && showVCHint && (
-                <span className="control-feedback">{t("notInVCWarning")}</span>
             )}
             {hasSession && (
                 <button
@@ -1006,6 +986,35 @@ const ARTIST_TYPE_OPTIONS: ActivityArtistType[] = [
 ];
 const SUBUNITS_OPTIONS: ActivitySubunits[] = ["include", "exclude"];
 
+/**
+ * An option's heading plus an optional ⓘ that reveals a short explanation
+ * (the gist of what `/help <option>` shows) on hover/focus.
+ */
+function OptionLabel({
+    label,
+    help,
+}: {
+    label: React.ReactNode;
+    help?: string;
+}) {
+    return (
+        <div className="option-label">
+            <span>{label}</span>
+            {help && (
+                <button
+                    type="button"
+                    className="option-info"
+                    aria-label={help}
+                    data-tip={help}
+                    onClick={(e) => e.preventDefault()}
+                >
+                    ⓘ
+                </button>
+            )}
+        </div>
+    );
+}
+
 function OptionsPanel({
     accessToken,
     instanceId,
@@ -1172,7 +1181,10 @@ function OptionsPanel({
 
     return (
         <div className="options-panel">
-            <div className="option-label">{t("options.gender")}</div>
+            <OptionLabel
+                label={t("options.gender")}
+                help={t("options.help.gender")}
+            />
             <div className="pills">
                 {GENDER_OPTIONS.map((g) => {
                     const active = !isAlternating && options.gender.includes(g);
@@ -1197,7 +1209,10 @@ function OptionsPanel({
                 </button>
             </div>
 
-            <div className="option-label">{t("options.guessMode")}</div>
+            <OptionLabel
+                label={t("options.guessMode")}
+                help={t("options.help.guessMode")}
+            />
             <div className="pills">
                 {GUESS_MODE_OPTIONS.map((mode) => (
                     <button
@@ -1213,7 +1228,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.multiguess")}</div>
+            <OptionLabel
+                label={t("options.multiguess")}
+                help={t("options.help.multiguess")}
+            />
             <div className="pills">
                 <button
                     type="button"
@@ -1228,7 +1246,10 @@ function OptionsPanel({
                 </button>
             </div>
 
-            <div className="option-label">{t("options.shuffle")}</div>
+            <OptionLabel
+                label={t("options.shuffle")}
+                help={t("options.help.shuffle")}
+            />
             <div className="pills">
                 {SHUFFLE_OPTIONS.map((s) => (
                     <button
@@ -1242,7 +1263,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.seek")}</div>
+            <OptionLabel
+                label={t("options.seek")}
+                help={t("options.help.seek")}
+            />
             <div className="pills">
                 {SEEK_OPTIONS.map((s) => (
                     <button
@@ -1256,7 +1280,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.language")}</div>
+            <OptionLabel
+                label={t("options.language")}
+                help={t("options.help.language")}
+            />
             <div className="pills">
                 {LANGUAGE_OPTIONS.map((l) => (
                     <button
@@ -1270,7 +1297,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.release")}</div>
+            <OptionLabel
+                label={t("options.release")}
+                help={t("options.help.release")}
+            />
             <div className="pills">
                 {RELEASE_OPTIONS.map((r) => (
                     <button
@@ -1284,7 +1314,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.artisttype")}</div>
+            <OptionLabel
+                label={t("options.artisttype")}
+                help={t("options.help.artisttype")}
+            />
             <div className="pills">
                 {ARTIST_TYPE_OPTIONS.map((a) => (
                     <button
@@ -1300,7 +1333,10 @@ function OptionsPanel({
                 ))}
             </div>
 
-            <div className="option-label">{t("options.subunits")}</div>
+            <OptionLabel
+                label={t("options.subunits")}
+                help={t("options.help.subunits")}
+            />
             <div className="pills">
                 {SUBUNITS_OPTIONS.map((s) => (
                     <button
@@ -1316,6 +1352,7 @@ function OptionsPanel({
 
             <NumberRangeGroup
                 label={t("options.limit")}
+                help={t("options.help.limit")}
                 startValue={options.limitStart}
                 endValue={options.limitEnd}
                 startMin={0}
@@ -1327,6 +1364,7 @@ function OptionsPanel({
 
             <NumberRangeGroup
                 label={t("options.cutoff")}
+                help={t("options.help.cutoff")}
                 startValue={options.beginningYear}
                 endValue={options.endYear}
                 startMin={1900}
@@ -1338,6 +1376,7 @@ function OptionsPanel({
 
             <NullableNumberGroup
                 label={t("options.goal")}
+                help={t("options.help.goal")}
                 value={options.goal}
                 min={1}
                 max={100000}
@@ -1347,6 +1386,7 @@ function OptionsPanel({
 
             <NullableNumberGroup
                 label={t("options.timer")}
+                help={t("options.help.timer")}
                 value={options.timer}
                 min={2}
                 max={180}
@@ -1356,6 +1396,7 @@ function OptionsPanel({
 
             <NullableNumberGroup
                 label={t("options.duration")}
+                help={t("options.help.duration")}
                 value={options.duration}
                 min={2}
                 max={600}
@@ -1365,6 +1406,7 @@ function OptionsPanel({
 
             <ArtistListGroup
                 label={t("options.groups")}
+                help={t("options.help.groups")}
                 accessToken={accessToken}
                 artists={options.groups ?? []}
                 onCommit={(next) => submitArtistList("groups", next)}
@@ -1372,6 +1414,7 @@ function OptionsPanel({
 
             <ArtistListGroup
                 label={t("options.includes")}
+                help={t("options.help.includes")}
                 accessToken={accessToken}
                 artists={options.includes ?? []}
                 onCommit={(next) => submitArtistList("includes", next)}
@@ -1379,6 +1422,7 @@ function OptionsPanel({
 
             <ArtistListGroup
                 label={t("options.excludes")}
+                help={t("options.help.excludes")}
                 accessToken={accessToken}
                 artists={options.excludes ?? []}
                 onCommit={(next) => submitArtistList("excludes", next)}
@@ -1391,11 +1435,13 @@ function OptionsPanel({
 
 function ArtistListGroup({
     label,
+    help,
     accessToken,
     artists,
     onCommit,
 }: {
     label: string;
+    help?: string;
     accessToken: string;
     artists: ActivityArtist[];
     onCommit: (next: ActivityArtist[]) => void;
@@ -1449,7 +1495,7 @@ function ArtistListGroup({
 
     return (
         <div className="options-group">
-            <div className="option-label">{label}</div>
+            <OptionLabel label={label} help={help} />
             {artists.length > 0 && (
                 <div className="artist-chips">
                     {artists.map((a) => (
@@ -1502,6 +1548,7 @@ function ArtistListGroup({
 
 function NumberRangeGroup({
     label,
+    help,
     startValue,
     endValue,
     startMin,
@@ -1511,6 +1558,7 @@ function NumberRangeGroup({
     onCommit,
 }: {
     label: string;
+    help?: string;
     startValue: number;
     endValue: number;
     startMin: number;
@@ -1539,7 +1587,7 @@ function NumberRangeGroup({
 
     return (
         <div className="options-group">
-            <div className="option-label">{label}</div>
+            <OptionLabel label={label} help={help} />
             <div className="number-row">
                 <input
                     type="number"
@@ -1567,6 +1615,7 @@ function NumberRangeGroup({
 
 function NullableNumberGroup({
     label,
+    help,
     value,
     min,
     max,
@@ -1574,6 +1623,7 @@ function NullableNumberGroup({
     offLabel,
 }: {
     label: string;
+    help?: string;
     value: number | null;
     min: number;
     max: number;
@@ -1602,7 +1652,7 @@ function NullableNumberGroup({
 
     return (
         <div className="options-group">
-            <div className="option-label">{label}</div>
+            <OptionLabel label={label} help={help} />
             <div className="number-row">
                 <input
                     type="number"
@@ -1715,11 +1765,6 @@ export default function App() {
     // without reloading the iframe — drives the Reconnect button.
     const [connectNonce, setConnectNonce] = useState(0);
     const [reconnecting, setReconnecting] = useState(false);
-    // Whether the local user is in the voice channel running the Activity.
-    // null = unknown (SDK couldn't tell us → don't gate, let the server
-    // enforce); false = confirmed not in VC → gate the start button.
-    const [selfInVC, setSelfInVC] = useState<boolean | null>(null);
-    const participantsUnsubRef = useRef<(() => void) | null>(null);
 
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
@@ -1748,28 +1793,6 @@ export default function App() {
                 const auth = await authenticate();
                 if (cancelled) return;
                 const instanceId = auth.sdk.instanceId;
-
-                // Determine whether the local user is actually in the voice
-                // channel running the Activity, so we can gate the start
-                // button (the server enforces this too, but gating up front
-                // is clearer than a click that bounces with "not in VC").
-                // Subscribe to keep it live as people join/leave.
-                const participantIds = await getConnectedParticipantIds();
-                if (cancelled) return;
-                if (participantIds !== null) {
-                    setSelfInVC(participantIds.includes(auth.user.id));
-                }
-
-                participantsUnsubRef.current?.();
-                participantsUnsubRef.current = await subscribeParticipants(
-                    (ids) => setSelfInVC(ids.includes(auth.user.id)),
-                );
-
-                if (cancelled) {
-                    participantsUnsubRef.current?.();
-                    participantsUnsubRef.current = null;
-                    return;
-                }
 
                 // Fetch the snapshot and initial i18n bundle in parallel —
                 // they don't depend on each other. The i18n endpoint is
@@ -1850,8 +1873,6 @@ export default function App() {
             cancelled = true;
             streamRef.current?.close();
             streamRef.current = null;
-            participantsUnsubRef.current?.();
-            participantsUnsubRef.current = null;
         };
         // Re-runs when connectNonce changes (the Reconnect button). t's
         // identity changes with the bundle, but we don't want a locale flip to
@@ -1859,41 +1880,10 @@ export default function App() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [connectNonce]);
 
-    // Self-heal the VC gate. The participants subscription can miss the case
-    // where the user joins voice *after* the Activity loads, and the initial
-    // fetch can race an unpopulated participant list — both leave selfInVC
-    // stuck at false. Re-check whenever the iframe regains focus/visibility,
-    // plus one delayed retry after load, so the warning clears on its own.
-    useEffect(() => {
-        const userID = authState?.userID;
-        if (!userID) return undefined;
-
-        const refresh = async (): Promise<void> => {
-            const ids = await getConnectedParticipantIds();
-            if (ids !== null) setSelfInVC(ids.includes(userID));
-        };
-
-        const onFocus = (): void => void refresh();
-        const onVisible = (): void => {
-            if (document.visibilityState === "visible") void refresh();
-        };
-
-        window.addEventListener("focus", onFocus);
-        document.addEventListener("visibilitychange", onVisible);
-        const retry = window.setTimeout(() => void refresh(), 1500);
-
-        return () => {
-            window.removeEventListener("focus", onFocus);
-            document.removeEventListener("visibilitychange", onVisible);
-            window.clearTimeout(retry);
-        };
-    }, [authState?.userID]);
-
     const reconnect = (): void => {
         setReconnecting(true);
         setError(null);
         setReady(false);
-        setSelfInVC(null);
         setConnectNonce((n) => n + 1);
     };
 
@@ -2121,7 +2111,6 @@ export default function App() {
                                     hasSession={
                                         ui.session !== null && !ui.sessionEnded
                                     }
-                                    selfInVC={selfInVC}
                                     t={t}
                                 />
                             )}
