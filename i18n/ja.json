@@ -42,6 +42,7 @@
         "historyEmpty": "まだ曲がありません。",
         "historyHeading": "曲の履歴",
         "networkError": "ネットワークエラー",
+        "notInVCWarning": "ゲームを始めるにはボイスチャンネルに参加してください。",
         "openOnYouTube": "YouTubeで開く",
         "options": {
             "alternating": "交互",
@@ -66,6 +67,8 @@
             "song": "曲",
             "timer": "タイマー (秒)"
         },
+        "reconnectButton": "再接続",
+        "reconnecting": "再接続中...",
         "rejectBadRequest": "リクエストが無効です。",
         "rejectBanned": "KMQから追放されています。",
         "rejectForbidden": "このActivityの参加者ではありません。",
@@ -101,7 +104,7 @@
         "startGameBusy": "開始中…",
         "startGameButton": "ゲーム開始",
         "statusConnecting": "接続中…",
-        "statusDisconnected": "KMQから切断されました。再試行するには更新してください。",
+        "statusDisconnected": "接続が失われました。インターネットを確認して再接続してください。",
         "themeToggleDark": "ダークモードに切り替え",
         "themeToggleLight": "ライトモードに切り替え",
         "waitingForNextRound": "次のラウンドを待機中…",

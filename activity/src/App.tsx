@@ -21,7 +21,13 @@ import {
     startGame as apiStartGame,
     submitGuess,
 } from "./api";
-import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
+import {
+    authenticate,
+    getConnectedParticipantIds,
+    openExternalUrl,
+    readSdkLocale,
+    subscribeParticipants,
+} from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
@@ -499,15 +505,24 @@ function ControlButtons({
     accessToken,
     instanceId,
     hasSession,
+    selfInVC,
     t,
 }: {
     accessToken: string;
     instanceId: string;
     hasSession: boolean;
+    /** Whether the local user is in the Activity's voice channel. null = the
+     *  SDK couldn't tell us, so don't gate — let the server enforce it. */
+    selfInVC: boolean | null;
     t: Translator;
 }) {
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
+
+    // Only gate when we positively know the user isn't in VC. When unknown
+    // (null) the button stays enabled and the server's not_in_vc reply is the
+    // backstop.
+    const startBlocked = selfInVC === false;
 
     const run = async (
         action: "start" | "end",
@@ -532,7 +547,7 @@ function ControlButtons({
                 <button
                     type="button"
                     className="primary"
-                    disabled={busy !== null}
+                    disabled={busy !== null || startBlocked}
                     onClick={() =>
                         run("start", () =>
                             apiStartGame(accessToken, instanceId),
@@ -543,6 +558,9 @@ function ControlButtons({
                         ? t("startGameBusy")
                         : t("startGameButton")}
                 </button>
+            )}
+            {!hasSession && startBlocked && (
+                <span className="control-feedback">{t("notInVCWarning")}</span>
             )}
             {hasSession && (
                 <button
@@ -1490,6 +1508,15 @@ export default function App() {
     const [sidebarOpen, setSidebarOpen] = useState(true);
     const [historyOpen, setHistoryOpen] = useState(true);
     const [theme, setTheme] = useState<Theme>(readInitialTheme);
+    // Bumped to re-run the whole connect flow (auth → snapshot → stream)
+    // without reloading the iframe — drives the Reconnect button.
+    const [connectNonce, setConnectNonce] = useState(0);
+    const [reconnecting, setReconnecting] = useState(false);
+    // Whether the local user is in the voice channel running the Activity.
+    // null = unknown (SDK couldn't tell us → don't gate, let the server
+    // enforce); false = confirmed not in VC → gate the start button.
+    const [selfInVC, setSelfInVC] = useState<boolean | null>(null);
+    const participantsUnsubRef = useRef<(() => void) | null>(null);
 
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
@@ -1518,6 +1545,28 @@ export default function App() {
                 const auth = await authenticate();
                 if (cancelled) return;
                 const instanceId = auth.sdk.instanceId;
+
+                // Determine whether the local user is actually in the voice
+                // channel running the Activity, so we can gate the start
+                // button (the server enforces this too, but gating up front
+                // is clearer than a click that bounces with "not in VC").
+                // Subscribe to keep it live as people join/leave.
+                const participantIds = await getConnectedParticipantIds();
+                if (cancelled) return;
+                if (participantIds !== null) {
+                    setSelfInVC(participantIds.includes(auth.user.id));
+                }
+
+                participantsUnsubRef.current?.();
+                participantsUnsubRef.current = await subscribeParticipants(
+                    (ids) => setSelfInVC(ids.includes(auth.user.id)),
+                );
+
+                if (cancelled) {
+                    participantsUnsubRef.current?.();
+                    participantsUnsubRef.current = null;
+                    return;
+                }
 
                 // Fetch the snapshot and initial i18n bundle in parallel —
                 // they don't depend on each other. The i18n endpoint is
@@ -1568,8 +1617,13 @@ export default function App() {
                         setUi((prev) => reduce(prev, event));
                     },
                     () => {
-                        // socket closed — show banner; phase 2 can add reconnect
-                        setError(t("statusDisconnected"));
+                        // Socket closed (often a flaky connection). Surface a
+                        // readable message; the error screen offers Reconnect,
+                        // which re-runs this flow without reloading the iframe.
+                        if (!cancelled) {
+                            setReconnecting(false);
+                            setError(t("statusDisconnected"));
+                        }
                     },
                 );
 
@@ -1579,9 +1633,11 @@ export default function App() {
                 }
 
                 streamRef.current = stream;
+                setReconnecting(false);
             } catch (e) {
                 console.error(e);
                 if (!cancelled) {
+                    setReconnecting(false);
                     setError(e instanceof Error ? e.message : "Unknown error");
                 }
             }
@@ -1590,17 +1646,37 @@ export default function App() {
         return () => {
             cancelled = true;
             streamRef.current?.close();
+            streamRef.current = null;
+            participantsUnsubRef.current?.();
+            participantsUnsubRef.current = null;
         };
-        // t's identity changes with the bundle but the WS setup only runs
-        // once, so don't restart it on locale flips.
+        // Re-runs when connectNonce changes (the Reconnect button). t's
+        // identity changes with the bundle, but we don't want a locale flip to
+        // tear down and rebuild the stream, so it's intentionally omitted.
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [connectNonce]);
+
+    const reconnect = (): void => {
+        setReconnecting(true);
+        setError(null);
+        setReady(false);
+        setSelfInVC(null);
+        setConnectNonce((n) => n + 1);
+    };
 
     if (error) {
         return (
             <div className="kmq-app error">
                 <h2>{t("appTitle")}</h2>
                 <p>{error}</p>
+                <button
+                    type="button"
+                    className="primary"
+                    onClick={reconnect}
+                    disabled={reconnecting}
+                >
+                    {reconnecting ? t("reconnecting") : t("reconnectButton")}
+                </button>
             </div>
         );
     }
@@ -1795,6 +1871,7 @@ export default function App() {
                                     hasSession={
                                         ui.session !== null && !ui.sessionEnded
                                     }
+                                    selfInVC={selfInVC}
                                     t={t}
                                 />
                             )}

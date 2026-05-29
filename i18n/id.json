@@ -42,6 +42,7 @@
         "historyEmpty": "Belum ada lagu.",
         "historyHeading": "Riwayat Lagu",
         "networkError": "Kesalahan jaringan",
+        "notInVCWarning": "Bergabunglah dengan saluran suara untuk memulai permainan.",
         "openOnYouTube": "Buka di YouTube",
         "options": {
             "alternating": "Bergantian",
@@ -66,6 +67,8 @@
             "song": "Lagu",
             "timer": "Pengatur waktu (detik)"
         },
+        "reconnectButton": "Sambungkan kembali",
+        "reconnecting": "Menyambungkan kembali...",
         "rejectBadRequest": "Permintaan tidak valid.",
         "rejectBanned": "Kamu dilarang bermain KMQ.",
         "rejectForbidden": "Kamu bukan peserta Activity ini.",
@@ -101,7 +104,7 @@
         "startGameBusy": "Memulai…",
         "startGameButton": "Mulai permainan",
         "statusConnecting": "Menghubungkan…",
-        "statusDisconnected": "Terputus dari KMQ. Refresh untuk mencoba lagi.",
+        "statusDisconnected": "Sambungan terputus. Periksa internet Anda dan coba sambungkan kembali.",
         "themeToggleDark": "Beralih ke mode gelap",
         "themeToggleLight": "Beralih ke mode terang",
         "waitingForNextRound": "Menunggu ronde berikutnya…",

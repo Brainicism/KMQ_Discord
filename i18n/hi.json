@@ -42,6 +42,7 @@
         "historyEmpty": "अभी तक कोई गाना नहीं।",
         "historyHeading": "गाने का इतिहास",
         "networkError": "नेटवर्क त्रुटि",
+        "notInVCWarning": "खेल शुरू करने के लिए वॉयस चैनल से जुड़ें।",
         "openOnYouTube": "YouTube पर खोलें",
         "options": {
             "alternating": "बारी-बारी से",
@@ -66,6 +67,8 @@
             "song": "गाना",
             "timer": "टाइमर (सेकंड)"
         },
+        "reconnectButton": "पुनः कनेक्ट करें",
+        "reconnecting": "पुन: कनेक्ट किया जा रहा है...",
         "rejectBadRequest": "अमान्य अनुरोध।",
         "rejectBanned": "आप KMQ से प्रतिबंधित हैं।",
         "rejectForbidden": "आप इस Activity के भागीदार नहीं हैं।",
@@ -101,7 +104,7 @@
         "startGameBusy": "शुरू हो रहा है…",
         "startGameButton": "खेल शुरू करें",
         "statusConnecting": "कनेक्ट हो रहा है…",
-        "statusDisconnected": "KMQ से डिस्कनेक्ट। पुनः प्रयास के लिए रीफ्रेश करें।",
+        "statusDisconnected": "कनेक्शन खो गया। अपनी इंटरनेट की जाँच करें और पुन: कनेक्ट करने का प्रयास करें।",
         "themeToggleDark": "डार्क मोड में स्विच करें",
         "themeToggleLight": "लाइट मोड में स्विच करें",
         "waitingForNextRound": "अगले राउंड का इंतज़ार है…",

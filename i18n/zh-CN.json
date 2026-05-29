@@ -42,6 +42,7 @@
         "historyEmpty": "暂无歌曲。",
         "historyHeading": "歌曲历史",
         "networkError": "网络错误",
+        "notInVCWarning": "加入语音频道开始游戏。",
         "openOnYouTube": "在 YouTube 中打开",
         "options": {
             "alternating": "交替",
@@ -66,6 +67,8 @@
             "song": "歌曲",
             "timer": "计时器（秒）"
         },
+        "reconnectButton": "重新连接",
+        "reconnecting": "重新连接中...",
         "rejectBadRequest": "请求无效。",
         "rejectBanned": "你已被 KMQ 封禁。",
         "rejectForbidden": "你不是本次 Activity 的参与者。",
@@ -101,7 +104,7 @@
         "startGameBusy": "开始中…",
         "startGameButton": "开始游戏",
         "statusConnecting": "连接中…",
-        "statusDisconnected": "与 KMQ 断开连接。刷新重试。",
+        "statusDisconnected": "连接丢失。检查您的网络并尝试重新连接。",
         "themeToggleDark": "切换到深色模式",
         "themeToggleLight": "切换到浅色模式",
         "waitingForNextRound": "等待下一回合…",

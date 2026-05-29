@@ -42,6 +42,7 @@
         "historyEmpty": "Noch keine Songs.",
         "historyHeading": "Songverlauf",
         "networkError": "Netzwerkfehler",
+        "notInVCWarning": "Trete dem Sprachkanal bei, um ein Spiel zu starten.",
         "openOnYouTube": "Auf YouTube öffnen",
         "options": {
             "alternating": "Abwechselnd",
@@ -66,6 +67,8 @@
             "song": "Lied",
             "timer": "Timer (Sekunden)"
         },
+        "reconnectButton": "Erneut verbinden",
+        "reconnecting": "Erneute Verbindung wird hergestellt...",
         "rejectBadRequest": "Ungültige Anfrage.",
         "rejectBanned": "Du bist von KMQ gesperrt.",
         "rejectForbidden": "Du nimmst an dieser Activity nicht teil.",
@@ -101,7 +104,7 @@
         "startGameBusy": "Wird gestartet…",
         "startGameButton": "Spiel starten",
         "statusConnecting": "Verbinden…",
-        "statusDisconnected": "Von KMQ getrennt. Aktualisieren, um erneut zu versuchen.",
+        "statusDisconnected": "Verbindung verloren. Überprüfe dein Internet und versuche, dich erneut zu verbinden.",
         "themeToggleDark": "Wechseln Sie in den Dunkelmodus",
         "themeToggleLight": "Wechseln Sie in den Lichtmodus",
         "waitingForNextRound": "Warten auf die nächste Runde…",

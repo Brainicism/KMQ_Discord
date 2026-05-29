@@ -42,6 +42,7 @@
         "historyEmpty": "Nog geen nummers.",
         "historyHeading": "Geschiedenis van nummers",
         "networkError": "Netwerkfout",
+        "notInVCWarning": "Neem deel aan het spraakkanaal om een spel te starten.",
         "openOnYouTube": "Openen op YouTube",
         "options": {
             "alternating": "Afwisselend",
@@ -66,6 +67,8 @@
             "song": "Lied",
             "timer": "Timer (seconden)"
         },
+        "reconnectButton": "Opnieuw verbinden",
+        "reconnecting": "Opnieuw verbinden...",
         "rejectBadRequest": "Ongeldig verzoek.",
         "rejectBanned": "Je bent verbannen van KMQ.",
         "rejectForbidden": "Je bent geen deelnemer van deze Activity.",
@@ -101,7 +104,7 @@
         "startGameBusy": "Starten…",
         "startGameButton": "Spel starten",
         "statusConnecting": "Verbinden…",
-        "statusDisconnected": "Verbinding met KMQ verbroken. Ververs om opnieuw te proberen.",
+        "statusDisconnected": "Verbinding verbroken. Controleer je internet en probeer opnieuw verbinding te maken.",
         "themeToggleDark": "Overschakelen naar de donkere modus",
         "themeToggleLight": "Overschakelen naar de lichte modus",
         "waitingForNextRound": "Wachten op volgende ronde…",
