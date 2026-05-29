@@ -648,13 +648,19 @@ function GuessInput({
         prevEnabledRef.current = enabled;
     }, [enabled]);
 
-    // Refocus whenever the input becomes typable: on round start (enabled
-    // flips true) and after a submit resolves (busy flips false). Running
-    // from an effect is important — focusing inside the submit's finally
-    // block happens before React re-renders the input with disabled=false,
-    // and the browser rejects focus() on a disabled element. preventScroll
-    // because the input lives below the fold on short viewports.
+    // Desktop only: auto-focus the box when it becomes typable (round start /
+    // after a submit) for fast play. NEVER do this on touch devices — a
+    // non-gesture .focus() can't open the soft keyboard there and actively
+    // makes it flicker/close across round transitions. Since the input is
+    // never disabled, a user-tapped input keeps focus (and the keyboard) on
+    // its own on mobile, so no programmatic focus is needed.
     useEffect(() => {
+        const coarsePointer =
+            typeof window !== "undefined" &&
+            typeof window.matchMedia === "function" &&
+            window.matchMedia("(pointer: coarse)").matches;
+
+        if (coarsePointer) return;
         if (enabled && !busy) {
             inputRef.current?.focus({ preventScroll: true });
         }
