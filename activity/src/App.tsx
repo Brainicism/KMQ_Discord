@@ -703,11 +703,13 @@ function GuessInput({
 
     return (
         <form className="guess-input" onSubmit={onSubmit}>
-            {/* Intentionally never `disabled`: a disabled input loses focus,
-                which closes the mobile soft keyboard on every round transition
-                / submit (and programmatic .focus() can't reliably reopen it
-                without a user gesture). Gate guessing via onSubmit + the
-                button; show the inactive state with a class instead. */}
+            {/* `readOnly` between rounds, never `disabled`: a disabled input
+                loses focus, which closes the mobile soft keyboard on every
+                round transition (and a programmatic .focus() can't reopen it
+                without a user gesture). A readOnly input stays focusable so the
+                keyboard persists across rounds, but ignores typing — so players
+                can't enter text while guessing is closed. The submit path is
+                also gated by `enabled`. */}
             <input
                 ref={inputRef}
                 type="text"
@@ -720,6 +722,7 @@ function GuessInput({
                 }
                 value={text}
                 onChange={(e) => setText(e.target.value)}
+                readOnly={!enabled}
                 className={enabled ? undefined : "waiting"}
                 aria-disabled={!enabled}
                 maxLength={MAX_GUESS_LENGTH}
