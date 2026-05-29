@@ -1509,6 +1509,34 @@ body::before {
     color: var(--red-primary);
 }
 
+/* Reconnect button: size to its label and center it (the .kmq-app flex column
+   would otherwise stretch it full-width), and give it the brand pill look
+   since the scoped .control-buttons styles don't reach the error screen. */
+.kmq-app.error button {
+    align-self: center;
+    margin-top: 16px;
+    padding: 9px 22px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--red-primary);
+    color: white;
+    font-family: inherit;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.kmq-app.error button:hover:not(:disabled) {
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
+.kmq-app.error button:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
 .kmq-splash-logo {
     width: 140px;
     height: 140px;
