@@ -305,6 +305,13 @@ body::before {
     font-size: 1.2rem;
 }
 
+.sidebar-toggle.options {
+    right: auto;
+    left: 16px;
+    top: 112px;
+    font-size: 1.15rem;
+}
+
 .sidebar-toggle:hover {
     background: var(--red-light);
     border-color: var(--red-primary);
@@ -1569,6 +1576,89 @@ body::before {
     z-index: 0;
     opacity: 0.08;
     font-size: 1.2rem;
+}
+
+/* ---- MODAL (settings / options) ---- */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    background: rgba(0, 0, 0, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    animation: modal-fade 0.12s ease;
+}
+
+.modal {
+    width: 100%;
+    max-width: 420px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-surface);
+    border: 1px solid var(--border-red);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    animation: modal-pop 0.14s ease;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    background: var(--bg-surface);
+}
+
+.modal-header h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.modal-close {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.modal-close:hover {
+    background: var(--red-light);
+    color: var(--red-primary);
+}
+
+.modal-body {
+    padding: 16px 18px;
+    overflow-y: auto;
+}
+
+@keyframes modal-fade {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes modal-pop {
+    from {
+        opacity: 0;
+        transform: translateY(6px) scale(0.98);
+    }
 }
 
 /* ---- RESPONSIVE ---- */

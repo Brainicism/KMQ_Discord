@@ -1767,6 +1767,51 @@ function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
     );
 }
 
+/** Centered overlay dialog. Closes on backdrop click or Escape. */
+function Modal({
+    title,
+    onClose,
+    children,
+}: {
+    title: string;
+    onClose: () => void;
+    children: React.ReactNode;
+}) {
+    useEffect(() => {
+        const onKey = (e: KeyboardEvent): void => {
+            if (e.key === "Escape") onClose();
+        };
+
+        window.addEventListener("keydown", onKey);
+        return () => window.removeEventListener("keydown", onKey);
+    }, [onClose]);
+
+    return (
+        <div className="modal-backdrop" onClick={onClose}>
+            <div
+                className="modal"
+                role="dialog"
+                aria-modal="true"
+                aria-label={title}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="modal-header">
+                    <h3>{title}</h3>
+                    <button
+                        type="button"
+                        className="modal-close"
+                        onClick={onClose}
+                        aria-label="Close"
+                    >
+                        ✕
+                    </button>
+                </div>
+                <div className="modal-body">{children}</div>
+            </div>
+        </div>
+    );
+}
+
 /** A connection problem to surface on the error screen. Both are rendered
  *  with the current i18n bundle at render time (never a string captured when
  *  the error happened): "disconnected" = the socket dropped after connecting;
@@ -1789,6 +1834,7 @@ export default function App() {
     // opens on demand; on mobile nothing covers the screen on load.
     const [sidebarOpen, setSidebarOpen] = useState(false);
     const [historyOpen, setHistoryOpen] = useState(false);
+    const [optionsOpen, setOptionsOpen] = useState(false);
     const [theme, setTheme] = useState<Theme>(readInitialTheme);
     // Bumped to re-run the whole connect flow (auth → snapshot → stream)
     // without reloading the iframe — drives the Reconnect button.
@@ -2038,6 +2084,41 @@ export default function App() {
             >
                 <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
+
+            {/* Options / settings */}
+            {authState && ui.options && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle options ${
+                        optionsOpen ? "active" : ""
+                    }`}
+                    onClick={() => setOptionsOpen((o) => !o)}
+                    title={t("options.heading")}
+                    aria-label={t("options.heading")}
+                >
+                    <span>⚙</span>
+                </button>
+            )}
+
+            {optionsOpen && authState && ui.options && (
+                <Modal
+                    title={t("options.heading")}
+                    onClose={() => setOptionsOpen(false)}
+                >
+                    <OptionsPanel
+                        accessToken={authState.accessToken}
+                        instanceId={authState.instanceId}
+                        options={ui.options}
+                        t={t}
+                        onOptimistic={(next) =>
+                            setUi((prev) => ({ ...prev, options: next }))
+                        }
+                        onRollback={(prevOpts) =>
+                            setUi((prev) => ({ ...prev, options: prevOpts }))
+                        }
+                    />
+                </Modal>
+            )}
 
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
@@ -2349,31 +2430,6 @@ export default function App() {
                                 <p className="empty">{t("scoreboardEmpty")}</p>
                             )}
                         </div>
-                        {authState && ui.options && (
-                            <div>
-                                <h3 className="sb-section-title">
-                                    {t("options.heading")}
-                                </h3>
-                                <OptionsPanel
-                                    accessToken={authState.accessToken}
-                                    instanceId={authState.instanceId}
-                                    options={ui.options}
-                                    t={t}
-                                    onOptimistic={(next) =>
-                                        setUi((prev) => ({
-                                            ...prev,
-                                            options: next,
-                                        }))
-                                    }
-                                    onRollback={(prevOpts) =>
-                                        setUi((prev) => ({
-                                            ...prev,
-                                            options: prevOpts,
-                                        }))
-                                    }
-                                />
-                            </div>
-                        )}
                     </div>
                 </aside>
             </div>
