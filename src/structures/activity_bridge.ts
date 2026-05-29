@@ -688,8 +688,10 @@ function ensureWorkerHandlerRegistered(): void {
                                         session.guildID,
                                     );
 
-                                const text = currentRound.getHint(
-                                    session.guildID,
+                                // Compact (unspaced, unlabelled) hint — the
+                                // Activity styles it itself, so it doesn't want
+                                // the chat label/backticks/inter-char spaces.
+                                const text = currentRound.getCompactHint(
                                     guildPreference.gameOptions.guessModeType,
                                     State.getGuildLocale(session.guildID),
                                 );
