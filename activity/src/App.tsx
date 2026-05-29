@@ -1016,7 +1016,7 @@ function OptionLabel({
                     type="button"
                     className="option-info"
                     aria-label={help}
-                    data-tip={help}
+                    title={help}
                     onClick={(e) => e.preventDefault()}
                 >
                     ?

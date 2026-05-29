@@ -1253,43 +1253,10 @@ body::before {
     background: var(--red-light);
 }
 
-.option-info::after {
-    content: attr(data-tip);
-    position: absolute;
-    /* Anchor to the icon's right edge and grow leftward — the options panel
-       lives in the right-edge sidebar, so a left-anchored tooltip ran off the
-       right of the screen. */
-    right: 0;
-    left: auto;
-    top: 150%;
-    width: max-content;
-    max-width: 220px;
-    background: var(--bg-surface);
-    border: 1px solid var(--border-red);
-    border-radius: var(--radius-sm);
-    padding: 7px 10px;
-    font-size: 0.72rem;
-    font-weight: 500;
-    line-height: 1.35;
-    color: var(--text-primary);
-    text-transform: none;
-    letter-spacing: normal;
-    white-space: normal;
-    box-shadow: var(--shadow-md);
-    opacity: 0;
-    pointer-events: none;
-    transform: translateY(-2px);
-    transition:
-        opacity 0.12s ease,
-        transform 0.12s ease;
-    z-index: 30;
-}
-
-.option-info:hover::after,
-.option-info:focus-visible::after {
-    opacity: 1;
-    transform: translateY(0);
-}
+/* The description is shown via the native title tooltip (see App.tsx) rather
+   than a CSS box — the options panel sits in the narrow right-edge sidebar,
+   where a custom absolutely-positioned tooltip either ran off-screen or added
+   a horizontal scrollbar. The browser positions title tooltips for us. */
 
 .pills {
     display: flex;
