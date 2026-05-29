@@ -113,6 +113,7 @@
         "reconnecting": "Переподключение...",
         "rejectBadRequest": "Некорректный запрос.",
         "rejectBanned": "Вы забанены в KMQ.",
+        "rejectBotNoVoicePerms": "Бот не может подключиться к вашему голосовому каналу — у него отсутствуют необходимые разрешения.",
         "rejectForbidden": "Вы не участник этой Activity.",
         "rejectGeneric": "Действие не выполнено.",
         "rejectMaintenance": "Режим обслуживания включён.",

@@ -113,6 +113,7 @@
         "reconnecting": "重新连接中...",
         "rejectBadRequest": "请求无效。",
         "rejectBanned": "你已被 KMQ 封禁。",
+        "rejectBotNoVoicePerms": "机器人无法加入您的语音频道 — 它缺少权限。",
         "rejectForbidden": "你不是本次 Activity 的参与者。",
         "rejectGeneric": "操作失败。",
         "rejectMaintenance": "维护模式已启用。",

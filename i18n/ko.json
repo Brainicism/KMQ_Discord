@@ -113,6 +113,7 @@
         "reconnecting": "다시 연결 중...",
         "rejectBadRequest": "잘못된 요청.",
         "rejectBanned": "KMQ에서 차단되었습니다.",
+        "rejectBotNoVoicePerms": "봇이 음성 채널에 참여할 수 없습니다 — 해당 채널에서 권한이 부족합니다.",
         "rejectForbidden": "이 Activity의 참가자가 아닙니다.",
         "rejectGeneric": "작업에 실패했습니다.",
         "rejectMaintenance": "점검 모드가 활성화되었습니다.",

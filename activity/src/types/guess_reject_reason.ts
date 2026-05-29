@@ -4,6 +4,7 @@ type GuessRejectReason =
     | "banned"
     | "rate_limit"
     | "not_in_vc"
+    | "bot_no_voice_perms"
     | "internal"
     | "unauthorized"
     | "forbidden"

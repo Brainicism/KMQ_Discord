@@ -113,6 +113,7 @@
         "reconnecting": "Menyambungkan kembali...",
         "rejectBadRequest": "Permintaan tidak valid.",
         "rejectBanned": "Kamu dilarang bermain KMQ.",
+        "rejectBotNoVoicePerms": "Bot tidak dapat bergabung dengan saluran suara Anda — izin di sana hilang.",
         "rejectForbidden": "Kamu bukan peserta Activity ini.",
         "rejectGeneric": "Aksi gagal.",
         "rejectMaintenance": "Mode pemeliharaan aktif.",

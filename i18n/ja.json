@@ -113,6 +113,7 @@
         "reconnecting": "再接続中...",
         "rejectBadRequest": "リクエストが無効です。",
         "rejectBanned": "KMQから追放されています。",
+        "rejectBotNoVoicePerms": "ボットはあなたのボイスチャンネルに参加できません — その場所での権限が不足しています。",
         "rejectForbidden": "このActivityの参加者ではありません。",
         "rejectGeneric": "操作に失敗しました。",
         "rejectMaintenance": "メンテナンスモード中です。",

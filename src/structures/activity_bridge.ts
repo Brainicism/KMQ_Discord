@@ -7,7 +7,12 @@ import {
     youtubeThumbnailUrl,
 } from "../constants";
 import { IPCLogger } from "../logger";
-import { getMajorityCount, searchArtists } from "../helpers/discord_utils";
+import {
+    botHasVoicePermissions,
+    getMajorityCount,
+    getUserVoiceChannelID,
+    searchArtists,
+} from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
@@ -226,6 +231,25 @@ function runLocked(guildID: string, fn: () => Promise<void>): void {
     });
 }
 
+/**
+ * Whether the user is actually connected to the given voice channel, read from
+ * their own voice state. The web layer already verified the caller is a Discord
+ * activity participant, but activities can be launched in text channels or used
+ * without joining voice — so we additionally require real voice presence before
+ * letting someone control or play the game.
+ * @param guildID - the guild
+ * @param userID - the calling user
+ * @param voiceChannelID - the channel they must be connected to
+ * @returns whether the user is in that voice channel
+ */
+function userInVoiceChannel(
+    guildID: string,
+    userID: string,
+    voiceChannelID: string,
+): boolean {
+    return getUserVoiceChannelID(guildID, userID) === voiceChannelID;
+}
+
 function pushEvent(guildID: string, event: ActivityEvent): void {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!State.ipc) return;
@@ -405,6 +429,17 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
+                    if (
+                        !userInVoiceChannel(
+                            guessArgs.guildID,
+                            guessArgs.userID,
+                            session.voiceChannelID,
+                        )
+                    ) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
                     const messageContext = new MessageContext(
                         session.textChannelID,
                         new KmqMember(guessArgs.userID),
@@ -456,6 +491,30 @@ function ensureWorkerHandlerRegistered(): void {
                             reply({
                                 ok: false,
                                 reason: "session_already_running",
+                            });
+                            return;
+                        }
+
+                        // The caller must actually be connected to the
+                        // activity's voice channel (being a Discord activity
+                        // participant isn't enough — activities can be opened
+                        // without joining voice).
+                        if (
+                            !userInVoiceChannel(
+                                startArgs.guildID,
+                                startArgs.userID,
+                                startArgs.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
+
+                        // ...and the bot must be able to join that channel.
+                        if (!botHasVoicePermissions(startArgs.voiceChannelID)) {
+                            reply({
+                                ok: false,
+                                reason: "bot_no_voice_perms",
                             });
                             return;
                         }
@@ -554,6 +613,17 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
+                        if (
+                            !userInVoiceChannel(
+                                skipArgs.guildID,
+                                skipArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
+
                         const messageContext = new MessageContext(
                             session.textChannelID,
                             new KmqMember(skipArgs.userID),
@@ -616,6 +686,17 @@ function ensureWorkerHandlerRegistered(): void {
                         const originalRound = session.round;
                         if (!originalRound || originalRound.finished) {
                             reply({ ok: false, reason: "no_round" });
+                            return;
+                        }
+
+                        if (
+                            !userInVoiceChannel(
+                                hintArgs.guildID,
+                                hintArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
 
@@ -701,11 +782,22 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Voice-channel membership is already enforced at the
-                        // web layer (requireAuthedInstance gates on Discord's
-                        // authoritative activity participant list), so there's
-                        // no need to re-check the bot's voice cache here.
+                        // When a game is running, require the caller to be in
+                        // its voice channel (read from their own voice state).
+                        // Before a game exists there's no specific channel to
+                        // check, so any authenticated participant may configure.
                         const session = Session.getSession(optionArgs.guildID);
+                        if (
+                            session &&
+                            !userInVoiceChannel(
+                                optionArgs.guildID,
+                                optionArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
 
                         try {
                             const guildPreference =
@@ -995,10 +1087,20 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Any authenticated activity participant may end the
-                        // game (matches the relaxed /end command, which has no
-                        // owner check). Participation is already verified at the
-                        // web layer, so no voice re-check is needed here.
+                        // Any member of the game's voice channel may end it
+                        // (matches the relaxed /end command, which has no owner
+                        // check) — but they must actually be in that channel.
+                        if (
+                            !userInVoiceChannel(
+                                endArgs.guildID,
+                                endArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
+
                         const messageContext = new MessageContext(
                             session.textChannelID,
                             new KmqMember(endArgs.userID),

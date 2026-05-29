@@ -113,6 +113,7 @@
         "reconnecting": "Erneute Verbindung wird hergestellt...",
         "rejectBadRequest": "Ungültige Anfrage.",
         "rejectBanned": "Du bist von KMQ gesperrt.",
+        "rejectBotNoVoicePerms": "Der Bot kann deinem Sprachkanal nicht beitreten — ihm fehlen dort Berechtigungen.",
         "rejectForbidden": "Du nimmst an dieser Activity nicht teil.",
         "rejectGeneric": "Aktion fehlgeschlagen.",
         "rejectMaintenance": "Wartungsmodus ist aktiviert.",

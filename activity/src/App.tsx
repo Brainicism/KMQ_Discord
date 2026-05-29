@@ -214,6 +214,8 @@ function rejectReasonText(
             return t("rejectRateLimit");
         case "not_in_vc":
             return t("rejectNotInVC");
+        case "bot_no_voice_perms":
+            return t("rejectBotNoVoicePerms");
         case "unauthorized":
             return t("rejectUnauthorized");
         case "forbidden":

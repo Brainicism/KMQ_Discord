@@ -113,6 +113,7 @@
         "reconnecting": "पुन: कनेक्ट किया जा रहा है...",
         "rejectBadRequest": "अमान्य अनुरोध।",
         "rejectBanned": "आप KMQ से प्रतिबंधित हैं।",
+        "rejectBotNoVoicePerms": "बॉट आपके वॉइस चैनल में शामिल नहीं हो सकता — वहां इसकी अनुमतियों की कमी है।",
         "rejectForbidden": "आप इस Activity के भागीदार नहीं हैं।",
         "rejectGeneric": "क्रिया विफल रही।",
         "rejectMaintenance": "रखरखाव मोड चालू है।",

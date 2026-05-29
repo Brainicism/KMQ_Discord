@@ -1516,6 +1516,48 @@ export function getUserVoiceChannel(
 }
 
 /**
+ * @param guildID - The guild the user is in
+ * @param userID - The user to look up
+ * @returns the ID of the voice channel the user is currently connected to, or
+ * null if they aren't in voice. Reads the member's own voice state, which is
+ * reliable even before the bot has joined the channel — unlike a channel's
+ * `voiceMembers` collection, which may be unpopulated in that window.
+ */
+export function getUserVoiceChannelID(
+    guildID: string,
+    userID: string,
+): string | null {
+    return (
+        State.client.guilds.get(guildID)?.members.get(userID)?.voiceState
+            .channelID ?? null
+    );
+}
+
+/**
+ * @param voiceChannelID - The voice channel the bot would join
+ * @returns whether the channel resolves to a voice channel the bot has all
+ * REQUIRED_VOICE_PERMISSIONS in. A lightweight boolean form of
+ * `voicePermissionsCheck` for callers (e.g. the Activity bridge) that handle
+ * their own user messaging rather than sending an embed.
+ */
+export function botHasVoicePermissions(voiceChannelID: string): boolean {
+    const voiceChannel = getVoiceChannel(voiceChannelID);
+    // Not a (cached) voice channel → the bot can't play there.
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+    if (!voiceChannel || !voiceChannel.permissionsOf) {
+        return false;
+    }
+
+    const permissions = voiceChannel.permissionsOf(
+        process.env.BOT_CLIENT_ID as string,
+    );
+
+    return REQUIRED_VOICE_PERMISSIONS.every((permission) =>
+        permissions.has(permission),
+    );
+}
+
+/**
  * @param voiceChannelID - The voice channel ID
  * @returns the voice channel that the message's author is in
  */

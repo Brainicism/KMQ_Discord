@@ -113,6 +113,7 @@
         "reconnecting": "Reconnecting...",
         "rejectBadRequest": "Bad request.",
         "rejectBanned": "You are banned from KMQ.",
+        "rejectBotNoVoicePerms": "The bot can't join your voice channel — it's missing permissions there.",
         "rejectForbidden": "You're not a participant of this Activity.",
         "rejectGeneric": "Action failed.",
         "rejectMaintenance": "Maintenance mode is on.",

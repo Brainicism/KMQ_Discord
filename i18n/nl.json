@@ -113,6 +113,7 @@
         "reconnecting": "Opnieuw verbinden...",
         "rejectBadRequest": "Ongeldig verzoek.",
         "rejectBanned": "Je bent verbannen van KMQ.",
+        "rejectBotNoVoicePerms": "De bot kan niet deelnemen aan je spraakkanaal — er ontbreken machtigingen.",
         "rejectForbidden": "Je bent geen deelnemer van deze Activity.",
         "rejectGeneric": "Actie mislukt.",
         "rejectMaintenance": "Onderhoudsmodus is ingeschakeld.",
