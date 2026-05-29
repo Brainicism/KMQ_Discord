@@ -1,10 +1,14 @@
 import { ACTIVITY_PROXY_BASE, ACTIVITY_WS_PATH } from "./constants";
 import type {
+    ActivityArtistType,
     ActivityGender,
     ActivityGuessMode,
+    ActivityLanguage,
     ActivityMultiguess,
+    ActivityRelease,
     ActivitySeek,
     ActivityShuffle,
+    ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type ActivityEvent from "./types/activity_event";
 import type ActivitySessionResponse from "./types/activity_session_response";
@@ -30,6 +34,10 @@ export type SetOptionRequest =
     | { kind: "duration"; duration: number | null }
     | { kind: "shuffle"; shuffle: ActivityShuffle }
     | { kind: "seek"; seek: ActivitySeek }
+    | { kind: "language"; language: ActivityLanguage }
+    | { kind: "release"; release: ActivityRelease }
+    | { kind: "artisttype"; artisttype: ActivityArtistType }
+    | { kind: "subunits"; subunits: ActivitySubunits }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] };

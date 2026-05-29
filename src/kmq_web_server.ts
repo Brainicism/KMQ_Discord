@@ -22,11 +22,15 @@ import { availableGenders } from "./enums/option_types/gender";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
+import ArtistType from "./enums/option_types/artist_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
+import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
+import ReleaseType from "./enums/option_types/release_type";
 import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
+import SubunitsPreference from "./enums/option_types/subunit_preference";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -130,6 +134,18 @@ const MULTIGUESS_VALUES: ReadonlySet<string> = new Set(
 
 const SHUFFLE_VALUES: ReadonlySet<string> = new Set(Object.values(ShuffleType));
 const SEEK_VALUES: ReadonlySet<string> = new Set(Object.values(SeekType));
+const LANGUAGE_VALUES: ReadonlySet<string> = new Set(
+    Object.values(LanguageType),
+);
+
+const RELEASE_VALUES: ReadonlySet<string> = new Set(Object.values(ReleaseType));
+const ARTIST_TYPE_VALUES: ReadonlySet<string> = new Set(
+    Object.values(ArtistType),
+);
+
+const SUBUNITS_VALUES: ReadonlySet<string> = new Set(
+    Object.values(SubunitsPreference),
+);
 
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
@@ -160,6 +176,10 @@ type SetOptionBody =
     | { kind: "duration"; duration: number | null }
     | { kind: "shuffle"; shuffle: ShuffleType }
     | { kind: "seek"; seek: SeekType }
+    | { kind: "language"; language: LanguageType }
+    | { kind: "release"; release: ReleaseType }
+    | { kind: "artisttype"; artisttype: ArtistType }
+    | { kind: "subunits"; subunits: SubunitsPreference }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] };
@@ -291,6 +311,42 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             }
 
             return { kind: "seek", seek: v as SeekType };
+        }
+
+        case "language": {
+            const v = obj["language"];
+            if (typeof v !== "string" || !LANGUAGE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "language", language: v as LanguageType };
+        }
+
+        case "release": {
+            const v = obj["release"];
+            if (typeof v !== "string" || !RELEASE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "release", release: v as ReleaseType };
+        }
+
+        case "artisttype": {
+            const v = obj["artisttype"];
+            if (typeof v !== "string" || !ARTIST_TYPE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "artisttype", artisttype: v as ArtistType };
+        }
+
+        case "subunits": {
+            const v = obj["subunits"];
+            if (typeof v !== "string" || !SUBUNITS_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "subunits", subunits: v as SubunitsPreference };
         }
 
         case "groups":

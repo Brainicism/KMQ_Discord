@@ -33,11 +33,15 @@ import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { ActivityArtist } from "./types/activity_options_snapshot";
 import type {
+    ActivityArtistType,
     ActivityGender,
     ActivityGuessMode,
+    ActivityLanguage,
     ActivityMultiguess,
+    ActivityRelease,
     ActivitySeek,
     ActivityShuffle,
+    ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
 import type { SetOptionRequest } from "./api";
@@ -991,6 +995,14 @@ const SHUFFLE_OPTIONS: ActivityShuffle[] = [
     "reversechronological",
 ];
 const SEEK_OPTIONS: ActivitySeek[] = ["random", "beginning", "middle"];
+const LANGUAGE_OPTIONS: ActivityLanguage[] = ["all", "korean"];
+const RELEASE_OPTIONS: ActivityRelease[] = ["official", "bside", "all"];
+const ARTIST_TYPE_OPTIONS: ActivityArtistType[] = [
+    "soloists",
+    "groups",
+    "both",
+];
+const SUBUNITS_OPTIONS: ActivitySubunits[] = ["include", "exclude"];
 
 function OptionsPanel({
     accessToken,
@@ -1112,6 +1124,29 @@ function OptionsPanel({
         void submit({ kind: "seek", seek }, { ...options, seek });
     };
 
+    const pickLanguage = (language: ActivityLanguage): void => {
+        if (language === options.language) return;
+        void submit({ kind: "language", language }, { ...options, language });
+    };
+
+    const pickRelease = (release: ActivityRelease): void => {
+        if (release === options.release) return;
+        void submit({ kind: "release", release }, { ...options, release });
+    };
+
+    const pickArtistType = (artisttype: ActivityArtistType): void => {
+        if (artisttype === options.artisttype) return;
+        void submit(
+            { kind: "artisttype", artisttype },
+            { ...options, artisttype },
+        );
+    };
+
+    const pickSubunits = (subunits: ActivitySubunits): void => {
+        if (subunits === options.subunits) return;
+        void submit({ kind: "subunits", subunits }, { ...options, subunits });
+    };
+
     const submitArtistList = (
         listKind: "groups" | "includes" | "excludes",
         next: ActivityArtist[],
@@ -1202,6 +1237,64 @@ function OptionsPanel({
                         type="button"
                         className={`pill ${options.seek === s ? "on" : ""}`}
                         onClick={() => pickSeek(s)}
+                    >
+                        {t(`options.${s}`)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.language")}</div>
+            <div className="pills">
+                {LANGUAGE_OPTIONS.map((l) => (
+                    <button
+                        key={l}
+                        type="button"
+                        className={`pill ${options.language === l ? "on" : ""}`}
+                        onClick={() => pickLanguage(l)}
+                    >
+                        {t(`options.${l}`)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.release")}</div>
+            <div className="pills">
+                {RELEASE_OPTIONS.map((r) => (
+                    <button
+                        key={r}
+                        type="button"
+                        className={`pill ${options.release === r ? "on" : ""}`}
+                        onClick={() => pickRelease(r)}
+                    >
+                        {t(`options.${r}`)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.artisttype")}</div>
+            <div className="pills">
+                {ARTIST_TYPE_OPTIONS.map((a) => (
+                    <button
+                        key={a}
+                        type="button"
+                        className={`pill ${
+                            options.artisttype === a ? "on" : ""
+                        }`}
+                        onClick={() => pickArtistType(a)}
+                    >
+                        {t(`options.${a}`)}
+                    </button>
+                ))}
+            </div>
+
+            <div className="option-label">{t("options.subunits")}</div>
+            <div className="pills">
+                {SUBUNITS_OPTIONS.map((s) => (
+                    <button
+                        key={s}
+                        type="button"
+                        className={`pill ${options.subunits === s ? "on" : ""}`}
+                        onClick={() => pickSubunits(s)}
                     >
                         {t(`options.${s}`)}
                     </button>

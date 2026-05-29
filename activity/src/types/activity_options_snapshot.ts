@@ -13,6 +13,10 @@ export type ActivityShuffle =
     | "chronological"
     | "reversechronological";
 export type ActivitySeek = "beginning" | "random" | "middle";
+export type ActivityLanguage = "korean" | "all";
+export type ActivityRelease = "official" | "bside" | "all";
+export type ActivityArtistType = "soloists" | "groups" | "both";
+export type ActivitySubunits = "include" | "exclude";
 
 export interface ActivityArtist {
     id: number;
@@ -32,6 +36,10 @@ export default interface ActivityOptionsSnapshot {
     duration: number | null;
     shuffle: ActivityShuffle;
     seek: ActivitySeek;
+    language: ActivityLanguage;
+    release: ActivityRelease;
+    artisttype: ActivityArtistType;
+    subunits: ActivitySubunits;
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;
     excludes: ActivityArtist[] | null;

@@ -156,6 +156,10 @@ function snapshotOptions(
         duration: opts.duration,
         shuffle: opts.shuffleType,
         seek: opts.seekType,
+        language: opts.languageType,
+        release: opts.releaseType,
+        artisttype: opts.artistType,
+        subunits: opts.subunitPreference,
         groups: toActivity(opts.groups),
         includes: toActivity(opts.includes),
         excludes: toActivity(opts.excludes),
@@ -890,6 +894,34 @@ function ensureWorkerHandlerRegistered(): void {
                                 case "seek": {
                                     await guildPreference.setSeekType(
                                         optionArgs.seek,
+                                    );
+                                    break;
+                                }
+
+                                case "language": {
+                                    await guildPreference.setLanguageType(
+                                        optionArgs.language,
+                                    );
+                                    break;
+                                }
+
+                                case "release": {
+                                    await guildPreference.setReleaseType(
+                                        optionArgs.release,
+                                    );
+                                    break;
+                                }
+
+                                case "artisttype": {
+                                    await guildPreference.setArtistType(
+                                        optionArgs.artisttype,
+                                    );
+                                    break;
+                                }
+
+                                case "subunits": {
+                                    await guildPreference.setSubunitPreference(
+                                        optionArgs.subunits,
                                     );
                                     break;
                                 }
