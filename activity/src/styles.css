@@ -144,9 +144,11 @@ body::before {
  * an on-demand overlay drawer. */
 .kmq-layout {
     display: block;
-    /* --app-vh tracks window.visualViewport so the layout shrinks when the
-       mobile keyboard opens (set in App); falls back to 100vh on desktop. */
-    height: var(--app-vh, 100vh);
+    /* Stable full-height shell. The Android keyboard overlays the page
+       (interactive-widget=overlays-content in index.html) rather than resizing
+       the viewport, so the layout doesn't reflow when it opens — the browser
+       scrolls the focused input into the visible area instead. */
+    height: 100vh;
     overflow: hidden;
     position: relative;
 }
@@ -1701,6 +1703,16 @@ body::before {
 }
 
 /* ---- RESPONSIVE ---- */
+/* Below the grid breakpoint the history / scoreboard toggles are fixed in the
+   top corners (40px wide, 16px from each edge). Reserve horizontal room in the
+   header so the KMQ logo and the Start/End buttons don't slide under them. */
+@media (max-width: 900px) {
+    .kmq-app header {
+        padding-left: 52px;
+        padding-right: 52px;
+    }
+}
+
 @media (max-width: 600px) {
     .vote-row {
         grid-template-columns: 1fr;

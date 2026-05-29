@@ -2,7 +2,16 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <!-- interactive-widget=overlays-content: when the Android soft keyboard
+             opens, overlay it on top of the page instead of resizing either
+             viewport. This stops the layout from reflowing mid-animation, which
+             on Android WebView (Discord's mobile client) stole focus from the
+             guess input and dismissed the keyboard on the very first tap. The
+             browser still scrolls the focused input into the visible area. -->
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, interactive-widget=overlays-content"
+        />
         <link
             rel="preconnect"
             href="https://fonts.googleapis.com"
