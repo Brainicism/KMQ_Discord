@@ -137,33 +137,30 @@ body::before {
     pointer-events: none;
 }
 
-/* ---- LAYOUT: main + sidebar ---- */
+/* ---- LAYOUT: main + sidebar ----
+ * Mobile-first: a single column. The sidebars are fixed overlay drawers
+ * (toggled). On desktop the layout becomes a grid whose right column is a
+ * PERSISTENT scoreboard rail (always visible); the left history sidebar stays
+ * an on-demand overlay drawer. */
 .kmq-layout {
-    display: flex;
+    display: block;
     height: 100vh;
     overflow: hidden;
     position: relative;
 }
 
 .kmq-main {
-    flex: 1;
+    height: 100%;
     overflow-y: auto;
     padding: 16px clamp(14px, 3vw, 28px) 40px;
-    transition:
-        margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-        margin-right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Make room for each open sidebar on wide viewports so the centered main
- * column isn't obscured. On narrow screens (<=900px) the sidebars overlay
- * the content instead. */
 @media (min-width: 901px) {
-    .kmq-layout.left-open .kmq-main {
-        margin-left: 300px;
-    }
-
-    .kmq-layout.right-open .kmq-main {
-        margin-right: 300px;
+    /* main | persistent scoreboard rail. The left history sidebar is fixed
+     * (out of flow), so the grid only lays out main + the right rail. */
+    .kmq-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) var(--rail-width, 320px);
     }
 }
 
@@ -208,6 +205,23 @@ body::before {
 
 .kmq-sidebar.left.open {
     transform: translateX(0);
+}
+
+/* Desktop: the right scoreboard rail is part of the grid (always visible),
+ * not a slide-in overlay. */
+@media (min-width: 901px) {
+    .kmq-sidebar:not(.left) {
+        position: static;
+        width: auto;
+        transform: none;
+        box-shadow: none;
+        z-index: auto;
+    }
+
+    /* The right toggle is pointless when the rail is always shown. */
+    .sidebar-toggle:not(.left):not(.theme) {
+        display: none;
+    }
 }
 
 .sidebar-header {
@@ -282,7 +296,11 @@ body::before {
     left: 16px;
 }
 
+/* Left cluster, below the history toggle — on desktop the persistent
+ * scoreboard rail covers the top-right, so keep theme off the right edge. */
 .sidebar-toggle.theme {
+    right: auto;
+    left: 16px;
     top: 64px;
     font-size: 1.2rem;
 }

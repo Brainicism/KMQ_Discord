@@ -1776,8 +1776,11 @@ export default function App() {
         userID: string;
     } | null>(null);
     const [bundle, setBundle] = useState<Record<string, string> | null>(null);
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [historyOpen, setHistoryOpen] = useState(true);
+    // Both drawers default closed. On desktop the scoreboard rail is always
+    // shown via the grid (this flag only drives its mobile drawer), and history
+    // opens on demand; on mobile nothing covers the screen on load.
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [historyOpen, setHistoryOpen] = useState(false);
     const [theme, setTheme] = useState<Theme>(readInitialTheme);
     // Bumped to re-run the whole connect flow (auth → snapshot → stream)
     // without reloading the iframe — drives the Reconnect button.
