@@ -1221,31 +1221,49 @@ body::before {
 /* ⓘ info trigger + hover/focus tooltip describing the option (the gist of
    /help). Pure CSS: the description lives in data-tip and renders in a
    floating box on hover or keyboard focus. */
+/* Small circular "?" help badge. */
 .option-info {
-    border: none;
-    background: none;
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
     padding: 0;
     margin: 0;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: transparent;
     color: var(--text-tertiary);
     cursor: help;
-    font-size: 0.78rem;
+    font-size: 0.62rem;
+    font-weight: 700;
     line-height: 1;
-    position: relative;
     display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition:
+        color 0.12s ease,
+        border-color 0.12s ease,
+        background 0.12s ease;
 }
 
 .option-info:hover,
 .option-info:focus-visible {
     color: var(--red-primary);
+    border-color: var(--red-primary);
+    background: var(--red-light);
 }
 
 .option-info::after {
     content: attr(data-tip);
     position: absolute;
-    left: 0;
+    /* Anchor to the icon's right edge and grow leftward — the options panel
+       lives in the right-edge sidebar, so a left-anchored tooltip ran off the
+       right of the screen. */
+    right: 0;
+    left: auto;
     top: 150%;
     width: max-content;
-    max-width: 230px;
+    max-width: 220px;
     background: var(--bg-surface);
     border: 1px solid var(--border-red);
     border-radius: var(--radius-sm);

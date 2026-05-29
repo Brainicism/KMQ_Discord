@@ -1019,7 +1019,7 @@ function OptionLabel({
                     data-tip={help}
                     onClick={(e) => e.preventDefault()}
                 >
-                    ⓘ
+                    ?
                 </button>
             )}
         </div>
