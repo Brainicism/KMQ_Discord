@@ -495,23 +495,24 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // The caller must actually be connected to the
-                        // activity's voice channel (being a Discord activity
-                        // participant isn't enough — activities can be opened
-                        // without joining voice).
-                        if (
-                            !userInVoiceChannel(
-                                startArgs.guildID,
-                                startArgs.userID,
-                                startArgs.voiceChannelID,
-                            )
-                        ) {
+                        // Start the game in the channel the caller is actually
+                        // connected to — NOT startArgs.voiceChannelID, which is
+                        // where the activity was launched (it can be a text
+                        // channel, or a VC the user later left/changed). The
+                        // activity can be opened without joining voice, so being
+                        // a Discord participant isn't enough.
+                        const startVoiceChannelID = getUserVoiceChannelID(
+                            startArgs.guildID,
+                            startArgs.userID,
+                        );
+
+                        if (!startVoiceChannelID) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
 
                         // ...and the bot must be able to join that channel.
-                        if (!botHasVoicePermissions(startArgs.voiceChannelID)) {
+                        if (!botHasVoicePermissions(startVoiceChannelID)) {
                             reply({
                                 ok: false,
                                 reason: "bot_no_voice_perms",
@@ -545,7 +546,7 @@ function ensureWorkerHandlerRegistered(): void {
                             const gameSession = new GameSession(
                                 guildPreference,
                                 startArgs.textChannelID,
-                                startArgs.voiceChannelID,
+                                startVoiceChannelID,
                                 startArgs.guildID,
                                 gameOwner,
                                 GameType.CLASSIC,
