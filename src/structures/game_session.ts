@@ -200,7 +200,15 @@ export default class GameSession extends Session {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
-                await this.sendMultipleChoiceOptionsMessage(false);
+
+                // Reuse the round's existing choices (same options, same order)
+                // if they were already generated — otherwise toggling
+                // typing <-> MC within a round reshuffles the order each time.
+                // First switch in a round that started in typing has none yet,
+                // so fall back to generating.
+                await this.sendMultipleChoiceOptionsMessage(
+                    round.multipleChoiceOptions.length > 0,
+                );
             } else if (this.isHiddenMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
