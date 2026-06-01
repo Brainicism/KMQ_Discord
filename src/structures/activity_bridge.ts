@@ -121,14 +121,9 @@ function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
  * @returns the cached MatchedArtist entries, in input order
  */
 function resolveArtistIDs(artistIDs: number[]): MatchedArtist[] {
-    const byID = new Map<number, MatchedArtist>();
-    for (const a of Object.values(State.artistToEntry)) {
-        byID.set(a.id, a);
-    }
-
     const out: MatchedArtist[] = [];
     for (const id of artistIDs) {
-        const match = byID.get(id);
+        const match = State.artistIDToEntry.get(id);
         if (match) out.push(match);
     }
 
@@ -921,7 +916,7 @@ function ensureWorkerHandlerRegistered(): void {
                                     // a CLI convenience that doesn't suit
                                     // a point-and-click panel.
                                     await guildPreference.setDuration(
-                                        optionArgs.duration as number,
+                                        optionArgs.duration,
                                     );
                                     break;
                                 }

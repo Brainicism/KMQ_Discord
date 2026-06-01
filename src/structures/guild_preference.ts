@@ -826,9 +826,9 @@ export default class GuildPreference {
 
     /**
      * Sets the duration option value
-     * @param duration - The game session duration in minutes
+     * @param duration - The game session duration in minutes, or null to reset
      */
-    async setDuration(duration: number): Promise<void> {
+    async setDuration(duration: number | null): Promise<void> {
         this.gameOptions.duration = duration;
         await this.updateGuildPreferences([
             { name: GameOptionInternal.DURATION, value: duration },

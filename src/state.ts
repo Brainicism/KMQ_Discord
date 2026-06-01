@@ -40,6 +40,10 @@ export default class State {
     static bonusArtists: Set<string> = new Set<string>();
     static locales: { [guildID: string]: LocaleType } = {};
     static artistToEntry: { [artistNameOrAlias: string]: MatchedArtist } = {};
+    // ID → entry view of artistToEntry (one entry per artist, vs. the
+    // name/alias-keyed map above). Rebuilt by reloadArtists; lets callers
+    // resolve artist IDs without iterating the full name map each time.
+    static artistIDToEntry: Map<number, MatchedArtist> = new Map();
     static topArtists: Array<MatchedArtist> = [];
     static songLinkToEntry: {
         [songLink: string]: {
