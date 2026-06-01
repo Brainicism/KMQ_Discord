@@ -182,7 +182,8 @@ type SetOptionBody =
     | { kind: "subunits"; subunits: SubunitsPreference }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
-    | { kind: "excludes"; artistIDs: number[] };
+    | { kind: "excludes"; artistIDs: number[] }
+    | { kind: "playlist"; playlistURL: string | null };
 
 function intInRange(v: unknown, min: number, max: number): number | null {
     if (typeof v !== "number" || !Number.isInteger(v)) return null;
@@ -372,6 +373,14 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
                 kind: obj["kind"] as "groups" | "includes" | "excludes",
                 artistIDs,
             };
+        }
+
+        case "playlist": {
+            const v = obj["playlistURL"];
+            if (v === null) return { kind: "playlist", playlistURL: null };
+            // Cap length defensively; the worker validates the URL shape.
+            if (typeof v !== "string" || v.length > 2048) return null;
+            return { kind: "playlist", playlistURL: v };
         }
 
         default:

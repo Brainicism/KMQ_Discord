@@ -1409,6 +1409,82 @@ body::before {
     grid-column: 1 / -1;
 }
 
+/* Playlist option: a URL input + Set button, or an active-state banner. */
+.options-playlist .playlist-input-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+}
+
+.playlist-url-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 8px);
+    color: var(--text-primary);
+    padding: 5px 10px;
+    font-size: 0.73rem;
+    font-family: inherit;
+}
+
+.playlist-url-input:focus-visible {
+    outline: none;
+    border-color: var(--red-primary);
+}
+
+.playlist-url-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.playlist-active {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.playlist-active-count {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* One-line note explaining the greyed-out, playlist-managed options below. */
+.options-playlist-note {
+    margin: -4px 0 0;
+    font-size: 0.72rem;
+    font-style: italic;
+    color: var(--text-tertiary);
+}
+
+/* Wraps options a set playlist overrides. display:contents keeps each inner
+   .options-group as a direct grid cell, while the native <fieldset disabled>
+   disables every control inside. */
+fieldset.options-override {
+    display: contents;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    min-inline-size: 0;
+}
+
+fieldset.options-override:disabled .options-group {
+    opacity: 0.45;
+}
+
+.pill:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.pill:disabled:hover {
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
 /* Tighten the label spacing now that the grid gap separates fields. */
 .options-group .option-label {
     margin-top: 0;

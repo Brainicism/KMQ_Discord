@@ -79,6 +79,7 @@
                 "language": "仅播放韩语歌曲，或播放任何语言的歌曲。",
                 "limit": "将歌曲池限制为范围内最流行的X首歌曲。",
                 "multiguess": "打开时，其他人可以在第一个正确答案后有个简短猜测时间。",
+                "playlist": "从 Spotify 或 YouTube 播放列表中播放歌曲。激活时，播放列表管理歌曲池的筛选器。",
                 "release": "只播官方音乐视频，或所有视频类型（b面，舞蹈练习等）。",
                 "seek": "每首歌从哪个位置开始播放 — 随机点，开始或中间。",
                 "shuffle": "如何选择下一首歌 — 随机，根据难度或受欢迎程度加权，或按发布日期。",
@@ -97,6 +98,21 @@
             "off": "关",
             "official": "官方",
             "on": "开",
+            "playlist": {
+                "active": "🎵 播放列表激活 — {{count}} 首歌曲",
+                "clear": "清除",
+                "errors": {
+                    "failed": "无法加载该播放列表。请再试一次。",
+                    "invalidUrl": "这似乎不是一个有效的 URL。",
+                    "noMatches": "该播放列表没有匹配的 KMQ 歌曲。",
+                    "unsupported": "仅支持 Spotify 和 YouTube 播放列表链接。"
+                },
+                "label": "播放列表",
+                "managed": "歌曲池选项由播放列表管理。",
+                "matching": "匹配中…",
+                "set": "设置",
+                "urlPlaceholder": "Spotify 或 YouTube 播放列表 URL"
+            },
             "popularity": "人气",
             "random": "随机",
             "release": "发布",

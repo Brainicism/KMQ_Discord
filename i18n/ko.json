@@ -79,6 +79,7 @@
                 "language": "한국어 노래만 재생하거나, 모든 언어의 노래를 재생합니다.",
                 "limit": "범위 내에서 가장 인기 있는 상위 X곡으로 풀을 제한합니다.",
                 "multiguess": "켜져 있으면, 첫 번째 정답 후에 다른 사람들도 잠깐 동안 추측할 기회가 주어집니다.",
+                "playlist": "Spotify 또는 YouTube 플레이리스트에서 곡을 재생합니다. 활성화된 동안, 곡 풀 필터는 플레이리스트에 의해 관리됩니다.",
                 "release": "공식 뮤직비디오만 또는 모든 비디오 유형 (b-sides, 댄스 연습 영상 등).",
                 "seek": "각 곡이 시작되는 지점 - 랜덤 지점, 시작, 또는 중간입니다.",
                 "shuffle": "다음 곡을 선택하는 방법 — 임의로, 난이도나 인기도로 가중치, 또는 출시일로.",
@@ -97,6 +98,21 @@
             "off": "끄기",
             "official": "공식",
             "on": "켜짐",
+            "playlist": {
+                "active": "🎵 플레이리스트 활성화 — {{count}} 곡",
+                "clear": "지우기",
+                "errors": {
+                    "failed": "그 플레이리스트를 로드할 수 없습니다. 다시 시도하세요.",
+                    "invalidUrl": "유효한 URL이 아닌 것 같습니다.",
+                    "noMatches": "해당 플레이리스트와 일치하는 KMQ 곡이 없습니다.",
+                    "unsupported": "Spotify 및 YouTube 플레이리스트 링크만 지원됩니다."
+                },
+                "label": "플레이리스트",
+                "managed": "곡 풀 옵션은 플레이리스트에 의해 관리됩니다.",
+                "matching": "일치 중...",
+                "set": "설정",
+                "urlPlaceholder": "Spotify 또는 YouTube 플레이리스트 URL"
+            },
             "popularity": "인기도",
             "random": "랜덤",
             "release": "발매",

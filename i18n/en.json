@@ -79,6 +79,7 @@
                 "language": "Play only Korean-language songs, or songs in any language.",
                 "limit": "Restrict the pool to the top X most popular songs in range.",
                 "multiguess": "When on, others get a brief window to also guess after the first correct answer.",
+                "playlist": "Play songs from a Spotify or YouTube playlist. While active, the song-pool filters are managed by the playlist.",
                 "release": "Only official music videos, or all video types (b-sides, dance practices, etc.).",
                 "seek": "Where each song starts playing — a random point, the beginning, or the middle.",
                 "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, or by release date.",
@@ -97,6 +98,21 @@
             "off": "Off",
             "official": "Official",
             "on": "On",
+            "playlist": {
+                "active": "🎵 Playlist active — {{count}} songs",
+                "clear": "Clear",
+                "errors": {
+                    "failed": "Couldn't load that playlist. Try again.",
+                    "invalidUrl": "That doesn't look like a valid URL.",
+                    "noMatches": "No KMQ songs matched that playlist.",
+                    "unsupported": "Only Spotify and YouTube playlist links are supported."
+                },
+                "label": "Playlist",
+                "managed": "Song-pool options are managed by the playlist.",
+                "matching": "Matching…",
+                "set": "Set",
+                "urlPlaceholder": "Spotify or YouTube playlist URL"
+            },
             "popularity": "Popularity",
             "random": "Random",
             "release": "Release",

@@ -37,6 +37,9 @@ type ActivitySetOptionArgs = {
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] }
+    // Playlist URL to match against, or null to clear the playlist (and the
+    // limit it auto-sets), mirroring the slash-command `/playlist reset` flow.
+    | { kind: "playlist"; playlistURL: string | null }
 );
 
 export default ActivitySetOptionArgs;

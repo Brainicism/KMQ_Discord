@@ -79,6 +79,7 @@
                 "language": "Putar hanya lagu berbahasa Korea, atau lagu dalam bahasa apa saja.",
                 "limit": "Batasi kumpulan ke X lagu terpopuler teratas dalam rentang.",
                 "multiguess": "Jika diaktifkan, orang lain mendapatkan kesempatan singkat untuk juga menebak setelah jawaban benar pertama.",
+                "playlist": "Putar lagu dari playlist Spotify atau YouTube. Saat aktif, filter kumpulan lagu dikelola oleh playlist.",
                 "release": "Hanya video musik resmi, atau semua jenis video (b-sides, dance practice, dll.).",
                 "seek": "Di mana setiap lagu mulai diputar — titik acak, awal, atau tengah.",
                 "shuffle": "Bagaimana lagu berikutnya dipilih — secara acak, diberi bobot menurut kesulitan atau popularitas, atau berdasarkan tanggal rilis.",
@@ -97,6 +98,21 @@
             "off": "Mati",
             "official": "Resmi",
             "on": "Aktif",
+            "playlist": {
+                "active": "🎵 Playlist aktif — {{count}} lagu",
+                "clear": "Bersihkan",
+                "errors": {
+                    "failed": "Tidak dapat memuat playlist itu. Coba lagi.",
+                    "invalidUrl": "Itu tidak terlihat seperti URL yang valid.",
+                    "noMatches": "Tidak ada lagu KMQ yang cocok dengan playlist itu.",
+                    "unsupported": "Hanya tautan playlist Spotify dan YouTube yang didukung."
+                },
+                "label": "Playlist",
+                "managed": "Opsi kolam lagu dikelola oleh playlist.",
+                "matching": "Mencocokkan…",
+                "set": "Atur",
+                "urlPlaceholder": "URL playlist Spotify atau YouTube"
+            },
             "popularity": "Popularitas",
             "random": "Acak",
             "release": "Rilis",

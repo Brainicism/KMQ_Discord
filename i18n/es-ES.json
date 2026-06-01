@@ -79,6 +79,7 @@
                 "language": "Reproducir solo canciones en coreano o canciones en cualquier idioma.",
                 "limit": "Restringir el conjunto a las X canciones más populares dentro del rango.",
                 "multiguess": "Cuando está activado, los demás tienen una breve ventana para adivinar después de la primera respuesta correcta.",
+                "playlist": "Reproduce canciones de una lista de reproducción de Spotify o YouTube. Mientras esté activa, los filtros del grupo de canciones son gestionados por la lista de reproducción.",
                 "release": "Solo vídeos musicales oficiales, o todos los tipos de vídeos (b-sides, prácticas de baile, etc.).",
                 "seek": "Dónde empieza a reproducirse cada canción: un punto aleatorio, el principio o el medio.",
                 "shuffle": "Cómo se elige la siguiente canción: al azar, ponderada por dificultad o popularidad, o por fecha de lanzamiento.",
@@ -97,6 +98,21 @@
             "off": "Apagado",
             "official": "Oficial",
             "on": "Encendido",
+            "playlist": {
+                "active": "🎵 Lista de reproducción activa — {{count}} canciones",
+                "clear": "Limpiar",
+                "errors": {
+                    "failed": "No se pudo cargar esa lista de reproducción. Intenta de nuevo.",
+                    "invalidUrl": "Ese no parece ser un URL válido.",
+                    "noMatches": "Ninguna canción de KMQ coincidió con esa lista de reproducción.",
+                    "unsupported": "Solo se admiten enlaces de listas de reproducción de Spotify y YouTube."
+                },
+                "label": "Lista de reproducción",
+                "managed": "Las opciones del grupo de canciones son gestionadas por la lista de reproducción.",
+                "matching": "Emparejando…",
+                "set": "Establecer",
+                "urlPlaceholder": "URL de la lista de reproducción de Spotify o YouTube"
+            },
             "popularity": "Popularidad",
             "random": "Aleatorio",
             "release": "Lanzamiento",

@@ -226,6 +226,14 @@ function rejectReasonText(
             return t("rejectSessionAlreadyRunning");
         case "no_round":
             return t("rejectNoRound");
+        case "playlist_invalid_url":
+            return t("options.playlist.errors.invalidUrl");
+        case "playlist_unsupported_url":
+            return t("options.playlist.errors.unsupported");
+        case "playlist_no_matches":
+            return t("options.playlist.errors.noMatches");
+        case "playlist_resolve_failed":
+            return t("options.playlist.errors.failed");
         default:
             return t("rejectGeneric");
     }
@@ -1126,6 +1134,52 @@ function OptionsPanel({
         }
     };
 
+    // Playlist is async (resolve + match server-side) and the server decides
+    // the matched-song count, so it isn't optimistic: we await the POST, then
+    // let the optionsChanged broadcast refresh `options.playlist`/`limitEnd`.
+    const [playlistInput, setPlaylistInput] = useState("");
+    const [playlistBusy, setPlaylistBusy] = useState(false);
+    const playlistActive = options.playlist !== null;
+
+    const submitPlaylist = async (): Promise<void> => {
+        const url = playlistInput.trim();
+        if (!url || playlistBusy) return;
+        setPlaylistBusy(true);
+        setFeedback(null);
+        try {
+            const result = await apiSetOption(accessToken, instanceId, {
+                kind: "playlist",
+                playlistURL: url,
+            });
+            if (result.ok) {
+                setPlaylistInput("");
+            } else {
+                setFeedback(rejectReasonText(t, result.reason));
+            }
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+        } finally {
+            setPlaylistBusy(false);
+        }
+    };
+
+    const clearPlaylist = async (): Promise<void> => {
+        if (playlistBusy) return;
+        setPlaylistBusy(true);
+        setFeedback(null);
+        try {
+            const result = await apiSetOption(accessToken, instanceId, {
+                kind: "playlist",
+                playlistURL: null,
+            });
+            if (!result.ok) setFeedback(rejectReasonText(t, result.reason));
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+        } finally {
+            setPlaylistBusy(false);
+        }
+    };
+
     const isAlternating = options.gender[0] === "alternating";
 
     const toggleGender = (g: ActivityGender): void => {
@@ -1254,32 +1308,92 @@ function OptionsPanel({
 
     return (
         <div className="options-panel">
-            <PillField
-                label={t("options.gender")}
-                help={t("options.help.gender")}
-            >
-                {GENDER_OPTIONS.map((g) => {
-                    const active = !isAlternating && options.gender.includes(g);
-
-                    return (
+            <div className="options-group options-group-wide options-playlist">
+                <OptionLabel
+                    label={t("options.playlist.label")}
+                    help={t("options.help.playlist")}
+                />
+                {playlistActive ? (
+                    <div className="playlist-active">
+                        <span className="playlist-active-count">
+                            {t("options.playlist.active", {
+                                count: String(options.limitEnd),
+                            })}
+                        </span>
                         <button
-                            key={g}
                             type="button"
-                            className={`pill ${active ? "on" : ""}`}
-                            onClick={() => toggleGender(g)}
+                            className="pill"
+                            disabled={playlistBusy}
+                            onClick={() => void clearPlaylist()}
                         >
-                            {t(`options.${g}`)}
+                            {t("options.playlist.clear")}
                         </button>
-                    );
-                })}
-                <button
-                    type="button"
-                    className={`pill ${isAlternating ? "on" : ""}`}
-                    onClick={toggleAlternating}
+                    </div>
+                ) : (
+                    <div className="playlist-input-row">
+                        <input
+                            type="url"
+                            inputMode="url"
+                            className="playlist-url-input"
+                            placeholder={t("options.playlist.urlPlaceholder")}
+                            value={playlistInput}
+                            disabled={playlistBusy}
+                            onChange={(e) => setPlaylistInput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter") void submitPlaylist();
+                            }}
+                        />
+                        <button
+                            type="button"
+                            className="pill"
+                            disabled={
+                                playlistBusy || playlistInput.trim() === ""
+                            }
+                            onClick={() => void submitPlaylist()}
+                        >
+                            {playlistBusy
+                                ? t("options.playlist.matching")
+                                : t("options.playlist.set")}
+                        </button>
+                    </div>
+                )}
+            </div>
+
+            {playlistActive && (
+                <p className="options-group-wide options-playlist-note">
+                    {t("options.playlist.managed")}
+                </p>
+            )}
+
+            <fieldset className="options-override" disabled={playlistActive}>
+                <PillField
+                    label={t("options.gender")}
+                    help={t("options.help.gender")}
                 >
-                    {t("options.alternating")}
-                </button>
-            </PillField>
+                    {GENDER_OPTIONS.map((g) => {
+                        const active =
+                            !isAlternating && options.gender.includes(g);
+
+                        return (
+                            <button
+                                key={g}
+                                type="button"
+                                className={`pill ${active ? "on" : ""}`}
+                                onClick={() => toggleGender(g)}
+                            >
+                                {t(`options.${g}`)}
+                            </button>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        className={`pill ${isAlternating ? "on" : ""}`}
+                        onClick={toggleAlternating}
+                    >
+                        {t("options.alternating")}
+                    </button>
+                </PillField>
+            </fieldset>
 
             <PillField
                 label={t("options.guessMode")}
@@ -1345,95 +1459,97 @@ function OptionsPanel({
                 ))}
             </PillField>
 
-            <PillField
-                label={t("options.language")}
-                help={t("options.help.language")}
-            >
-                {LANGUAGE_OPTIONS.map((l) => (
-                    <button
-                        key={l}
-                        type="button"
-                        className={`pill ${options.language === l ? "on" : ""}`}
-                        onClick={() => pickLanguage(l)}
-                    >
-                        {t(`options.${l}`)}
-                    </button>
-                ))}
-            </PillField>
+            <fieldset className="options-override" disabled={playlistActive}>
+                <PillField
+                    label={t("options.language")}
+                    help={t("options.help.language")}
+                >
+                    {LANGUAGE_OPTIONS.map((l) => (
+                        <button
+                            key={l}
+                            type="button"
+                            className={`pill ${options.language === l ? "on" : ""}`}
+                            onClick={() => pickLanguage(l)}
+                        >
+                            {t(`options.${l}`)}
+                        </button>
+                    ))}
+                </PillField>
 
-            <PillField
-                label={t("options.release")}
-                help={t("options.help.release")}
-            >
-                {RELEASE_OPTIONS.map((r) => (
-                    <button
-                        key={r}
-                        type="button"
-                        className={`pill ${options.release === r ? "on" : ""}`}
-                        onClick={() => pickRelease(r)}
-                    >
-                        {t(`options.${r}`)}
-                    </button>
-                ))}
-            </PillField>
+                <PillField
+                    label={t("options.release")}
+                    help={t("options.help.release")}
+                >
+                    {RELEASE_OPTIONS.map((r) => (
+                        <button
+                            key={r}
+                            type="button"
+                            className={`pill ${options.release === r ? "on" : ""}`}
+                            onClick={() => pickRelease(r)}
+                        >
+                            {t(`options.${r}`)}
+                        </button>
+                    ))}
+                </PillField>
 
-            <PillField
-                label={t("options.artisttype")}
-                help={t("options.help.artisttype")}
-            >
-                {ARTIST_TYPE_OPTIONS.map((a) => (
-                    <button
-                        key={a}
-                        type="button"
-                        className={`pill ${
-                            options.artisttype === a ? "on" : ""
-                        }`}
-                        onClick={() => pickArtistType(a)}
-                    >
-                        {t(`options.${a}`)}
-                    </button>
-                ))}
-            </PillField>
+                <PillField
+                    label={t("options.artisttype")}
+                    help={t("options.help.artisttype")}
+                >
+                    {ARTIST_TYPE_OPTIONS.map((a) => (
+                        <button
+                            key={a}
+                            type="button"
+                            className={`pill ${
+                                options.artisttype === a ? "on" : ""
+                            }`}
+                            onClick={() => pickArtistType(a)}
+                        >
+                            {t(`options.${a}`)}
+                        </button>
+                    ))}
+                </PillField>
 
-            <PillField
-                label={t("options.subunits")}
-                help={t("options.help.subunits")}
-            >
-                {SUBUNITS_OPTIONS.map((s) => (
-                    <button
-                        key={s}
-                        type="button"
-                        className={`pill ${options.subunits === s ? "on" : ""}`}
-                        onClick={() => pickSubunits(s)}
-                    >
-                        {t(`options.${s}`)}
-                    </button>
-                ))}
-            </PillField>
+                <PillField
+                    label={t("options.subunits")}
+                    help={t("options.help.subunits")}
+                >
+                    {SUBUNITS_OPTIONS.map((s) => (
+                        <button
+                            key={s}
+                            type="button"
+                            className={`pill ${options.subunits === s ? "on" : ""}`}
+                            onClick={() => pickSubunits(s)}
+                        >
+                            {t(`options.${s}`)}
+                        </button>
+                    ))}
+                </PillField>
 
-            <NumberRangeGroup
-                label={t("options.limit")}
-                help={t("options.help.limit")}
-                startValue={options.limitStart}
-                endValue={options.limitEnd}
-                startMin={0}
-                startMax={100000}
-                endMin={1}
-                endMax={100000}
-                onCommit={submitLimit}
-            />
+                <NumberRangeGroup
+                    label={t("options.limit")}
+                    help={t("options.help.limit")}
+                    startValue={options.limitStart}
+                    endValue={options.limitEnd}
+                    startMin={0}
+                    startMax={100000}
+                    endMin={1}
+                    endMax={100000}
+                    onCommit={submitLimit}
+                />
 
-            <NumberRangeGroup
-                label={t("options.cutoff")}
-                help={t("options.help.cutoff")}
-                startValue={options.beginningYear}
-                endValue={options.endYear}
-                startMin={1900}
-                startMax={new Date().getFullYear()}
-                endMin={1900}
-                endMax={new Date().getFullYear()}
-                onCommit={submitCutoff}
-            />
+                <NumberRangeGroup
+                    label={t("options.cutoff")}
+                    help={t("options.help.cutoff")}
+                    startValue={options.beginningYear}
+                    endValue={options.endYear}
+                    startMin={1900}
+                    startMax={new Date().getFullYear()}
+                    endMin={1900}
+                    endMax={new Date().getFullYear()}
+                    onCommit={submitCutoff}
+                />
+            </fieldset>
 
             <NullableNumberGroup
                 label={t("options.goal")}
@@ -1465,29 +1581,31 @@ function OptionsPanel({
                 offLabel={t("options.off")}
             />
 
-            <ArtistListGroup
-                label={t("options.groups")}
-                help={t("options.help.groups")}
-                accessToken={accessToken}
-                artists={options.groups ?? []}
-                onCommit={(next) => submitArtistList("groups", next)}
-            />
+            <fieldset className="options-override" disabled={playlistActive}>
+                <ArtistListGroup
+                    label={t("options.groups")}
+                    help={t("options.help.groups")}
+                    accessToken={accessToken}
+                    artists={options.groups ?? []}
+                    onCommit={(next) => submitArtistList("groups", next)}
+                />
 
-            <ArtistListGroup
-                label={t("options.includes")}
-                help={t("options.help.includes")}
-                accessToken={accessToken}
-                artists={options.includes ?? []}
-                onCommit={(next) => submitArtistList("includes", next)}
-            />
+                <ArtistListGroup
+                    label={t("options.includes")}
+                    help={t("options.help.includes")}
+                    accessToken={accessToken}
+                    artists={options.includes ?? []}
+                    onCommit={(next) => submitArtistList("includes", next)}
+                />
 
-            <ArtistListGroup
-                label={t("options.excludes")}
-                help={t("options.help.excludes")}
-                accessToken={accessToken}
-                artists={options.excludes ?? []}
-                onCommit={(next) => submitArtistList("excludes", next)}
-            />
+                <ArtistListGroup
+                    label={t("options.excludes")}
+                    help={t("options.help.excludes")}
+                    accessToken={accessToken}
+                    artists={options.excludes ?? []}
+                    onCommit={(next) => submitArtistList("excludes", next)}
+                />
+            </fieldset>
 
             {feedback && <span className="options-feedback">{feedback}</span>}
         </div>
