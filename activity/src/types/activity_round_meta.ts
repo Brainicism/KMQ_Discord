@@ -1,3 +1,9 @@
+/** Mirror of src/interfaces/activity_round_meta.ts. */
+export interface ActivityMultipleChoiceOption {
+    id: string;
+    label: string;
+}
+
 export default interface ActivityRoundMeta {
     roundIndex: number;
     songStartedAt: number;
@@ -6,4 +12,7 @@ export default interface ActivityRoundMeta {
      *  songStartedAt at round start; reset to "now" if the timer is changed
      *  mid-round. Used as the countdown reference. */
     timerStartedAt: number;
+    /** Present only in multiple-choice mode: the shuffled choices for this
+     *  round. Absent (undefined) when guessing is by typing/hidden. */
+    choices?: Array<ActivityMultipleChoiceOption>;
 }

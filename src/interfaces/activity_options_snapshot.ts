@@ -1,4 +1,5 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
+import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
@@ -48,6 +49,10 @@ export default interface ActivityOptionsSnapshot {
     artisttype: ArtistType;
     /** Whether subunits of selected groups are included. */
     subunits: SubunitsPreference;
+    /** How players answer: typing, typing-with-typos, multiple-choice
+     *  (easy/medium/hard), or hidden. Drives whether the Activity shows a
+     *  text input or the choice grid. */
+    answerType: AnswerType;
     /** Null (not in groups mode) or the selected artist list. */
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;

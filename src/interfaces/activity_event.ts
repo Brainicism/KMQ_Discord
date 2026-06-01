@@ -1,3 +1,4 @@
+import type { ActivityMultipleChoiceOption } from "./activity_round_meta";
 import type ActivityCorrectGuesser from "./activity_correct_guesser";
 import type ActivityOptionsSnapshot from "./activity_options_snapshot";
 import type ActivityRoundGuess from "./activity_round_guess";
@@ -19,6 +20,15 @@ type ActivityEvent =
           songCounter: { uniqueSongsPlayed: number; totalSongs: number };
       }
     | { type: "scoreboardUpdate"; scoreboard: ActivityScoreboardSnapshot }
+    | {
+          // Pushed when multiple-choice options are (re)generated for the
+          // current round — at round start in MC mode, or when answerType is
+          // switched to MC mid-round. roundIndex lets a stale client ignore
+          // choices for a round it has already moved past.
+          type: "roundChoices";
+          roundIndex: number;
+          choices: ActivityMultipleChoiceOption[];
+      }
     | {
           type: "guessReceived";
           userID: string;

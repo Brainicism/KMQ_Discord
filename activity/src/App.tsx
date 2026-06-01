@@ -20,6 +20,7 @@ import {
     skipVote as apiSkipVote,
     startGame as apiStartGame,
     submitGuess,
+    submitMcGuess,
 } from "./api";
 import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
 import { makeTranslator } from "./i18n/translator";
@@ -27,6 +28,7 @@ import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { ActivityArtist } from "./types/activity_options_snapshot";
 import type {
+    ActivityAnswerType,
     ActivityArtistType,
     ActivityGender,
     ActivityGuessMode,
@@ -42,6 +44,7 @@ import type { SetOptionRequest } from "./api";
 import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
+import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
 import type ActivityScoreboardSnapshot from "./types/activity_scoreboard_snapshot";
 import type ActivitySnapshot from "./types/activity_snapshot";
 import type GuessRejectReason from "./types/guess_reject_reason";
@@ -732,6 +735,100 @@ function GuessInput({
     );
 }
 
+// answerType values that put the Activity into multiple-choice mode (vs.
+// typing / typingtypos / hidden, which use the text input).
+const MC_ANSWER_TYPES: ReadonlySet<ActivityAnswerType> =
+    new Set<ActivityAnswerType>(["easy", "medium", "hard"]);
+
+function MultipleChoiceInput({
+    accessToken,
+    instanceId,
+    choices,
+    roundKey,
+    enabled,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    choices: ActivityMultipleChoiceOption[];
+    /** Identity of the round at render time; resets the lock when it changes. */
+    roundKey: number | null;
+    enabled: boolean;
+    t: Translator;
+}) {
+    // Which choice the user committed to this round (locks the grid). null
+    // until they pick; reset on a new round.
+    const [picked, setPicked] = useState<string | null>(null);
+    const [busy, setBusy] = useState(false);
+    const [feedback, setFeedback] = useState<string | null>(null);
+
+    const prevRoundRef = useRef(roundKey);
+    useEffect(() => {
+        if (prevRoundRef.current !== roundKey) {
+            setPicked(null);
+            setBusy(false);
+            setFeedback(null);
+            prevRoundRef.current = roundKey;
+        }
+    }, [roundKey]);
+
+    const onPick = async (choiceID: string) => {
+        if (!enabled || busy || picked !== null) return;
+        setBusy(true);
+        setPicked(choiceID);
+        setFeedback(null);
+        try {
+            const result = await submitMcGuess(
+                accessToken,
+                instanceId,
+                choiceID,
+            );
+
+            // Keep the grid locked on an accepted pick (ok) — correct or wrong,
+            // you get one pick per round. On rejection (rate limit, not in VC,
+            // etc.) the pick never landed, so unlock to allow a retry.
+            if (!result.ok) {
+                setFeedback(rejectReasonText(t, result.reason));
+                setPicked(null);
+            }
+        } catch (err) {
+            setFeedback(err instanceof Error ? err.message : t("networkError"));
+            setPicked(null);
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    return (
+        <div className="mc-input">
+            {choices.length === 0 ? (
+                <span className="mc-waiting">
+                    {t("guessPlaceholderWaiting")}
+                </span>
+            ) : (
+                <div className="mc-choices">
+                    {choices.map((choice) => (
+                        <button
+                            key={choice.id}
+                            type="button"
+                            className={
+                                picked === choice.id
+                                    ? "mc-choice picked"
+                                    : "mc-choice"
+                            }
+                            disabled={!enabled || picked !== null}
+                            onClick={() => onPick(choice.id)}
+                        >
+                            {choice.label}
+                        </button>
+                    ))}
+                </div>
+            )}
+            {feedback && <span className="guess-feedback">{feedback}</span>}
+        </div>
+    );
+}
+
 function SkipControl({
     accessToken,
     instanceId,
@@ -1025,6 +1122,19 @@ const ARTIST_TYPE_OPTIONS: ActivityArtistType[] = [
     "both",
 ];
 const SUBUNITS_OPTIONS: ActivitySubunits[] = ["include", "exclude"];
+// "hidden" is intentionally omitted: it's a text-channel privacy mechanism
+// (don't show your typed guess to the shared channel), which the Activity
+// already provides inherently — you type in your own iframe and only
+// correct/incorrect is broadcast. It would be a redundant, confusing pick
+// here. If a guild sets hidden via the /answer slash command, the Activity
+// falls back to the normal text input (it isn't a multiple-choice type).
+const ANSWER_OPTIONS: ActivityAnswerType[] = [
+    "typing",
+    "typingtypos",
+    "easy",
+    "medium",
+    "hard",
+];
 
 /**
  * An option's heading plus an optional ⓘ that reveals a short explanation
@@ -1242,6 +1352,14 @@ function OptionsPanel({
         void submit({ kind: "subunits", subunits }, { ...options, subunits });
     };
 
+    const pickAnswer = (answer: ActivityAnswerType): void => {
+        if (answer === options.answerType) return;
+        void submit(
+            { kind: "answer", answer },
+            { ...options, answerType: answer },
+        );
+    };
+
     const submitArtistList = (
         listKind: "groups" | "includes" | "excludes",
         next: ActivityArtist[],
@@ -1279,6 +1397,24 @@ function OptionsPanel({
                 >
                     {t("options.alternating")}
                 </button>
+            </PillField>
+
+            <PillField
+                label={t("options.answer")}
+                help={t("options.help.answer")}
+            >
+                {ANSWER_OPTIONS.map((a) => (
+                    <button
+                        key={a}
+                        type="button"
+                        className={`pill ${
+                            options.answerType === a ? "on" : ""
+                        }`}
+                        onClick={() => pickAnswer(a)}
+                    >
+                        {t(`options.${a}`)}
+                    </button>
+                ))}
             </PillField>
 
             <PillField
@@ -2306,16 +2442,33 @@ export default function App() {
                             }
                         />
 
-                        {authState && (
-                            <GuessInput
-                                accessToken={authState.accessToken}
-                                instanceId={authState.instanceId}
-                                enabled={
-                                    ui.currentRound !== null && !ui.sessionEnded
-                                }
-                                t={t}
-                            />
-                        )}
+                        {authState &&
+                            (ui.options &&
+                            MC_ANSWER_TYPES.has(ui.options.answerType) ? (
+                                <MultipleChoiceInput
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    choices={ui.currentRound?.choices ?? []}
+                                    roundKey={
+                                        ui.currentRound?.roundIndex ?? null
+                                    }
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                            ) : (
+                                <GuessInput
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    enabled={
+                                        ui.currentRound !== null &&
+                                        !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
+                            ))}
 
                         {authState && (
                             <div className="vote-row">
@@ -2557,6 +2710,21 @@ function reduce(
             };
         case "scoreboardUpdate":
             return { ...prev, scoreboard: msg.scoreboard };
+        case "roundChoices":
+            // Merge the round's MC choices into the live round. Scoped by
+            // roundIndex so a late event can't apply stale choices to a newer
+            // round. Fires at round start (after roundStart) and on a mid-round
+            // switch to multiple choice.
+            return prev.currentRound &&
+                prev.currentRound.roundIndex === msg.roundIndex
+                ? {
+                      ...prev,
+                      currentRound: {
+                          ...prev.currentRound,
+                          choices: msg.choices,
+                      },
+                  }
+                : prev;
         case "guessReceived":
             return {
                 ...prev,

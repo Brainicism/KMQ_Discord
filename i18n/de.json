@@ -48,6 +48,7 @@
         "options": {
             "all": "Alle",
             "alternating": "Abwechselnd",
+            "answer": "Antworttyp",
             "artist": "Künstler",
             "artisttype": "Künstlertyp",
             "beginning": "Anfang",
@@ -58,6 +59,7 @@
             "cutoff": "Jahresbereich",
             "cutoffRangeError": "Das Startjahr darf nicht nach dem Endjahr liegen.",
             "duration": "Dauer (Minuten)",
+            "easy": "Multiple Choice (Einfach)",
             "exclude": "Ausschließen",
             "excludes": "Künstler ausschließen",
             "female": "Weiblich",
@@ -65,8 +67,10 @@
             "goal": "Ziel",
             "groups": "Gruppen",
             "guessMode": "Ratemodus",
+            "hard": "Multiple Choice (Schwierig)",
             "heading": "Spieloptionen",
             "help": {
+                "answer": "Wie Spieler antworten – den Namen eintippen oder aus mehreren Optionen wählen.",
                 "artisttype": "Songs von Solokünstlern, Gruppen oder beiden abspielen.",
                 "cutoff": "Nur Songs abspielen, die innerhalb dieses Jahresbereichs veröffentlicht wurden.",
                 "duration": "Maximale Spiellänge, in Minuten.",
@@ -92,6 +96,7 @@
             "limit": "Limit",
             "limitRangeError": "Ende muss größer als Start sein.",
             "male": "Männlich",
+            "medium": "Multiple Choice (Mittel)",
             "middle": "Mitte",
             "multiguess": "Mehrfachraten",
             "off": "Aus",
@@ -107,6 +112,8 @@
             "song": "Lied",
             "subunits": "Untergruppen",
             "timer": "Timer (Sekunden)",
+            "typing": "Tippen",
+            "typingtypos": "Tippen (Tippfehler OK)",
             "weighted_easy": "Gewichtet (Einfach)",
             "weighted_hard": "Gewichtet (Schwer)"
         },

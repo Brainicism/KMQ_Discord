@@ -48,6 +48,7 @@
         "options": {
             "all": "すべて",
             "alternating": "交互",
+            "answer": "解答タイプ",
             "artist": "アーティスト",
             "artisttype": "アーティストタイプ",
             "beginning": "始まり",
@@ -58,6 +59,7 @@
             "cutoff": "年代範囲",
             "cutoffRangeError": "開始年は終了年より後にできません。",
             "duration": "所要時間（分）",
+            "easy": "選択式（簡単）",
             "exclude": "除外",
             "excludes": "アーティストを除外",
             "female": "女性",
@@ -65,8 +67,10 @@
             "goal": "ゴール",
             "groups": "グループ",
             "guessMode": "推測モード",
+            "hard": "選択式（難しい）",
             "heading": "ゲームオプション",
             "help": {
+                "answer": "プレイヤーの回答方法 - 名前を入力するか、複数の選択肢から選んでください。",
                 "artisttype": "ソロアーティスト、グループ、またはその両方の曲を再生。",
                 "cutoff": "この年の範囲内でリリースされた曲のみを再生します。",
                 "duration": "ゲームの最大時間 (分)。",
@@ -92,6 +96,7 @@
             "limit": "制限",
             "limitRangeError": "終了は開始より大きくなければなりません。",
             "male": "男性",
+            "medium": "選択式（中級）",
             "middle": "中央",
             "multiguess": "マルチ推測",
             "off": "オフ",
@@ -107,6 +112,8 @@
             "song": "曲",
             "subunits": "サブユニット",
             "timer": "タイマー (秒)",
+            "typing": "タイピング",
+            "typingtypos": "タイピング（誤字OK）",
             "weighted_easy": "重み付け (簡単)",
             "weighted_hard": "重み付け (難しい)"
         },

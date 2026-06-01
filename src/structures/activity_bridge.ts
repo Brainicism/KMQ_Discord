@@ -27,10 +27,12 @@ import HintCommand from "../commands/game_commands/hint";
 import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
+import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
 import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
+import type { ActivityMultipleChoiceOption } from "../interfaces/activity_round_meta";
 import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
@@ -39,6 +41,7 @@ import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser"
 import type ActivityEvent from "../interfaces/activity_event";
 import type ActivityGuessArgs from "../interfaces/activity_guess_args";
 import type ActivityGuessResponse from "../interfaces/activity_guess_response";
+import type ActivityMcGuessArgs from "../interfaces/activity_mc_guess_args";
 import type ActivityOptionsSnapshot from "../interfaces/activity_options_snapshot";
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
@@ -156,10 +159,31 @@ function snapshotOptions(
         release: opts.releaseType,
         artisttype: opts.artistType,
         subunits: opts.subunitPreference,
+        answerType: opts.answerType,
         groups: toActivity(opts.groups),
         includes: toActivity(opts.includes),
         excludes: toActivity(opts.excludes),
     };
+}
+
+/**
+ * Maps a round's generated MC buttons into the client-facing choice list.
+ * The correct answer is intentionally not flagged — the client can't tell
+ * which option is right until the round ends.
+ * @param round - the active game round
+ * @returns the shuffled choices (id + label), or undefined if none generated
+ */
+function snapshotMultipleChoiceOptions(
+    round: GameRound,
+): Array<ActivityMultipleChoiceOption> | undefined {
+    if (round.multipleChoiceOptions.length === 0) {
+        return undefined;
+    }
+
+    return round.multipleChoiceOptions.map((button) => ({
+        id: button.custom_id,
+        label: button.label ?? "",
+    }));
 }
 
 function buildSessionSnapshot(
@@ -179,6 +203,11 @@ function buildSessionSnapshot(
                       songStartedAt: round.songStartedAt,
                       guessTimeoutSec: session.getGuessTimeoutSec(),
                       timerStartedAt: round.timerStartedAt,
+                      // Include MC choices so a client opening mid-round renders
+                      // the grid immediately; undefined in typing/hidden modes.
+                      choices: guildPreference.isMultipleChoiceMode()
+                          ? snapshotMultipleChoiceOptions(round)
+                          : undefined,
                   }
                 : undefined,
     };
@@ -328,6 +357,11 @@ interface RoundStartPayload {
     timerStartedAt: number;
 }
 
+interface RoundChoicesPayload {
+    roundIndex: number;
+    choices: ActivityMultipleChoiceOption[];
+}
+
 interface RoundEndPayload {
     song: QueriedSong;
     correctGuessers: KmqMember[];
@@ -456,6 +490,82 @@ function ensureWorkerHandlerRegistered(): void {
                         });
 
                     reply({ ok: true });
+                    return;
+                }
+
+                case "mcGuess": {
+                    const mcArgs = args as ActivityMcGuessArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const session = Session.getSession(mcArgs.guildID);
+                    if (!session || !session.isGameSession()) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    if (KmqConfiguration.Instance.maintenanceModeEnabled()) {
+                        reply({ ok: false, reason: "maintenance" });
+                        return;
+                    }
+
+                    if (State.bannedPlayers.has(mcArgs.userID)) {
+                        reply({ ok: false, reason: "banned" });
+                        return;
+                    }
+
+                    if (!State.rateLimiter.check(mcArgs.userID)) {
+                        reply({ ok: false, reason: "rate_limit" });
+                        return;
+                    }
+
+                    if (
+                        !userInVoiceChannel(
+                            mcArgs.guildID,
+                            mcArgs.userID,
+                            session.voiceChannelID,
+                        )
+                    ) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const messageContext = new MessageContext(
+                        session.textChannelID,
+                        new KmqMember(mcArgs.userID),
+                        session.guildID,
+                    );
+
+                    session
+                        .submitMultipleChoiceGuess(
+                            mcArgs.userID,
+                            mcArgs.choiceID,
+                            mcArgs.ts,
+                            messageContext,
+                        )
+                        .then((result) => {
+                            // INELIGIBLE = no round / already picked / not
+                            // eligible → reject so the client can surface it.
+                            // CORRECT/INCORRECT both accepted the pick; the
+                            // client learns correctness from the guessReceived
+                            // / roundEnd events.
+                            reply(
+                                result === MultipleChoiceGuessResult.INELIGIBLE
+                                    ? { ok: false, reason: "no_round" }
+                                    : { ok: true },
+                            );
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity mc-guess for gid=${mcArgs.guildID}, uid=${mcArgs.userID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        });
+
                     return;
                 }
 
@@ -963,6 +1073,18 @@ function ensureWorkerHandlerRegistered(): void {
                                     break;
                                 }
 
+                                case "answer": {
+                                    // setAnswerType fires answerTypeChangeCallback,
+                                    // which re-renders MC buttons mid-round (and
+                                    // thus pushes roundChoices) when switching to
+                                    // multiple choice — matching the slash-command
+                                    // behaviour.
+                                    await guildPreference.setAnswerType(
+                                        optionArgs.answer,
+                                    );
+                                    break;
+                                }
+
                                 case "groups":
                                 case "includes":
                                 case "excludes": {
@@ -1230,6 +1352,14 @@ export function attachActivityBridge(session: GameSession): void {
                 guessTimeoutSec: payload.guessTimeoutSec,
                 timerStartedAt: payload.timerStartedAt,
             },
+        });
+    });
+
+    session.on("roundChoices", (payload: RoundChoicesPayload) => {
+        pushEvent(guildID, {
+            type: "roundChoices",
+            roundIndex: payload.roundIndex,
+            choices: payload.choices,
         });
     });
 

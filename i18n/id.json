@@ -48,6 +48,7 @@
         "options": {
             "all": "Semua",
             "alternating": "Bergantian",
+            "answer": "Jenis Jawaban",
             "artist": "Seniman",
             "artisttype": "Tipe Artis",
             "beginning": "Awal",
@@ -58,6 +59,7 @@
             "cutoff": "Rentang Tahun",
             "cutoffRangeError": "Tahun mulai tidak boleh setelah tahun berakhir.",
             "duration": "Durasi (menit)",
+            "easy": "Pilihan Ganda (Mudah)",
             "exclude": "Kecualikan",
             "excludes": "Kecualikan Artis",
             "female": "Perempuan",
@@ -65,8 +67,10 @@
             "goal": "Tujuan",
             "groups": "Grup",
             "guessMode": "Mode Tebak",
+            "hard": "Pilihan Ganda (Sulit)",
             "heading": "Opsi Permainan",
             "help": {
+                "answer": "Bagaimana pemain menjawab — ketik nama, atau pilih dari beberapa pilihan.",
                 "artisttype": "Putar lagu dari solois, grup, atau keduanya.",
                 "cutoff": "Hanya putar lagu yang dirilis dalam rentang tahun ini.",
                 "duration": "Panjang permainan maksimum, dalam menit.",
@@ -92,6 +96,7 @@
             "limit": "Batas",
             "limitRangeError": "Akhir harus lebih besar dari awal.",
             "male": "Pria",
+            "medium": "Pilihan Ganda (Sedang)",
             "middle": "Tengah",
             "multiguess": "Multiguess",
             "off": "Mati",
@@ -107,6 +112,8 @@
             "song": "Lagu",
             "subunits": "Subunit",
             "timer": "Pengatur waktu (detik)",
+            "typing": "Mengetik",
+            "typingtypos": "Mengetik (Kesalahan pengetikan OK)",
             "weighted_easy": "Berbobot (Mudah)",
             "weighted_hard": "Berbobot (Sulit)"
         },

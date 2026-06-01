@@ -984,6 +984,68 @@ body::before {
     font-size: 0.85rem;
 }
 
+/* ---- MULTIPLE CHOICE ---- */
+.mc-input {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    padding: 10px 12px;
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    scroll-margin-bottom: 16px;
+}
+
+.mc-choices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px;
+}
+
+.mc-choice {
+    background: var(--bg-base);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+    /* Comfortable touch target for mobile play. */
+    min-height: 44px;
+    text-align: center;
+    word-break: break-word;
+}
+
+.mc-choice:hover:not(:disabled) {
+    border-color: var(--red-primary);
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
+.mc-choice.picked {
+    background: var(--red-primary);
+    border-color: var(--red-primary);
+    color: white;
+}
+
+.mc-choice:disabled {
+    cursor: not-allowed;
+}
+
+.mc-choice:disabled:not(.picked) {
+    opacity: 0.5;
+}
+
+.mc-waiting {
+    color: var(--text-tertiary);
+    font-size: 0.9rem;
+    padding: 8px 2px;
+}
+
 /* ---- VOTE ROW ---- */
 .vote-row {
     display: grid;
