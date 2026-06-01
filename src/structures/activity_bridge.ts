@@ -1,4 +1,5 @@
 import {
+    ACTIVITY_AUTOCOMPLETE_LIMIT,
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
@@ -7,13 +8,18 @@ import {
 } from "../constants";
 import { IPCLogger } from "../logger";
 import {
-    getCurrentVoiceMembers,
+    botHasVoicePermissions,
     getMajorityCount,
+    getUserVoiceChannelID,
+    searchArtists,
 } from "../helpers/discord_utils";
+import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import EndCommand from "../commands/game_commands/end";
+import GameOption from "../enums/game_option_name";
 // Not a cycle: game_session.ts no longer imports this module — the
 // attachActivityBridge call was moved to PlayCommand alongside the
 // State.gameSessions write, so this import is a one-way edge.
+import GameRound from "./game_round";
 import GameSession from "./game_session";
 import GameType from "../enums/game_type";
 import GuildPreference from "./guild_preference";
@@ -25,20 +31,25 @@ import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
+import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
+import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
 import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
 import type ActivityEvent from "../interfaces/activity_event";
 import type ActivityGuessArgs from "../interfaces/activity_guess_args";
 import type ActivityGuessResponse from "../interfaces/activity_guess_response";
+import type ActivityOptionsSnapshot from "../interfaces/activity_options_snapshot";
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
 import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "../interfaces/activity_session_meta";
+import type ActivitySetOptionArgs from "../interfaces/activity_set_option_args";
 import type ActivitySnapshot from "../interfaces/activity_snapshot";
 import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
+import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -100,18 +111,74 @@ function snapshotSessionMeta(session: GameSession): ActivitySessionMeta {
     };
 }
 
-function buildSessionSnapshot(session: GameSession): ActivitySnapshot {
+/**
+ * Resolve Activity-supplied artist IDs into MatchedArtist[] the
+ * GuildPreference setters expect. Unknown IDs are silently dropped; an
+ * empty input becomes an empty output which GuildPreference treats as
+ * "no groups selected" (and the subsequent length check in
+ * isGroupsMode/isIncludesMode/isExcludesMode returns false).
+ * @param artistIDs - IDs as submitted by the client
+ * @returns the cached MatchedArtist entries, in input order
+ */
+function resolveArtistIDs(artistIDs: number[]): MatchedArtist[] {
+    const out: MatchedArtist[] = [];
+    for (const id of artistIDs) {
+        const match = State.artistIDToEntry.get(id);
+        if (match) out.push(match);
+    }
+
+    return out;
+}
+
+function snapshotOptions(
+    guildPreference: GuildPreference,
+): ActivityOptionsSnapshot {
+    const opts = guildPreference.gameOptions;
+    const toActivity = (
+        list: { id: number; name: string }[] | null,
+    ): { id: number; name: string }[] | null =>
+        list === null ? null : list.map((a) => ({ id: a.id, name: a.name }));
+
+    return {
+        gender: [...opts.gender],
+        guessMode: opts.guessModeType,
+        multiguess: opts.multiGuessType,
+        limitStart: opts.limitStart,
+        limitEnd: opts.limitEnd,
+        beginningYear: opts.beginningYear,
+        endYear: opts.endYear,
+        goal: opts.goal,
+        timer: opts.guessTimeout,
+        duration: opts.duration,
+        shuffle: opts.shuffleType,
+        seek: opts.seekType,
+        language: opts.languageType,
+        release: opts.releaseType,
+        artisttype: opts.artistType,
+        subunits: opts.subunitPreference,
+        groups: toActivity(opts.groups),
+        includes: toActivity(opts.includes),
+        excludes: toActivity(opts.excludes),
+    };
+}
+
+function buildSessionSnapshot(
+    session: GameSession,
+    guildPreference: GuildPreference,
+): ActivitySnapshot {
     const round = session.round;
     return {
         hasSession: true,
         session: snapshotSessionMeta(session),
         scoreboard: snapshotScoreboard(session.scoreboard),
+        options: snapshotOptions(guildPreference),
         currentRound:
             round && round.songStartedAt !== null
                 ? {
                       roundIndex: session.getRoundsPlayed(),
                       songStartedAt: round.songStartedAt,
                       guessTimeoutSec: session.getGuessTimeoutSec(),
+                      timerStartedAt: round.timerStartedAt,
                   }
                 : undefined,
     };
@@ -159,6 +226,25 @@ function runLocked(guildID: string, fn: () => Promise<void>): void {
     });
 }
 
+/**
+ * Whether the user is actually connected to the given voice channel, read from
+ * their own voice state. The web layer already verified the caller is a Discord
+ * activity participant, but activities can be launched in text channels or used
+ * without joining voice — so we additionally require real voice presence before
+ * letting someone control or play the game.
+ * @param guildID - the guild
+ * @param userID - the calling user
+ * @param voiceChannelID - the channel they must be connected to
+ * @returns whether the user is in that voice channel
+ */
+function userInVoiceChannel(
+    guildID: string,
+    userID: string,
+    voiceChannelID: string,
+): boolean {
+    return getUserVoiceChannelID(guildID, userID) === voiceChannelID;
+}
+
 function pushEvent(guildID: string, event: ActivityEvent): void {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (!State.ipc) return;
@@ -171,10 +257,75 @@ function pushEvent(guildID: string, event: ActivityEvent): void {
     }
 }
 
+async function broadcastOptionsChangedCore(guildID: string): Promise<void> {
+    try {
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
+
+        pushEvent(guildID, {
+            type: "optionsChanged",
+            options: snapshotOptions(guildPreference),
+        });
+    } catch (e) {
+        logger.warn(
+            `Failed to broadcast optionsChanged for gid=${guildID}. err=${e}`,
+        );
+    }
+}
+
+/**
+ * Fires a standalone optionsChanged wire event for the given guild. Fire-
+ * and-forget by design — the GuildPreference write that triggered this has
+ * already persisted, so any broadcast failure is just dropped with a log.
+ * @param guildID - The guild whose options changed.
+ */
+function broadcastOptionsChanged(guildID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    broadcastOptionsChangedCore(guildID);
+}
+
+async function handleSnapshotRequestCore(
+    cid: string,
+    guildID: string,
+): Promise<void> {
+    try {
+        const guildPreference =
+            await GuildPreference.getGuildPreference(guildID);
+
+        const options = snapshotOptions(guildPreference);
+        const session = Session.getSession(guildID);
+
+        const payload: ActivitySnapshot =
+            session && session.isGameSession()
+                ? buildSessionSnapshot(session, guildPreference)
+                : { hasSession: false, options };
+
+        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, { cid, payload });
+    } catch (e) {
+        logger.warn(`snapshot op failed for gid=${guildID}. err=${e}`);
+        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+            cid,
+            error: "snapshot_failed",
+        });
+    }
+}
+
+/**
+ * Dispatches the async body of the "snapshot" IPC op. Fire-and-forget; the
+ * reply goes back through State.ipc inside the core.
+ * @param cid - Correlation ID to tag the reply with.
+ * @param guildID - Guild the snapshot is for.
+ */
+function handleSnapshotRequest(cid: string, guildID: string): void {
+    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+    handleSnapshotRequestCore(cid, guildID);
+}
+
 interface RoundStartPayload {
     roundIndex: number;
     songStartedAt: number;
     guessTimeoutSec: number | null;
+    timerStartedAt: number;
 }
 
 interface RoundEndPayload {
@@ -220,26 +371,26 @@ function ensureWorkerHandlerRegistered(): void {
     }
 
     workerHandlerRegistered = true;
+
+    // Any GuildPreference write (slash command or Activity IPC op) gets
+    // broadcast to Activity sockets for that guild. Loading the preference
+    // again is cheap — the setter's just persisted it, so the static cache
+    // is warm.
+    onGuildPreferenceChanged((guildID) => {
+        broadcastOptionsChanged(guildID);
+    });
+
     State.ipc.register(ACTIVITY_IPC_REQUEST, (msg: ActivityRequestMessage) => {
         const { cid, op, args } = msg;
         try {
             switch (op) {
                 case "snapshot": {
                     const snapshotArgs = args as ActivitySnapshotArgs;
-                    const session = Session.getSession(snapshotArgs.guildID);
-                    if (!session || !session.isGameSession()) {
-                        const payload: ActivitySnapshot = { hasSession: false };
-                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
-                            cid,
-                            payload,
-                        });
-                        return;
-                    }
-
-                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
-                        cid,
-                        payload: buildSessionSnapshot(session),
-                    });
+                    // Every snapshot reply carries the current options, so
+                    // load GuildPreference upfront (hits the DB when not
+                    // cached — intentional per Q2 of the Phase 4 plan so
+                    // the Activity sees persisted state).
+                    handleSnapshotRequest(cid, snapshotArgs.guildID);
                     return;
                 }
 
@@ -273,11 +424,13 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
-                    const inVC = getCurrentVoiceMembers(
-                        session.voiceChannelID,
-                    ).some((m) => m.id === guessArgs.userID);
-
-                    if (!inVC) {
+                    if (
+                        !userInVoiceChannel(
+                            guessArgs.guildID,
+                            guessArgs.userID,
+                            session.voiceChannelID,
+                        )
+                    ) {
                         reply({ ok: false, reason: "not_in_vc" });
                         return;
                     }
@@ -337,12 +490,28 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        const inVC = getCurrentVoiceMembers(
-                            startArgs.voiceChannelID,
-                        ).some((m) => m.id === startArgs.userID);
+                        // Start the game in the channel the caller is actually
+                        // connected to — NOT startArgs.voiceChannelID, which is
+                        // where the activity was launched (it can be a text
+                        // channel, or a VC the user later left/changed). The
+                        // activity can be opened without joining voice, so being
+                        // a Discord participant isn't enough.
+                        const startVoiceChannelID = getUserVoiceChannelID(
+                            startArgs.guildID,
+                            startArgs.userID,
+                        );
 
-                        if (!inVC) {
+                        if (!startVoiceChannelID) {
                             reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
+
+                        // ...and the bot must be able to join that channel.
+                        if (!botHasVoicePermissions(startVoiceChannelID)) {
+                            reply({
+                                ok: false,
+                                reason: "bot_no_voice_perms",
+                            });
                             return;
                         }
 
@@ -372,7 +541,7 @@ function ensureWorkerHandlerRegistered(): void {
                             const gameSession = new GameSession(
                                 guildPreference,
                                 startArgs.textChannelID,
-                                startArgs.voiceChannelID,
+                                startVoiceChannelID,
                                 startArgs.guildID,
                                 gameOwner,
                                 GameType.CLASSIC,
@@ -440,11 +609,13 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === skipArgs.userID);
-
-                        if (!inVC) {
+                        if (
+                            !userInVoiceChannel(
+                                skipArgs.guildID,
+                                skipArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -514,11 +685,13 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === hintArgs.userID);
-
-                        if (!inVC) {
+                        if (
+                            !userInVoiceChannel(
+                                hintArgs.guildID,
+                                hintArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -558,8 +731,10 @@ function ensureWorkerHandlerRegistered(): void {
                                         session.guildID,
                                     );
 
-                                const text = currentRound.getHint(
-                                    session.guildID,
+                                // Compact (unspaced, unlabelled) hint — the
+                                // Activity styles it itself, so it doesn't want
+                                // the chat label/backticks/inter-char spaces.
+                                const text = currentRound.getCompactHint(
                                     guildPreference.gameOptions.guessModeType,
                                     State.getGuildLocale(session.guildID),
                                 );
@@ -574,6 +749,255 @@ function ensureWorkerHandlerRegistered(): void {
                         } catch (e) {
                             logger.error(
                                 `Error in activity hint for gid=${hintArgs.guildID}. err=${e}`,
+                            );
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
+                    return;
+                }
+
+                case "setOption": {
+                    const optionArgs = args as ActivitySetOptionArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    runLocked(optionArgs.guildID, async () => {
+                        if (
+                            KmqConfiguration.Instance.maintenanceModeEnabled()
+                        ) {
+                            reply({ ok: false, reason: "maintenance" });
+                            return;
+                        }
+
+                        if (State.bannedPlayers.has(optionArgs.userID)) {
+                            reply({ ok: false, reason: "banned" });
+                            return;
+                        }
+
+                        // When a game is running, require the caller to be in
+                        // its voice channel (read from their own voice state).
+                        // Before a game exists there's no specific channel to
+                        // check, so any authenticated participant may configure.
+                        const session = Session.getSession(optionArgs.guildID);
+                        if (
+                            session &&
+                            !userInVoiceChannel(
+                                optionArgs.guildID,
+                                optionArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "not_in_vc" });
+                            return;
+                        }
+
+                        try {
+                            const guildPreference =
+                                await GuildPreference.getGuildPreference(
+                                    optionArgs.guildID,
+                                );
+
+                            switch (optionArgs.kind) {
+                                case "gender": {
+                                    if (optionArgs.genders.length === 0) {
+                                        await guildPreference.reset(
+                                            GameOption.GENDER,
+                                        );
+                                    } else {
+                                        // Alternating is mutually exclusive.
+                                        const genders =
+                                            optionArgs.genders.includes(
+                                                "alternating",
+                                            )
+                                                ? ["alternating" as const]
+                                                : optionArgs.genders;
+
+                                        await guildPreference.setGender(
+                                            genders,
+                                        );
+                                    }
+
+                                    break;
+                                }
+
+                                case "guessMode": {
+                                    await guildPreference.setGuessModeType(
+                                        optionArgs.guessMode,
+                                    );
+                                    break;
+                                }
+
+                                case "multiguess": {
+                                    await guildPreference.setMultiGuessType(
+                                        optionArgs.multiguess,
+                                    );
+                                    break;
+                                }
+
+                                case "limit": {
+                                    await guildPreference.setLimit(
+                                        optionArgs.limitStart,
+                                        optionArgs.limitEnd,
+                                    );
+                                    break;
+                                }
+
+                                case "cutoff": {
+                                    // Two setters + two DB writes, but each
+                                    // one funnels through updateGuildPreferences
+                                    // → guildPreferenceChanged, so clients get
+                                    // two back-to-back optionsChanged events.
+                                    // Acceptable for now; reducer overwrites.
+                                    await guildPreference.setBeginningCutoffYear(
+                                        optionArgs.beginningYear,
+                                    );
+
+                                    await guildPreference.setEndCutoffYear(
+                                        optionArgs.endYear,
+                                    );
+                                    break;
+                                }
+
+                                case "goal": {
+                                    await guildPreference.setGoal(
+                                        optionArgs.goal,
+                                    );
+                                    break;
+                                }
+
+                                case "timer": {
+                                    await guildPreference.setGuessTimeout(
+                                        optionArgs.timer,
+                                    );
+
+                                    // Apply to the live round immediately,
+                                    // mirroring the /timer command: restart
+                                    // the guess-timeout from now and push the
+                                    // new countdown reference so the Activity
+                                    // timer reflects the change mid-round
+                                    // instead of waiting for the next round.
+                                    if (
+                                        session &&
+                                        session.isGameSession() &&
+                                        session.round &&
+                                        session.connection?.playing
+                                    ) {
+                                        session.stopGuessTimeout();
+                                        session.startGuessTimeout(
+                                            new MessageContext(
+                                                session.textChannelID,
+                                                null,
+                                                optionArgs.guildID,
+                                            ),
+                                        );
+                                        const timerStartedAt = Date.now();
+                                        session.round.timerStartedAt =
+                                            timerStartedAt;
+
+                                        pushEvent(optionArgs.guildID, {
+                                            type: "roundTimerChanged",
+                                            guessTimeoutSec:
+                                                session.getGuessTimeoutSec(),
+                                            timerStartedAt,
+                                        });
+                                    }
+
+                                    break;
+                                }
+
+                                case "duration": {
+                                    // Activity exposes set + clear. The
+                                    // slash-command's add/remove delta UX
+                                    // is intentionally not mirrored; it's
+                                    // a CLI convenience that doesn't suit
+                                    // a point-and-click panel.
+                                    await guildPreference.setDuration(
+                                        optionArgs.duration,
+                                    );
+                                    break;
+                                }
+
+                                case "shuffle": {
+                                    await guildPreference.setShuffleType(
+                                        optionArgs.shuffle,
+                                    );
+                                    break;
+                                }
+
+                                case "seek": {
+                                    await guildPreference.setSeekType(
+                                        optionArgs.seek,
+                                    );
+                                    break;
+                                }
+
+                                case "language": {
+                                    await guildPreference.setLanguageType(
+                                        optionArgs.language,
+                                    );
+                                    break;
+                                }
+
+                                case "release": {
+                                    await guildPreference.setReleaseType(
+                                        optionArgs.release,
+                                    );
+                                    break;
+                                }
+
+                                case "artisttype": {
+                                    await guildPreference.setArtistType(
+                                        optionArgs.artisttype,
+                                    );
+                                    break;
+                                }
+
+                                case "subunits": {
+                                    await guildPreference.setSubunitPreference(
+                                        optionArgs.subunits,
+                                    );
+                                    break;
+                                }
+
+                                case "groups":
+                                case "includes":
+                                case "excludes": {
+                                    const artists = resolveArtistIDs(
+                                        optionArgs.artistIDs,
+                                    );
+
+                                    if (optionArgs.kind === "groups") {
+                                        await guildPreference.setGroups(
+                                            artists,
+                                        );
+                                    } else if (optionArgs.kind === "includes") {
+                                        await guildPreference.setIncludes(
+                                            artists,
+                                        );
+                                    } else {
+                                        await guildPreference.setExcludes(
+                                            artists,
+                                        );
+                                    }
+
+                                    break;
+                                }
+
+                                default:
+                                    // The discriminated union is exhaustive;
+                                    // this branch is unreachable but the
+                                    // linter wants an explicit default.
+                                    break;
+                            }
+
+                            reply({ ok: true });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity setOption for gid=${optionArgs.guildID}, kind=${optionArgs.kind}. err=${e}`,
                             );
                             reply({ ok: false, reason: "internal" });
                         }
@@ -659,14 +1083,16 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Only the session owner (or someone in VC) can end —
-                        // matches the relaxed posture of the existing /end
-                        // command, which has no explicit owner check.
-                        const inVC = getCurrentVoiceMembers(
-                            session.voiceChannelID,
-                        ).some((m) => m.id === endArgs.userID);
-
-                        if (!inVC) {
+                        // Any member of the game's voice channel may end it
+                        // (matches the relaxed /end command, which has no owner
+                        // check) — but they must actually be in that channel.
+                        if (
+                            !userInVoiceChannel(
+                                endArgs.guildID,
+                                endArgs.userID,
+                                session.voiceChannelID,
+                            )
+                        ) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -686,6 +1112,61 @@ function ensureWorkerHandlerRegistered(): void {
                             );
                             reply({ ok: false, reason: "internal" });
                         }
+                    });
+                    return;
+                }
+
+                case "autocompleteArtists": {
+                    // Reads from this worker's already-populated artist
+                    // caches (State.artistToEntry / State.topArtists seeded
+                    // by reloadCaches at worker boot). No guild / session
+                    // context; the data is process-wide.
+                    const autocompleteArgs =
+                        args as ActivityAutocompleteArtistsArgs;
+
+                    // searchArtists matches against keys normalized via
+                    // normalizePunctuationInName (which strips spaces and
+                    // punctuation), so the query must be normalized the same
+                    // way — otherwise "red velvet" never matches "redvelvet".
+                    const query = GameRound.normalizePunctuationInName(
+                        autocompleteArgs.query.trim(),
+                    );
+
+                    // searchArtists can return the same artist more than once
+                    // when several of its aliases share the typed prefix (e.g.
+                    // "loona"/"loonatheworld"). Dedupe by id so the client
+                    // never renders two suggestions with the same React key
+                    // (duplicate keys corrupt list reconciliation, leaving
+                    // stale rows until the list remounts), and so the limit
+                    // counts distinct artists.
+                    const seen = new Set<number>();
+                    const results: ActivityAutocompleteArtistsResponse["results"] =
+                        [];
+
+                    for (const a of searchArtists(query, [])) {
+                        if (seen.has(a.id)) {
+                            continue;
+                        }
+
+                        seen.add(a.id);
+                        results.push({
+                            id: a.id,
+                            name: a.name,
+                            hangulName: a.hangulName ?? null,
+                        });
+
+                        if (results.length >= ACTIVITY_AUTOCOMPLETE_LIMIT) {
+                            break;
+                        }
+                    }
+
+                    const payload: ActivityAutocompleteArtistsResponse = {
+                        results,
+                    };
+
+                    State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                        cid,
+                        payload,
                     });
                     return;
                 }
@@ -747,6 +1228,7 @@ export function attachActivityBridge(session: GameSession): void {
                 roundIndex: payload.roundIndex,
                 songStartedAt: payload.songStartedAt,
                 guessTimeoutSec: payload.guessTimeoutSec,
+                timerStartedAt: payload.timerStartedAt,
             },
         });
     });
@@ -777,12 +1259,20 @@ export function attachActivityBridge(session: GameSession): void {
         const correctGuessers: ActivityCorrectGuesser[] =
             payload.playerRoundResults.map((r) => {
                 const { username, avatarUrl } = lookupName(r.player.id);
+                // Time to guess: the player's last correct guess in this round.
+                const playerGuesses = payload.guesses[r.player.id];
+                const correctGuess = playerGuesses
+                    ?.filter((g) => g.correct)
+                    .at(-1);
+
                 return {
                     id: r.player.id,
                     username,
                     avatarUrl,
                     pointsEarned: r.pointsEarned,
                     expGain: r.expGain,
+                    streak: r.streak,
+                    timeToGuessMs: correctGuess?.timeToGuessMs ?? null,
                 };
             });
 
@@ -808,6 +1298,8 @@ export function attachActivityBridge(session: GameSession): void {
             },
         );
 
+        const counter = session.getUniqueSongCounter();
+
         pushEvent(guildID, {
             type: "roundEnd",
             song: snapshotSong(payload.song),
@@ -815,6 +1307,10 @@ export function attachActivityBridge(session: GameSession): void {
             allGuesses,
             isCorrectGuess: payload.isCorrectGuess,
             scoreboard: snapshotScoreboard(session.scoreboard),
+            songCounter: {
+                uniqueSongsPlayed: counter.uniqueSongsPlayed,
+                totalSongs: counter.totalSongs,
+            },
         });
     });
 

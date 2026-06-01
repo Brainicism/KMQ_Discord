@@ -5,6 +5,8 @@ type ActivityRequestOp =
     | "skipVote"
     | "endGame"
     | "hint"
-    | "bookmark";
+    | "bookmark"
+    | "setOption"
+    | "autocompleteArtists";
 
 export default ActivityRequestOp;

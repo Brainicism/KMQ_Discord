@@ -692,9 +692,13 @@ export default class GameRound extends Round {
                     guildID,
                     "command.hint.artistName",
                 )}: ${codeLine(
-                    this.hints.artistHint[
-                        locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                    ],
+                    GameRound.spaceHint(
+                        this.hints.artistHint[
+                            locale === LocaleType.KO
+                                ? LocaleType.KO
+                                : LocaleType.EN
+                        ],
+                    ),
                 )}`;
             case GuessModeType.SONG_NAME:
             case GuessModeType.BOTH:
@@ -703,10 +707,38 @@ export default class GameRound extends Round {
                     guildID,
                     "command.hint.songName",
                 )}: ${codeLine(
-                    this.hints.songHint[
-                        locale === LocaleType.KO ? LocaleType.KO : LocaleType.EN
-                    ],
+                    GameRound.spaceHint(
+                        this.hints.songHint[
+                            locale === LocaleType.KO
+                                ? LocaleType.KO
+                                : LocaleType.EN
+                        ],
+                    ),
                 )}`;
+        }
+    }
+
+    /**
+     * Returns the compact (unspaced) masked hint for the active guess mode,
+     * suitable for the Activity UI which styles the hint itself and doesn't
+     * want the chat formatting (label, backticks, inter-character spaces).
+     * @param guessMode - the active guess mode
+     * @param locale - the guild locale
+     * @returns the masked name, e.g. "R__ V_lv_t"
+     */
+    getCompactHint(guessMode: GuessModeType, locale: LocaleType): string {
+        const useKo = locale === LocaleType.KO;
+        switch (guessMode) {
+            case GuessModeType.ARTIST:
+                return this.hints.artistHint[
+                    useKo ? LocaleType.KO : LocaleType.EN
+                ];
+            case GuessModeType.SONG_NAME:
+            case GuessModeType.BOTH:
+            default:
+                return this.hints.songHint[
+                    useKo ? LocaleType.KO : LocaleType.EN
+                ];
         }
     }
 
@@ -855,14 +887,28 @@ export default class GameRound extends Round {
             ),
         );
 
+        // Compact form: real word spaces are preserved (they're not eligible
+        // to hide), but characters are NOT separated by spaces. Chat callers
+        // re-space this for readability (see getHint); the Activity renders the
+        // compact form as-is so hints don't show stray spaces between letters.
         const hiddenName = name
             .split("")
             .map((char, idx) => {
                 if (hideMask.includes(idx)) return "_";
                 return char;
             })
-            .join(" ");
+            .join("");
 
         return hiddenName;
+    }
+
+    /**
+     * Re-spaces a compact masked hint for chat rendering (a space between
+     * every character), preserving the historical text-channel hint look.
+     * @param compact - the compact masked hint from generateHint
+     * @returns the spaced form, e.g. "R _ _   V _ l v _ t"
+     */
+    private static spaceHint(compact: string): string {
+        return compact.split("").join(" ");
     }
 }

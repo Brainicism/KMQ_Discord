@@ -4,6 +4,7 @@ type ActivityRequestRejection =
     | "banned"
     | "rate_limit"
     | "not_in_vc"
+    | "bot_no_voice_perms"
     | "internal"
     | "session_already_running"
     | "no_round"

@@ -707,6 +707,15 @@ export default abstract class Session extends EventEmitter {
     }
 
     /**
+     * @returns how many unique songs have been played this session vs. the
+     *  total eligible song pool. Exposed for the Activity round-end summary
+     *  (guildPreference itself is protected).
+     */
+    getUniqueSongCounter(): { uniqueSongsPlayed: number; totalSongs: number } {
+        return this.guildPreference.songSelector.getUniqueSongCounter();
+    }
+
+    /**
      * @param interaction - The interaction
      * @param _messageContext - Unused
      * @returns whether the interaction has been handled
@@ -947,9 +956,14 @@ export default abstract class Session extends EventEmitter {
             // Only set songStartedAt for clip mode at the start of the round
             if (!isClipMode || round.songStartedAt === null) {
                 round.songStartedAt = Date.now();
+                // The guess-timeout starts ticking right after playback begins
+                // (startGuessTimeout below), so align its reference with
+                // songStartedAt rather than the earlier round-construction time.
+                round.timerStartedAt = round.songStartedAt;
                 this.emit("roundStart", {
                     roundIndex: this.roundsPlayed,
                     songStartedAt: round.songStartedAt,
+                    timerStartedAt: round.timerStartedAt,
                     guessTimeoutSec: this.guildPreference.isGuessTimeoutSet()
                         ? this.guildPreference.gameOptions.guessTimeout
                         : null,

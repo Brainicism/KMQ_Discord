@@ -319,6 +319,8 @@ export async function reloadArtists(): Promise<void> {
         .where("artist_name_en", "not like", "% + %")
         .execute();
 
+    State.artistIDToEntry.clear();
+
     for (const mapping of artistAliasMapping) {
         const aliases = mapping["artist_aliases"]
             .split(";")
@@ -329,6 +331,8 @@ export async function reloadArtists(): Promise<void> {
             hangulName: mapping["artist_name_ko"],
             id: mapping["id_artist"],
         } as MatchedArtist;
+
+        State.artistIDToEntry.set(artistEntry.id, artistEntry);
 
         State.artistToEntry[
             GameRound.normalizePunctuationInName(mapping["artist_name_en"])

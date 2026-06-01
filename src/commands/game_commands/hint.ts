@@ -10,6 +10,7 @@ import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
 import GuildPreference from "../../structures/guild_preference";
+import KmqConfiguration from "../../kmq_configuration";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
@@ -182,6 +183,17 @@ export default class HintCommand implements BaseCommand {
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         if (!gameSession.round) return;
+        // Activity subscribers get live hintProgress events in the iframe;
+        // the actual hint content (rendered separately when the vote
+        // threshold hits) still goes to the channel so non-Activity users
+        // get the reveal.
+        if (KmqConfiguration.Instance.activityReducedEmbeds()) {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Hint notification suppressed (activityReducedEmbeds).`,
+            );
+            return;
+        }
+
         if (gameSession.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard =
                 gameSession.scoreboard as EliminationScoreboard;

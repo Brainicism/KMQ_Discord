@@ -1,3 +1,4 @@
+import type ActivityAutocompleteArtistsArgs from "./activity_autocomplete_artists_args";
 import type ActivityBookmarkArgs from "./activity_bookmark_args";
 import type ActivityGuessArgs from "./activity_guess_args";
 import type ActivityRequestOp from "../enums/activity_request_op";
@@ -13,5 +14,6 @@ export default interface ActivityRequestMessage {
         | ActivityGuessArgs
         | ActivityStartGameArgs
         | ActivityUserActionArgs
-        | ActivityBookmarkArgs;
+        | ActivityBookmarkArgs
+        | ActivityAutocompleteArtistsArgs;
 }

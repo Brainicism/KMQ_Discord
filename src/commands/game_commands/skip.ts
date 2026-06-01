@@ -10,6 +10,7 @@ import {
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
+import KmqConfiguration from "../../kmq_configuration";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import i18n from "../../helpers/localization_manager";
@@ -170,6 +171,17 @@ export default class SkipCommand implements BaseCommand {
         round: Round,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
+        // Activity subscribers get live skipProgress events in the iframe
+        // and don't need the channel tally too. The actual "skipped!"
+        // confirmation (sendSkipMessage) still fires so non-Activity users
+        // see the outcome.
+        if (KmqConfiguration.Instance.activityReducedEmbeds()) {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Vote instructions suppressed (activityReducedEmbeds).`,
+            );
+            return;
+        }
+
         const embedPayload = {
             title: i18n.translate(
                 messageContext.guildID,
