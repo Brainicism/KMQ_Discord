@@ -10,6 +10,7 @@ import {
 } from "./game_utils";
 import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
+import EnvType from "../enums/env_type";
 import GameRound from "../structures/game_round";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
@@ -355,7 +356,13 @@ export async function reloadArtists(): Promise<void> {
         await dbContext.kmq
             .selectFrom("available_songs")
             .innerJoin(
-                "kpop_videos.app_kpop_group",
+                // available_songs lives in the kmq DB and is joined across to the
+                // kpop_videos DB. The DB name is fixed at deploy time, but in tests
+                // it is kpop_videos_test, so qualify it by environment. The alias
+                // (last path segment) stays app_kpop_group either way.
+                (process.env.NODE_ENV === EnvType.TEST
+                    ? "kpop_videos_test.app_kpop_group"
+                    : "kpop_videos.app_kpop_group") as "kpop_videos.app_kpop_group",
                 "available_songs.id_artist",
                 "app_kpop_group.id",
             )
