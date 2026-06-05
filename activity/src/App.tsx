@@ -2472,16 +2472,24 @@ export default function App() {
 
                         {authState && (
                             <div className="vote-row">
-                                <HintControl
-                                    accessToken={authState.accessToken}
-                                    instanceId={authState.instanceId}
-                                    hint={ui.hint}
-                                    enabled={
-                                        ui.currentRound !== null &&
-                                        !ui.sessionEnded
-                                    }
-                                    t={t}
-                                />
+                                {/* Hints are disabled server-side in multiple
+                                    choice mode, so hide the control rather than
+                                    show a button that only errors out. */}
+                                {!(
+                                    ui.options &&
+                                    MC_ANSWER_TYPES.has(ui.options.answerType)
+                                ) && (
+                                    <HintControl
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        hint={ui.hint}
+                                        enabled={
+                                            ui.currentRound !== null &&
+                                            !ui.sessionEnded
+                                        }
+                                        t={t}
+                                    />
+                                )}
                                 <SkipControl
                                     accessToken={authState.accessToken}
                                     instanceId={authState.instanceId}
