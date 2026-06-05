@@ -6,9 +6,11 @@ import type {
     ActivityGuessMode,
     ActivityLanguage,
     ActivityMultiguess,
+    ActivityOst,
     ActivityRelease,
     ActivitySeek,
     ActivityShuffle,
+    ActivitySpecial,
     ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type ActivityEvent from "./types/activity_event";
@@ -40,6 +42,8 @@ export type SetOptionRequest =
     | { kind: "artisttype"; artisttype: ActivityArtistType }
     | { kind: "subunits"; subunits: ActivitySubunits }
     | { kind: "answer"; answer: ActivityAnswerType }
+    | { kind: "ost"; ost: ActivityOst }
+    | { kind: "special"; special: ActivitySpecial | null }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] }

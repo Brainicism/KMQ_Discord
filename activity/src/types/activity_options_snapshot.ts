@@ -24,6 +24,15 @@ export type ActivityAnswerType =
     | "medium"
     | "hard"
     | "hidden";
+export type ActivityOst = "include" | "exclude" | "exclusive";
+export type ActivitySpecial =
+    | "reverse"
+    | "slow"
+    | "fast"
+    | "faster"
+    | "lowpitch"
+    | "highpitch"
+    | "nightcore";
 
 export interface ActivityArtist {
     id: number;
@@ -48,6 +57,8 @@ export default interface ActivityOptionsSnapshot {
     artisttype: ActivityArtistType;
     subunits: ActivitySubunits;
     answerType: ActivityAnswerType;
+    ost: ActivityOst;
+    special: ActivitySpecial | null;
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;
     excludes: ActivityArtist[] | null;
