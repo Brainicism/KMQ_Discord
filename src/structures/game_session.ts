@@ -635,8 +635,16 @@ export default class GameSession extends Session {
                 round.interactionIncorrectAnswerUUIDs[choiceID] = 1;
             }
 
-            // Add the user as an (incorrect) participant
-            await this.guessSong(messageContext, "", createdAt);
+            // Add the user as an (incorrect) participant, recording the label
+            // of the option they actually chose so it can be displayed (e.g.
+            // in the Activity) instead of an empty guess. The label is a
+            // distinct wrong choice, so it never matches and stays incorrect.
+            const chosenLabel =
+                round.multipleChoiceOptions.find(
+                    (button) => button.custom_id === choiceID,
+                )?.label ?? "";
+
+            await this.guessSong(messageContext, chosenLabel, createdAt);
             return MultipleChoiceGuessResult.INCORRECT;
         }
 
