@@ -27,6 +27,7 @@ import State from "../state";
 import _ from "lodash";
 import i18n from "../helpers/localization_manager";
 import levenshtien from "damerau-levenshtein";
+import type AnswerType from "../enums/option_types/answer_type";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -92,6 +93,9 @@ export default class GameRound extends Round {
 
     /** The multiple choice options for the current round */
     public multipleChoiceOptions: Array<Eris.InteractionButton>;
+
+    /** The answer type the current multiple choice options were generated for */
+    public multipleChoiceAnswerType: AnswerType | null;
 
     /** The base EXP for this GameRound */
     private baseExp: number;
@@ -196,6 +200,7 @@ export default class GameRound extends Round {
                 : 1;
         this.guesses = {};
         this.multipleChoiceOptions = [];
+        this.multipleChoiceAnswerType = null;
     }
 
     getCorrectGuessers(isHidden: boolean): Array<KmqMember> {

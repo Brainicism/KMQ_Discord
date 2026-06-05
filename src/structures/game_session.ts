@@ -2191,10 +2191,20 @@ export default class GameSession extends Session {
             );
         }
 
+        // Only reuse the persisted choices if they were generated for the
+        // current answer type — switching MC difficulty (easy/med/hard)
+        // changes the number of options, so those must be regenerated.
+        const canReuse =
+            reuseExistingChoices &&
+            round.multipleChoiceOptions.length > 0 &&
+            round.multipleChoiceAnswerType ===
+                this.guildPreference.gameOptions.answerType;
+
         let buttons: Array<Eris.InteractionButton> = [];
-        if (reuseExistingChoices && round.multipleChoiceOptions.length > 0) {
+        if (canReuse) {
             buttons = round.multipleChoiceOptions;
         } else {
+            round.interactionIncorrectAnswerUUIDs = {};
             const randomSong = round.song;
             const correctChoice = {
                 displayedName:
@@ -2240,6 +2250,8 @@ export default class GameSession extends Session {
         // snapshot. Previously this was never stored, leaving the reuse path
         // dead and regenerating choices on every re-send.
         round.multipleChoiceOptions = buttons;
+        round.multipleChoiceAnswerType =
+            this.guildPreference.gameOptions.answerType;
 
         // Notify the Activity of the current round's choices. Fires both at
         // round start and on a mid-round switch to multiple choice (this
