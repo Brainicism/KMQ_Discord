@@ -2,6 +2,7 @@ import { IPCLogger } from "../logger";
 import { SPOTIFY_BASE_URL, SPOTIFY_SHORTHAND_BASE_URL } from "../constants";
 import { isValidURL } from "./utils";
 import GameOption from "../enums/game_option_name";
+import _ from "lodash";
 import type { MatchedPlaylist } from "../interfaces/matched_playlist";
 import type Eris from "eris";
 import type GuildPreference from "../structures/guild_preference";
@@ -57,12 +58,16 @@ async function deriveKmqPlaylistIdentifier(
         return { ok: false, reason: "invalid_url" };
     }
 
-    const isSpotifyFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
-        playlistURL,
-    );
+    // Escape the URL constants before embedding them in a RegExp — their
+    // unescaped dots (e.g. "open.spotify.com") would otherwise match any
+    // character, letting look-alike hosts slip through (CodeQL
+    // js/incomplete-hostname-regexp).
+    const isSpotifyFullURL = new RegExp(
+        `^${_.escapeRegExp(SPOTIFY_BASE_URL)}.+`,
+    ).test(playlistURL);
 
     const isSpotifyShorthandURL = new RegExp(
-        `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
+        `^${_.escapeRegExp(SPOTIFY_SHORTHAND_BASE_URL)}.+`,
     ).test(playlistURL);
 
     const isYoutubePlaylistURL =
@@ -74,7 +79,7 @@ async function deriveKmqPlaylistIdentifier(
         return { ok: false, reason: "unsupported_url" };
     }
 
-    const matchPlaylistID = `${SPOTIFY_BASE_URL}([a-zA-Z0-9]+)`;
+    const matchPlaylistID = `${_.escapeRegExp(SPOTIFY_BASE_URL)}([a-zA-Z0-9]+)`;
     try {
         if (isSpotifyFullURL) {
             return {
