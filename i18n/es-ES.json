@@ -100,6 +100,7 @@
             "limit": "Límite",
             "limitRangeError": "El final debe ser mayor que el inicio.",
             "male": "Masculino",
+            "managedByGroups": "Gestionado por los grupos seleccionados.",
             "medium": "Selección Múltiple (Medio)",
             "middle": "Medio",
             "multiguess": "Multirrespuesta",

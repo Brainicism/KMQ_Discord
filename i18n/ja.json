@@ -100,6 +100,7 @@
             "limit": "制限",
             "limitRangeError": "終了は開始より大きくなければなりません。",
             "male": "男性",
+            "managedByGroups": "選択されたグループによって管理されます。",
             "medium": "選択式（中級）",
             "middle": "中央",
             "multiguess": "マルチ推測",

@@ -100,6 +100,7 @@
             "limit": "限制",
             "limitRangeError": "结束必须大于开始。",
             "male": "男性",
+            "managedByGroups": "由选定的群组管理。",
             "medium": "选择题（中等）",
             "middle": "中间",
             "multiguess": "多重猜测",

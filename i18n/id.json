@@ -100,6 +100,7 @@
             "limit": "Batas",
             "limitRangeError": "Akhir harus lebih besar dari awal.",
             "male": "Pria",
+            "managedByGroups": "Diatur oleh kelompok yang dipilih.",
             "medium": "Pilihan Ganda (Sedang)",
             "middle": "Tengah",
             "multiguess": "Multiguess",
