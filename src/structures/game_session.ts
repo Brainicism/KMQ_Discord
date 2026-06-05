@@ -201,14 +201,11 @@ export default class GameSession extends Session {
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
 
-                // Reuse the round's existing choices (same options, same order)
-                // if they were already generated — otherwise toggling
-                // typing <-> MC within a round reshuffles the order each time.
-                // First switch in a round that started in typing has none yet,
-                // so fall back to generating.
-                await this.sendMultipleChoiceOptionsMessage(
-                    round.multipleChoiceOptions.length > 0,
-                );
+                // Reuse this difficulty's cached choices if present (same
+                // options, order, and answer UUIDs); the cache is keyed per
+                // answer type, so a first visit to a difficulty generates a
+                // fresh set while revisits restore the identical one.
+                await this.sendMultipleChoiceOptionsMessage(true);
             } else if (this.isHiddenMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
@@ -2185,26 +2182,23 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (reuseExistingChoices && round.multipleChoiceOptions.length === 0) {
-            logger.error(
-                "Expected to re-use multiple choice buttons, but none were set for the round. Falling back to generating new ones.",
-            );
-        }
+        const answerType = this.guildPreference.gameOptions.answerType;
+        // Reuse the choices previously generated for this exact answer type if
+        // they exist — this keeps the same options, order, and answer UUIDs
+        // when toggling typing <-> MC or cycling between MC difficulties within
+        // a round, so players can't switch difficulty to deduce the answer.
+        const cached = reuseExistingChoices
+            ? round.multipleChoiceCache[answerType]
+            : undefined;
 
-        // Only reuse the persisted choices if they were generated for the
-        // current answer type — switching MC difficulty (easy/med/hard)
-        // changes the number of options, so those must be regenerated.
-        const canReuse =
-            reuseExistingChoices &&
-            round.multipleChoiceOptions.length > 0 &&
-            round.multipleChoiceAnswerType ===
-                this.guildPreference.gameOptions.answerType;
-
-        let buttons: Array<Eris.InteractionButton> = [];
-        if (canReuse) {
-            buttons = round.multipleChoiceOptions;
+        let buttons: Array<Eris.InteractionButton>;
+        if (cached) {
+            buttons = cached.buttons;
+            round.interactionCorrectAnswerUUID = cached.correctAnswerUUID;
+            round.interactionIncorrectAnswerUUIDs = cached.incorrectAnswerUUIDs;
         } else {
-            round.interactionIncorrectAnswerUUIDs = {};
+            buttons = [];
+            const incorrectAnswerUUIDs: { [uuid: string]: number } = {};
             const randomSong = round.song;
             const correctChoice = {
                 displayedName:
@@ -2216,7 +2210,7 @@ export default class GameSession extends Session {
             };
 
             const wrongChoices = await getMultipleChoiceOptions(
-                this.guildPreference.gameOptions.answerType,
+                answerType,
                 this.guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
@@ -2225,7 +2219,7 @@ export default class GameSession extends Session {
 
             for (const choice of wrongChoices) {
                 const id = uuid.v4();
-                round.interactionIncorrectAnswerUUIDs[id] = 0;
+                incorrectAnswerUUIDs[id] = 0;
                 buttons.push({
                     type: 2,
                     style: 1,
@@ -2234,24 +2228,30 @@ export default class GameSession extends Session {
                 });
             }
 
-            round.interactionCorrectAnswerUUID = uuid.v4() as string;
+            const correctAnswerUUID = uuid.v4() as string;
             buttons.push({
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.PRIMARY,
                 label: correctChoice.displayedName.substring(0, 70),
-                custom_id: round.interactionCorrectAnswerUUID,
+                custom_id: correctAnswerUUID,
             });
 
             buttons = _.shuffle(buttons);
+
+            round.interactionCorrectAnswerUUID = correctAnswerUUID;
+            round.interactionIncorrectAnswerUUIDs = incorrectAnswerUUIDs;
+            // Cache this difficulty's set so a later switch back to it restores
+            // the identical options/order rather than regenerating.
+            round.multipleChoiceCache[answerType] = {
+                buttons,
+                correctAnswerUUID,
+                incorrectAnswerUUIDs,
+            };
         }
 
-        // Persist the generated buttons so re-sends (reuseExistingChoices) keep
-        // the same options, and so the Activity bridge can read them for its
-        // snapshot. Previously this was never stored, leaving the reuse path
-        // dead and regenerating choices on every re-send.
+        // Mark the active set so the Activity bridge can read it for its
+        // snapshot.
         round.multipleChoiceOptions = buttons;
-        round.multipleChoiceAnswerType =
-            this.guildPreference.gameOptions.answerType;
 
         // Notify the Activity of the current round's choices. Fires both at
         // round start and on a mid-round switch to multiple choice (this
