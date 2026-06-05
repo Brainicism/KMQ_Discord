@@ -196,7 +196,8 @@ type SetOptionBody =
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] }
-    | { kind: "playlist"; playlistURL: string | null };
+    | { kind: "playlist"; playlistURL: string | null }
+    | { kind: "reset" };
 
 function intInRange(v: unknown, min: number, max: number): number | null {
     if (typeof v !== "number" || !Number.isInteger(v)) return null;
@@ -426,6 +427,9 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             if (typeof v !== "string" || v.length > 2048) return null;
             return { kind: "playlist", playlistURL: v };
         }
+
+        case "reset":
+            return { kind: "reset" };
 
         default:
             return null;

@@ -1190,6 +1190,11 @@ function ensureWorkerHandlerRegistered(): void {
                                     break;
                                 }
 
+                                case "reset": {
+                                    await guildPreference.resetToDefault();
+                                    break;
+                                }
+
                                 default:
                                     // The discriminated union is exhaustive;
                                     // this branch is unreachable but the

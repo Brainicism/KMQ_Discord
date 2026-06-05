@@ -47,6 +47,8 @@ type ActivitySetOptionArgs = {
     // Playlist URL to match against, or null to clear the playlist (and the
     // limit it auto-sets), mirroring the slash-command `/playlist reset` flow.
     | { kind: "playlist"; playlistURL: string | null }
+    // Resets every game option to its default (mirrors `/reset`).
+    | { kind: "reset" }
 );
 
 export default ActivitySetOptionArgs;

@@ -126,6 +126,8 @@
             "popularity": "人気度",
             "random": "ランダム",
             "release": "リリース",
+            "resetAll": "すべてのオプションをリセット",
+            "resetConfirm": "もう一度タップして確認",
             "reversechronological": "逆時系列",
             "seek": "シーク",
             "shuffle": "シャッフル",

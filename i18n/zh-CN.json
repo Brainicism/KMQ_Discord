@@ -126,6 +126,8 @@
             "popularity": "人气",
             "random": "随机",
             "release": "发布",
+            "resetAll": "重置所有选项",
+            "resetConfirm": "再次点击以确认",
             "reversechronological": "倒序",
             "seek": "搜索",
             "shuffle": "随机",

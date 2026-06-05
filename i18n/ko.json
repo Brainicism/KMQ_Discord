@@ -126,6 +126,8 @@
             "popularity": "인기도",
             "random": "랜덤",
             "release": "발매",
+            "resetAll": "모든 옵션 재설정",
+            "resetConfirm": "확인하려면 다시 탭하세요",
             "reversechronological": "역연대순",
             "seek": "탐색",
             "shuffle": "셔플",
