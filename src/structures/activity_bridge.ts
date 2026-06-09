@@ -21,6 +21,10 @@ import applyPlaylistFromURL from "../helpers/playlist_utils";
 // Not a cycle: game_session.ts no longer imports this module — the
 // attachActivityBridge call was moved to PlayCommand alongside the
 // State.gameSessions write, so this import is a one-way edge.
+import {
+    MAX_NUM_PRESETS,
+    PRESET_NAME_MAX_LENGTH,
+} from "../commands/game_commands/preset";
 import GameRound from "./game_round";
 import GameSession from "./game_session";
 import GameType from "../enums/game_type";
@@ -45,6 +49,8 @@ import type ActivityGuessArgs from "../interfaces/activity_guess_args";
 import type ActivityGuessResponse from "../interfaces/activity_guess_response";
 import type ActivityMcGuessArgs from "../interfaces/activity_mc_guess_args";
 import type ActivityOptionsSnapshot from "../interfaces/activity_options_snapshot";
+import type ActivityPresetArgs from "../interfaces/activity_preset_args";
+import type ActivityPresetResponse from "../interfaces/activity_preset_response";
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
 import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
@@ -1321,6 +1327,168 @@ function ensureWorkerHandlerRegistered(): void {
                             reply({ ok: false, reason: "internal" });
                         }
                     });
+                    return;
+                }
+
+                case "preset": {
+                    const presetArgs = args as ActivityPresetArgs;
+                    const reply = (payload: ActivityPresetResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    if (State.bannedPlayers.has(presetArgs.userID)) {
+                        reply({ ok: false, reason: "banned" });
+                        return;
+                    }
+
+                    // Mirror setOption's guard: once a game is running, only
+                    // members of its voice channel may touch options/presets.
+                    const presetSession = Session.getSession(
+                        presetArgs.guildID,
+                    );
+
+                    if (
+                        presetSession &&
+                        !userInVoiceChannel(
+                            presetArgs.guildID,
+                            presetArgs.userID,
+                            presetSession.voiceChannelID,
+                        )
+                    ) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    // Serialize per guild so concurrent save/delete can't race
+                    // the count/uniqueness checks.
+                    runLocked(presetArgs.guildID, async () => {
+                        try {
+                            const guildPreference =
+                                await GuildPreference.getGuildPreference(
+                                    presetArgs.guildID,
+                                );
+
+                            const name = (presetArgs.name ?? "").trim();
+                            switch (presetArgs.action) {
+                                case "list":
+                                    break;
+                                case "save": {
+                                    if (!name) {
+                                        reply({ ok: false, reason: "no_name" });
+                                        return;
+                                    }
+
+                                    if (name.length > PRESET_NAME_MAX_LENGTH) {
+                                        reply({
+                                            ok: false,
+                                            reason: "name_too_long",
+                                        });
+                                        return;
+                                    }
+
+                                    if (name.startsWith("KMQ-")) {
+                                        reply({
+                                            ok: false,
+                                            reason: "illegal_prefix",
+                                        });
+                                        return;
+                                    }
+
+                                    if (
+                                        (await guildPreference.listPresets())
+                                            .length >= MAX_NUM_PRESETS
+                                    ) {
+                                        reply({
+                                            ok: false,
+                                            reason: "too_many",
+                                        });
+                                        return;
+                                    }
+
+                                    // savePreset returns false when a preset
+                                    // with this name already exists.
+                                    const saved =
+                                        await guildPreference.savePreset(
+                                            name,
+                                            null,
+                                        );
+
+                                    if (!saved) {
+                                        reply({ ok: false, reason: "exists" });
+                                        return;
+                                    }
+
+                                    break;
+                                }
+
+                                case "load": {
+                                    if (!name) {
+                                        reply({ ok: false, reason: "no_name" });
+                                        return;
+                                    }
+
+                                    // loadPreset persists the options, firing
+                                    // guildPreferenceChanged → the panel
+                                    // refreshes via the optionsChanged
+                                    // broadcast.
+                                    const [loaded] =
+                                        await guildPreference.loadPreset(
+                                            name,
+                                            presetArgs.guildID,
+                                        );
+
+                                    if (!loaded) {
+                                        reply({
+                                            ok: false,
+                                            reason: "not_found",
+                                        });
+                                        return;
+                                    }
+
+                                    break;
+                                }
+
+                                case "delete": {
+                                    if (!name) {
+                                        reply({ ok: false, reason: "no_name" });
+                                        return;
+                                    }
+
+                                    const deleted =
+                                        await guildPreference.deletePreset(
+                                            name,
+                                        );
+
+                                    if (!deleted) {
+                                        reply({
+                                            ok: false,
+                                            reason: "not_found",
+                                        });
+                                        return;
+                                    }
+
+                                    break;
+                                }
+
+                                default:
+                                    reply({ ok: false, reason: "internal" });
+                                    return;
+                            }
+
+                            const presets = await guildPreference.listPresets();
+                            reply({ ok: true, presets });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity preset for gid=${presetArgs.guildID}, action=${presetArgs.action}. err=${e}`,
+                            );
+
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
+
                     return;
                 }
 

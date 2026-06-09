@@ -86,6 +86,7 @@
                 "multiguess": "Quand activé, les autres ont une brève fenêtre pour deviner également après la première réponse correcte.",
                 "ost": "Que les chansons de la B.O. (bande originale) soient incluses, exclues ou jouées exclusivement.",
                 "playlist": "Écoutez des chansons d'une liste de lecture Spotify ou YouTube. Tant qu'elle est active, les filtres du groupe de chansons sont gérés par la liste de lecture.",
+                "preset": "Enregistrez les options actuelles comme préréglage nommé, ou chargez/supprimez un préréglage enregistré.",
                 "release": "Seulement les clips musicaux officiels, ou tous les types de vidéos (b-sides, pratiques de danse, etc.).",
                 "seek": "Où chaque chanson commence à jouer : un point aléatoire, le début ou le milieu.",
                 "shuffle": "Comment la prochaine chanson est choisie : aléatoirement, pondérée par difficulté ou popularité, ou par date de sortie.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "URL de la liste de lecture Spotify ou YouTube"
             },
             "popularity": "Popularité",
+            "preset": {
+                "confirmDelete": "Confirmer la suppression",
+                "delete": "Supprimer",
+                "empty": "Aucun préréglage enregistré pour le moment.",
+                "errors": {
+                    "exists": "Un préréglage portant ce nom existe déjà.",
+                    "generic": "Impossible de mettre à jour les préréglages. Réessayez.",
+                    "illegalPrefix": "Les noms de préréglage ne peuvent pas commencer par « KMQ- ».",
+                    "nameTooLong": "Ce nom de préréglage est trop long.",
+                    "noName": "Entrez un nom de préréglage.",
+                    "notFound": "Ce préréglage n'existe plus.",
+                    "tooMany": "Vous avez atteint le nombre maximum de préréglages."
+                },
+                "label": "Préréglages",
+                "load": "Charger",
+                "namePlaceholder": "Nom du préréglage",
+                "save": "Enregistrer"
+            },
             "random": "Aléatoire",
             "release": "Sortie",
             "resetAll": "Réinitialiser toutes les options",

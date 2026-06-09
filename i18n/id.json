@@ -86,6 +86,7 @@
                 "multiguess": "Jika diaktifkan, orang lain mendapatkan kesempatan singkat untuk juga menebak setelah jawaban benar pertama.",
                 "ost": "Apakah lagu OST (soundtrack) disertakan, dikecualikan, atau diputar secara eksklusif.",
                 "playlist": "Putar lagu dari playlist Spotify atau YouTube. Saat aktif, filter kumpulan lagu dikelola oleh playlist.",
+                "preset": "Simpan opsi saat ini sebagai preset bernama, atau muat/hapus yang sudah disimpan.",
                 "release": "Hanya video musik resmi, atau semua jenis video (b-sides, dance practice, dll.).",
                 "seek": "Di mana setiap lagu mulai diputar — titik acak, awal, atau tengah.",
                 "shuffle": "Bagaimana lagu berikutnya dipilih — secara acak, diberi bobot menurut kesulitan atau popularitas, atau berdasarkan tanggal rilis.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "URL playlist Spotify atau YouTube"
             },
             "popularity": "Popularitas",
+            "preset": {
+                "confirmDelete": "Konfirmasi hapus",
+                "delete": "Hapus",
+                "empty": "Belum ada preset yang disimpan.",
+                "errors": {
+                    "exists": "Sebuah preset dengan nama itu sudah ada.",
+                    "generic": "Tidak dapat memperbarui preset. Coba lagi.",
+                    "illegalPrefix": "Nama preset tidak boleh diawali dengan \"KMQ-\".",
+                    "nameTooLong": "Nama preset itu terlalu panjang.",
+                    "noName": "Masukkan nama preset.",
+                    "notFound": "Preset tersebut sudah tidak ada.",
+                    "tooMany": "Anda telah mencapai jumlah maksimum preset."
+                },
+                "label": "Preset",
+                "load": "Muat",
+                "namePlaceholder": "Nama preset",
+                "save": "Simpan"
+            },
             "random": "Acak",
             "release": "Rilis",
             "resetAll": "Setel ulang semua opsi",

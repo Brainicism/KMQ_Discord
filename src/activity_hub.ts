@@ -14,6 +14,8 @@ import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_respon
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
 import type ActivityMcGuessArgs from "./interfaces/activity_mc_guess_args";
+import type ActivityPresetArgs from "./interfaces/activity_preset_args";
+import type ActivityPresetResponse from "./interfaces/activity_preset_response";
 import type ActivityReplyMessage from "./interfaces/activity_reply_message";
 import type ActivityRequestOp from "./enums/activity_request_op";
 import type ActivitySetOptionArgs from "./interfaces/activity_set_option_args";
@@ -248,6 +250,16 @@ export default class ActivityHub {
     }
 
     /**
+     * Lists / saves / loads / deletes a game-option preset for the guild.
+     * @param args - the preset action + name; see ActivityPresetArgs
+     * @returns the worker's response, including the refreshed preset list
+     */
+    async preset(args: ActivityPresetArgs): Promise<ActivityPresetResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityPresetResponse>(target, "preset", args);
+    }
+
+    /**
      * Looks up artists matching a query prefix. Dispatched to any available
      * worker — the artist cache is identical across workers, so routing by
      * guild isn't needed. Falls back to an empty result set if no worker
@@ -394,7 +406,8 @@ export default class ActivityHub {
             | ActivityUserActionArgs
             | ActivityBookmarkArgs
             | ActivitySetOptionArgs
-            | ActivityAutocompleteArtistsArgs,
+            | ActivityAutocompleteArtistsArgs
+            | ActivityPresetArgs,
     ): Promise<T> {
         const cid = uuid.v4();
         return new Promise<T>((resolve, reject) => {

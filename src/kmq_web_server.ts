@@ -46,6 +46,7 @@ import fs from "fs";
 import i18n from "./helpers/localization_manager";
 import os from "os";
 import path from "path";
+import type { ActivityPresetAction } from "./interfaces/activity_preset_args";
 import type { ActivitySubscriber } from "./activity_hub";
 import type { DatabaseContext } from "./database_context";
 import type { Fleet, Stats } from "eris-fleet";
@@ -156,6 +157,13 @@ const ANSWER_TYPE_VALUES: ReadonlySet<string> = new Set(
 
 const OST_VALUES: ReadonlySet<string> = new Set(Object.values(OstPreference));
 const SPECIAL_VALUES: ReadonlySet<string> = new Set(Object.values(SpecialType));
+
+const PRESET_ACTIONS: ReadonlySet<string> = new Set([
+    "list",
+    "save",
+    "load",
+    "delete",
+]);
 
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
@@ -1264,6 +1272,54 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity setOption failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/preset",
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as {
+                    action?: unknown;
+                    name?: unknown;
+                };
+
+                const action = body.action;
+                if (typeof action !== "string" || !PRESET_ACTIONS.has(action)) {
+                    await reply
+                        .code(400)
+                        .send({ error: "Invalid preset action" });
+                    return;
+                }
+
+                const name =
+                    typeof body.name === "string" ? body.name : undefined;
+
+                try {
+                    const result = await this.activityHub!.preset({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        action: action as ActivityPresetAction,
+                        name,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply
+                        .code(200)
+                        .send({ ok: true, presets: result.presets });
+                } catch (e) {
+                    logger.warn(
+                        `Activity preset failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }

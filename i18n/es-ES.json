@@ -86,6 +86,7 @@
                 "multiguess": "Cuando está activado, los demás tienen una breve ventana para adivinar después de la primera respuesta correcta.",
                 "ost": "Si las canciones de la OST (banda sonora) están incluidas, excluidas o reproducidas exclusivamente.",
                 "playlist": "Reproduce canciones de una lista de reproducción de Spotify o YouTube. Mientras esté activa, los filtros del grupo de canciones son gestionados por la lista de reproducción.",
+                "preset": "Guarde las opciones actuales como un preajuste nombrado, o cargue/elimine uno guardado.",
                 "release": "Solo vídeos musicales oficiales, o todos los tipos de vídeos (b-sides, prácticas de baile, etc.).",
                 "seek": "Dónde empieza a reproducirse cada canción: un punto aleatorio, el principio o el medio.",
                 "shuffle": "Cómo se elige la siguiente canción: al azar, ponderada por dificultad o popularidad, o por fecha de lanzamiento.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "URL de la lista de reproducción de Spotify o YouTube"
             },
             "popularity": "Popularidad",
+            "preset": {
+                "confirmDelete": "Confirmar eliminación",
+                "delete": "Eliminar",
+                "empty": "Aún no hay preajustes guardados.",
+                "errors": {
+                    "exists": "Ya existe un preajuste con ese nombre.",
+                    "generic": "No se pudo actualizar los preajustes. Intente de nuevo.",
+                    "illegalPrefix": "Los nombres de los preajustes no pueden comenzar con \"KMQ-\".",
+                    "nameTooLong": "El nombre de ese preajuste es demasiado largo.",
+                    "noName": "Introduzca un nombre para el preajuste.",
+                    "notFound": "Ese preajuste ya no existe.",
+                    "tooMany": "Has alcanzado el número máximo de preajustes."
+                },
+                "label": "Preajustes",
+                "load": "Cargar",
+                "namePlaceholder": "Nombre del preajuste",
+                "save": "Guardar"
+            },
             "random": "Aleatorio",
             "release": "Lanzamiento",
             "resetAll": "Restablecer todas las opciones",

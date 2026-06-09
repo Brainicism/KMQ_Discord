@@ -1756,6 +1756,64 @@ fieldset.options-override:disabled .options-group {
     cursor: not-allowed;
 }
 
+/* ---- PRESET MANAGER ---- */
+.preset-list {
+    list-style: none;
+    margin: 0 0 8px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.preset-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm, 8px);
+    padding: 5px 5px 5px 11px;
+}
+
+.preset-name {
+    font-size: 0.76rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.preset-actions {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
+}
+
+.preset-save {
+    display: flex;
+    gap: 6px;
+}
+
+.preset-save .option-number {
+    flex: 1;
+    min-width: 0;
+}
+
+.preset-empty {
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    font-size: 0.72rem;
+    font-style: italic;
+}
+
+.preset-feedback {
+    margin: 6px 0 0;
+    color: var(--red-primary);
+    font-size: 0.72rem;
+}
+
 /* ---- SONG HISTORY ---- */
 .song-history {
     list-style: none;

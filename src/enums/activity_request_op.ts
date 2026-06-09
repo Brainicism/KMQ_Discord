@@ -8,6 +8,7 @@ type ActivityRequestOp =
     | "hint"
     | "bookmark"
     | "setOption"
-    | "autocompleteArtists";
+    | "autocompleteArtists"
+    | "preset";
 
 export default ActivityRequestOp;

@@ -30,8 +30,8 @@ import type HelpDocumentation from "../../interfaces/help";
 
 const COMMAND_NAME = "preset";
 const logger = new IPCLogger(COMMAND_NAME);
-const PRESET_NAME_MAX_LENGTH = 25;
-const MAX_NUM_PRESETS = 20;
+export const PRESET_NAME_MAX_LENGTH = 25;
+export const MAX_NUM_PRESETS = 20;
 
 enum PresetAction {
     LIST = "list",

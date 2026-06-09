@@ -86,6 +86,7 @@
                 "multiguess": "打开时，其他人可以在第一个正确答案后有个简短猜测时间。",
                 "ost": "是否包括、排除或专门播放OST（原声带）歌曲。",
                 "playlist": "从 Spotify 或 YouTube 播放列表中播放歌曲。激活时，播放列表管理歌曲池的筛选器。",
+                "preset": "将当前选项保存为命名预设，或加载/删除已保存的预设。",
                 "release": "只播官方音乐视频，或所有视频类型（b面，舞蹈练习等）。",
                 "seek": "每首歌从哪个位置开始播放 — 随机点，开始或中间。",
                 "shuffle": "如何选择下一首歌 — 随机，根据难度或受欢迎程度加权，或按发布日期。",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "Spotify 或 YouTube 播放列表 URL"
             },
             "popularity": "人气",
+            "preset": {
+                "confirmDelete": "确认删除",
+                "delete": "删除",
+                "empty": "尚未保存任何预设。",
+                "errors": {
+                    "exists": "具有该名称的预设已存在。",
+                    "generic": "无法更新预设。请重试。",
+                    "illegalPrefix": "预设名称不能以 \"KMQ-\" 开头。",
+                    "nameTooLong": "该预设名称太长。",
+                    "noName": "输入预设名称。",
+                    "notFound": "该预设不再存在。",
+                    "tooMany": "您已达到最大预设数量。"
+                },
+                "label": "预设",
+                "load": "加载",
+                "namePlaceholder": "预设名称",
+                "save": "保存"
+            },
             "random": "随机",
             "release": "发布",
             "resetAll": "重置所有选项",
