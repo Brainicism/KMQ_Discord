@@ -11,11 +11,16 @@ import {
     ACTIVITY_RATE_LIMIT_TOKEN,
     ACTIVITY_WS_HEARTBEAT_INTERVAL_MS,
     ACTIVITY_WS_TICKET_TTL_MS,
+    CLIP_DEFAULT_DURATION_SEC,
+    CLIP_MAX_DURATION_SEC,
+    CLIP_MIN_DURATION_SEC,
     DEFAULT_LOCALE,
     DISCORD_ACTIVITY_INSTANCE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
     EARLIEST_BEGINNING_SEARCH_YEAR,
+    ELIMINATION_DEFAULT_LIVES,
+    ELIMINATION_MAX_LIVES,
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
@@ -24,6 +29,7 @@ import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
+import GameType from "./enums/game_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
@@ -165,6 +171,15 @@ const PRESET_ACTIONS: ReadonlySet<string> = new Set([
     "delete",
 ]);
 
+// Game types the Activity can start. Teams (needs a lobby) and competition
+// (moderator-gated) are intentionally excluded.
+const ACTIVITY_GAME_TYPES: ReadonlySet<string> = new Set([
+    GameType.CLASSIC,
+    GameType.SUDDEN_DEATH,
+    GameType.ELIMINATION,
+    GameType.CLIP,
+]);
+
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
 // validated server-side so a malicious client can't persist out-of-range
@@ -220,6 +235,12 @@ function nullableIntInRange(
 ): number | null | undefined {
     if (v === null) return null;
     return intInRange(v, min, max);
+}
+
+function floatInRange(v: unknown, min: number, max: number): number | null {
+    if (typeof v !== "number" || !Number.isFinite(v)) return null;
+    if (v < min || v > max) return null;
+    return v;
 }
 
 /**
@@ -1121,12 +1142,69 @@ export default class KmqWebServer {
                     return;
                 }
 
+                const startBody = (request.body ?? {}) as {
+                    gameType?: unknown;
+                    eliminationLives?: unknown;
+                    clipDuration?: unknown;
+                };
+
+                const rawType =
+                    typeof startBody.gameType === "string"
+                        ? startBody.gameType
+                        : GameType.CLASSIC;
+
+                if (!ACTIVITY_GAME_TYPES.has(rawType)) {
+                    await reply.code(400).send({ error: "Invalid game type" });
+                    return;
+                }
+
+                const gameType = rawType as GameType;
+
+                let eliminationLives: number | undefined;
+                if (gameType === GameType.ELIMINATION) {
+                    eliminationLives =
+                        startBody.eliminationLives === undefined
+                            ? ELIMINATION_DEFAULT_LIVES
+                            : (intInRange(
+                                  startBody.eliminationLives,
+                                  1,
+                                  ELIMINATION_MAX_LIVES,
+                              ) ?? undefined);
+
+                    if (eliminationLives === undefined) {
+                        await reply.code(400).send({ error: "Invalid lives" });
+                        return;
+                    }
+                }
+
+                let clipDuration: number | undefined;
+                if (gameType === GameType.CLIP) {
+                    clipDuration =
+                        startBody.clipDuration === undefined
+                            ? CLIP_DEFAULT_DURATION_SEC
+                            : (floatInRange(
+                                  startBody.clipDuration,
+                                  CLIP_MIN_DURATION_SEC,
+                                  CLIP_MAX_DURATION_SEC,
+                              ) ?? undefined);
+
+                    if (clipDuration === undefined) {
+                        await reply
+                            .code(400)
+                            .send({ error: "Invalid clip duration" });
+                        return;
+                    }
+                }
+
                 try {
                     const result = await this.activityHub!.startGame({
                         guildID: ctx.instance.guildID,
                         userID: ctx.user.id,
                         voiceChannelID: ctx.instance.channelID,
                         textChannelID: ctx.instance.channelID,
+                        gameType,
+                        eliminationLives,
+                        clipDuration,
                     });
 
                     if (!result.ok) {

@@ -31,6 +31,14 @@
         "connectFailed": "No se pudo conectar a KMQ. Por favor, inténtalo de nuevo.",
         "endGameBusy": "Finalizando…",
         "endGameButton": "Finalizar partida",
+        "gameType": {
+            "classic": "Clásico",
+            "clip": "Clip",
+            "clipDuration": "Duración del clip (segundos)",
+            "elimination": "Eliminación",
+            "lives": "Vidas",
+            "suddendeath": "Muerte súbita"
+        },
         "guessButton": "Adivinar",
         "guessPlaceholderActive": "Escribe tu respuesta…",
         "guessPlaceholderWaiting": "Esperando ronda…",

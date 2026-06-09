@@ -667,13 +667,26 @@ function ensureWorkerHandlerRegistered(): void {
                                 );
 
                             const gameOwner = new KmqMember(startArgs.userID);
+                            // Clip mode plays a fresh portion each round (the
+                            // slash command's default `new_clip` is false, but
+                            // for the lobby-less Activity a new song per round
+                            // matches every other mode's behaviour).
                             const gameSession = new GameSession(
                                 guildPreference,
                                 startArgs.textChannelID,
                                 startVoiceChannelID,
                                 startArgs.guildID,
                                 gameOwner,
-                                GameType.CLASSIC,
+                                startArgs.gameType,
+                                startArgs.gameType === GameType.ELIMINATION
+                                    ? startArgs.eliminationLives
+                                    : undefined,
+                                startArgs.gameType === GameType.CLIP
+                                    ? startArgs.clipDuration
+                                    : undefined,
+                                startArgs.gameType === GameType.CLIP
+                                    ? true
+                                    : undefined,
                             );
 
                             // Swap out any stale non-initialized session

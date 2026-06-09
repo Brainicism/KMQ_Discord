@@ -118,6 +118,7 @@ async function postAction(
     accessToken: string,
     instanceId: string,
     path: "start" | "skip" | "end" | "hint",
+    extra?: Record<string, unknown>,
 ): Promise<GuessResult> {
     const resp = await fetch(`${ACTIVITY_PROXY_BASE}/${path}`, {
         method: "POST",
@@ -125,7 +126,7 @@ async function postAction(
             "Content-Type": "application/json",
             Authorization: `Bearer ${accessToken}`,
         },
-        body: JSON.stringify({ instance_id: instanceId }),
+        body: JSON.stringify({ instance_id: instanceId, ...extra }),
     });
 
     if (resp.ok) return { ok: true };
@@ -143,8 +144,27 @@ async function postAction(
     return { ok: false, reason: parsed.error ?? "internal" };
 }
 
-export const startGame = (accessToken: string, instanceId: string) =>
-    postAction(accessToken, instanceId, "start");
+// Game types the Activity can start (teams/competition are excluded — see
+// ACTIVITY_GAME_TYPES server-side).
+export type ActivityGameType =
+    | "classic"
+    | "suddendeath"
+    | "elimination"
+    | "clip";
+
+export interface StartGameOptions {
+    gameType: ActivityGameType;
+    /** Required for elimination; ignored otherwise. */
+    eliminationLives?: number;
+    /** Required for clip; ignored otherwise. */
+    clipDuration?: number;
+}
+
+export const startGame = (
+    accessToken: string,
+    instanceId: string,
+    options: StartGameOptions,
+) => postAction(accessToken, instanceId, "start", { ...options });
 
 export const skipVote = (accessToken: string, instanceId: string) =>
     postAction(accessToken, instanceId, "skip");

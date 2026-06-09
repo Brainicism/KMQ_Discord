@@ -466,6 +466,43 @@ body::before {
     font-size: 0.85rem;
 }
 
+/* ---- START-GAME CONFIG (game type + params) ---- */
+.start-config {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.start-game-types {
+    margin-bottom: 0;
+}
+
+/* The generic `.control-buttons button` rule (bigger padding, transparent
+   border) would clobber the pill look; re-assert the pill specifics with a
+   higher-specificity selector. */
+.start-config .pill {
+    padding: 4px 12px;
+    font-size: 0.73rem;
+    border: 1px solid var(--border);
+}
+
+.start-config .pill.on {
+    border-color: var(--red-primary);
+}
+
+.start-param {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.start-param .option-number {
+    width: 96px;
+}
+
 /* ---- ROUND AREA (card) ---- */
 .round-area {
     background: var(--bg-surface);

@@ -31,6 +31,14 @@
         "connectFailed": "无法连接到KMQ。请再试一次。",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
+        "gameType": {
+            "classic": "经典",
+            "clip": "剪辑",
+            "clipDuration": "剪辑长度（秒）",
+            "elimination": "淘汰",
+            "lives": "生命",
+            "suddendeath": "猝死"
+        },
         "guessButton": "猜",
         "guessPlaceholderActive": "输入你的答案…",
         "guessPlaceholderWaiting": "等待回合…",
