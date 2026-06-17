@@ -1461,6 +1461,32 @@ body::before {
     box-shadow: 0 2px 8px rgba(230, 57, 70, 0.2);
 }
 
+/* An option overridden by another (e.g. gender while groups is set): shown but
+   not editable. Suppress the hover affordance so it reads as inactive. */
+.pill:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.pill:disabled:hover {
+    border-color: var(--border);
+    color: var(--text-secondary);
+}
+
+.pill.on:disabled:hover {
+    border-color: var(--red-primary);
+    color: white;
+}
+
+/* Note under a control explaining it's managed by another option. */
+.option-managed-note {
+    margin: 6px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.68rem;
+    font-style: italic;
+    line-height: 1.3;
+}
+
 /* Each option is a grid cell; the grid's gap handles spacing. */
 .options-group {
     min-width: 0;
@@ -1616,6 +1642,21 @@ fieldset.options-override:disabled .options-group {
 .artist-chip:hover {
     background: var(--red-primary);
     color: white;
+}
+
+.artist-chip:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.artist-chip:disabled:hover {
+    background: var(--pink-soft);
+    color: var(--red-primary);
+}
+
+.artist-autocomplete .option-number:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .artist-chip-x {

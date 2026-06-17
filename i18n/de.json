@@ -100,6 +100,7 @@
             "limit": "Limit",
             "limitRangeError": "Ende muss größer als Start sein.",
             "male": "Männlich",
+            "managedByGroups": "Verwaltet von den ausgewählten Gruppen.",
             "medium": "Multiple Choice (Mittel)",
             "middle": "Mitte",
             "multiguess": "Mehrfachraten",

@@ -1206,16 +1206,21 @@ function OptionLabel({
 function PillField({
     label,
     help,
+    note,
     children,
 }: {
     label: string;
     help: string;
+    /** Shown under the pills when the option is overridden by another (e.g.
+     *  "managed by groups"); the pills themselves are disabled by the caller. */
+    note?: string;
     children: React.ReactNode;
 }) {
     return (
         <div className="options-group">
             <OptionLabel label={label} help={help} />
             <div className="pills">{children}</div>
+            {note && <p className="option-managed-note">{note}</p>}
         </div>
     );
 }
@@ -1305,6 +1310,16 @@ function OptionsPanel({
     };
 
     const isAlternating = options.gender[0] === "alternating";
+
+    // When groups are set the bot filters strictly by those groups and ignores
+    // gender / artist type / includes / excludes — the slash commands reject
+    // changing them in this state. Mirror that by disabling the conflicting
+    // controls and noting they're managed by groups. Subunits still applies
+    // (it controls whether the chosen groups' subunits are included), and
+    // "alternating" gender is still valid with 2+ groups, so leave those.
+    const groupCount = options.groups?.length ?? 0;
+    const groupsActive = groupCount > 0;
+    const managedNote = groupsActive ? t("options.managedByGroups") : undefined;
 
     const toggleGender = (g: ActivityGender): void => {
         const set = new Set<ActivityGender>(
@@ -1511,6 +1526,7 @@ function OptionsPanel({
                 <PillField
                     label={t("options.gender")}
                     help={t("options.help.gender")}
+                    note={managedNote}
                 >
                     {GENDER_OPTIONS.map((g) => {
                         const active =
@@ -1521,6 +1537,7 @@ function OptionsPanel({
                                 key={g}
                                 type="button"
                                 className={`pill ${active ? "on" : ""}`}
+                                disabled={groupsActive}
                                 onClick={() => toggleGender(g)}
                             >
                                 {t(`options.${g}`)}
@@ -1530,6 +1547,7 @@ function OptionsPanel({
                     <button
                         type="button"
                         className={`pill ${isAlternating ? "on" : ""}`}
+                        disabled={groupsActive && groupCount === 1}
                         onClick={toggleAlternating}
                     >
                         {t("options.alternating")}
@@ -1655,6 +1673,7 @@ function OptionsPanel({
                 <PillField
                     label={t("options.artisttype")}
                     help={t("options.help.artisttype")}
+                    note={managedNote}
                 >
                     {ARTIST_TYPE_OPTIONS.map((a) => (
                         <button
@@ -1663,6 +1682,7 @@ function OptionsPanel({
                             className={`pill ${
                                 options.artisttype === a ? "on" : ""
                             }`}
+                            disabled={groupsActive}
                             onClick={() => pickArtistType(a)}
                         >
                             {t(`options.${a}`)}
@@ -1790,6 +1810,8 @@ function OptionsPanel({
                     accessToken={accessToken}
                     artists={options.includes ?? []}
                     onCommit={(next) => submitArtistList("includes", next)}
+                    disabled={groupsActive}
+                    note={managedNote}
                 />
 
                 <ArtistListGroup
@@ -1798,6 +1820,8 @@ function OptionsPanel({
                     accessToken={accessToken}
                     artists={options.excludes ?? []}
                     onCommit={(next) => submitArtistList("excludes", next)}
+                    disabled={groupsActive}
+                    note={managedNote}
                 />
             </fieldset>
 
@@ -1812,12 +1836,17 @@ function ArtistListGroup({
     accessToken,
     artists,
     onCommit,
+    disabled,
+    note,
 }: {
     label: string;
     help?: string;
     accessToken: string;
     artists: ActivityArtist[];
     onCommit: (next: ActivityArtist[]) => void;
+    /** Overridden by another option (e.g. groups); disables editing. */
+    disabled?: boolean;
+    note?: string;
 }) {
     const [query, setQuery] = useState("");
     const [suggestions, setSuggestions] = useState<ActivityArtist[]>([]);
@@ -1876,6 +1905,7 @@ function ArtistListGroup({
                             key={a.id}
                             type="button"
                             className="artist-chip"
+                            disabled={disabled}
                             onClick={() => removeArtist(a.id)}
                             title="Remove"
                         >
@@ -1890,6 +1920,7 @@ function ArtistListGroup({
                     type="text"
                     className="option-number"
                     value={query}
+                    disabled={disabled}
                     onChange={(e) => setQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() =>
@@ -1915,6 +1946,7 @@ function ArtistListGroup({
                     </ul>
                 )}
             </div>
+            {note && <p className="option-managed-note">{note}</p>}
         </div>
     );
 }

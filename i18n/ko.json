@@ -100,6 +100,7 @@
             "limit": "제한",
             "limitRangeError": "끝은 시작보다 커야 합니다.",
             "male": "남성",
+            "managedByGroups": "선택된 그룹에 의해 관리됩니다.",
             "medium": "객관식 (중간)",
             "middle": "중간",
             "multiguess": "다중 추측",
