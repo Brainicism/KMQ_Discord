@@ -4,9 +4,11 @@ import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
+import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
 import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
+import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
 
 /**
@@ -53,6 +55,10 @@ export default interface ActivityOptionsSnapshot {
      *  (easy/medium/hard), or hidden. Drives whether the Activity shows a
      *  text input or the choice grid. */
     answerType: AnswerType;
+    /** Whether OST songs are included, excluded, or played exclusively. */
+    ost: OstPreference;
+    /** Active audio modifier, or null when none is applied. */
+    special: SpecialType | null;
     /** Null (not in groups mode) or the selected artist list. */
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;

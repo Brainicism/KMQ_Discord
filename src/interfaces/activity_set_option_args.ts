@@ -4,9 +4,11 @@ import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
 import type MultiGuessType from "../enums/option_types/multiguess_type";
+import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
 import type SeekType from "../enums/option_types/seek_type";
 import type ShuffleType from "../enums/option_types/shuffle_type";
+import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
 
 /**
@@ -34,6 +36,9 @@ type ActivitySetOptionArgs = {
     | { kind: "artisttype"; artisttype: ArtistType }
     | { kind: "subunits"; subunits: SubunitsPreference }
     | { kind: "answer"; answer: AnswerType }
+    | { kind: "ost"; ost: OstPreference }
+    // `null` special type is treated as a reset (no audio modifier).
+    | { kind: "special"; special: SpecialType | null }
     // Artist-list kinds: empty array is treated as "reset to null" to
     // mirror the slash-command `/groups reset` flow.
     | { kind: "groups"; artistIDs: number[] }

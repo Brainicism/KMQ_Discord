@@ -34,9 +34,11 @@ import type {
     ActivityGuessMode,
     ActivityLanguage,
     ActivityMultiguess,
+    ActivityOst,
     ActivityRelease,
     ActivitySeek,
     ActivityShuffle,
+    ActivitySpecial,
     ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
@@ -1143,6 +1145,18 @@ const ANSWER_OPTIONS: ActivityAnswerType[] = [
     "medium",
     "hard",
 ];
+const OST_OPTIONS: ActivityOst[] = ["include", "exclude", "exclusive"];
+// `null` (rendered as the "off" pill) clears any active audio modifier.
+const SPECIAL_OPTIONS: (ActivitySpecial | null)[] = [
+    null,
+    "reverse",
+    "slow",
+    "fast",
+    "faster",
+    "lowpitch",
+    "highpitch",
+    "nightcore",
+];
 
 /**
  * An option's heading plus an optional ⓘ that reveals a short explanation
@@ -1414,6 +1428,16 @@ function OptionsPanel({
         );
     };
 
+    const pickOst = (ost: ActivityOst): void => {
+        if (ost === options.ost) return;
+        void submit({ kind: "ost", ost }, { ...options, ost });
+    };
+
+    const pickSpecial = (special: ActivitySpecial | null): void => {
+        if (special === options.special) return;
+        void submit({ kind: "special", special }, { ...options, special });
+    };
+
     const submitArtistList = (
         listKind: "groups" | "includes" | "excludes",
         next: ActivityArtist[],
@@ -1658,6 +1682,40 @@ function OptionsPanel({
                             onClick={() => pickSubunits(s)}
                         >
                             {t(`options.${s}`)}
+                        </button>
+                    ))}
+                </PillField>
+
+                <PillField
+                    label={t("options.ost")}
+                    help={t("options.help.ost")}
+                >
+                    {OST_OPTIONS.map((o) => (
+                        <button
+                            key={o}
+                            type="button"
+                            className={`pill ${options.ost === o ? "on" : ""}`}
+                            onClick={() => pickOst(o)}
+                        >
+                            {t(`options.${o}`)}
+                        </button>
+                    ))}
+                </PillField>
+
+                <PillField
+                    label={t("options.special")}
+                    help={t("options.help.special")}
+                >
+                    {SPECIAL_OPTIONS.map((s) => (
+                        <button
+                            key={s ?? "off"}
+                            type="button"
+                            className={`pill ${options.special === s ? "on" : ""}`}
+                            onClick={() => pickSpecial(s)}
+                        >
+                            {s === null
+                                ? t("options.off")
+                                : t(`options.special_${s}`)}
                         </button>
                     ))}
                 </PillField>

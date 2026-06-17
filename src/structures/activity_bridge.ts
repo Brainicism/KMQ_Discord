@@ -163,6 +163,8 @@ function snapshotOptions(
         artisttype: opts.artistType,
         subunits: opts.subunitPreference,
         answerType: opts.answerType,
+        ost: opts.ostPreference,
+        special: opts.specialType,
         groups: toActivity(opts.groups),
         includes: toActivity(opts.includes),
         excludes: toActivity(opts.excludes),
@@ -1092,6 +1094,20 @@ function ensureWorkerHandlerRegistered(): void {
                                     // behaviour.
                                     await guildPreference.setAnswerType(
                                         optionArgs.answer,
+                                    );
+                                    break;
+                                }
+
+                                case "ost": {
+                                    await guildPreference.setOstPreference(
+                                        optionArgs.ost,
+                                    );
+                                    break;
+                                }
+
+                                case "special": {
+                                    await guildPreference.setSpecialType(
+                                        optionArgs.special,
                                     );
                                     break;
                                 }

@@ -28,9 +28,11 @@ import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
+import OstPreference from "./enums/option_types/ost_preference";
 import ReleaseType from "./enums/option_types/release_type";
 import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
+import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
 import _ from "lodash";
 import axios from "axios";
@@ -152,6 +154,9 @@ const ANSWER_TYPE_VALUES: ReadonlySet<string> = new Set(
     Object.values(AnswerType),
 );
 
+const OST_VALUES: ReadonlySet<string> = new Set(Object.values(OstPreference));
+const SPECIAL_VALUES: ReadonlySet<string> = new Set(Object.values(SpecialType));
+
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
 // validated server-side so a malicious client can't persist out-of-range
@@ -186,6 +191,8 @@ type SetOptionBody =
     | { kind: "artisttype"; artisttype: ArtistType }
     | { kind: "subunits"; subunits: SubunitsPreference }
     | { kind: "answer"; answer: AnswerType }
+    | { kind: "ost"; ost: OstPreference }
+    | { kind: "special"; special: SpecialType | null }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] }
@@ -363,6 +370,28 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             }
 
             return { kind: "answer", answer: v as AnswerType };
+        }
+
+        case "ost": {
+            const v = obj["ost"];
+            if (typeof v !== "string" || !OST_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "ost", ost: v as OstPreference };
+        }
+
+        case "special": {
+            const v = obj["special"];
+            // null is a valid value: it clears the audio modifier.
+            if (
+                v !== null &&
+                (typeof v !== "string" || !SPECIAL_VALUES.has(v))
+            ) {
+                return null;
+            }
+
+            return { kind: "special", special: v as SpecialType | null };
         }
 
         case "groups":
