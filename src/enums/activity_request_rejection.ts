@@ -9,6 +9,11 @@ type ActivityRequestRejection =
     | "session_already_running"
     | "no_round"
     | "hint_unavailable"
-    | "song_not_found";
+    | "song_not_found"
+    // Playlist set failures (POST /api/activity/option, kind="playlist").
+    | "playlist_invalid_url"
+    | "playlist_unsupported_url"
+    | "playlist_no_matches"
+    | "playlist_resolve_failed";
 
 export default ActivityRequestRejection;

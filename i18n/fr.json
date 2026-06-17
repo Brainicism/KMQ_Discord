@@ -83,6 +83,7 @@
                 "language": "Jouer seulement des chansons en coréen, ou des chansons dans n'importe quelle langue.",
                 "limit": "Restreindre le pool aux X chansons les plus populaires de la gamme.",
                 "multiguess": "Quand activé, les autres ont une brève fenêtre pour deviner également après la première réponse correcte.",
+                "playlist": "Écoutez des chansons d'une liste de lecture Spotify ou YouTube. Tant qu'elle est active, les filtres du groupe de chansons sont gérés par la liste de lecture.",
                 "release": "Seulement les clips musicaux officiels, ou tous les types de vidéos (b-sides, pratiques de danse, etc.).",
                 "seek": "Où chaque chanson commence à jouer : un point aléatoire, le début ou le milieu.",
                 "shuffle": "Comment la prochaine chanson est choisie : aléatoirement, pondérée par difficulté ou popularité, ou par date de sortie.",
@@ -102,6 +103,21 @@
             "off": "Désactivé",
             "official": "Officiel",
             "on": "Activé",
+            "playlist": {
+                "active": "🎵 Liste de lecture active — {{count}} chansons",
+                "clear": "Effacer",
+                "errors": {
+                    "failed": "Impossible de charger cette liste de lecture. Essayez à nouveau.",
+                    "invalidUrl": "Ce ne semble pas être une URL valide.",
+                    "noMatches": "Aucune chanson KMQ ne correspond à cette liste de lecture.",
+                    "unsupported": "Seuls les liens de listes de lecture Spotify et YouTube sont pris en charge."
+                },
+                "label": "Liste de lecture",
+                "managed": "Les options du groupe de chansons sont gérées par la liste de lecture.",
+                "matching": "Correspondance…",
+                "set": "Définir",
+                "urlPlaceholder": "URL de la liste de lecture Spotify ou YouTube"
+            },
             "popularity": "Popularité",
             "random": "Aléatoire",
             "release": "Sortie",

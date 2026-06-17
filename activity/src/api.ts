@@ -42,7 +42,8 @@ export type SetOptionRequest =
     | { kind: "answer"; answer: ActivityAnswerType }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
-    | { kind: "excludes"; artistIDs: number[] };
+    | { kind: "excludes"; artistIDs: number[] }
+    | { kind: "playlist"; playlistURL: string | null };
 
 export interface AutocompleteArtist {
     id: number;

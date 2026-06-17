@@ -14,8 +14,10 @@ import {
     searchArtists,
 } from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
+import { parseKmqPlaylistIdentifier } from "../helpers/utils";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
+import applyPlaylistFromURL from "../helpers/playlist_utils";
 // Not a cycle: game_session.ts no longer imports this module — the
 // attachActivityBridge call was moved to PlayCommand alongside the
 // State.gameSessions write, so this import is a one-way edge.
@@ -137,6 +139,7 @@ function snapshotOptions(
     guildPreference: GuildPreference,
 ): ActivityOptionsSnapshot {
     const opts = guildPreference.gameOptions;
+    const playlistID = guildPreference.getKmqPlaylistID();
     const toActivity = (
         list: { id: number; name: string }[] | null,
     ): { id: number; name: string }[] | null =>
@@ -163,6 +166,14 @@ function snapshotOptions(
         groups: toActivity(opts.groups),
         includes: toActivity(opts.includes),
         excludes: toActivity(opts.excludes),
+        playlist: playlistID
+            ? {
+                  type: parseKmqPlaylistIdentifier(playlistID).isSpotify
+                      ? "spotify"
+                      : "youtube",
+                  identifier: playlistID,
+              }
+            : null,
     };
 }
 
@@ -1106,6 +1117,60 @@ function ensureWorkerHandlerRegistered(): void {
                                         );
                                     }
 
+                                    break;
+                                }
+
+                                case "playlist": {
+                                    if (optionArgs.playlistURL === null) {
+                                        // Clear the playlist and the limit it
+                                        // auto-set (matches /playlist reset).
+                                        await guildPreference.reset(
+                                            GameOption.PLAYLIST_ID,
+                                        );
+
+                                        await guildPreference.reset(
+                                            GameOption.LIMIT,
+                                        );
+                                        break;
+                                    }
+
+                                    // No messageContext/interaction: the
+                                    // matcher skips progress messaging and just
+                                    // matches. The GuildPreference writes inside
+                                    // trigger the options broadcast via the
+                                    // onGuildPreferenceChanged hook.
+                                    const playlistResult =
+                                        await applyPlaylistFromURL(
+                                            guildPreference,
+                                            optionArgs.playlistURL,
+                                        );
+
+                                    if (!playlistResult.ok) {
+                                        const reasonMap = {
+                                            invalid_url: "playlist_invalid_url",
+                                            unsupported_url:
+                                                "playlist_unsupported_url",
+                                            no_matches: "playlist_no_matches",
+                                            resolve_failed:
+                                                "playlist_resolve_failed",
+                                        } as const;
+
+                                        reply({
+                                            ok: false,
+                                            reason: reasonMap[
+                                                playlistResult.reason
+                                            ],
+                                        });
+                                        return;
+                                    }
+
+                                    // Pin the limit to the matched-song count,
+                                    // mirroring the slash command.
+                                    await guildPreference.setLimit(
+                                        0,
+                                        playlistResult.matchedPlaylist.metadata
+                                            .matchedSongsLength,
+                                    );
                                     break;
                                 }
 

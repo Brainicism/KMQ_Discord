@@ -83,6 +83,7 @@
                 "language": "Speel alleen Koreaanse liedjes, of liedjes in elke taal.",
                 "limit": "Beperk de selectie tot de top X populairste nummers binnen het bereik.",
                 "multiguess": "Wanneer aan, krijgen anderen een kort moment om ook te raden na het eerste juiste antwoord.",
+                "playlist": "Speel nummers af van een Spotify- of YouTube-afspeellijst. Terwijl het actief is, worden de nummerpoolfilters beheerd door de afspeellijst.",
                 "release": "Alleen officiële muziekvideo's, of alle soorten video's (b-kanten, dansoefeningen, etc.).",
                 "seek": "Waar elk nummer begint te spelen — een willekeurig punt, het begin of het midden.",
                 "shuffle": "Hoe het volgende nummer wordt gekozen — willekeurig, gewogen op moeilijkheid of populariteit, of op releasedatum.",
@@ -102,6 +103,21 @@
             "off": "Uit",
             "official": "Officieel",
             "on": "Aan",
+            "playlist": {
+                "active": "🎵 Afspeellijst actief — {{count}} nummers",
+                "clear": "Leegmaken",
+                "errors": {
+                    "failed": "Kon die afspeellijst niet laden. Probeer het opnieuw.",
+                    "invalidUrl": "Dat lijkt geen geldige URL te zijn.",
+                    "noMatches": "Geen KMQ-nummers kwamen overeen met die afspeellijst.",
+                    "unsupported": "Alleen Spotify- en YouTube-afspeellijstlinks worden ondersteund."
+                },
+                "label": "Afspeellijst",
+                "managed": "Opties voor songpool worden beheerd door de afspeellijst.",
+                "matching": "Overeenkomen…",
+                "set": "Instellen",
+                "urlPlaceholder": "Spotify- of YouTube-afspeellijst URL"
+            },
             "popularity": "Populariteit",
             "random": "Willekeurig",
             "release": "Release",

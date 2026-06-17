@@ -83,6 +83,7 @@
                 "language": "Nur koreanischsprachige Songs abspielen, oder Songs in jeder Sprache.",
                 "limit": "Beschränken Sie die Auswahl auf die X beliebtesten Songs in Reichweite.",
                 "multiguess": "Wenn aktiviert, haben andere ein kurzes Zeitfenster, um nach der ersten richtigen Antwort auch zu raten.",
+                "playlist": "Spiele Songs aus einer Spotify- oder YouTube-Wiedergabeliste ab. Während aktiv, werden die Song-Pool-Filter von der Wiedergabeliste verwaltet.",
                 "release": "Nur offizielle Musikvideos, oder alle Videotypen (B-Seiten, Tanzpraktiken, etc.).",
                 "seek": "Wo jeder Song beginnt zu spielen — ein zufälliger Punkt, der Anfang oder die Mitte.",
                 "shuffle": "Wie der nächste Song ausgewählt wird — zufällig, nach Schwierigkeitsgrad oder Beliebtheit gewichtet, oder nach Erscheinungsdatum.",
@@ -102,6 +103,21 @@
             "off": "Aus",
             "official": "Offiziell",
             "on": "An",
+            "playlist": {
+                "active": "🎵 Playlist aktiv – {{count}} Lieder",
+                "clear": "Klar",
+                "errors": {
+                    "failed": "Konnte die Playlist nicht laden. Versuchen Sie es erneut.",
+                    "invalidUrl": "Das sieht nicht nach einer gültigen URL aus.",
+                    "noMatches": "Keine KMQ-Songs entsprachen dieser Wiedergabeliste.",
+                    "unsupported": "Nur Spotify- und YouTube-Playlist-Links werden unterstützt."
+                },
+                "label": "Wiedergabeliste",
+                "managed": "Song-Pool-Optionen werden von der Wiedergabeliste verwaltet.",
+                "matching": "Abgleichen…",
+                "set": "Satz",
+                "urlPlaceholder": "Spotify- oder YouTube-Playlist-URL"
+            },
             "popularity": "Beliebtheit",
             "random": "Zufällig",
             "release": "Veröffentlichung",

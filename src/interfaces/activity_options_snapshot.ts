@@ -57,4 +57,10 @@ export default interface ActivityOptionsSnapshot {
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;
     excludes: ActivityArtist[] | null;
+    /**
+     * Active playlist (set via `/playlist` or the panel), or null when none.
+     * When set, song-pool filters above are overridden by the playlist and the
+     * matched-song count is reflected in `limitEnd`.
+     */
+    playlist: { type: "spotify" | "youtube"; identifier: string } | null;
 }

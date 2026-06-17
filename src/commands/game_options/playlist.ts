@@ -18,7 +18,6 @@ import {
 } from "../../helpers/discord_utils";
 import {
     friendlyFormattedNumber,
-    isValidURL,
     italicize,
     standardDateFormat,
 } from "../../helpers/utils";
@@ -31,6 +30,7 @@ import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import Session from "../../structures/session";
 import State from "../../state";
+import applyPlaylistFromURL from "../../helpers/playlist_utils";
 import i18n from "../../helpers/localization_manager";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
@@ -308,143 +308,37 @@ export default class PlaylistCommand implements BaseCommand {
             return;
         }
 
-        if (!playlistURL || !isValidURL(playlistURL)) {
-            logger.warn(
-                `Invalid URL in updateOption. playlistURL = ${playlistURL}`,
-            );
-
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.title",
-                    ),
-                    description: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.description",
-                    ),
-                },
-                interaction,
-            );
-            return;
-        }
-
-        const parsedUrl = new URL(playlistURL);
-        const isSpotifyFullURL = new RegExp(`^${SPOTIFY_BASE_URL}.+`).test(
-            playlistURL,
-        );
-
-        const isSpotifyShorthandURL = new RegExp(
-            `^${SPOTIFY_SHORTHAND_BASE_URL}.+`,
-        ).test(playlistURL);
-
-        const isYoutubePlaylistURL =
-            ["www.youtube.com", "youtube.com", "music.youtube.com"].includes(
-                parsedUrl.host,
-            ) && parsedUrl.searchParams.get("list");
-
-        if (
-            !isSpotifyFullURL &&
-            !isSpotifyShorthandURL &&
-            !isYoutubePlaylistURL
-        ) {
-            logger.warn(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Unsupported URL in updateOption. playlistURL = ${playlistURL}`,
-            );
-
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.title",
-                    ),
-                    description: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.description",
-                    ),
-                },
-                interaction,
-            );
-            return;
-        }
-
-        let kmqPlaylistIdentifier: string;
-        const matchPlaylistID = `${SPOTIFY_BASE_URL}([a-zA-Z0-9]+)`;
-        try {
-            if (isSpotifyFullURL) {
-                kmqPlaylistIdentifier = `spotify|${
-                    playlistURL.match(matchPlaylistID)![1]
-                }`;
-            } else if (isSpotifyShorthandURL) {
-                const response = await fetch(playlistURL);
-                const body = await response.text();
-                kmqPlaylistIdentifier = `spotify|${
-                    body.match(matchPlaylistID)![1]
-                }`;
-            } else {
-                kmqPlaylistIdentifier = `youtube|${parsedUrl.searchParams.get("list")}`;
-            }
-        } catch (err) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Failed to get playlist ID from playlist URL. playlistURL = ${playlistURL}. err = ${err}`,
-            );
-
-            await sendErrorMessage(
-                messageContext,
-                {
-                    title: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.title",
-                    ),
-                    description: i18n.translate(
-                        messageContext.guildID,
-                        "command.playlist.invalidURL.description",
-                    ),
-                },
-                interaction,
-            );
-            return;
-        }
-
-        await guildPreference.setKmqPlaylistID(kmqPlaylistIdentifier);
-        const matchedPlaylist = await guildPreference.songSelector.reloadSongs(
-            true,
+        const result = await applyPlaylistFromURL(
+            guildPreference,
+            playlistURL ?? "",
             messageContext,
             interaction,
         );
 
-        if (!matchedPlaylist || matchedPlaylist.matchedSongs.length === 0) {
-            if (!matchedPlaylist) {
-                logger.warn(
-                    `matchPlaylist unexpectedly null. expected_kmqPlaylistIdentifier: ${kmqPlaylistIdentifier}. actual_kmqPlaylistIdentifier = ${guildPreference.getKmqPlaylistID()} forceplay = ${guildPreference.gameOptions.forcePlaySongID}`,
-                );
-            }
-
+        if (!result.ok) {
+            const isNoMatch = result.reason === "no_matches";
             await sendErrorMessage(
                 messageContext,
                 {
                     title: i18n.translate(
                         guildID,
-                        "command.playlist.noMatches.title",
+                        isNoMatch
+                            ? "command.playlist.noMatches.title"
+                            : "command.playlist.invalidURL.title",
                     ),
                     description: i18n.translate(
                         guildID,
-                        "command.playlist.noMatches.description",
+                        isNoMatch
+                            ? "command.playlist.noMatches.description"
+                            : "command.playlist.invalidURL.description",
                     ),
                 },
                 interaction,
             );
-
-            // reset playlist if invalid
-            await guildPreference.reset(GameOption.PLAYLIST_ID);
             return;
         }
+
+        const { matchedPlaylist, identifier: kmqPlaylistIdentifier } = result;
 
         logger.info(
             `${getDebugLogHeader(messageContext)} | Matched ${

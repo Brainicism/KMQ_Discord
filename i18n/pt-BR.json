@@ -83,6 +83,7 @@
                 "language": "Toque apenas músicas em coreano, ou músicas em qualquer idioma.",
                 "limit": "Restringir o conjunto às X músicas mais populares dentro do alcance.",
                 "multiguess": "Quando ativado, outros têm uma breve janela para também adivinhar após a primeira resposta correta.",
+                "playlist": "Reproduza músicas de uma playlist do Spotify ou YouTube. Durante a atividade, os filtros do conjunto de músicas são geridos pela playlist.",
                 "release": "Apenas videoclipes oficiais, ou todos os tipos de vídeos (b-sides, práticas de dança, etc.).",
                 "seek": "Onde cada música começa a tocar — um ponto aleatório, o início ou o meio.",
                 "shuffle": "Como a próxima música é escolhida — aleatoriamente, ponderada por dificuldade ou popularidade, ou pela data de lançamento.",
@@ -102,6 +103,21 @@
             "off": "Desligado",
             "official": "Oficial",
             "on": "Ligado",
+            "playlist": {
+                "active": "🎵 Playlist ativa — {{count}} músicas",
+                "clear": "Limpar",
+                "errors": {
+                    "failed": "Não foi possível carregar essa playlist. Tente novamente.",
+                    "invalidUrl": "Isso não parece um URL válido.",
+                    "noMatches": "Nenhuma música KMQ correspondeu a essa playlist.",
+                    "unsupported": "Apenas links de playlists do Spotify e YouTube são suportados."
+                },
+                "label": "Playlist",
+                "managed": "As opções do conjunto de músicas são geridas pela playlist.",
+                "matching": "Correspondendo…",
+                "set": "Definir",
+                "urlPlaceholder": "URL da playlist do Spotify ou YouTube"
+            },
             "popularity": "Popularidade",
             "random": "Aleatório",
             "release": "Lançamento",
