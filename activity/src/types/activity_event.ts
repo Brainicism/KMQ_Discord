@@ -2,6 +2,7 @@ import type ActivityCorrectGuesser from "./activity_correct_guesser";
 import type ActivityOptionsSnapshot from "./activity_options_snapshot";
 import type ActivityRoundGuess from "./activity_round_guess";
 import type ActivityRoundMeta from "./activity_round_meta";
+import type { ActivityMultipleChoiceOption } from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
 import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
@@ -19,6 +20,11 @@ type ActivityEvent =
           songCounter: { uniqueSongsPlayed: number; totalSongs: number };
       }
     | { type: "scoreboardUpdate"; scoreboard: ActivityScoreboardSnapshot }
+    | {
+          type: "roundChoices";
+          roundIndex: number;
+          choices: ActivityMultipleChoiceOption[];
+      }
     | {
           type: "guessReceived";
           userID: string;

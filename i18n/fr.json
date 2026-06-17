@@ -48,6 +48,7 @@
         "options": {
             "all": "Tous",
             "alternating": "Alterné",
+            "answer": "Type de réponse",
             "artist": "Artiste",
             "artisttype": "Type d'artiste",
             "beginning": "Début",
@@ -58,6 +59,7 @@
             "cutoff": "Plage d'années",
             "cutoffRangeError": "L'année de début ne peut pas être après l'année de fin.",
             "duration": "Durée (minutes)",
+            "easy": "Choix multiple (Facile)",
             "exclude": "Exclure",
             "excludes": "Exclure les artistes",
             "female": "Féminin",
@@ -65,8 +67,10 @@
             "goal": "Objectif",
             "groups": "Groupes",
             "guessMode": "Mode Devinette",
+            "hard": "Choix multiple (Difficile)",
             "heading": "Options de jeu",
             "help": {
+                "answer": "Comment les joueurs répondent — taper le nom ou choisir parmi plusieurs options.",
                 "artisttype": "Jouer des chansons de solistes, de groupes, ou des deux.",
                 "cutoff": "Jouer uniquement des chansons sorties dans cette plage d'années.",
                 "duration": "Durée maximale du jeu, en minutes.",
@@ -93,6 +97,7 @@
             "limit": "Limite",
             "limitRangeError": "La fin doit être supérieure au début.",
             "male": "Masculin",
+            "medium": "Choix multiple (Moyen)",
             "middle": "Milieu",
             "multiguess": "Multidevinette",
             "off": "Désactivé",
@@ -123,6 +128,8 @@
             "song": "Chanson",
             "subunits": "Unités secondaires",
             "timer": "Minuterie (secondes)",
+            "typing": "Saisie",
+            "typingtypos": "Saisie (Fautes de frappe acceptées)",
             "weighted_easy": "Pesé (Facile)",
             "weighted_hard": "Pesé (Difficile)"
         },

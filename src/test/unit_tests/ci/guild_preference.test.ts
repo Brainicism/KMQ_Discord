@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/dot-notation */
+import GameOption from "../../../enums/game_option_name";
 import GuildPreference from "../../../structures/guild_preference";
 import assert from "assert";
 
@@ -100,6 +101,37 @@ describe("guild preference", () => {
 
         afterEach(async () => {
             await guildPreference.deletePreset(TEST_PRESET_NAME);
+        });
+    });
+
+    describe("setDuration", () => {
+        const guildPreference = GuildPreference.fromGuild("123");
+
+        beforeEach(async () => {
+            await guildPreference.resetToDefault();
+        });
+
+        it("sets a numeric duration and reports it as active", async () => {
+            await guildPreference.setDuration(120);
+            assert.strictEqual(guildPreference.gameOptions.duration, 120);
+            assert.strictEqual(guildPreference.isDurationSet(), true);
+        });
+
+        it("accepts null to clear the duration (the reset path)", async () => {
+            await guildPreference.setDuration(120);
+            // This is exactly what reset()/the Activity's "clear" invokes —
+            // the signature must allow null, not just rely on an `as number`
+            // cast at the call site.
+            await guildPreference.setDuration(null);
+            assert.strictEqual(guildPreference.gameOptions.duration, null);
+            assert.strictEqual(guildPreference.isDurationSet(), false);
+        });
+
+        it("reset(DURATION) clears it identically to setDuration(null)", async () => {
+            await guildPreference.setDuration(90);
+            await guildPreference.reset(GameOption.DURATION);
+            assert.strictEqual(guildPreference.gameOptions.duration, null);
+            assert.strictEqual(guildPreference.isDurationSet(), false);
         });
     });
 });

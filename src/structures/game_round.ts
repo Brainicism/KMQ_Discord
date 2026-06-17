@@ -27,6 +27,7 @@ import State from "../state";
 import _ from "lodash";
 import i18n from "../helpers/localization_manager";
 import levenshtien from "damerau-levenshtein";
+import type AnswerType from "../enums/option_types/answer_type";
 import type MessageContext from "./message_context";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -90,8 +91,25 @@ export default class GameRound extends Round {
     /** Let players know their guess would have been accepted if they were using /answer typingtypos */
     public warnTypoReceived: boolean;
 
-    /** The multiple choice options for the current round */
+    /** The currently-active multiple choice options for the round */
     public multipleChoiceOptions: Array<Eris.InteractionButton>;
+
+    /**
+     * Per-answer-type cache of generated multiple choice options so that
+     * switching difficulty (or toggling between typing and MC) within a round
+     * always restores the same options, order, and answer UUIDs — preventing
+     * players from cycling difficulties to deduce the answer.
+     */
+    public multipleChoiceCache: Partial<
+        Record<
+            AnswerType,
+            {
+                buttons: Array<Eris.InteractionButton>;
+                correctAnswerUUID: string;
+                incorrectAnswerUUIDs: { [uuid: string]: number };
+            }
+        >
+    >;
 
     /** The base EXP for this GameRound */
     private baseExp: number;
@@ -196,6 +214,7 @@ export default class GameRound extends Round {
                 : 1;
         this.guesses = {};
         this.multipleChoiceOptions = [];
+        this.multipleChoiceCache = {};
     }
 
     getCorrectGuessers(isHidden: boolean): Array<KmqMember> {

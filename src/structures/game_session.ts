@@ -63,11 +63,11 @@ import ExpCommand from "../commands/game_commands/exp";
 import GameRound from "./game_round";
 import GameType from "../enums/game_type";
 import GuessModeType from "../enums/option_types/guess_mode_type";
-import GuildPreference from "./guild_preference";
 import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import MultiGuessType from "../enums/option_types/multiguess_type";
+import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
 import Player from "./player";
 import ProfileCommand from "../commands/game_commands/profile";
 import Scoreboard from "./scoreboard";
@@ -77,6 +77,7 @@ import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
+import type GuildPreference from "./guild_preference";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
@@ -199,7 +200,12 @@ export default class GameSession extends Session {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to multiple choice, re-sending mc buttons`,
                 );
-                await this.sendMultipleChoiceOptionsMessage(false);
+
+                // Reuse this difficulty's cached choices if present (same
+                // options, order, and answer UUIDs); the cache is keyed per
+                // answer type, so a first visit to a difficulty generates a
+                // fresh set while revisits restore the identical one.
+                await this.sendMultipleChoiceOptionsMessage(true);
             } else if (this.isHiddenMode()) {
                 logger.info(
                     `gid: ${this.guildID} | answerType changed to hidden, re-sending hidden message`,
@@ -551,10 +557,18 @@ export default class GameSession extends Session {
             }
         }
 
-        if (
-            round.getIncorrectGuessers().has(interaction.member!.id) ||
-            !this.guessEligible(messageContext, interaction.createdAt)
-        ) {
+        // Acknowledge a correct pick before scoring runs: a correct guess can
+        // trigger the multiguess delay + round-end work, which would blow past
+        // Discord's 3s interaction deadline if we acked afterwards.
+        const mcResult = await this.submitMultipleChoiceGuess(
+            interaction.member!.id,
+            interaction.data.custom_id,
+            interaction.createdAt,
+            messageContext,
+            () => tryInteractionAcknowledge(interaction),
+        );
+
+        if (mcResult === MultipleChoiceGuessResult.INELIGIBLE) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
@@ -566,7 +580,7 @@ export default class GameSession extends Session {
             return true;
         }
 
-        if (!round.isCorrectInteractionAnswer(interaction.data.custom_id)) {
+        if (mcResult === MultipleChoiceGuessResult.INCORRECT) {
             await tryCreateInteractionErrorAcknowledgement(
                 interaction,
                 null,
@@ -575,36 +589,78 @@ export default class GameSession extends Session {
                     "misc.failure.interaction.eliminated",
                 ),
             );
-
-            const buttonId = interaction.data.custom_id;
-            if (round.interactionIncorrectAnswerUUIDs[buttonId] !== undefined) {
-                round.interactionIncorrectAnswerUUIDs[buttonId]++;
-            } else {
-                logger.warn(
-                    `interactionIncorrectAnswerUUIDs unexpectedly not initialized for ${buttonId}`,
-                );
-                round.interactionIncorrectAnswerUUIDs[buttonId] = 1;
-            }
-
-            // Add the user as a participant
-            await this.guessSong(messageContext, "", interaction.createdAt);
             return true;
         }
 
-        await tryInteractionAcknowledge(interaction);
+        return true;
+    }
 
-        const guildPreference = await GuildPreference.getGuildPreference(
-            messageContext.guildID,
-        );
+    /**
+     * Core multiple-choice pick logic shared by the Discord button handler and
+     * the Activity. Validates eligibility, records the pick, and routes scoring
+     * through guessSong exactly like the text path. It does NOT send Eris
+     * interaction acknowledgements — callers handle their own UI feedback.
+     * @param userID - the player making the pick
+     * @param choiceID - the tapped button custom_id (uuid)
+     * @param createdAt - the pick timestamp (epoch ms)
+     * @param messageContext - context for the synthesized guess
+     * @param onCorrect - invoked once, right before the correct-guess scoring
+     * runs, so an interaction-based caller can acknowledge within the deadline
+     * @returns whether the pick was ineligible, incorrect, or correct
+     */
+    async submitMultipleChoiceGuess(
+        userID: string,
+        choiceID: string,
+        createdAt: number,
+        messageContext: MessageContext,
+        onCorrect?: () => Promise<unknown>,
+    ): Promise<MultipleChoiceGuessResult> {
+        const round = this.round;
+        if (!round) return MultipleChoiceGuessResult.INELIGIBLE;
+
+        if (
+            round.getIncorrectGuessers().has(userID) ||
+            !this.guessEligible(messageContext, createdAt)
+        ) {
+            return MultipleChoiceGuessResult.INELIGIBLE;
+        }
+
+        if (!round.isCorrectInteractionAnswer(choiceID)) {
+            if (round.interactionIncorrectAnswerUUIDs[choiceID] !== undefined) {
+                round.interactionIncorrectAnswerUUIDs[choiceID]++;
+            } else {
+                logger.warn(
+                    `interactionIncorrectAnswerUUIDs unexpectedly not initialized for ${choiceID}`,
+                );
+                round.interactionIncorrectAnswerUUIDs[choiceID] = 1;
+            }
+
+            // Add the user as an (incorrect) participant, recording the label
+            // of the option they actually chose so it can be displayed (e.g.
+            // in the Activity) instead of an empty guess. The label is a
+            // distinct wrong choice, so it never matches and stays incorrect.
+            const chosenLabel =
+                round.multipleChoiceOptions.find(
+                    (button) => button.custom_id === choiceID,
+                )?.label ?? "";
+
+            await this.guessSong(messageContext, chosenLabel, createdAt);
+            return MultipleChoiceGuessResult.INCORRECT;
+        }
+
+        if (onCorrect) {
+            await onCorrect();
+        }
 
         await this.guessSong(
             messageContext,
-            guildPreference.gameOptions.guessModeType !== GuessModeType.ARTIST
+            this.guildPreference.gameOptions.guessModeType !==
+                GuessModeType.ARTIST
                 ? round.song.songName
                 : round.song.artistName,
-            interaction.createdAt,
+            createdAt,
         );
-        return true;
+        return MultipleChoiceGuessResult.CORRECT;
     }
 
     /**
@@ -2134,16 +2190,23 @@ export default class GameSession extends Session {
             return;
         }
 
-        if (reuseExistingChoices && round.multipleChoiceOptions.length === 0) {
-            logger.error(
-                "Expected to re-use multiple choice buttons, but none were set for the round. Falling back to generating new ones.",
-            );
-        }
+        const answerType = this.guildPreference.gameOptions.answerType;
+        // Reuse the choices previously generated for this exact answer type if
+        // they exist — this keeps the same options, order, and answer UUIDs
+        // when toggling typing <-> MC or cycling between MC difficulties within
+        // a round, so players can't switch difficulty to deduce the answer.
+        const cached = reuseExistingChoices
+            ? round.multipleChoiceCache[answerType]
+            : undefined;
 
-        let buttons: Array<Eris.InteractionButton> = [];
-        if (reuseExistingChoices && round.multipleChoiceOptions.length > 0) {
-            buttons = round.multipleChoiceOptions;
+        let buttons: Array<Eris.InteractionButton>;
+        if (cached) {
+            buttons = cached.buttons;
+            round.interactionCorrectAnswerUUID = cached.correctAnswerUUID;
+            round.interactionIncorrectAnswerUUIDs = cached.incorrectAnswerUUIDs;
         } else {
+            buttons = [];
+            const incorrectAnswerUUIDs: { [uuid: string]: number } = {};
             const randomSong = round.song;
             const correctChoice = {
                 displayedName:
@@ -2155,7 +2218,7 @@ export default class GameSession extends Session {
             };
 
             const wrongChoices = await getMultipleChoiceOptions(
-                this.guildPreference.gameOptions.answerType,
+                answerType,
                 this.guildPreference.gameOptions.guessModeType,
                 randomSong.members,
                 correctChoice,
@@ -2164,7 +2227,7 @@ export default class GameSession extends Session {
 
             for (const choice of wrongChoices) {
                 const id = uuid.v4();
-                round.interactionIncorrectAnswerUUIDs[id] = 0;
+                incorrectAnswerUUIDs[id] = 0;
                 buttons.push({
                     type: 2,
                     style: 1,
@@ -2173,16 +2236,42 @@ export default class GameSession extends Session {
                 });
             }
 
-            round.interactionCorrectAnswerUUID = uuid.v4() as string;
+            const correctAnswerUUID = uuid.v4() as string;
             buttons.push({
                 type: Eris.Constants.ComponentTypes.BUTTON,
                 style: Eris.Constants.ButtonStyles.PRIMARY,
                 label: correctChoice.displayedName.substring(0, 70),
-                custom_id: round.interactionCorrectAnswerUUID,
+                custom_id: correctAnswerUUID,
             });
 
             buttons = _.shuffle(buttons);
+
+            round.interactionCorrectAnswerUUID = correctAnswerUUID;
+            round.interactionIncorrectAnswerUUIDs = incorrectAnswerUUIDs;
+            // Cache this difficulty's set so a later switch back to it restores
+            // the identical options/order rather than regenerating.
+            round.multipleChoiceCache[answerType] = {
+                buttons,
+                correctAnswerUUID,
+                incorrectAnswerUUIDs,
+            };
         }
+
+        // Mark the active set so the Activity bridge can read it for its
+        // snapshot.
+        round.multipleChoiceOptions = buttons;
+
+        // Notify the Activity of the current round's choices. Fires both at
+        // round start and on a mid-round switch to multiple choice (this
+        // method is the single funnel for both). The correct answer isn't
+        // marked — clients only see labels + ids.
+        this.emit("roundChoices", {
+            roundIndex: this.getRoundsPlayed(),
+            choices: buttons.map((button) => ({
+                id: button.custom_id,
+                label: button.label ?? "",
+            })),
+        });
 
         let actionRows: Array<ButtonActionRow>;
         switch (this.guildPreference.gameOptions.answerType) {

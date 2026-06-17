@@ -13,6 +13,7 @@ import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
+import type ActivityMcGuessArgs from "./interfaces/activity_mc_guess_args";
 import type ActivityReplyMessage from "./interfaces/activity_reply_message";
 import type ActivityRequestOp from "./enums/activity_request_op";
 import type ActivitySetOptionArgs from "./interfaces/activity_set_option_args";
@@ -139,6 +140,25 @@ export default class ActivityHub {
         const target = await this.resolveCluster(guildID);
         const args: ActivityGuessArgs = { guildID, userID, guess, ts };
         return this.sendRequest<ActivityGuessResponse>(target, "guess", args);
+    }
+
+    /**
+     * Submits a multiple-choice pick to the worker hosting the given guild.
+     * @param guildID - the guild whose game session to submit to
+     * @param userID - the Discord user submitting the pick
+     * @param choiceID - the round button custom_id (uuid) that was tapped
+     * @param ts - the pick timestamp in epoch ms
+     * @returns the worker's accept/reject response
+     */
+    async submitMcGuess(
+        guildID: string,
+        userID: string,
+        choiceID: string,
+        ts: number,
+    ): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(guildID);
+        const args: ActivityMcGuessArgs = { guildID, userID, choiceID, ts };
+        return this.sendRequest<ActivityGuessResponse>(target, "mcGuess", args);
     }
 
     /**
@@ -369,6 +389,7 @@ export default class ActivityHub {
         args:
             | { guildID: string }
             | ActivityGuessArgs
+            | ActivityMcGuessArgs
             | ActivityStartGameArgs
             | ActivityUserActionArgs
             | ActivityBookmarkArgs

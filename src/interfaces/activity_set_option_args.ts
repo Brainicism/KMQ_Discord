@@ -1,4 +1,5 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
+import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
 import type LanguageType from "../enums/option_types/language_type";
@@ -32,6 +33,7 @@ type ActivitySetOptionArgs = {
     | { kind: "release"; release: ReleaseType }
     | { kind: "artisttype"; artisttype: ArtistType }
     | { kind: "subunits"; subunits: SubunitsPreference }
+    | { kind: "answer"; answer: AnswerType }
     // Artist-list kinds: empty array is treated as "reset to null" to
     // mirror the slash-command `/groups reset` flow.
     | { kind: "groups"; artistIDs: number[] }

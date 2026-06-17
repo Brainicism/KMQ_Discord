@@ -48,6 +48,7 @@
         "options": {
             "all": "Todas",
             "alternating": "Alternado",
+            "answer": "Tipo de Resposta",
             "artist": "Artista",
             "artisttype": "Tipo de Artista",
             "beginning": "Começo",
@@ -58,6 +59,7 @@
             "cutoff": "Faixa de Ano",
             "cutoffRangeError": "O ano de início não pode ser após o ano de término.",
             "duration": "Duração (minutos)",
+            "easy": "Escolha Múltipla (Fácil)",
             "exclude": "Excluir",
             "excludes": "Excluir Artistas",
             "female": "Feminino",
@@ -65,8 +67,10 @@
             "goal": "Objetivo",
             "groups": "Grupos",
             "guessMode": "Modo Adivinhação",
+            "hard": "Escolha Múltipla (Difícil)",
             "heading": "Opções de Jogo",
             "help": {
+                "answer": "Como os jogadores respondem — digite o nome ou escolha entre várias opções.",
                 "artisttype": "Toque músicas de solistas, grupos ou ambos.",
                 "cutoff": "Toque apenas músicas lançadas dentro deste intervalo de anos.",
                 "duration": "Duração máxima do jogo, em minutos.",
@@ -93,6 +97,7 @@
             "limit": "Limite",
             "limitRangeError": "O fim deve ser maior que o início.",
             "male": "Masculino",
+            "medium": "Escolha Múltipla (Médio)",
             "middle": "Meio",
             "multiguess": "Multiadivinhar",
             "off": "Desligado",
@@ -123,6 +128,8 @@
             "song": "Canção",
             "subunits": "Subunidades",
             "timer": "Temporizador (segundos)",
+            "typing": "Digitando",
+            "typingtypos": "Digitando (Erros de digitação OK)",
             "weighted_easy": "Ponderado (Fácil)",
             "weighted_hard": "Ponderado (Difícil)"
         },

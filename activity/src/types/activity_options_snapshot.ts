@@ -17,6 +17,13 @@ export type ActivityLanguage = "korean" | "all";
 export type ActivityRelease = "official" | "bside" | "all";
 export type ActivityArtistType = "soloists" | "groups" | "both";
 export type ActivitySubunits = "include" | "exclude";
+export type ActivityAnswerType =
+    | "typing"
+    | "typingtypos"
+    | "easy"
+    | "medium"
+    | "hard"
+    | "hidden";
 
 export interface ActivityArtist {
     id: number;
@@ -40,6 +47,7 @@ export default interface ActivityOptionsSnapshot {
     release: ActivityRelease;
     artisttype: ActivityArtistType;
     subunits: ActivitySubunits;
+    answerType: ActivityAnswerType;
     groups: ActivityArtist[] | null;
     includes: ActivityArtist[] | null;
     excludes: ActivityArtist[] | null;

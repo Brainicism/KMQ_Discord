@@ -1,5 +1,6 @@
 import { ACTIVITY_PROXY_BASE, ACTIVITY_WS_PATH } from "./constants";
 import type {
+    ActivityAnswerType,
     ActivityArtistType,
     ActivityGender,
     ActivityGuessMode,
@@ -38,6 +39,7 @@ export type SetOptionRequest =
     | { kind: "release"; release: ActivityRelease }
     | { kind: "artisttype"; artisttype: ActivityArtistType }
     | { kind: "subunits"; subunits: ActivitySubunits }
+    | { kind: "answer"; answer: ActivityAnswerType }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] }
@@ -238,6 +240,43 @@ export async function submitGuess(
             Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ instance_id: instanceId, guess }),
+    });
+
+    if (resp.ok) {
+        return { ok: true };
+    }
+
+    if (resp.status === 401) return { ok: false, reason: "unauthorized" };
+    if (resp.status === 403) return { ok: false, reason: "forbidden" };
+    if (resp.status === 400) return { ok: false, reason: "bad_request" };
+
+    let parsed: { error?: GuessRejectReason } = {};
+    try {
+        parsed = (await resp.json()) as { error?: GuessRejectReason };
+    } catch {
+        // ignore
+    }
+
+    return { ok: false, reason: parsed.error ?? "internal" };
+}
+
+/**
+ * Submits a multiple-choice pick. `choiceID` is the round button id (uuid)
+ * surfaced via the roundChoices event / snapshot — never the answer text, so
+ * the server is the sole authority on correctness.
+ */
+export async function submitMcGuess(
+    accessToken: string,
+    instanceId: string,
+    choiceID: string,
+): Promise<GuessResult> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/mc-guess`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId, choiceID }),
     });
 
     if (resp.ok) {

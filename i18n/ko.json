@@ -48,6 +48,7 @@
         "options": {
             "all": "전체",
             "alternating": "교대",
+            "answer": "답변 유형",
             "artist": "아티스트",
             "artisttype": "아티스트 유형",
             "beginning": "시작",
@@ -58,6 +59,7 @@
             "cutoff": "연도 범위",
             "cutoffRangeError": "시작 연도는 종료 연도 이후일 수 없습니다.",
             "duration": "기간 (분)",
+            "easy": "객관식 (쉬움)",
             "exclude": "제외",
             "excludes": "아티스트 제외",
             "female": "여성",
@@ -65,8 +67,10 @@
             "goal": "목표",
             "groups": "그룹",
             "guessMode": "추측 모드",
+            "hard": "객관식 (어려움)",
             "heading": "게임 옵션",
             "help": {
+                "answer": "플레이어가 답하는 방법 - 이름을 입력하거나 여러 선택지 중에서 선택하세요.",
                 "artisttype": "솔로 아티스트, 그룹 또는 둘 모두의 노래를 재생합니다.",
                 "cutoff": "이 연도 범위 내에서 발매된 곡만 재생합니다.",
                 "duration": "게임의 최대 길이 (분)입니다.",
@@ -93,6 +97,7 @@
             "limit": "제한",
             "limitRangeError": "끝은 시작보다 커야 합니다.",
             "male": "남성",
+            "medium": "객관식 (중간)",
             "middle": "중간",
             "multiguess": "다중 추측",
             "off": "끄기",
@@ -123,6 +128,8 @@
             "song": "노래",
             "subunits": "유닛",
             "timer": "타이머 (초)",
+            "typing": "타이핑",
+            "typingtypos": "타이핑 (오타 허용)",
             "weighted_easy": "가중치 (쉬움)",
             "weighted_hard": "가중치 (어려움)"
         },
