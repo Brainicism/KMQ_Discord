@@ -48,6 +48,7 @@
         "options": {
             "all": "Alle",
             "alternating": "Afwisselend",
+            "answer": "Antwoordtype",
             "artist": "Artiest",
             "artisttype": "Artiesttype",
             "beginning": "Begin",
@@ -58,6 +59,7 @@
             "cutoff": "Jaarbereik",
             "cutoffRangeError": "Startjaar kan niet na eindjaar zijn.",
             "duration": "Duur (minuten)",
+            "easy": "Meerkeuze (Makkelijk)",
             "exclude": "Uitsluiten",
             "excludes": "Artiesten uitsluiten",
             "female": "Vrouwelijk",
@@ -65,8 +67,10 @@
             "goal": "Doel",
             "groups": "Groepen",
             "guessMode": "Raadmodus",
+            "hard": "Meerkeuze (Moeilijk)",
             "heading": "Spelopties",
             "help": {
+                "answer": "Hoe spelers antwoorden - typ de naam of kies uit meerdere opties.",
                 "artisttype": "Speel nummers van soloartiesten, groepen of beide.",
                 "cutoff": "Speel alleen nummers die binnen dit jaar bereik zijn uitgebracht.",
                 "duration": "Maximale spelduur, in minuten.",
@@ -92,6 +96,7 @@
             "limit": "Limiet",
             "limitRangeError": "Einde moet groter zijn dan begin.",
             "male": "Mannelijk",
+            "medium": "Meerkeuze (Gemiddeld)",
             "middle": "Midden",
             "multiguess": "Multiraad",
             "off": "Uit",
@@ -107,6 +112,8 @@
             "song": "Lied",
             "subunits": "Subeenheden",
             "timer": "Timer (seconden)",
+            "typing": "Typen",
+            "typingtypos": "Typen (Typfouten OK)",
             "weighted_easy": "Gewogen (Makkelijk)",
             "weighted_hard": "Gewogen (Moeilijk)"
         },

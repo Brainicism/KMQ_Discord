@@ -48,6 +48,7 @@
         "options": {
             "all": "全部",
             "alternating": "交替",
+            "answer": "答案类型",
             "artist": "艺术家",
             "artisttype": "艺人类型",
             "beginning": "开头",
@@ -58,6 +59,7 @@
             "cutoff": "年份范围",
             "cutoffRangeError": "开始年份不能晚于结束年份。",
             "duration": "时长（分钟）",
+            "easy": "选择题（简单）",
             "exclude": "排除",
             "excludes": "排除艺术家",
             "female": "女性",
@@ -65,8 +67,10 @@
             "goal": "目标",
             "groups": "群组",
             "guessMode": "猜测模式",
+            "hard": "选择题（困难）",
             "heading": "游戏选项",
             "help": {
+                "answer": "玩家如何回答——输入名称或从多个选项中选择。",
                 "artisttype": "播放来自独奏歌手、团体或两者的歌曲。",
                 "cutoff": "仅播放在此年份范围内发布的歌曲。",
                 "duration": "游戏的最长时长，以分钟为单位。",
@@ -92,6 +96,7 @@
             "limit": "限制",
             "limitRangeError": "结束必须大于开始。",
             "male": "男性",
+            "medium": "选择题（中等）",
             "middle": "中间",
             "multiguess": "多重猜测",
             "off": "关",
@@ -107,6 +112,8 @@
             "song": "歌曲",
             "subunits": "子单位",
             "timer": "计时器（秒）",
+            "typing": "输入",
+            "typingtypos": "输入（允许错别字）",
             "weighted_easy": "加权（简单）",
             "weighted_hard": "加权（困难）"
         },

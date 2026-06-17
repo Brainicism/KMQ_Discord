@@ -22,6 +22,7 @@ import { availableGenders } from "./enums/option_types/gender";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
+import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import LanguageType from "./enums/option_types/language_type";
@@ -147,6 +148,10 @@ const SUBUNITS_VALUES: ReadonlySet<string> = new Set(
     Object.values(SubunitsPreference),
 );
 
+const ANSWER_TYPE_VALUES: ReadonlySet<string> = new Set(
+    Object.values(AnswerType),
+);
+
 // Numeric bounds for the Activity options panel. Kept in sync with the
 // slash-command handlers (src/commands/game_options/{limit,timer,...}.ts);
 // validated server-side so a malicious client can't persist out-of-range
@@ -180,6 +185,7 @@ type SetOptionBody =
     | { kind: "release"; release: ReleaseType }
     | { kind: "artisttype"; artisttype: ArtistType }
     | { kind: "subunits"; subunits: SubunitsPreference }
+    | { kind: "answer"; answer: AnswerType }
     | { kind: "groups"; artistIDs: number[] }
     | { kind: "includes"; artistIDs: number[] }
     | { kind: "excludes"; artistIDs: number[] };
@@ -347,6 +353,15 @@ function parseSetOptionBody(body: unknown): SetOptionBody | null {
             }
 
             return { kind: "subunits", subunits: v as SubunitsPreference };
+        }
+
+        case "answer": {
+            const v = obj["answer"];
+            if (typeof v !== "string" || !ANSWER_TYPE_VALUES.has(v)) {
+                return null;
+            }
+
+            return { kind: "answer", answer: v as AnswerType };
         }
 
         case "groups":
@@ -1347,6 +1362,77 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity guess failed. gid=${instance.guildID}, uid=${user.id}, err=${(e as Error).message}`,
+                    );
+
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/mc-guess",
+            limit(ACTIVITY_RATE_LIMIT_GUESS),
+            async (request, reply) => {
+                if (!this.activityHub) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Activity not enabled" });
+                    return;
+                }
+
+                const user = await this.resolveAccessToken(
+                    extractBearer(request),
+                );
+
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                const body = (request.body ?? {}) as {
+                    instance_id?: string;
+                    choiceID?: string;
+                };
+
+                const instanceId = body.instance_id;
+                const choiceID = body.choiceID;
+                // choiceID is a server-generated round button uuid (36 chars);
+                // cap length so a malicious client can't ship a huge payload.
+                if (
+                    !instanceId ||
+                    typeof choiceID !== "string" ||
+                    choiceID.length === 0 ||
+                    choiceID.length > 64
+                ) {
+                    await reply
+                        .code(400)
+                        .send({ error: "Missing instance_id or choiceID" });
+                    return;
+                }
+
+                const instance = await this.resolveActivityInstance(instanceId);
+                if (!instance || !instance.participantIDs.has(user.id)) {
+                    await reply.code(403).send({ error: "Forbidden" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub.submitMcGuess(
+                        instance.guildID,
+                        user.id,
+                        choiceID,
+                        Date.now(),
+                    );
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity mc-guess failed. gid=${instance.guildID}, uid=${user.id}, err=${(e as Error).message}`,
                     );
 
                     await reply.code(500).send({ error: "Internal" });
