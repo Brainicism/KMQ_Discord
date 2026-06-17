@@ -1720,6 +1720,42 @@ fieldset.options-override:disabled .options-group {
     margin-top: 4px;
 }
 
+/* Full-width "reset all options" row at the bottom of the panel. */
+.options-reset {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+
+.options-reset-button {
+    background: transparent;
+    border: 1px solid var(--border-red);
+    color: var(--red-primary);
+    padding: 6px 14px;
+    border-radius: var(--radius-pill);
+    font-size: 0.73rem;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.options-reset-button:hover:not(:disabled) {
+    background: var(--red-light);
+}
+
+/* Armed (second-click) state: filled red to signal it's destructive. */
+.options-reset-button.armed {
+    background: var(--red-primary);
+    border-color: var(--red-primary);
+    color: white;
+}
+
+.options-reset-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
 /* ---- SONG HISTORY ---- */
 .song-history {
     list-style: none;

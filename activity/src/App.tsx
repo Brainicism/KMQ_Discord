@@ -1243,6 +1243,10 @@ function OptionsPanel({
     onRollback: (prev: ActivityOptionsSnapshot) => void;
 }) {
     const [feedback, setFeedback] = useState<string | null>(null);
+    // Two-click confirm for the destructive "reset all" action; the first
+    // click arms it, the second performs it. Reset clears it.
+    const [resetArmed, setResetArmed] = useState(false);
+    const [resetBusy, setResetBusy] = useState(false);
 
     const submit = async (
         req: SetOptionRequest,
@@ -1306,6 +1310,32 @@ function OptionsPanel({
             setFeedback(e instanceof Error ? e.message : t("networkError"));
         } finally {
             setPlaylistBusy(false);
+        }
+    };
+
+    // Reset isn't optimistic: it changes every option at once, so rather than
+    // synthesize the default snapshot client-side we await the request and let
+    // the optionsChanged broadcast refresh the panel.
+    const resetAll = async (): Promise<void> => {
+        if (!resetArmed) {
+            setResetArmed(true);
+            return;
+        }
+
+        setResetArmed(false);
+        setResetBusy(true);
+        setFeedback(null);
+        try {
+            const result = await apiSetOption(accessToken, instanceId, {
+                kind: "reset",
+            });
+            if (!result.ok) {
+                setFeedback(rejectReasonText(t, result.reason));
+            }
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+        } finally {
+            setResetBusy(false);
         }
     };
 
@@ -1824,6 +1854,22 @@ function OptionsPanel({
                     note={managedNote}
                 />
             </fieldset>
+
+            <div className="options-reset options-group-wide">
+                <button
+                    type="button"
+                    className={`options-reset-button${
+                        resetArmed ? " armed" : ""
+                    }`}
+                    disabled={resetBusy}
+                    onClick={() => void resetAll()}
+                    onBlur={() => setResetArmed(false)}
+                >
+                    {resetArmed
+                        ? t("options.resetConfirm")
+                        : t("options.resetAll")}
+                </button>
+            </div>
 
             {feedback && <span className="options-feedback">{feedback}</span>}
         </div>

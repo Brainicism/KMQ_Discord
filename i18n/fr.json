@@ -126,6 +126,8 @@
             "popularity": "Popularité",
             "random": "Aléatoire",
             "release": "Sortie",
+            "resetAll": "Réinitialiser toutes les options",
+            "resetConfirm": "Appuyez de nouveau pour confirmer",
             "reversechronological": "Chronologique Inverse",
             "seek": "Rechercher",
             "shuffle": "Mélanger",

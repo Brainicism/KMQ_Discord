@@ -126,6 +126,8 @@
             "popularity": "Popularitas",
             "random": "Acak",
             "release": "Rilis",
+            "resetAll": "Setel ulang semua opsi",
+            "resetConfirm": "Ketuk lagi untuk mengonfirmasi",
             "reversechronological": "Terbalik Kronologis",
             "seek": "Cari",
             "shuffle": "Acak",

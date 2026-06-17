@@ -126,6 +126,8 @@
             "popularity": "Populariteit",
             "random": "Willekeurig",
             "release": "Release",
+            "resetAll": "Alle opties resetten",
+            "resetConfirm": "Tik opnieuw om te bevestigen",
             "reversechronological": "Omgekeerd chronologisch",
             "seek": "Zoeken",
             "shuffle": "Shuffle",
