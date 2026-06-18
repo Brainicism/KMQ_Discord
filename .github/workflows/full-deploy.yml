@@ -82,6 +82,12 @@ jobs:
                   file: docker/kmq/Dockerfile
                   push: true
                   platforms: linux/arm64
+                  # Vite bakes BOT_CLIENT_ID into the Activity bundle at build
+                  # time; without it the deployed Activity ships an empty client
+                  # ID and can't connect. BOT_CLIENT is the bot's application ID
+                  # (same mapping gci-e2e.yml uses: BOT_CLIENT_ID=$BOT_CLIENT).
+                  build-args: |
+                      BOT_CLIENT_ID=${{ secrets.BOT_CLIENT }}
                   tags: ${{ steps.app-version-parser.outputs.IMAGE_NAME }},ghcr.io/brainicism/kmq_discord:latest
 
     upgrade:
