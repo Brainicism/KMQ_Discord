@@ -2227,23 +2227,25 @@ function OptionsPanel({
                     instanceId={instanceId}
                     t={t}
                 />
-
-                <div className="options-reset options-group-wide">
-                    <button
-                        type="button"
-                        className={`options-reset-button${
-                            resetArmed ? " armed" : ""
-                        }`}
-                        disabled={resetBusy}
-                        onClick={() => void resetAll()}
-                        onBlur={() => setResetArmed(false)}
-                    >
-                        {resetArmed
-                            ? t("options.resetConfirm")
-                            : t("options.resetAll")}
-                    </button>
-                </div>
             </OptionsCategory>
+
+            {/* Kept outside the accordion so the reset stays visible even when
+                every category is collapsed. */}
+            <div className="options-reset">
+                <button
+                    type="button"
+                    className={`options-reset-button${
+                        resetArmed ? " armed" : ""
+                    }`}
+                    disabled={resetBusy}
+                    onClick={() => void resetAll()}
+                    onBlur={() => setResetArmed(false)}
+                >
+                    {resetArmed
+                        ? t("options.resetConfirm")
+                        : t("options.resetAll")}
+                </button>
+            </div>
 
             {feedback && <span className="options-feedback">{feedback}</span>}
         </div>

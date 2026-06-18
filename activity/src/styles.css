@@ -1807,10 +1807,13 @@ fieldset.options-override:disabled .options-group {
 }
 
 /* Full-width "reset all options" row at the bottom of the panel. */
+/* Footer action below the category accordion; stays visible when every
+   category is collapsed. */
 .options-reset {
     display: flex;
     justify-content: flex-end;
-    margin-top: 4px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
 }
 
 .options-reset-button {
