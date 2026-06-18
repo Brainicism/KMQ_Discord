@@ -31,6 +31,14 @@
         "connectFailed": "KMQ에 연결할 수 없습니다. 다시 시도해 주세요.",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
+        "gameType": {
+            "classic": "클래식",
+            "clip": "클립",
+            "clipDuration": "클립 길이 (초)",
+            "elimination": "제거",
+            "lives": "목숨",
+            "suddendeath": "갑작스러운 죽음"
+        },
         "guessButton": "정답",
         "guessPlaceholderActive": "정답을 입력하세요…",
         "guessPlaceholderWaiting": "라운드 대기 중…",

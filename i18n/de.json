@@ -31,6 +31,14 @@
         "connectFailed": "Konnte keine Verbindung zu KMQ herstellen. Bitte versuche es erneut.",
         "endGameBusy": "Wird beendet…",
         "endGameButton": "Spiel beenden",
+        "gameType": {
+            "classic": "Klassisch",
+            "clip": "Klammer",
+            "clipDuration": "Cliplänge (Sekunden)",
+            "elimination": "Beseitigung",
+            "lives": "Leben",
+            "suddendeath": "Plötzlicher Tod"
+        },
         "guessButton": "Raten",
         "guessPlaceholderActive": "Gib deine Vermutung ein…",
         "guessPlaceholderWaiting": "Warten auf Runde…",

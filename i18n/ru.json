@@ -31,6 +31,14 @@
         "connectFailed": "Не удалось подключиться к KMQ. Пожалуйста, попробуйте снова.",
         "endGameBusy": "Завершение…",
         "endGameButton": "Завершить игру",
+        "gameType": {
+            "classic": "Классический",
+            "clip": "Клип",
+            "clipDuration": "Длина клипа (в секундах)",
+            "elimination": "Устранение",
+            "lives": "Жизни",
+            "suddendeath": "Внезапная смерть"
+        },
         "guessButton": "Ответить",
         "guessPlaceholderActive": "Введите ответ…",
         "guessPlaceholderWaiting": "Ожидание раунда…",

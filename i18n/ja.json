@@ -31,6 +31,14 @@
         "connectFailed": "KMQに接続できませんでした。もう一度お試しください。",
         "endGameBusy": "終了中…",
         "endGameButton": "ゲーム終了",
+        "gameType": {
+            "classic": "クラシック",
+            "clip": "クリップ",
+            "clipDuration": "クリップの長さ (秒)",
+            "elimination": "排除",
+            "lives": "ライフ",
+            "suddendeath": "サドンデス"
+        },
         "guessButton": "回答",
         "guessPlaceholderActive": "回答を入力…",
         "guessPlaceholderWaiting": "ラウンド待機中…",

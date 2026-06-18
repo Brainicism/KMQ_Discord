@@ -31,6 +31,14 @@
         "connectFailed": "KMQ से कनेक्ट नहीं हो सका। कृपया फिर से प्रयास करें।",
         "endGameBusy": "समाप्त हो रहा है…",
         "endGameButton": "खेल समाप्त करें",
+        "gameType": {
+            "classic": "क्लासिक",
+            "clip": "क्लिप",
+            "clipDuration": "क्लिप लंबाई (सेकंड)",
+            "elimination": "बहिष्कार",
+            "lives": "जिंदगियाँ",
+            "suddendeath": "अचानक मृत्यु"
+        },
         "guessButton": "अनुमान लगाएँ",
         "guessPlaceholderActive": "अपना अनुमान लिखें…",
         "guessPlaceholderWaiting": "राउंड का इंतज़ार है…",

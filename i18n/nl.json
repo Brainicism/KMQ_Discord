@@ -31,6 +31,14 @@
         "connectFailed": "Kon geen verbinding maken met KMQ. Probeer het opnieuw.",
         "endGameBusy": "Beëindigen…",
         "endGameButton": "Spel beëindigen",
+        "gameType": {
+            "classic": "Klassiek",
+            "clip": "Clip",
+            "clipDuration": "Cliplengte (seconden)",
+            "elimination": "Eliminatie",
+            "lives": "Levens",
+            "suddendeath": "Plotse Dood"
+        },
         "guessButton": "Raden",
         "guessPlaceholderActive": "Typ je antwoord…",
         "guessPlaceholderWaiting": "Wachten op ronde…",

@@ -43,7 +43,11 @@ import type {
     ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type ActivityOptionsSnapshot from "./types/activity_options_snapshot";
-import type { SetOptionRequest } from "./api";
+import type {
+    ActivityGameType,
+    SetOptionRequest,
+    StartGameOptions,
+} from "./api";
 import type { Translator } from "./i18n/translator";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
@@ -277,11 +281,19 @@ function RoundTimer({
 
 function Scoreboard({
     scoreboard,
+    gameType,
+    selfID,
     t,
 }: {
     scoreboard: ActivityScoreboardSnapshot;
+    gameType: string | null;
+    selfID: string | null;
     t: Translator;
 }) {
+    // In elimination, a player's "score" is their remaining lives; keep
+    // out-of-lives players visible (so they read as eliminated) as long as
+    // they're still in the channel.
+    const isElimination = gameType === "elimination";
     const sorted = [...scoreboard.players]
         .filter((p) => p.score > 0 || p.inVC)
         .sort((a, b) => b.score - a.score);
@@ -292,37 +304,56 @@ function Scoreboard({
 
     return (
         <ol className="scoreboard">
-            {sorted.map((p, i) => (
-                <li
-                    key={p.id}
-                    className={
-                        scoreboard.winnerIDs.includes(p.id) ? "winner" : ""
-                    }
-                >
-                    <span className="rank">#{i + 1}</span>
-                    {p.avatarUrl && (
-                        <img
-                            className="avatar"
-                            src={p.avatarUrl}
-                            alt=""
-                            width={24}
-                            height={24}
-                        />
-                    )}
-                    <span className="name">
-                        {p.username}
-                        {!p.inVC && (
-                            <span className="afk"> {t("scoreboardLeft")}</span>
+            {sorted.map((p, i) => {
+                const eliminated = isElimination && p.score === 0;
+                return (
+                    <li
+                        key={p.id}
+                        className={[
+                            scoreboard.winnerIDs.includes(p.id) ? "winner" : "",
+                            p.id === selfID ? "self" : "",
+                            eliminated ? "eliminated" : "",
+                        ]
+                            .filter(Boolean)
+                            .join(" ")}
+                    >
+                        <span className="rank">#{i + 1}</span>
+                        {p.avatarUrl && (
+                            <img
+                                className="avatar"
+                                src={p.avatarUrl}
+                                alt=""
+                                width={24}
+                                height={24}
+                            />
                         )}
-                    </span>
-                    <span className="score">{p.score}</span>
-                    {p.expGain > 0 && (
-                        <span className="exp">
-                            {t("scoreboardExpGain", { exp: p.expGain })}
+                        <span className="name">
+                            {p.username}
+                            {!p.inVC && (
+                                <span className="afk">
+                                    {" "}
+                                    {t("scoreboardLeft")}
+                                </span>
+                            )}
                         </span>
-                    )}
-                </li>
-            ))}
+                        {isElimination ? (
+                            <span
+                                className="score lives"
+                                title={t("gameType.lives")}
+                            >
+                                {eliminated ? "☠️" : `♥ ${p.score}`}
+                            </span>
+                        ) : (
+                            <span className="score">{p.score}</span>
+                        )}
+                        {p.expGain > 0 && (
+                            <span className="exp">
+                                {t("scoreboardExpGain", { exp: p.expGain })}
+                            </span>
+                        )}
+                    </li>
+                );
+            })}
         </ol>
     );
 }
@@ -585,6 +616,11 @@ function ControlButtons({
 }) {
     const [busy, setBusy] = useState<null | "start" | "end">(null);
     const [feedback, setFeedback] = useState<string | null>(null);
+    const [gameType, setGameType] = useState<ActivityGameType>("classic");
+    const [lives, setLives] = useState(String(ELIMINATION_DEFAULT_LIVES));
+    const [clipDuration, setClipDuration] = useState(
+        String(CLIP_DEFAULT_DURATION_SEC),
+    );
 
     // Auto-clear the action feedback so a stale message (e.g. "join the voice
     // channel first" after the user has since joined) doesn't linger and look
@@ -612,23 +648,94 @@ function ControlButtons({
         }
     };
 
+    const buildStartOptions = (): StartGameOptions => {
+        const options: StartGameOptions = { gameType };
+        if (gameType === "elimination") {
+            const n = Math.round(Number(lives));
+            options.eliminationLives =
+                Number.isFinite(n) && n >= 1 && n <= ELIMINATION_MAX_LIVES
+                    ? n
+                    : ELIMINATION_DEFAULT_LIVES;
+        } else if (gameType === "clip") {
+            const n = Number(clipDuration);
+            options.clipDuration =
+                Number.isFinite(n) &&
+                n >= CLIP_MIN_DURATION_SEC &&
+                n <= CLIP_MAX_DURATION_SEC
+                    ? n
+                    : CLIP_DEFAULT_DURATION_SEC;
+        }
+
+        return options;
+    };
+
     return (
         <div className="control-buttons">
             {!hasSession && (
-                <button
-                    type="button"
-                    className="primary"
-                    disabled={busy !== null}
-                    onClick={() =>
-                        run("start", () =>
-                            apiStartGame(accessToken, instanceId),
-                        )
-                    }
-                >
-                    {busy === "start"
-                        ? t("startGameBusy")
-                        : t("startGameButton")}
-                </button>
+                <div className="start-config">
+                    <div className="pills start-game-types">
+                        {GAME_TYPE_OPTIONS.map((gt) => (
+                            <button
+                                key={gt}
+                                type="button"
+                                className={`pill ${
+                                    gameType === gt ? "on" : ""
+                                }`}
+                                disabled={busy !== null}
+                                onClick={() => setGameType(gt)}
+                            >
+                                {t(`gameType.${gt}`)}
+                            </button>
+                        ))}
+                    </div>
+                    {gameType === "elimination" && (
+                        <label className="start-param">
+                            <span>{t("gameType.lives")}</span>
+                            <input
+                                type="number"
+                                className="option-number"
+                                min={1}
+                                max={ELIMINATION_MAX_LIVES}
+                                value={lives}
+                                onChange={(e) => setLives(e.target.value)}
+                            />
+                        </label>
+                    )}
+                    {gameType === "clip" && (
+                        <label className="start-param">
+                            <span>{t("gameType.clipDuration")}</span>
+                            <input
+                                type="number"
+                                className="option-number"
+                                min={CLIP_MIN_DURATION_SEC}
+                                max={CLIP_MAX_DURATION_SEC}
+                                step={0.25}
+                                value={clipDuration}
+                                onChange={(e) =>
+                                    setClipDuration(e.target.value)
+                                }
+                            />
+                        </label>
+                    )}
+                    <button
+                        type="button"
+                        className="primary"
+                        disabled={busy !== null}
+                        onClick={() =>
+                            run("start", () =>
+                                apiStartGame(
+                                    accessToken,
+                                    instanceId,
+                                    buildStartOptions(),
+                                ),
+                            )
+                        }
+                    >
+                        {busy === "start"
+                            ? t("startGameBusy")
+                            : t("startGameButton")}
+                    </button>
+                </div>
             )}
             {hasSession && (
                 <button
@@ -1158,6 +1265,20 @@ const SPECIAL_OPTIONS: (ActivitySpecial | null)[] = [
     "highpitch",
     "nightcore",
 ];
+
+// Game types selectable from the Activity start screen. Mirrors the server's
+// ACTIVITY_GAME_TYPES (teams/competition excluded). Bounds mirror src/constants.
+const GAME_TYPE_OPTIONS: ActivityGameType[] = [
+    "classic",
+    "suddendeath",
+    "elimination",
+    "clip",
+];
+const ELIMINATION_DEFAULT_LIVES = 10;
+const ELIMINATION_MAX_LIVES = 10000;
+const CLIP_DEFAULT_DURATION_SEC = 1;
+const CLIP_MIN_DURATION_SEC = 0.25;
+const CLIP_MAX_DURATION_SEC = 5;
 
 /**
  * An option's heading plus an optional ⓘ that reveals a short explanation
@@ -2714,6 +2835,28 @@ export default function App() {
                                     {t("appTitle")}{" "}
                                     <span className="logo-heart">♥</span>
                                 </h1>
+                                {ui.session?.gameType === "elimination" &&
+                                    authState &&
+                                    (() => {
+                                        // Surface the current player's own
+                                        // remaining lives prominently in the
+                                        // header for the duration of the game.
+                                        const me = ui.scoreboard?.players.find(
+                                            (p) => p.id === authState.userID,
+                                        );
+                                        if (!me) return null;
+                                        const out = me.score === 0;
+                                        return (
+                                            <span
+                                                className={`lives-badge ${
+                                                    out ? "out" : ""
+                                                }`}
+                                                title={t("gameType.lives")}
+                                            >
+                                                {out ? "☠️" : `♥ ${me.score}`}
+                                            </span>
+                                        );
+                                    })()}
                                 {ui.session &&
                                     (() => {
                                         const completed =
@@ -3019,7 +3162,12 @@ export default function App() {
                     </div>
                     <div className="sidebar-body">
                         {ui.scoreboard ? (
-                            <Scoreboard scoreboard={ui.scoreboard} t={t} />
+                            <Scoreboard
+                                scoreboard={ui.scoreboard}
+                                gameType={ui.session?.gameType ?? null}
+                                selfID={authState?.userID ?? null}
+                                t={t}
+                            />
                         ) : (
                             <p className="empty">{t("scoreboardEmpty")}</p>
                         )}

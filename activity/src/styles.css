@@ -392,6 +392,30 @@ body::before {
     color: var(--text-secondary);
 }
 
+/* Current player's remaining lives, shown prominently next to the title in
+   elimination games. */
+.lives-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--red-light);
+    color: var(--red-primary);
+    border: 1px solid var(--red-primary);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+}
+
+.lives-badge.out {
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+    border-color: var(--border);
+}
+
 .meta-pill {
     background: var(--bg-surface);
     border: 1px solid var(--border);
@@ -464,6 +488,43 @@ body::before {
 .control-feedback {
     color: var(--red-primary);
     font-size: 0.85rem;
+}
+
+/* ---- START-GAME CONFIG (game type + params) ---- */
+.start-config {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+}
+
+.start-game-types {
+    margin-bottom: 0;
+}
+
+/* The generic `.control-buttons button` rule (bigger padding, transparent
+   border) would clobber the pill look; re-assert the pill specifics with a
+   higher-specificity selector. */
+.start-config .pill {
+    padding: 4px 12px;
+    font-size: 0.73rem;
+    border: 1px solid var(--border);
+}
+
+.start-config .pill.on {
+    border-color: var(--red-primary);
+}
+
+.start-param {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.76rem;
+    font-weight: 600;
+}
+
+.start-param .option-number {
+    width: 96px;
 }
 
 /* ---- ROUND AREA (card) ---- */
@@ -1355,6 +1416,31 @@ body::before {
     font-size: 0.72rem;
     color: var(--pink);
     font-weight: 600;
+}
+
+/* Highlight the viewing player's own row. */
+.scoreboard li.self {
+    outline: 2px solid var(--red-primary);
+    outline-offset: -2px;
+}
+
+/* Lives readout (elimination mode) — the heart is the cue, so make it red. */
+.scoreboard .score.lives {
+    color: var(--red-primary);
+    white-space: nowrap;
+}
+
+/* Players who've run out of lives read as dimmed/struck-through. */
+.scoreboard li.eliminated {
+    opacity: 0.55;
+}
+
+.scoreboard li.eliminated .name {
+    text-decoration: line-through;
+}
+
+.scoreboard li.eliminated .score.lives {
+    color: var(--text-tertiary);
 }
 
 /* ---- SIDEBAR OPTIONS PANEL ---- */

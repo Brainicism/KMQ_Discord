@@ -31,6 +31,14 @@
         "connectFailed": "Tidak dapat terhubung ke KMQ. Silakan coba lagi.",
         "endGameBusy": "Mengakhiri…",
         "endGameButton": "Akhiri permainan",
+        "gameType": {
+            "classic": "Klasik",
+            "clip": "Klip",
+            "clipDuration": "Panjang klip (detik)",
+            "elimination": "Eliminasi",
+            "lives": "Nyawa",
+            "suddendeath": "Kematian Mendadak"
+        },
         "guessButton": "Tebak",
         "guessPlaceholderActive": "Ketik tebakanmu…",
         "guessPlaceholderWaiting": "Menunggu ronde…",
