@@ -392,6 +392,30 @@ body::before {
     color: var(--text-secondary);
 }
 
+/* Current player's remaining lives, shown prominently next to the title in
+   elimination games. */
+.lives-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--red-light);
+    color: var(--red-primary);
+    border: 1px solid var(--red-primary);
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    font-size: 0.95rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+}
+
+.lives-badge.out {
+    background: var(--bg-surface);
+    color: var(--text-tertiary);
+    border-color: var(--border);
+}
+
 .meta-pill {
     background: var(--bg-surface);
     border: 1px solid var(--border);
@@ -1392,6 +1416,31 @@ body::before {
     font-size: 0.72rem;
     color: var(--pink);
     font-weight: 600;
+}
+
+/* Highlight the viewing player's own row. */
+.scoreboard li.self {
+    outline: 2px solid var(--red-primary);
+    outline-offset: -2px;
+}
+
+/* Lives readout (elimination mode) — the heart is the cue, so make it red. */
+.scoreboard .score.lives {
+    color: var(--red-primary);
+    white-space: nowrap;
+}
+
+/* Players who've run out of lives read as dimmed/struck-through. */
+.scoreboard li.eliminated {
+    opacity: 0.55;
+}
+
+.scoreboard li.eliminated .name {
+    text-decoration: line-through;
+}
+
+.scoreboard li.eliminated .score.lives {
+    color: var(--text-tertiary);
 }
 
 /* ---- SIDEBAR OPTIONS PANEL ---- */
