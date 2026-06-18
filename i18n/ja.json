@@ -62,6 +62,13 @@
             "beginning": "始まり",
             "both": "両方",
             "bside": "Bサイド",
+            "category": {
+                "artists": "アーティスト",
+                "gameplay": "ゲームプレイ",
+                "playback": "再生",
+                "presets": "プリセット",
+                "songs": "曲"
+            },
             "chronological": "年代順",
             "coed": "男女共学",
             "cutoff": "年代範囲",

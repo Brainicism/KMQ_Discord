@@ -62,6 +62,13 @@
             "beginning": "Beginning",
             "both": "Both",
             "bside": "B-side",
+            "category": {
+                "artists": "Artists",
+                "gameplay": "Gameplay",
+                "playback": "Playback",
+                "presets": "Presets",
+                "songs": "Songs"
+            },
             "chronological": "Chronological",
             "coed": "Coed",
             "cutoff": "Year Range",

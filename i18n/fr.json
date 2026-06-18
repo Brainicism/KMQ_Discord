@@ -62,6 +62,13 @@
             "beginning": "Début",
             "both": "Les deux",
             "bside": "Face B",
+            "category": {
+                "artists": "Artistes",
+                "gameplay": "Jouabilité",
+                "playback": "Lecture",
+                "presets": "Préréglages",
+                "songs": "Chansons"
+            },
             "chronological": "Chronologique",
             "coed": "Mixte",
             "cutoff": "Plage d'années",

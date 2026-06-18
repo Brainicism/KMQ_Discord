@@ -62,6 +62,13 @@
             "beginning": "आरंभ",
             "both": "दोनों",
             "bside": "बी-साइड",
+            "category": {
+                "artists": "कलाकार",
+                "gameplay": "गेमप्ले",
+                "playback": "प्लेबैक",
+                "presets": "प्रीसेट्स",
+                "songs": "गीत"
+            },
             "chronological": "कालानुक्रमिक",
             "coed": "सहशिक्षा",
             "cutoff": "वर्ष सीमा",

@@ -62,6 +62,13 @@
             "beginning": "Awal",
             "both": "Keduanya",
             "bside": "B-side",
+            "category": {
+                "artists": "Seniman",
+                "gameplay": "Permainan",
+                "playback": "Pemutaran",
+                "presets": "Prasetel",
+                "songs": "Lagu"
+            },
             "chronological": "Kronologis",
             "coed": "Campuran",
             "cutoff": "Rentang Tahun",
