@@ -86,6 +86,7 @@
                 "multiguess": "Wenn aktiviert, haben andere ein kurzes Zeitfenster, um nach der ersten richtigen Antwort auch zu raten.",
                 "ost": "Ob OST (Soundtrack) Songs eingeschlossen, ausgeschlossen oder exklusiv gespielt werden.",
                 "playlist": "Spiele Songs aus einer Spotify- oder YouTube-Wiedergabeliste ab. Während aktiv, werden die Song-Pool-Filter von der Wiedergabeliste verwaltet.",
+                "preset": "Speichern Sie die aktuellen Optionen als benannte Voreinstellung oder laden/löschen Sie eine gespeicherte.",
                 "release": "Nur offizielle Musikvideos, oder alle Videotypen (B-Seiten, Tanzpraktiken, etc.).",
                 "seek": "Wo jeder Song beginnt zu spielen — ein zufälliger Punkt, der Anfang oder die Mitte.",
                 "shuffle": "Wie der nächste Song ausgewählt wird — zufällig, nach Schwierigkeitsgrad oder Beliebtheit gewichtet, oder nach Erscheinungsdatum.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "Spotify- oder YouTube-Playlist-URL"
             },
             "popularity": "Beliebtheit",
+            "preset": {
+                "confirmDelete": "Löschen bestätigen",
+                "delete": "Löschen",
+                "empty": "Keine gespeicherten Presets vorhanden.",
+                "errors": {
+                    "exists": "Eine Voreinstellung mit diesem Namen existiert bereits.",
+                    "generic": "Konnte Voreinstellungen nicht aktualisieren. Versuchen Sie es erneut.",
+                    "illegalPrefix": "Voreinstellungsnamen dürfen nicht mit \"KMQ-\" beginnen.",
+                    "nameTooLong": "Dieser Voreinstellungsname ist zu lang.",
+                    "noName": "Geben Sie einen Preset-Namen ein.",
+                    "notFound": "Dieses Preset existiert nicht mehr.",
+                    "tooMany": "Sie haben die maximale Anzahl von Presets erreicht."
+                },
+                "label": "Voreinstellungen",
+                "load": "Laden",
+                "namePlaceholder": "Preset-Name",
+                "save": "Speichern"
+            },
             "random": "Zufällig",
             "release": "Veröffentlichung",
             "resetAll": "Alle Optionen zurücksetzen",

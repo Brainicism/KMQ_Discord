@@ -86,6 +86,7 @@
                 "multiguess": "Wanneer aan, krijgen anderen een kort moment om ook te raden na het eerste juiste antwoord.",
                 "ost": "Of OST (soundtrack) nummers zijn inbegrepen, uitgesloten of exclusief worden afgespeeld.",
                 "playlist": "Speel nummers af van een Spotify- of YouTube-afspeellijst. Terwijl het actief is, worden de nummerpoolfilters beheerd door de afspeellijst.",
+                "preset": "Sla de huidige opties op als een benoemde preset, of laad/verwijder een opgeslagen preset.",
                 "release": "Alleen officiële muziekvideo's, of alle soorten video's (b-kanten, dansoefeningen, etc.).",
                 "seek": "Waar elk nummer begint te spelen — een willekeurig punt, het begin of het midden.",
                 "shuffle": "Hoe het volgende nummer wordt gekozen — willekeurig, gewogen op moeilijkheid of populariteit, of op releasedatum.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "Spotify- of YouTube-afspeellijst URL"
             },
             "popularity": "Populariteit",
+            "preset": {
+                "confirmDelete": "Bevestig verwijderen",
+                "delete": "Verwijderen",
+                "empty": "Nog geen opgeslagen presets.",
+                "errors": {
+                    "exists": "Een preset met die naam bestaat al.",
+                    "generic": "Kon de presets niet bijwerken. Probeer het opnieuw.",
+                    "illegalPrefix": "Presetnamen kunnen niet beginnen met 'KMQ-'.",
+                    "nameTooLong": "Die presetnaam is te lang.",
+                    "noName": "Voer een presetnaam in.",
+                    "notFound": "Die preset bestaat niet meer.",
+                    "tooMany": "Je hebt het maximum aantal presets bereikt."
+                },
+                "label": "Presets",
+                "load": "Laden",
+                "namePlaceholder": "Presetnaam",
+                "save": "Opslaan"
+            },
             "random": "Willekeurig",
             "release": "Release",
             "resetAll": "Alle opties resetten",

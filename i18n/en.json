@@ -86,6 +86,7 @@
                 "multiguess": "When on, others get a brief window to also guess after the first correct answer.",
                 "ost": "Whether OST (soundtrack) songs are included, excluded, or played exclusively.",
                 "playlist": "Play songs from a Spotify or YouTube playlist. While active, the song-pool filters are managed by the playlist.",
+                "preset": "Save the current options as a named preset, or load/delete a saved one.",
                 "release": "Only official music videos, or all video types (b-sides, dance practices, etc.).",
                 "seek": "Where each song starts playing — a random point, the beginning, or the middle.",
                 "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, or by release date.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "Spotify or YouTube playlist URL"
             },
             "popularity": "Popularity",
+            "preset": {
+                "confirmDelete": "Confirm delete",
+                "delete": "Delete",
+                "empty": "No saved presets yet.",
+                "errors": {
+                    "exists": "A preset with that name already exists.",
+                    "generic": "Couldn't update presets. Try again.",
+                    "illegalPrefix": "Preset names can't start with \"KMQ-\".",
+                    "nameTooLong": "That preset name is too long.",
+                    "noName": "Enter a preset name.",
+                    "notFound": "That preset no longer exists.",
+                    "tooMany": "You've reached the maximum number of presets."
+                },
+                "label": "Presets",
+                "load": "Load",
+                "namePlaceholder": "Preset name",
+                "save": "Save"
+            },
             "random": "Random",
             "release": "Release",
             "resetAll": "Reset all options",

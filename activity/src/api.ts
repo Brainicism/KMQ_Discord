@@ -188,6 +188,50 @@ export async function setOption(
     return { ok: false, reason: parsed.error ?? "internal" };
 }
 
+export type PresetAction = "list" | "save" | "load" | "delete";
+
+export type PresetResult =
+    | { ok: true; presets: string[] }
+    | { ok: false; reason: string };
+
+/**
+ * List / save / load / delete a game-option preset. Every successful call
+ * returns the refreshed preset list. `name` is required for all actions
+ * except "list".
+ */
+export async function preset(
+    accessToken: string,
+    instanceId: string,
+    action: PresetAction,
+    name?: string,
+): Promise<PresetResult> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/preset`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId, action, name }),
+    });
+
+    if (resp.ok) {
+        const body = (await resp.json()) as { presets?: string[] };
+        return { ok: true, presets: body.presets ?? [] };
+    }
+
+    if (resp.status === 401) return { ok: false, reason: "unauthorized" };
+    if (resp.status === 403) return { ok: false, reason: "forbidden" };
+
+    let parsed: { error?: string } = {};
+    try {
+        parsed = (await resp.json()) as { error?: string };
+    } catch {
+        // ignore
+    }
+
+    return { ok: false, reason: parsed.error ?? "internal" };
+}
+
 /**
  * Bookmark a song. If `youtubeLink` is omitted, the server bookmarks whatever
  * song is currently playing — used by the in-round bookmark button so the

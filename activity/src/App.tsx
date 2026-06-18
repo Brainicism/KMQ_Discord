@@ -16,6 +16,7 @@ import {
     fetchSnapshot,
     hintVote as apiHintVote,
     openActivityStream,
+    preset as apiPreset,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
@@ -1225,6 +1226,151 @@ function PillField({
     );
 }
 
+// Mirrors PRESET_NAME_MAX_LENGTH in src/commands/game_commands/preset.ts; the
+// server rejects longer names, so cap the input to match.
+const PRESET_NAME_MAX_LENGTH = 25;
+
+const PRESET_REJECT_KEYS: Record<string, string> = {
+    no_name: "options.preset.errors.noName",
+    name_too_long: "options.preset.errors.nameTooLong",
+    illegal_prefix: "options.preset.errors.illegalPrefix",
+    too_many: "options.preset.errors.tooMany",
+    exists: "options.preset.errors.exists",
+    not_found: "options.preset.errors.notFound",
+};
+
+function presetRejectText(t: Translator, reason: string): string {
+    const key = PRESET_REJECT_KEYS[reason];
+    return key ? t(key) : t("options.preset.errors.generic");
+}
+
+/** Save / load / delete game-option presets from within the panel. Keeps its
+ *  own preset list (seeded from the server on mount, refreshed on every
+ *  action). Loading a preset refreshes the rest of the panel via the normal
+ *  optionsChanged broadcast, so this component doesn't touch `options`. */
+function PresetManager({
+    accessToken,
+    instanceId,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    t: Translator;
+}) {
+    const [presets, setPresets] = useState<string[]>([]);
+    const [name, setName] = useState("");
+    const [busy, setBusy] = useState(false);
+    const [feedback, setFeedback] = useState<string | null>(null);
+    // Two-click confirm for delete; holds the name being confirmed.
+    const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        void (async () => {
+            const r = await apiPreset(accessToken, instanceId, "list");
+            if (!cancelled && r.ok) setPresets(r.presets);
+        })();
+        return () => {
+            cancelled = true;
+        };
+    }, [accessToken, instanceId]);
+
+    const run = async (
+        action: "save" | "load" | "delete",
+        presetName: string,
+    ): Promise<void> => {
+        setBusy(true);
+        setFeedback(null);
+        try {
+            const r = await apiPreset(
+                accessToken,
+                instanceId,
+                action,
+                presetName,
+            );
+            if (r.ok) {
+                setPresets(r.presets);
+                if (action === "save") setName("");
+            } else {
+                setFeedback(presetRejectText(t, r.reason));
+            }
+        } catch (e) {
+            setFeedback(e instanceof Error ? e.message : t("networkError"));
+        } finally {
+            setBusy(false);
+            setConfirmDelete(null);
+        }
+    };
+
+    return (
+        <div className="options-group options-group-wide preset-manager">
+            <OptionLabel
+                label={t("options.preset.label")}
+                help={t("options.help.preset")}
+            />
+            {presets.length === 0 ? (
+                <p className="preset-empty">{t("options.preset.empty")}</p>
+            ) : (
+                <ul className="preset-list">
+                    {presets.map((p) => (
+                        <li key={p} className="preset-item">
+                            <span className="preset-name">{p}</span>
+                            <div className="preset-actions">
+                                <button
+                                    type="button"
+                                    className="pill"
+                                    disabled={busy}
+                                    onClick={() => void run("load", p)}
+                                >
+                                    {t("options.preset.load")}
+                                </button>
+                                <button
+                                    type="button"
+                                    className={`pill${
+                                        confirmDelete === p ? " on" : ""
+                                    }`}
+                                    disabled={busy}
+                                    onClick={() => {
+                                        if (confirmDelete === p) {
+                                            void run("delete", p);
+                                        } else {
+                                            setConfirmDelete(p);
+                                        }
+                                    }}
+                                    onBlur={() => setConfirmDelete(null)}
+                                >
+                                    {confirmDelete === p
+                                        ? t("options.preset.confirmDelete")
+                                        : t("options.preset.delete")}
+                                </button>
+                            </div>
+                        </li>
+                    ))}
+                </ul>
+            )}
+            <div className="preset-save">
+                <input
+                    type="text"
+                    className="option-number"
+                    value={name}
+                    maxLength={PRESET_NAME_MAX_LENGTH}
+                    placeholder={t("options.preset.namePlaceholder")}
+                    onChange={(e) => setName(e.target.value)}
+                />
+                <button
+                    type="button"
+                    className="pill"
+                    disabled={busy || !name.trim()}
+                    onClick={() => void run("save", name.trim())}
+                >
+                    {t("options.preset.save")}
+                </button>
+            </div>
+            {feedback && <p className="preset-feedback">{feedback}</p>}
+        </div>
+    );
+}
+
 function OptionsPanel({
     accessToken,
     instanceId,
@@ -1870,6 +2016,12 @@ function OptionsPanel({
                         : t("options.resetAll")}
                 </button>
             </div>
+
+            <PresetManager
+                accessToken={accessToken}
+                instanceId={instanceId}
+                t={t}
+            />
 
             {feedback && <span className="options-feedback">{feedback}</span>}
         </div>

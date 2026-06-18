@@ -86,6 +86,7 @@
                 "multiguess": "Quando ativado, outros têm uma breve janela para também adivinhar após a primeira resposta correta.",
                 "ost": "Se as músicas da OST (trilha sonora) estão incluídas, excluídas ou tocadas exclusivamente.",
                 "playlist": "Reproduza músicas de uma playlist do Spotify ou YouTube. Durante a atividade, os filtros do conjunto de músicas são geridos pela playlist.",
+                "preset": "Salve as opções atuais como um predefinido nomeado ou carregue/exclua um salvo.",
                 "release": "Apenas videoclipes oficiais, ou todos os tipos de vídeos (b-sides, práticas de dança, etc.).",
                 "seek": "Onde cada música começa a tocar — um ponto aleatório, o início ou o meio.",
                 "shuffle": "Como a próxima música é escolhida — aleatoriamente, ponderada por dificuldade ou popularidade, ou pela data de lançamento.",
@@ -124,6 +125,24 @@
                 "urlPlaceholder": "URL da playlist do Spotify ou YouTube"
             },
             "popularity": "Popularidade",
+            "preset": {
+                "confirmDelete": "Confirmar exclusão",
+                "delete": "Excluir",
+                "empty": "Ainda não há predefinidos salvos.",
+                "errors": {
+                    "exists": "Já existe um preset com esse nome.",
+                    "generic": "Não foi possível atualizar os predefinidos. Tente novamente.",
+                    "illegalPrefix": "Nomes de predefinição não podem começar com 'KMQ-'.",
+                    "nameTooLong": "Esse nome de predefinição é muito longo.",
+                    "noName": "Insira um nome para o predefinido.",
+                    "notFound": "Essa predefinição não existe mais.",
+                    "tooMany": "Você atingiu o número máximo de predefinições."
+                },
+                "label": "Presets",
+                "load": "Carregar",
+                "namePlaceholder": "Nome da predefinição",
+                "save": "Salvar"
+            },
             "random": "Aleatório",
             "release": "Lançamento",
             "resetAll": "Redefinir todas as opções",
