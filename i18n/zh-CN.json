@@ -62,6 +62,13 @@
             "beginning": "开头",
             "both": "两者",
             "bside": "B面",
+            "category": {
+                "artists": "艺术家",
+                "gameplay": "游戏玩法",
+                "playback": "播放",
+                "presets": "预设",
+                "songs": "歌曲"
+            },
             "chronological": "按时间顺序",
             "coed": "男女同校",
             "cutoff": "年份范围",

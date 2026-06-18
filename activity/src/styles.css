@@ -2074,14 +2074,49 @@ fieldset.options-override:disabled .options-group {
     transition: transform 0.18s ease;
 }
 
-.options-toggle.open .options-chevron {
+.options-toggle.open .options-chevron,
+.options-subtoggle.open .options-chevron {
     transform: rotate(180deg);
 }
 
-/* The panel grid lives inside the section, below the toggle bar. */
-.options-section .options-panel {
-    padding: 4px 16px 16px;
+/* The accordion of option categories lives inside the section, below the
+   toggle bar. */
+.options-accordion {
+    display: flex;
+    flex-direction: column;
     border-top: 1px solid var(--border);
+}
+
+/* One collapsible category; a header bar over its own .options-panel grid. */
+.options-category + .options-category {
+    border-top: 1px solid var(--border);
+}
+
+/* Reuse the panel-toggle look as a nested, slightly lighter sub-header. */
+.options-subtoggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+
+.options-subtoggle:hover {
+    background: var(--bg-hover);
+}
+
+/* The panel grid lives inside its category, below the sub-header. */
+.options-category .options-panel {
+    padding: 4px 16px 16px;
 }
 
 /* ---- RESPONSIVE ---- */

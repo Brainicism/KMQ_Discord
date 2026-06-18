@@ -62,6 +62,13 @@
             "beginning": "Começo",
             "both": "Ambos",
             "bside": "Lado B",
+            "category": {
+                "artists": "Artistas",
+                "gameplay": "Jogabilidade",
+                "playback": "Reprodução",
+                "presets": "Padrões",
+                "songs": "Músicas"
+            },
             "chronological": "Cronológico",
             "coed": "Misto",
             "cutoff": "Faixa de Ano",

@@ -62,6 +62,13 @@
             "beginning": "Begin",
             "both": "Beide",
             "bside": "B-kant",
+            "category": {
+                "artists": "Artiesten",
+                "gameplay": "Gameplay",
+                "playback": "Weergave",
+                "presets": "Voorkeuzen",
+                "songs": "Liedjes"
+            },
             "chronological": "Chronologisch",
             "coed": "Gemengd",
             "cutoff": "Jaarbereik",

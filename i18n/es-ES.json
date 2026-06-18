@@ -62,6 +62,13 @@
             "beginning": "Comienzo",
             "both": "Ambos",
             "bside": "Caras B",
+            "category": {
+                "artists": "Artistas",
+                "gameplay": "Jugabilidad",
+                "playback": "Reproducción",
+                "presets": "Preajustes",
+                "songs": "Canciones"
+            },
             "chronological": "Cronológico",
             "coed": "Mixto",
             "cutoff": "Rango de años",

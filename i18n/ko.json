@@ -62,6 +62,13 @@
             "beginning": "시작",
             "both": "둘 다",
             "bside": "B사이드",
+            "category": {
+                "artists": "아티스트",
+                "gameplay": "게임플레이",
+                "playback": "재생",
+                "presets": "프리셋",
+                "songs": "노래"
+            },
             "chronological": "연대순",
             "coed": "남녀공학",
             "cutoff": "연도 범위",

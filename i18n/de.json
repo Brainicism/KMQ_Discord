@@ -62,6 +62,13 @@
             "beginning": "Anfang",
             "both": "Beide",
             "bside": "B-Seite",
+            "category": {
+                "artists": "Künstler",
+                "gameplay": "Spielablauf",
+                "playback": "Wiedergabe",
+                "presets": "Voreinstellungen",
+                "songs": "Lieder"
+            },
             "chronological": "Chronologisch",
             "coed": "Gemischt",
             "cutoff": "Jahresbereich",
