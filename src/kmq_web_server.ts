@@ -1405,6 +1405,47 @@ export default class KmqWebServer {
         );
 
         httpServer.post(
+            "/api/activity/profile",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as {
+                    target_user_id?: string;
+                };
+
+                const targetUserID =
+                    typeof body.target_user_id === "string"
+                        ? body.target_user_id
+                        : ctx.user.id;
+
+                // Only let callers view profiles of fellow instance
+                // participants (self always qualifies) — don't expose
+                // arbitrary global users' stats.
+                if (!ctx.instance.participantIDs.has(targetUserID)) {
+                    await reply.code(403).send({ error: "Forbidden" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.profile({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        targetUserID,
+                    });
+
+                    await reply.code(200).send(result);
+                } catch (e) {
+                    logger.warn(
+                        `Activity profile failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
             "/api/activity/bookmark",
             limit(ACTIVITY_RATE_LIMIT_ACTION),
             async (request, reply) => {

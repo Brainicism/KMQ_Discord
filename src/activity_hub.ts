@@ -16,6 +16,8 @@ import type ActivityGuessResponse from "./interfaces/activity_guess_response";
 import type ActivityMcGuessArgs from "./interfaces/activity_mc_guess_args";
 import type ActivityPresetArgs from "./interfaces/activity_preset_args";
 import type ActivityPresetResponse from "./interfaces/activity_preset_response";
+import type ActivityProfileArgs from "./interfaces/activity_profile_args";
+import type ActivityProfileResponse from "./interfaces/activity_profile_response";
 import type ActivityReplyMessage from "./interfaces/activity_reply_message";
 import type ActivityRequestOp from "./enums/activity_request_op";
 import type ActivitySetOptionArgs from "./interfaces/activity_set_option_args";
@@ -257,6 +259,22 @@ export default class ActivityHub {
     async preset(args: ActivityPresetArgs): Promise<ActivityPresetResponse> {
         const target = await this.resolveCluster(args.guildID);
         return this.sendRequest<ActivityPresetResponse>(target, "preset", args);
+    }
+
+    /**
+     * Fetches a player's profile stats. Routed by guild only to land on a
+     * worker — `player_stats` is process-wide, so any worker can answer; the
+     * guild routing just reuses the existing cluster map.
+     * @param args - the requesting + target user; see ActivityProfileArgs
+     * @returns the worker's profile response (found:false when no stats)
+     */
+    async profile(args: ActivityProfileArgs): Promise<ActivityProfileResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityProfileResponse>(
+            target,
+            "profile",
+            args,
+        );
     }
 
     /**

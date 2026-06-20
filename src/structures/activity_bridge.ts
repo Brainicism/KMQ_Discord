@@ -34,6 +34,7 @@ import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
 import MessageContext from "./message_context";
 import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
+import ProfileCommand from "../commands/game_commands/profile";
 import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
@@ -51,6 +52,8 @@ import type ActivityMcGuessArgs from "../interfaces/activity_mc_guess_args";
 import type ActivityOptionsSnapshot from "../interfaces/activity_options_snapshot";
 import type ActivityPresetArgs from "../interfaces/activity_preset_args";
 import type ActivityPresetResponse from "../interfaces/activity_preset_response";
+import type ActivityProfileArgs from "../interfaces/activity_profile_args";
+import type ActivityProfileResponse from "../interfaces/activity_profile_response";
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
 import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
@@ -1558,6 +1561,43 @@ function ensureWorkerHandlerRegistered(): void {
                         cid,
                         payload,
                     });
+                    return;
+                }
+
+                case "profile": {
+                    // Read-only: player_stats is process-wide, so no session
+                    // or guild lock is needed. The web layer has already
+                    // validated targetUserID is an instance participant.
+                    const profileArgs = args as ActivityProfileArgs;
+                    const reply = (payload: ActivityProfileResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    const targetUserID =
+                        profileArgs.targetUserID ?? profileArgs.userID;
+
+                    ProfileCommand.getProfileStats(
+                        targetUserID,
+                        profileArgs.guildID,
+                    )
+                        .then((stats) =>
+                            reply(
+                                stats
+                                    ? { found: true, stats }
+                                    : { found: false },
+                            ),
+                        )
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity profile for gid=${profileArgs.guildID}, target=${targetUserID}. err=${e}`,
+                            );
+
+                            reply({ found: false });
+                        });
+
                     return;
                 }
 

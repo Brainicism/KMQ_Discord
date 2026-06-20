@@ -1443,6 +1443,323 @@ body::before {
     color: var(--text-tertiary);
 }
 
+/* ---- PROFILE ---- */
+/* Each scoreboard row is now a button (opens the profile popover) wrapped in
+   the li; the li keeps the row chrome + anchors the popover. */
+.scoreboard li {
+    position: relative;
+}
+
+.scoreboard-row-main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.scoreboard-row-main:disabled {
+    cursor: default;
+}
+
+/* Header "my profile" button — matches the control-button pill look. */
+.profile-button {
+    flex-shrink: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 1rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-button:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+/* Popover anchored to a scoreboard row. The rail lives on the right edge, so
+   open leftward (toward the centre) to stay on-screen. */
+.profile-popover {
+    position: absolute;
+    top: 0;
+    right: 100%;
+    margin-right: 8px;
+    z-index: 200;
+    width: 280px;
+    max-height: 70vh;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-popover-close,
+.profile-modal-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 1;
+}
+
+.profile-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 16px;
+}
+
+.profile-modal {
+    position: relative;
+    width: min(92vw, 340px);
+    max-height: 86vh;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.profile-card {
+    padding: 16px;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.profile-avatar {
+    border-radius: 50%;
+    border: 2px solid var(--border);
+}
+
+.profile-name {
+    font-weight: 800;
+    font-size: 1rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.profile-status {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 8px 0;
+}
+
+.profile-level-row {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.profile-level {
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+
+.profile-rank {
+    color: var(--red-primary);
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.profile-xp {
+    margin: 8px 0 12px;
+}
+
+.profile-xp-bar {
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+
+.profile-xp-fill {
+    height: 100%;
+    border-radius: var(--radius-pill);
+    background: linear-gradient(90deg, var(--red-soft), var(--red-primary));
+    transition: width 0.4s ease;
+}
+
+.profile-xp-label {
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-next-rank {
+    font-size: 0.72rem;
+    color: var(--text-tertiary);
+}
+
+.profile-buffs {
+    margin-bottom: 12px;
+}
+
+.profile-buff-active {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--red-muted);
+}
+
+.profile-buff-mult {
+    font-weight: 800;
+    color: var(--red-primary);
+    font-size: 0.85rem;
+}
+
+.profile-buff-list {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+}
+
+.profile-buff-expiry {
+    font-size: 0.7rem;
+    color: var(--text-tertiary);
+}
+
+.profile-vote-cta {
+    margin-top: 8px;
+    width: 100%;
+    padding: 8px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--red-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+}
+
+.profile-vote-cta:hover {
+    box-shadow: var(--shadow-glow);
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.profile-stats div {
+    background: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+}
+
+.profile-stats dt {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.profile-stats dd {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-badges-title {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.profile-badges ul {
+    list-style: none;
+    margin: 4px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.profile-badges li {
+    font-size: 0.74rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+    background: var(--red-light);
+    color: var(--red-primary);
+}
+
+.profile-levelup {
+    margin-bottom: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius-sm);
+    background: var(--red-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.82rem;
+    text-align: center;
+    animation: profile-levelup-pop 0.4s ease;
+}
+
+@keyframes profile-levelup-pop {
+    from {
+        transform: scale(0.9);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Below the grid breakpoint the scoreboard is a drawer overlay; a row-anchored
+   popover would clip, so centre the card on-screen instead. */
+@media (max-width: 900px) {
+    .profile-popover {
+        position: fixed;
+        inset: auto;
+        top: 50%;
+        left: 50%;
+        right: auto;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        width: min(92vw, 320px);
+        max-height: 86vh;
+    }
+}
+
 /* ---- SIDEBAR OPTIONS PANEL ---- */
 .options-panel {
     /* Spread options across the available width: compact fields flow into as
