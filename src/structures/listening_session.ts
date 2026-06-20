@@ -43,7 +43,7 @@ export default class ListeningSession extends Session {
     }
 
     async updateOwner(): Promise<void> {
-        if (this.finished) {
+        if (this.isFinished) {
             return;
         }
 
@@ -78,7 +78,7 @@ export default class ListeningSession extends Session {
      * @param messageContext - An object containing relevant parts of Eris.Message
      */
     async startRound(messageContext: MessageContext): Promise<Round | null> {
-        if (this.finished || this.round) {
+        if (this.isFinished || this.round) {
             return null;
         }
 
@@ -125,7 +125,7 @@ export default class ListeningSession extends Session {
     }
 
     async endSession(reason: string): Promise<void> {
-        if (this.finished) {
+        if (this.isFinished) {
             return;
         }
 
