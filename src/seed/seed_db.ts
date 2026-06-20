@@ -602,14 +602,18 @@ async function checkModifiedBetterAudioLinks(
 
     for (const songToDelete of invalidatedBetterAudioToDelete) {
         logger.info(`Deleting old better audio for ${songToDelete}`);
+
+        // File is now saved under the actual audio ID (better_audio or original)
+        const oldBetterAudioLink = oldBetterAudioMapping[songToDelete];
+        const audioFileId = oldBetterAudioLink ?? songToDelete;
         const songAudioPath = path.resolve(
             process.env.SONG_DOWNLOAD_DIR!,
-            `${songToDelete}.ogg`,
+            `${audioFileId}.ogg`,
         );
 
         await db.kmq
             .deleteFrom("cached_song_duration")
-            .where("vlink", "=", songToDelete)
+            .where("vlink", "=", audioFileId)
             .execute();
 
         if (await pathExists(songAudioPath)) {

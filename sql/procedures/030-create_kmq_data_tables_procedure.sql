@@ -33,7 +33,7 @@ BEGIN
 		dead,
 		daisuki_id
 	FROM expected_available_songs
-	INNER JOIN kmq.cached_song_duration ON expected_available_songs.link = kmq.cached_song_duration.vlink
+	INNER JOIN kmq.cached_song_duration ON kmq.cached_song_duration.vlink = COALESCE(expected_available_songs.better_audio_link, expected_available_songs.link)
 	LEFT JOIN kmq.not_downloaded ON expected_available_songs.link = kmq.not_downloaded.vlink
 	WHERE kmq.not_downloaded.vlink IS NULL
 	AND expected_available_songs.link NOT IN (SELECT vlink FROM kmq.dead_links);

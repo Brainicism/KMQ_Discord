@@ -19,8 +19,13 @@ const program = new Command().option("--delete", "Delete the songs");
     const options = program.opts();
     const db = getNewConnection();
     const availableSongs = (
-        await db.kmq.selectFrom("available_songs").select("link").execute()
-    ).map((x) => x["link"]);
+        await db.kmq
+            .selectFrom("available_songs")
+            .select(["link", "better_audio_link"])
+            .execute()
+    ).flatMap((x) =>
+        x.better_audio_link ? [x.link, x.better_audio_link] : [x.link],
+    );
 
     const downloadedSongs = (
         await fs.promises.readdir(process.env.SONG_DOWNLOAD_DIR as string)

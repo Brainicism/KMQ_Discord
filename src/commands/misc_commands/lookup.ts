@@ -481,11 +481,15 @@ export default class LookupCommand implements BaseCommand {
             views = kmqSongEntry.views;
             publishDate = kmqSongEntry.publishDate;
 
+            // Duration is cached under the actual audio file ID, which may
+            // be the better_audio link rather than the original video ID.
+            const audioFileId = kmqSongEntry.betterAudioLink ?? videoID;
+
             const durationInSeconds = (
                 await dbContext.kmq
                     .selectFrom("cached_song_duration")
                     .select("duration")
-                    .where("vlink", "=", videoID)
+                    .where("vlink", "=", audioFileId)
                     .executeTakeFirst()
             )?.duration;
 
