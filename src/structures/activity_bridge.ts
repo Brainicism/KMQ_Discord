@@ -702,6 +702,7 @@ function ensureWorkerHandlerRegistered(): void {
                                 );
                             }
 
+                            gameSession.startedViaActivity = true;
                             State.gameSessions[startArgs.guildID] = gameSession;
                             // Safe to forward-reference: IPC handlers only
                             // fire after module load is complete.

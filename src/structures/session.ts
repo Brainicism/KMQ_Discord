@@ -94,6 +94,9 @@ export default abstract class Session extends EventEmitter {
     /** Whether the Session is active yet */
     public sessionInitialized: boolean;
 
+    /** Whether the Session was started through the Discord Activity (vs the legacy slash-command path) */
+    public startedViaActivity: boolean;
+
     /** State machine tracking session lifecycle */
     public readonly stateMachine: SessionStateMachine;
 
@@ -134,6 +137,7 @@ export default abstract class Session extends EventEmitter {
         this.finished = false;
         this.round = null;
         this.sessionInitialized = false;
+        this.startedViaActivity = false;
         this.roundsPlayed = 0;
         this.bookmarkedSongs = {};
         this.guildPreference.songSelector.resetSessionState();
@@ -190,7 +194,9 @@ export default abstract class Session extends EventEmitter {
             logger.info(
                 `${getDebugLogHeader(
                     messageContext,
-                )} | ${this.sessionName()} initializing session`,
+                )} | ${this.sessionName()} initializing session | startedViaActivity: ${
+                    this.startedViaActivity
+                }`,
             );
         } else {
             logger.info(
