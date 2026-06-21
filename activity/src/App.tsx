@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
     MAX_GUESS_LENGTH,
@@ -647,6 +648,24 @@ function ProfileCard({
     );
 }
 
+// Positions the desktop profile popover as a viewport-`fixed` element anchored
+// to its scoreboard row, so it escapes the rail's `overflow` clipping. Opens
+// leftward (toward the centre) since the rail hugs the right edge; flips to
+// grow upward when the row sits in the lower half so it stays on-screen.
+function popoverFixedStyle(rect: DOMRect): CSSProperties {
+    const GAP = 8;
+    const inLowerHalf = rect.top > window.innerHeight / 2;
+    return {
+        position: "fixed",
+        right: window.innerWidth - rect.left + GAP,
+        left: "auto",
+        margin: 0,
+        ...(inLowerHalf
+            ? { bottom: window.innerHeight - rect.bottom }
+            : { top: rect.top }),
+    };
+}
+
 function Scoreboard({
     scoreboard,
     gameType,
@@ -679,6 +698,10 @@ function Scoreboard({
     // tap on mobile). Auth is required to fetch; without it rows aren't
     // interactive.
     const [activeID, setActiveID] = useState<string | null>(null);
+    // Viewport rect of the anchoring row, captured on open. On desktop the
+    // popover is positioned `fixed` from this so it escapes the scoreboard
+    // rail's `overflow` clipping (mobile centres the card via CSS instead).
+    const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
     const closeTimer = useRef<number | null>(null);
     const canViewProfiles = accessToken !== null && instanceId !== null;
 
@@ -721,8 +744,11 @@ function Scoreboard({
                             .join(" ")}
                         onMouseEnter={
                             canViewProfiles && canHover
-                                ? () => {
+                                ? (e) => {
                                       clearCloseTimer();
+                                      setAnchorRect(
+                                          e.currentTarget.getBoundingClientRect(),
+                                      );
                                       setActiveID(p.id);
                                   }
                                 : undefined
@@ -740,10 +766,19 @@ function Scoreboard({
                             aria-expanded={open}
                             onClick={
                                 canViewProfiles
-                                    ? () =>
+                                    ? (e) => {
+                                          const row =
+                                              e.currentTarget.closest("li");
+                                          if (row) {
+                                              setAnchorRect(
+                                                  row.getBoundingClientRect(),
+                                              );
+                                          }
+
                                           setActiveID((cur) =>
                                               cur === p.id ? null : p.id,
-                                          )
+                                          );
+                                      }
                                     : undefined
                             }
                         >
@@ -787,6 +822,11 @@ function Scoreboard({
                         {open && (
                             <div
                                 className="profile-popover"
+                                style={
+                                    canHover && anchorRect
+                                        ? popoverFixedStyle(anchorRect)
+                                        : undefined
+                                }
                                 onMouseEnter={
                                     canHover ? clearCloseTimer : undefined
                                 }
@@ -3358,6 +3398,19 @@ export default function App() {
                 <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
 
+            {/* Profile toggle — left cluster, below history + theme. */}
+            {authState && (
+                <button
+                    type="button"
+                    className="sidebar-toggle left profile"
+                    onClick={() => setMyProfileOpen(true)}
+                    aria-label={t("profile.myProfile")}
+                    title={t("profile.myProfile")}
+                >
+                    <span>👤</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -3490,18 +3543,6 @@ export default function App() {
                                         );
                                     })()}
                             </div>
-
-                            {authState && (
-                                <button
-                                    type="button"
-                                    className="profile-button"
-                                    onClick={() => setMyProfileOpen(true)}
-                                    aria-label={t("profile.myProfile")}
-                                    title={t("profile.myProfile")}
-                                >
-                                    👤
-                                </button>
-                            )}
 
                             {authState && (
                                 <ControlButtons
