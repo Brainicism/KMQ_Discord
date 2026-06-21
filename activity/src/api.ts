@@ -13,6 +13,7 @@ import type {
     ActivitySpecial,
     ActivitySubunits,
 } from "./types/activity_options_snapshot";
+import type { ActivityProfileResponse } from "./types/activity_profile";
 import type ActivityEvent from "./types/activity_event";
 import type ActivitySessionResponse from "./types/activity_session_response";
 import type ActivitySnapshot from "./types/activity_snapshot";
@@ -295,6 +296,33 @@ export async function bookmarkSong(
     }
 
     return { ok: false, reason: parsed.error ?? "internal" };
+}
+
+/**
+ * Fetches a player's profile stats. Omit `targetUserID` for the caller's own
+ * profile; otherwise the server validates the target is an instance
+ * participant. Returns `{ found: false }` for players with no stats yet, and
+ * `null` on a transport/auth error so callers can show a retry/empty state.
+ */
+export async function fetchProfile(
+    accessToken: string,
+    instanceId: string,
+    targetUserID?: string,
+): Promise<ActivityProfileResponse | null> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/profile`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+            instance_id: instanceId,
+            target_user_id: targetUserID,
+        }),
+    });
+
+    if (!resp.ok) return null;
+    return (await resp.json()) as ActivityProfileResponse;
 }
 
 export async function submitGuess(

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { CSSProperties } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
     MAX_GUESS_LENGTH,
@@ -13,6 +14,7 @@ import {
     endGame as apiEndGame,
     fetchArtistAutocomplete,
     fetchI18nBundle,
+    fetchProfile,
     fetchSnapshot,
     hintVote as apiHintVote,
     openActivityStream,
@@ -49,6 +51,10 @@ import type {
     StartGameOptions,
 } from "./api";
 import type { Translator } from "./i18n/translator";
+import type {
+    ActivityProfileResponse,
+    ActivityProfileStats,
+} from "./types/activity_profile";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
@@ -279,15 +285,404 @@ function RoundTimer({
     return <span className="round-timer">{seconds}s</span>;
 }
 
+// Cached profile responses keyed by user id. The `nonce` records the
+// profileRefreshNonce the entry was fetched at, so a round/session end (which
+// bumps the nonce) forces open cards to refetch while idle re-opens stay cheap.
+type ProfileCacheEntry = { resp: ActivityProfileResponse; nonce: number };
+type ProfileCache = Map<string, ProfileCacheEntry>;
+
+/** True when the device supports a real hover pointer (desktop). */
+function useCanHover(): boolean {
+    const [can, setCan] = useState(
+        () =>
+            typeof window !== "undefined" &&
+            !!window.matchMedia &&
+            window.matchMedia("(hover: hover)").matches,
+    );
+    useEffect(() => {
+        if (!window.matchMedia) return;
+        const mq = window.matchMedia("(hover: hover)");
+        const onChange = (): void => setCan(mq.matches);
+        mq.addEventListener?.("change", onChange);
+        return () => mq.removeEventListener?.("change", onChange);
+    }, []);
+    return can;
+}
+
+function formatProfileNumber(n: number): string {
+    try {
+        return n.toLocaleString();
+    } catch {
+        return String(n);
+    }
+}
+
+function formatProfileDate(ms: number): string {
+    try {
+        return new Intl.DateTimeFormat(undefined, {
+            dateStyle: "medium",
+        }).format(new Date(ms));
+    } catch {
+        return new Date(ms).toLocaleDateString();
+    }
+}
+
+function formatProfileRelative(ms: number): string {
+    const diff = ms - Date.now();
+    const abs = Math.abs(diff);
+    try {
+        const rtf = new Intl.RelativeTimeFormat(undefined, {
+            numeric: "auto",
+        });
+        const units: Array<[Intl.RelativeTimeFormatUnit, number]> = [
+            ["year", 31_536_000_000],
+            ["month", 2_592_000_000],
+            ["day", 86_400_000],
+            ["hour", 3_600_000],
+            ["minute", 60_000],
+        ];
+        for (const [unit, msPer] of units) {
+            if (abs >= msPer) return rtf.format(Math.round(diff / msPer), unit);
+        }
+
+        return rtf.format(Math.round(diff / 1000), "second");
+    } catch {
+        return formatProfileDate(ms);
+    }
+}
+
+/** Compact "Xh Ym" / "Ym" for a remaining duration in ms. */
+function formatProfileDuration(ms: number): string {
+    const totalMin = Math.max(0, Math.round(ms / 60_000));
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
+}
+
+function ProfileBuffs({
+    stats,
+    t,
+    onVote,
+}: {
+    stats: ActivityProfileStats;
+    t: Translator;
+    onVote: () => void;
+}) {
+    const { buffs } = stats;
+    const active: string[] = [];
+    if (buffs.powerHour) active.push(t("profile.buffPowerHour"));
+    if (buffs.firstGameOfDay) active.push(t("profile.buffFirstGame"));
+    if (buffs.voteBonusActive) active.push(t("profile.buffVote"));
+
+    return (
+        <div className="profile-buffs">
+            {buffs.multiplier > 1 && (
+                <div className="profile-buff-active">
+                    <span className="profile-buff-mult">
+                        🔥{" "}
+                        {t("profile.multiplier", {
+                            mult: Number(buffs.multiplier.toFixed(2)),
+                        })}
+                    </span>
+                    <span className="profile-buff-list">
+                        {active.join(" · ")}
+                    </span>
+                    {buffs.voteBonusActive &&
+                        buffs.voteBonusExpiresAtMs !== null && (
+                            <span className="profile-buff-expiry">
+                                {t("profile.voteExpires", {
+                                    time: formatProfileDuration(
+                                        buffs.voteBonusExpiresAtMs - Date.now(),
+                                    ),
+                                })}
+                            </span>
+                        )}
+                </div>
+            )}
+            {!buffs.voteBonusActive && (
+                <button
+                    type="button"
+                    className="profile-vote-cta"
+                    onClick={onVote}
+                >
+                    🗳️ {t("profile.voteCta")}
+                </button>
+            )}
+        </div>
+    );
+}
+
+function ProfileCardBody({
+    stats,
+    isSelf,
+    showLevelUp,
+    t,
+    onVote,
+}: {
+    stats: ActivityProfileStats;
+    isSelf: boolean;
+    showLevelUp: boolean;
+    t: Translator;
+    onVote: () => void;
+}) {
+    const span = stats.expForNextLevel - stats.expForCurrentLevel;
+    const progress =
+        span > 0 ? (stats.exp - stats.expForCurrentLevel) / span : 0;
+    const progressPct = Math.max(0, Math.min(100, progress * 100));
+
+    return (
+        <div className="profile-body">
+            {showLevelUp && (
+                <div className="profile-levelup" role="status">
+                    🎉 {t("profile.levelUp", { level: stats.level })}
+                </div>
+            )}
+            <div className="profile-level-row">
+                <span className="profile-level">
+                    {t("profile.level")} {formatProfileNumber(stats.level)}
+                </span>
+                <span className="profile-rank">{stats.rankName}</span>
+            </div>
+
+            <div className="profile-xp">
+                <div className="profile-xp-bar">
+                    <div
+                        className="profile-xp-fill"
+                        style={{ width: `${progressPct}%` }}
+                    />
+                </div>
+                <div className="profile-xp-label">
+                    {formatProfileNumber(stats.exp)} /{" "}
+                    {formatProfileNumber(stats.expForNextLevel)}
+                </div>
+                {stats.nextRankName && stats.levelsToNextRank !== null && (
+                    <div className="profile-next-rank">
+                        {t("profile.nextRank", {
+                            levels: stats.levelsToNextRank,
+                            rank: stats.nextRankName,
+                        })}
+                    </div>
+                )}
+            </div>
+
+            <ProfileBuffs stats={stats} t={t} onVote={onVote} />
+
+            <dl className="profile-stats">
+                <div>
+                    <dt>{t("profile.overallRank")}</dt>
+                    <dd>
+                        {stats.isRankIneligible
+                            ? t("profile.ineligible")
+                            : t("profile.rankOf", {
+                                  rank: formatProfileNumber(stats.overallRank),
+                                  total: formatProfileNumber(
+                                      stats.totalPlayers,
+                                  ),
+                              })}
+                    </dd>
+                </div>
+                <div>
+                    <dt>{t("profile.songsGuessed")}</dt>
+                    <dd>{formatProfileNumber(stats.songsGuessed)}</dd>
+                </div>
+                <div>
+                    <dt>{t("profile.gamesPlayed")}</dt>
+                    <dd>{formatProfileNumber(stats.gamesPlayed)}</dd>
+                </div>
+                <div>
+                    <dt>{t("profile.timesVoted")}</dt>
+                    <dd>{formatProfileNumber(stats.timesVoted)}</dd>
+                </div>
+                <div>
+                    <dt>{t("profile.firstPlayed")}</dt>
+                    <dd>{formatProfileDate(stats.firstPlayMs)}</dd>
+                </div>
+                <div>
+                    <dt>{t("profile.lastActive")}</dt>
+                    <dd>{formatProfileRelative(stats.lastActiveMs)}</dd>
+                </div>
+            </dl>
+
+            {stats.badges.length > 0 && (
+                <div className="profile-badges">
+                    <span className="profile-badges-title">
+                        {t("profile.badges")}
+                    </span>
+                    <ul>
+                        {stats.badges.map((b) => (
+                            <li key={b}>{b}</li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {/* isSelf reserved for future self-only affordances. */}
+            {void isSelf}
+        </div>
+    );
+}
+
+/**
+ * Fetches + renders a player's profile. Used both as the header "my profile"
+ * modal and the scoreboard hover/tap popover. Reads from `cache` (shared
+ * across the session) and refetches when `refreshNonce` changes — round/session
+ * ends bump it so an open card reflects newly-earned EXP and can celebrate a
+ * level-up (self only).
+ */
+function ProfileCard({
+    accessToken,
+    instanceId,
+    targetUserID,
+    username,
+    avatarUrl,
+    isSelf,
+    cache,
+    refreshNonce,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    targetUserID: string;
+    username: string;
+    avatarUrl: string | null;
+    isSelf: boolean;
+    cache: ProfileCache;
+    refreshNonce: number;
+    t: Translator;
+}) {
+    const cached = cache.get(targetUserID);
+    const [resp, setResp] = useState<ActivityProfileResponse | null>(
+        cached?.resp ?? null,
+    );
+    const [loading, setLoading] = useState(!cached);
+    const [errored, setErrored] = useState(false);
+    const [showLevelUp, setShowLevelUp] = useState(false);
+    const prevLevelRef = useRef<number | null>(
+        cached?.resp.stats?.level ?? null,
+    );
+
+    useEffect(() => {
+        let cancelled = false;
+        const entry = cache.get(targetUserID);
+        const fresh = entry && entry.nonce === refreshNonce;
+
+        if (entry) {
+            setResp(entry.resp);
+            setLoading(false);
+        }
+
+        if (fresh) return;
+
+        setLoading(!entry);
+        setErrored(false);
+        void (async () => {
+            const result = await fetchProfile(
+                accessToken,
+                instanceId,
+                targetUserID,
+            );
+            if (cancelled) return;
+            if (!result) {
+                setErrored(true);
+                setLoading(false);
+                return;
+            }
+
+            cache.set(targetUserID, { resp: result, nonce: refreshNonce });
+
+            if (isSelf && result.found && result.stats) {
+                const prev = prevLevelRef.current;
+                if (prev !== null && result.stats.level > prev) {
+                    setShowLevelUp(true);
+                    window.setTimeout(() => {
+                        if (!cancelled) setShowLevelUp(false);
+                    }, 4000);
+                }
+
+                prevLevelRef.current = result.stats.level;
+            }
+
+            setResp(result);
+            setLoading(false);
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [accessToken, instanceId, targetUserID, refreshNonce, isSelf, cache]);
+
+    const onVote = (): void => {
+        if (resp?.stats) void openExternalUrl(resp.stats.voteURL);
+    };
+
+    return (
+        <div className="profile-card">
+            <div className="profile-header">
+                {avatarUrl && (
+                    <img
+                        className="profile-avatar"
+                        src={avatarUrl}
+                        alt=""
+                        width={48}
+                        height={48}
+                    />
+                )}
+                <span className="profile-name">{username}</span>
+            </div>
+            {loading ? (
+                <p className="profile-status">{t("profile.loading")}</p>
+            ) : errored ? (
+                <p className="profile-status">{t("profile.loadError")}</p>
+            ) : resp && resp.found && resp.stats ? (
+                <ProfileCardBody
+                    stats={resp.stats}
+                    isSelf={isSelf}
+                    showLevelUp={showLevelUp}
+                    t={t}
+                    onVote={onVote}
+                />
+            ) : (
+                <p className="profile-status">{t("profile.noStats")}</p>
+            )}
+        </div>
+    );
+}
+
+// Positions the desktop profile popover as a viewport-`fixed` element anchored
+// to its scoreboard row, so it escapes the rail's `overflow` clipping. Opens
+// leftward (toward the centre) since the rail hugs the right edge; flips to
+// grow upward when the row sits in the lower half so it stays on-screen.
+function popoverFixedStyle(rect: DOMRect): CSSProperties {
+    const GAP = 8;
+    const inLowerHalf = rect.top > window.innerHeight / 2;
+    return {
+        position: "fixed",
+        right: window.innerWidth - rect.left + GAP,
+        left: "auto",
+        margin: 0,
+        ...(inLowerHalf
+            ? { bottom: window.innerHeight - rect.bottom }
+            : { top: rect.top }),
+    };
+}
+
 function Scoreboard({
     scoreboard,
     gameType,
     selfID,
+    accessToken,
+    instanceId,
+    profileCache,
+    profileRefreshNonce,
     t,
 }: {
     scoreboard: ActivityScoreboardSnapshot;
     gameType: string | null;
     selfID: string | null;
+    accessToken: string | null;
+    instanceId: string | null;
+    profileCache: ProfileCache;
+    profileRefreshNonce: number;
     t: Translator;
 }) {
     // In elimination, a player's "score" is their remaining lives; keep
@@ -298,6 +693,34 @@ function Scoreboard({
         .filter((p) => p.score > 0 || p.inVC)
         .sort((a, b) => b.score - a.score);
 
+    const canHover = useCanHover();
+    // The row whose profile popover is currently open (hover on desktop,
+    // tap on mobile). Auth is required to fetch; without it rows aren't
+    // interactive.
+    const [activeID, setActiveID] = useState<string | null>(null);
+    // Viewport rect of the anchoring row, captured on open. On desktop the
+    // popover is positioned `fixed` from this so it escapes the scoreboard
+    // rail's `overflow` clipping (mobile centres the card via CSS instead).
+    const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+    const closeTimer = useRef<number | null>(null);
+    const canViewProfiles = accessToken !== null && instanceId !== null;
+
+    const clearCloseTimer = (): void => {
+        if (closeTimer.current !== null) {
+            window.clearTimeout(closeTimer.current);
+            closeTimer.current = null;
+        }
+    };
+
+    // Brief delay before closing on mouse-leave so the cursor can travel into
+    // the popover without it vanishing.
+    const scheduleClose = (): void => {
+        clearCloseTimer();
+        closeTimer.current = window.setTimeout(() => setActiveID(null), 120);
+    };
+
+    useEffect(() => () => clearCloseTimer(), []);
+
     if (sorted.length === 0) {
         return <p className="empty">{t("scoreboardEmptyJoinVC")}</p>;
     }
@@ -306,6 +729,7 @@ function Scoreboard({
         <ol className="scoreboard">
             {sorted.map((p, i) => {
                 const eliminated = isElimination && p.score === 0;
+                const open = canViewProfiles && activeID === p.id;
                 return (
                     <li
                         key={p.id}
@@ -313,43 +737,123 @@ function Scoreboard({
                             scoreboard.winnerIDs.includes(p.id) ? "winner" : "",
                             p.id === selfID ? "self" : "",
                             eliminated ? "eliminated" : "",
+                            canViewProfiles ? "clickable" : "",
+                            open ? "profile-open" : "",
                         ]
                             .filter(Boolean)
                             .join(" ")}
+                        onMouseEnter={
+                            canViewProfiles && canHover
+                                ? (e) => {
+                                      clearCloseTimer();
+                                      setAnchorRect(
+                                          e.currentTarget.getBoundingClientRect(),
+                                      );
+                                      setActiveID(p.id);
+                                  }
+                                : undefined
+                        }
+                        onMouseLeave={
+                            canViewProfiles && canHover
+                                ? scheduleClose
+                                : undefined
+                        }
                     >
-                        <span className="rank">#{i + 1}</span>
-                        {p.avatarUrl && (
-                            <img
-                                className="avatar"
-                                src={p.avatarUrl}
-                                alt=""
-                                width={24}
-                                height={24}
-                            />
-                        )}
-                        <span className="name">
-                            {p.username}
-                            {!p.inVC && (
-                                <span className="afk">
-                                    {" "}
-                                    {t("scoreboardLeft")}
+                        <button
+                            type="button"
+                            className="scoreboard-row-main"
+                            disabled={!canViewProfiles}
+                            aria-expanded={open}
+                            onClick={
+                                canViewProfiles
+                                    ? (e) => {
+                                          const row =
+                                              e.currentTarget.closest("li");
+                                          if (row) {
+                                              setAnchorRect(
+                                                  row.getBoundingClientRect(),
+                                              );
+                                          }
+
+                                          setActiveID((cur) =>
+                                              cur === p.id ? null : p.id,
+                                          );
+                                      }
+                                    : undefined
+                            }
+                        >
+                            <span className="rank">#{i + 1}</span>
+                            {p.avatarUrl && (
+                                <img
+                                    className="avatar"
+                                    src={p.avatarUrl}
+                                    alt=""
+                                    width={24}
+                                    height={24}
+                                />
+                            )}
+                            <span className="name">
+                                {p.username}
+                                {!p.inVC && (
+                                    <span className="afk">
+                                        {" "}
+                                        {t("scoreboardLeft")}
+                                    </span>
+                                )}
+                            </span>
+                            {isElimination ? (
+                                <span
+                                    className="score lives"
+                                    title={t("gameType.lives")}
+                                >
+                                    {eliminated ? "☠️" : `♥ ${p.score}`}
+                                </span>
+                            ) : (
+                                <span className="score">{p.score}</span>
+                            )}
+                            {p.expGain > 0 && (
+                                <span className="exp">
+                                    {t("scoreboardExpGain", {
+                                        exp: p.expGain,
+                                    })}
                                 </span>
                             )}
-                        </span>
-                        {isElimination ? (
-                            <span
-                                className="score lives"
-                                title={t("gameType.lives")}
+                        </button>
+                        {open && (
+                            <div
+                                className="profile-popover"
+                                style={
+                                    canHover && anchorRect
+                                        ? popoverFixedStyle(anchorRect)
+                                        : undefined
+                                }
+                                onMouseEnter={
+                                    canHover ? clearCloseTimer : undefined
+                                }
+                                onMouseLeave={
+                                    canHover ? scheduleClose : undefined
+                                }
                             >
-                                {eliminated ? "☠️" : `♥ ${p.score}`}
-                            </span>
-                        ) : (
-                            <span className="score">{p.score}</span>
-                        )}
-                        {p.expGain > 0 && (
-                            <span className="exp">
-                                {t("scoreboardExpGain", { exp: p.expGain })}
-                            </span>
+                                <button
+                                    type="button"
+                                    className="profile-popover-close"
+                                    aria-label={t("profile.close")}
+                                    onClick={() => setActiveID(null)}
+                                >
+                                    ✕
+                                </button>
+                                <ProfileCard
+                                    accessToken={accessToken!}
+                                    instanceId={instanceId!}
+                                    targetUserID={p.id}
+                                    username={p.username}
+                                    avatarUrl={p.avatarUrl}
+                                    isSelf={p.id === selfID}
+                                    cache={profileCache}
+                                    refreshNonce={profileRefreshNonce}
+                                    t={t}
+                                />
+                            </div>
                         )}
                     </li>
                 );
@@ -2609,6 +3113,18 @@ export default function App() {
     // without reloading the iframe — drives the Reconnect button.
     const [connectNonce, setConnectNonce] = useState(0);
     const [reconnecting, setReconnecting] = useState(false);
+    // Profile cards. The cache is shared across every card for the session so
+    // re-opening a player is free; the nonce is bumped on round/session end to
+    // invalidate open cards (newly-earned EXP, level-ups).
+    const profileCacheRef = useRef<ProfileCache>(new Map());
+    const [profileRefreshNonce, setProfileRefreshNonce] = useState(0);
+    const [myProfileOpen, setMyProfileOpen] = useState(false);
+
+    // A finished round (roundHistory grows) or a session end can change EXP /
+    // level, so invalidate open profile cards by bumping the nonce.
+    useEffect(() => {
+        setProfileRefreshNonce((n) => n + 1);
+    }, [ui.roundHistory.length, ui.sessionEnded]);
 
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
@@ -2882,6 +3398,19 @@ export default function App() {
                 <span>{theme === "dark" ? "☀" : "☾"}</span>
             </button>
 
+            {/* Profile toggle — left cluster, below history + theme. */}
+            {authState && (
+                <button
+                    type="button"
+                    className="sidebar-toggle left profile"
+                    onClick={() => setMyProfileOpen(true)}
+                    aria-label={t("profile.myProfile")}
+                    title={t("profile.myProfile")}
+                >
+                    <span>👤</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -3026,6 +3555,51 @@ export default function App() {
                                 />
                             )}
                         </header>
+
+                        {authState && myProfileOpen && (
+                            <div
+                                className="profile-modal-overlay"
+                                role="dialog"
+                                aria-modal="true"
+                                onClick={() => setMyProfileOpen(false)}
+                            >
+                                <div
+                                    className="profile-modal"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <button
+                                        type="button"
+                                        className="profile-modal-close"
+                                        aria-label={t("profile.close")}
+                                        onClick={() => setMyProfileOpen(false)}
+                                    >
+                                        ✕
+                                    </button>
+                                    <ProfileCard
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        targetUserID={authState.userID}
+                                        username={
+                                            ui.scoreboard?.players.find(
+                                                (p) =>
+                                                    p.id === authState.userID,
+                                            )?.username ??
+                                            t("profile.myProfile")
+                                        }
+                                        avatarUrl={
+                                            ui.scoreboard?.players.find(
+                                                (p) =>
+                                                    p.id === authState.userID,
+                                            )?.avatarUrl ?? null
+                                        }
+                                        isSelf
+                                        cache={profileCacheRef.current}
+                                        refreshNonce={profileRefreshNonce}
+                                        t={t}
+                                    />
+                                </div>
+                            </div>
+                        )}
 
                         {ui.sessionEnded && (
                             <div className="banner">
@@ -3269,6 +3843,10 @@ export default function App() {
                                 scoreboard={ui.scoreboard}
                                 gameType={ui.session?.gameType ?? null}
                                 selfID={authState?.userID ?? null}
+                                accessToken={authState?.accessToken ?? null}
+                                instanceId={authState?.instanceId ?? null}
+                                profileCache={profileCacheRef.current}
+                                profileRefreshNonce={profileRefreshNonce}
                                 t={t}
                             />
                         ) : (

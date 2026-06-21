@@ -1,5 +1,10 @@
 /* eslint-disable @typescript-eslint/dot-notation */
-import { CUM_EXP_TABLE, EPHEMERAL_MESSAGE_FLAG } from "../../constants";
+import {
+    CUM_EXP_TABLE,
+    EPHEMERAL_MESSAGE_FLAG,
+    ExpBonusModifierValues,
+    VOTE_LINK,
+} from "../../constants";
 import { IPCLogger } from "../../logger";
 import {
     clickableSlashCommand,
@@ -14,18 +19,41 @@ import {
 import {
     discordDateFormat,
     friendlyFormattedNumber,
+    isWeekend,
     romanize,
     visualProgressBar,
 } from "../../helpers/utils";
+import { isFirstGameOfDay, isPowerHour } from "../../helpers/game_utils";
 import Eris from "eris";
+import ExpBonusModifier from "../../enums/exp_bonus_modifier";
 import LocaleType from "../../enums/locale_type";
 import MessageContext from "../../structures/message_context";
 import dbContext from "../../database_context";
 import i18n from "../../helpers/localization_manager";
+import type { ActivityProfileStats } from "../../interfaces/activity_profile_response";
 import type { DefaultSlashCommand } from "../interfaces/base_command";
 import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
+
+/** Raw profile numbers shared by the embed builder and the Activity payload. */
+interface RawProfileData {
+    songsGuessed: number;
+    gamesPlayed: number;
+    isRankIneligible: boolean;
+    firstPlay: Date;
+    lastActive: Date;
+    exp: number;
+    level: number;
+    totalPlayers: number;
+    relativeSongRank: number;
+    relativeGamesPlayedRank: number;
+    relativeLevelRank: number;
+    timesVoted: number;
+    /** Vote-bonus expiry, or null when the player has no active bonus. */
+    voteBuffExpiry: Date | null;
+    badges: string[];
+}
 
 const COMMAND_NAME = "profile";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -386,10 +414,16 @@ export default class ProfileCommand implements BaseCommand {
         return i18n.translate(guildID, ProfileCommand.RANK_TITLES[0]!.title);
     }
 
-    static async getProfileFields(
-        requestedPlayer: Eris.User,
-        guildID: string,
-    ): Promise<Array<Eris.EmbedField>> {
+    /**
+     * Runs the DB queries backing a profile. Shared by the Discord embed
+     * (getProfileFields) and the Activity payload (getProfileStats) so both
+     * stay consistent.
+     * @param playerID - the player to look up
+     * @returns the raw numbers, or null when the player has never played
+     */
+    static async getRawProfileData(
+        playerID: string,
+    ): Promise<RawProfileData | null> {
         const playerStats = await dbContext.kmq
             .selectFrom("player_stats")
             .select([
@@ -401,28 +435,16 @@ export default class ProfileCommand implements BaseCommand {
                 "level",
                 "rank_ineligible",
             ])
-            .where("player_id", "=", requestedPlayer.id)
+            .where("player_id", "=", playerID)
             .executeTakeFirst();
 
         if (!playerStats) {
-            return [];
+            return null;
         }
 
         const songsGuessed = playerStats["songs_guessed"];
         const gamesPlayed = playerStats["games_played"];
-        const isRankIneligible = playerStats["rank_ineligible"] === 1;
-        const firstPlayDateString = discordDateFormat(
-            new Date(playerStats["first_play"]),
-            "d",
-        );
-
-        const lastActiveDateString = discordDateFormat(
-            new Date(playerStats["last_active"]),
-            "R",
-        );
-
         const exp = playerStats["exp"];
-        const level = playerStats["level"];
 
         const totalPlayers =
             (
@@ -466,13 +488,151 @@ export default class ProfileCommand implements BaseCommand {
                     .executeTakeFirst()
             )?.["count"] ?? totalPlayers;
 
-        const timesVotedData = await dbContext.kmq
+        const voteData = await dbContext.kmq
             .selectFrom("top_gg_user_votes")
-            .select(["total_votes"])
-            .where("user_id", "=", requestedPlayer.id)
+            .select(["total_votes", "buff_expiry_date"])
+            .where("user_id", "=", playerID)
             .executeTakeFirst();
 
-        const timesVoted = timesVotedData ? timesVotedData["total_votes"] : 0;
+        const badges = (
+            await dbContext.kmq
+                .selectFrom("badges_players")
+                .innerJoin("badges", "badges_players.badge_id", "badges.id")
+                .select(["badges.name as badge_name"])
+                .where("badges_players.user_id", "=", playerID)
+                .orderBy("badges.priority", "desc")
+                .execute()
+        ).map((x) => x["badge_name"]);
+
+        return {
+            songsGuessed,
+            gamesPlayed,
+            isRankIneligible: playerStats["rank_ineligible"] === 1,
+            firstPlay: new Date(playerStats["first_play"]),
+            lastActive: new Date(playerStats["last_active"]),
+            exp,
+            level: playerStats["level"],
+            totalPlayers,
+            relativeSongRank,
+            relativeGamesPlayedRank,
+            relativeLevelRank,
+            timesVoted: voteData ? voteData["total_votes"] : 0,
+            voteBuffExpiry: voteData?.["buff_expiry_date"]
+                ? new Date(voteData["buff_expiry_date"])
+                : null,
+            badges,
+        };
+    }
+
+    /**
+     * Builds render-ready profile data for the Discord Activity. Numbers stay
+     * raw (the client formats them); timestamps are epoch ms; the rank title
+     * is translated server-side (its i18n keys aren't in the activity bundle).
+     * @param playerID - the player to look up
+     * @param guildID - the guild (drives locale of the translated rank title)
+     * @returns the structured stats, or null when the player has never played
+     */
+    static async getProfileStats(
+        playerID: string,
+        guildID: string,
+    ): Promise<ActivityProfileStats | null> {
+        const raw = await ProfileCommand.getRawProfileData(playerID);
+        if (!raw) {
+            return null;
+        }
+
+        const { level, exp } = raw;
+        const rankName = ProfileCommand.getRankNameByLevel(level, guildID);
+
+        // Walk forward until the rank title changes — robust across both the
+        // RANK_TITLES tiers (every 10 levels) and the roman-numeral tiers past
+        // the max rank (every 5). Capped so it always terminates.
+        let nextRankName: string | null = null;
+        let levelsToNextRank: number | null = null;
+        for (let next = level + 1; next <= level + 200; next++) {
+            const candidate = ProfileCommand.getRankNameByLevel(next, guildID);
+            if (candidate !== rankName) {
+                nextRankName = candidate;
+                levelsToNextRank = next - level;
+                break;
+            }
+        }
+
+        const voteBonusActive = raw.voteBuffExpiry
+            ? raw.voteBuffExpiry.getTime() > Date.now()
+            : false;
+
+        const powerHour = isWeekend() || isPowerHour();
+        const firstGameOfDay = await isFirstGameOfDay(playerID);
+
+        const multiplier =
+            (powerHour
+                ? ExpBonusModifierValues[ExpBonusModifier.POWER_HOUR]
+                : 1) *
+            (firstGameOfDay
+                ? ExpBonusModifierValues[ExpBonusModifier.FIRST_GAME_OF_DAY]
+                : 1) *
+            (voteBonusActive
+                ? ExpBonusModifierValues[ExpBonusModifier.VOTE]
+                : 1);
+
+        return {
+            level,
+            exp,
+            expForCurrentLevel: CUM_EXP_TABLE[level]!,
+            expForNextLevel: CUM_EXP_TABLE[level + 1]!,
+            rankName,
+            nextRankName,
+            levelsToNextRank,
+            isRankIneligible: raw.isRankIneligible,
+            overallRank: raw.relativeLevelRank + 1,
+            totalPlayers: raw.totalPlayers,
+            songsGuessed: raw.songsGuessed,
+            songRank: raw.relativeSongRank + 1,
+            gamesPlayed: raw.gamesPlayed,
+            gamesRank: raw.relativeGamesPlayedRank + 1,
+            firstPlayMs: raw.firstPlay.getTime(),
+            lastActiveMs: raw.lastActive.getTime(),
+            timesVoted: raw.timesVoted,
+            badges: raw.badges,
+            buffs: {
+                powerHour,
+                firstGameOfDay,
+                voteBonusActive,
+                voteBonusExpiresAtMs: voteBonusActive
+                    ? raw.voteBuffExpiry!.getTime()
+                    : null,
+                multiplier,
+            },
+            voteURL: VOTE_LINK,
+        };
+    }
+
+    static async getProfileFields(
+        requestedPlayer: Eris.User,
+        guildID: string,
+    ): Promise<Array<Eris.EmbedField>> {
+        const raw = await ProfileCommand.getRawProfileData(requestedPlayer.id);
+
+        if (!raw) {
+            return [];
+        }
+
+        const {
+            songsGuessed,
+            gamesPlayed,
+            isRankIneligible,
+            exp,
+            level,
+            totalPlayers,
+            relativeSongRank,
+            relativeGamesPlayedRank,
+            relativeLevelRank,
+            timesVoted,
+        } = raw;
+
+        const firstPlayDateString = discordDateFormat(raw.firstPlay, "d");
+        const lastActiveDateString = discordDateFormat(raw.lastActive, "R");
 
         const fields: Array<Eris.EmbedField> = [
             {
@@ -545,18 +705,7 @@ export default class ProfileCommand implements BaseCommand {
         ];
 
         // Optional fields
-        const badges = (
-            await dbContext.kmq
-                .selectFrom("badges_players")
-                .innerJoin("badges", "badges_players.badge_id", "badges.id")
-                .select(["badges.name as badge_name"])
-                .where("badges_players.user_id", "=", requestedPlayer.id)
-                .orderBy("badges.priority", "desc")
-                .execute()
-        )
-            .map((x) => x["badge_name"])
-            .join("\n");
-
+        const badges = raw.badges.join("\n");
         if (badges) {
             fields.push({
                 name: i18n.translate(guildID, "command.profile.badges"),

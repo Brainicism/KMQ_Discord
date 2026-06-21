@@ -9,6 +9,7 @@ type ActivityRequestOp =
     | "bookmark"
     | "setOption"
     | "autocompleteArtists"
-    | "preset";
+    | "preset"
+    | "profile";
 
 export default ActivityRequestOp;
