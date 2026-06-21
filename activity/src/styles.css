@@ -168,6 +168,17 @@ body::before {
         display: grid;
         grid-template-columns: minmax(0, 1fr) var(--rail-width, 320px);
     }
+
+    /* The left toggle cluster (history / theme / profile) stays fixed at the
+       viewport's left edge, reaching 56px in. In the grid range the 320px rail
+       squeezes the centred .kmq-app close to that edge, so its logo would slide
+       under the toggles. Reserve the cluster's width as left padding on the
+       column — this holds the card clear at every desktop width (no fragile
+       upper breakpoint) and keeps the header aligned with the content below,
+       rather than indenting the logo alone. */
+    .kmq-main {
+        padding-left: 64px;
+    }
 }
 
 .kmq-app {
@@ -926,6 +937,71 @@ body::before {
     line-height: 1.4;
 }
 
+/* ---- WIN CELEBRATION (viewer won) ---- */
+.round-area-body.idle.viewer-won {
+    position: relative;
+    overflow: hidden;
+}
+
+/* The winner line already carries a 🏆 from its i18n string; the celebration
+   here is the confetti + a one-shot pop-in (no extra trophy emoji). */
+.session-winner.won {
+    position: relative;
+    z-index: 6;
+    animation: winner-pop 0.5s cubic-bezier(0.2, 0.9, 0.3, 1.4);
+}
+
+@keyframes winner-pop {
+    0% {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    60% {
+        transform: scale(1.08);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* A short one-shot confetti shower. Pieces fall once from the top of the
+   round area, drifting + spinning, then fade — see CONFETTI_PIECES in App.tsx
+   for the per-piece left/delay/duration/color/drift. */
+.confetti {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 5;
+}
+
+.confetti-piece {
+    position: absolute;
+    top: -14px;
+    width: 8px;
+    height: 13px;
+    border-radius: 2px;
+    opacity: 0;
+    animation-name: confetti-fall;
+    animation-timing-function: ease-in;
+    animation-fill-mode: forwards;
+}
+
+@keyframes confetti-fall {
+    0% {
+        opacity: 0;
+        transform: translateY(-14px) translateX(0) rotate(0deg);
+    }
+    12% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(380px) translateX(var(--drift, 0)) rotate(560deg);
+    }
+}
+
 /* ---- BOOKMARK STAR ---- */
 .bookmark-star {
     width: 30px;
@@ -1329,6 +1405,19 @@ body::before {
     background: var(--bg-surface);
     border: 1px solid var(--border);
     color: var(--text-tertiary);
+    /* Stable keys (userID+ts) → only the just-arrived guess pops in. */
+    animation: guess-pop-in 0.25s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+}
+
+@keyframes guess-pop-in {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .guess-ticker li.correct {
@@ -2226,6 +2315,21 @@ fieldset.options-override:disabled .options-group {
     background: var(--bg-elevated);
     border-radius: var(--radius-sm);
     transition: background 0.1s;
+    /* Newly-revealed songs are prepended (newest-first); the stable React keys
+       mean only the freshly-mounted top row plays this entrance, not the whole
+       list on every update. */
+    animation: history-row-in 0.32s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes history-row-in {
+    from {
+        opacity: 0;
+        transform: translateY(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .song-history li:hover {
@@ -2441,5 +2545,209 @@ fieldset.options-override:disabled .options-group {
 @media (max-width: 600px) {
     .vote-row {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ---- MOTION POLISH ----
+   Entrance + interaction animations layered onto existing components. Each
+   round-area state is a separate JSX branch that mounts on transition, so a
+   CSS `animation` plays once on the swap and isn't replayed by re-renders
+   within a state. All of this is neutralised by the prefers-reduced-motion
+   guard below. */
+
+/* Round-area state swaps. The in-round stage (tall, full-width) collapses to
+   the shorter reveal/idle split post-round; a fade/scale entrance softens that
+   jump (a true height morph isn't possible across the separate DOM subtrees). */
+.round-area-body.in-round,
+.round-area-body.idle {
+    animation: round-state-in 0.3s ease;
+}
+
+.round-area-body.has-reveal {
+    animation: round-reveal-in 0.34s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes round-state-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes round-reveal-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.985);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Stagger the revealed song's lines so they settle in top-to-bottom. */
+.round-area-body.has-reveal .reveal-header {
+    animation: reveal-line-in 0.3s ease both 0.04s;
+}
+.round-area-body.has-reveal .artist-line {
+    animation: reveal-line-in 0.3s ease both 0.1s;
+}
+.round-area-body.has-reveal .winners {
+    animation: reveal-line-in 0.3s ease both 0.16s;
+}
+.round-area-body.has-reveal .song-counter {
+    animation: reveal-line-in 0.3s ease both 0.22s;
+}
+
+@keyframes reveal-line-in {
+    from {
+        opacity: 0;
+        transform: translateX(-6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Height collapse for the options panel and its sub-categories. The grid-rows
+   0fr→1fr transition animates open AND close (no fixed height needed); the
+   inner wrapper clips the content while the row height grows/shrinks. Mount /
+   unmount of the panel is delayed (usePresence) so the close plays too. */
+.collapse {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.22s ease;
+}
+
+.collapse.open {
+    grid-template-rows: 1fr;
+}
+
+.collapse-inner {
+    overflow: hidden;
+    min-height: 0;
+}
+
+/* Scoreboard hover/tap → profile popover. Mount/unmount is delayed (usePresence
+   adds `.visible` a frame after mount and removes it before unmount), so the
+   opacity transition plays both ways. Desktop adds a scale/slide from the row's
+   right edge; the centred mobile variant (which keeps a translate(-50%,-50%))
+   only fades so the transition doesn't fight the centring. */
+.profile-popover {
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.profile-popover.visible {
+    opacity: 1;
+}
+
+@media (min-width: 901px) {
+    .profile-popover {
+        transform-origin: right center;
+        transform: scale(0.94) translateX(6px);
+    }
+
+    .profile-popover.visible {
+        transform: scale(1) translateX(0);
+    }
+}
+
+/* Profile modal: backdrop fade + card pop-in, both reversible on close. */
+.profile-modal-overlay {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.profile-modal-overlay.visible {
+    opacity: 1;
+}
+
+.profile-modal {
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.profile-modal.visible {
+    opacity: 1;
+    transform: none;
+}
+
+/* Round-area crossfade: on a state swap the outgoing view stays briefly as an
+   absolutely-stacked layer fading out (clipped to the new view's height) while
+   the new view fades in on top. Entrance animations on the new view's content
+   still play; they're suppressed on the leaving copy so it doesn't re-animate. */
+.crossfade {
+    position: relative;
+    overflow: hidden;
+    /* Height is locked + transitioned by CrossFade during a swap so content
+       below moves smoothly; otherwise it's auto (no inline height). */
+    transition: height 0.26s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.crossfade-layer.entering {
+    position: relative;
+    z-index: 1;
+}
+
+.crossfade-layer.leaving {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    animation: crossfade-out 0.22s ease forwards;
+}
+
+.crossfade-layer.leaving * {
+    animation: none !important;
+}
+
+@keyframes crossfade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* The session-ended banner slides in when the game wraps. */
+.banner {
+    animation: hint-slide-in 0.3s ease;
+}
+
+/* Tactile press feedback (hover states already lift; active presses in). */
+.control-buttons button:active:not(:disabled),
+.hint-control button:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.sidebar-toggle:active {
+    transform: scale(0.94);
+}
+
+/* Respect users who opt out of motion at the OS level: drop the decorative
+   loops (confetti, floating notes, etc.) and collapse entrance animations /
+   transitions to a near-instant change. */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+
+    .confetti {
+        display: none;
     }
 }

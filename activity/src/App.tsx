@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
@@ -307,6 +307,124 @@ function useCanHover(): boolean {
         return () => mq.removeEventListener?.("change", onChange);
     }, []);
     return can;
+}
+
+// Keeps a conditionally-rendered element mounted through its close transition.
+// While `open`, it mounts and — after a frame, so the enter transition runs
+// from the closed state — flips `visible` true. When `open` goes false it flips
+// `visible` false (playing the exit transition) and unmounts after `ms`. Drive
+// opacity/transform/height off `visible` in CSS so both directions animate.
+function usePresence(
+    open: boolean,
+    ms: number,
+): { mounted: boolean; visible: boolean } {
+    const [mounted, setMounted] = useState(open);
+    const [visible, setVisible] = useState(open);
+    useEffect(() => {
+        if (open) {
+            setMounted(true);
+            // Double rAF: let the browser paint the closed state once before
+            // flipping `visible`, so the enter transition reliably runs.
+            let inner = 0;
+            const outer = requestAnimationFrame(() => {
+                inner = requestAnimationFrame(() => setVisible(true));
+            });
+            return () => {
+                cancelAnimationFrame(outer);
+                cancelAnimationFrame(inner);
+            };
+        }
+
+        setVisible(false);
+        const id = window.setTimeout(() => setMounted(false), ms);
+        return () => window.clearTimeout(id);
+    }, [open, ms]);
+    return { mounted, visible };
+}
+
+// Crossfades between successive children identified by `viewKey`, AND animates
+// the container's height from the old view's to the new view's so the content
+// below moves smoothly instead of snapping (the round-area's in-round stage is
+// much taller than the reveal/idle states). On a key change the previous
+// children linger briefly as an absolutely-stacked layer fading out while the
+// new children fade in; the wrapper's height is locked to the old height then
+// transitioned to the new one. Re-renders that keep the same key pass through.
+// Outlasts the CSS height transition (0.26s) plus the 2-frame rAF lead-in, so
+// the cleanup (unlock height, drop the leaving layer) doesn't cut it short.
+const CROSSFADE_MS = 320;
+
+function CrossFade({
+    viewKey,
+    children,
+}: {
+    viewKey: string;
+    children: React.ReactNode;
+}) {
+    const containerRef = useRef<HTMLDivElement>(null);
+    const prevKey = useRef(viewKey);
+    const prevNode = useRef<React.ReactNode>(children);
+    // Last natural (auto) height, recorded after every settled commit so a swap
+    // knows the height to animate FROM (the new height isn't measurable until
+    // after React commits the new children).
+    const naturalHeight = useRef<number | null>(null);
+    const [outgoing, setOutgoing] = useState<{
+        key: string;
+        node: React.ReactNode;
+    } | null>(null);
+    const [lockedHeight, setLockedHeight] = useState<number | null>(null);
+
+    // Detects a view swap. Declared FIRST so it reads the pre-swap node/height
+    // (captured by the bookkeeping effect below on the previous commit) before
+    // that effect overwrites them for this commit.
+    useLayoutEffect(() => {
+        if (prevKey.current === viewKey) return undefined;
+
+        const fromH = naturalHeight.current;
+        const toH = containerRef.current?.offsetHeight ?? null;
+        setOutgoing({ key: prevKey.current, node: prevNode.current });
+        prevKey.current = viewKey;
+
+        if (fromH !== null && toH !== null && fromH !== toH) {
+            setLockedHeight(fromH);
+            requestAnimationFrame(() =>
+                requestAnimationFrame(() => setLockedHeight(toH)),
+            );
+        }
+
+        const id = window.setTimeout(() => {
+            setOutgoing(null);
+            setLockedHeight(null);
+        }, CROSSFADE_MS);
+        return () => window.clearTimeout(id);
+    }, [viewKey]);
+
+    // Runs after every commit (after the swap effect above). Keeps the
+    // previous-node snapshot fresh and, while not mid-transition, records the
+    // natural height for the next swap to animate from.
+    useLayoutEffect(() => {
+        if (lockedHeight === null && containerRef.current) {
+            naturalHeight.current = containerRef.current.offsetHeight;
+        }
+
+        prevNode.current = children;
+    });
+
+    return (
+        <div
+            ref={containerRef}
+            className="crossfade"
+            style={lockedHeight !== null ? { height: lockedHeight } : undefined}
+        >
+            {outgoing && (
+                <div className="crossfade-layer leaving" aria-hidden>
+                    {outgoing.node}
+                </div>
+            )}
+            <div key={viewKey} className="crossfade-layer entering">
+                {children}
+            </div>
+        </div>
+    );
 }
 
 function formatProfileNumber(n: number): string {
@@ -705,6 +823,14 @@ function Scoreboard({
     const closeTimer = useRef<number | null>(null);
     const canViewProfiles = accessToken !== null && instanceId !== null;
 
+    // Keep the popover mounted through its close animation. `popoverID` latches
+    // the last-open row's id so that row still renders the (now exiting)
+    // popover while it fades out, after `activeID` has already cleared.
+    const popover = usePresence(activeID !== null, 200);
+    const lastActiveID = useRef<string | null>(activeID);
+    if (activeID !== null) lastActiveID.current = activeID;
+    const popoverID = popover.mounted ? lastActiveID.current : null;
+
     const clearCloseTimer = (): void => {
         if (closeTimer.current !== null) {
             window.clearTimeout(closeTimer.current);
@@ -819,9 +945,11 @@ function Scoreboard({
                                 </span>
                             )}
                         </button>
-                        {open && (
+                        {canViewProfiles && popoverID === p.id && (
                             <div
-                                className="profile-popover"
+                                className={`profile-popover${
+                                    popover.visible ? " visible" : ""
+                                }`}
                                 style={
                                     canHover && anchorRect
                                         ? popoverFixedStyle(anchorRect)
@@ -903,6 +1031,7 @@ function CurrentRound({
     reveal,
     bookmarkSlot,
     winnerText,
+    viewerWon,
     history,
     guesses,
     t,
@@ -913,6 +1042,9 @@ function CurrentRound({
     /** If non-null, the round-area idle state renders the session-end winner
      *  line in place of "Waiting for next round". */
     winnerText: string | null;
+    /** Whether the viewer won the just-ended game — triggers the confetti +
+     *  celebratory styling on the winner line. */
+    viewerWon: boolean;
     /** Songs played this session, used to build the end-of-game montage. */
     history: UiState["roundHistory"];
     /** Live guesses, shown in the in-round stage as they come in. */
@@ -921,188 +1053,214 @@ function CurrentRound({
 }) {
     return (
         <section className="round-area">
-            {round ? (
-                <div className="round-area-body in-round">
-                    {/* Full-width "stage": big countdown is the focal point,
+            <CrossFade viewKey={round ? "round" : reveal ? "reveal" : "idle"}>
+                {round ? (
+                    <div className="round-area-body in-round">
+                        {/* Full-width "stage": big countdown is the focal point,
                         with the live guess feed below — replaces the old
                         decorative listening animation that left this space
                         doing nothing while the round was most active. */}
-                    <div className="stage">
-                        {bookmarkSlot && (
-                            <div className="stage-bookmark">{bookmarkSlot}</div>
-                        )}
-                        <div className="stage-header">
-                            <span className="stage-round-label">
-                                {t("roundLabel", {
-                                    num: round.roundIndex + 1,
+                        <div className="stage">
+                            {bookmarkSlot && (
+                                <div className="stage-bookmark">
+                                    {bookmarkSlot}
+                                </div>
+                            )}
+                            <div className="stage-header">
+                                <span className="stage-round-label">
+                                    {t("roundLabel", {
+                                        num: round.roundIndex + 1,
+                                    })}
+                                </span>
+                                <span className="live-badge">
+                                    <span className="live-dot" />
+                                    LIVE
+                                </span>
+                            </div>
+                            <div className="stage-countdown">
+                                <RoundTimer
+                                    songStartedAt={round.songStartedAt}
+                                    timerStartedAt={round.timerStartedAt}
+                                    guessTimeoutSec={round.guessTimeoutSec}
+                                />
+                            </div>
+                            {guesses.length > 0 ? (
+                                <GuessTicker guesses={guesses} />
+                            ) : (
+                                <div className="stage-notes" aria-hidden>
+                                    <span className="note-float">♪</span>
+                                    <span className="note-float">♫</span>
+                                    <span className="note-float">♩</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                ) : reveal ? (
+                    <div className="round-area-body has-reveal">
+                        <div className="round-area-text">
+                            <div className="reveal-header">
+                                <h3>{reveal.song.songName}</h3>
+                                {bookmarkSlot}
+                            </div>
+                            <p className="artist-line">
+                                {reveal.song.artistName} (
+                                {reveal.song.publishYear})
+                            </p>
+                            <ul className="winners">
+                                {reveal.correctGuessers.map((g) => {
+                                    const quick =
+                                        g.timeToGuessMs !== null &&
+                                        g.timeToGuessMs <= QUICK_GUESS_MS;
+                                    return (
+                                        <li key={g.id}>
+                                            {t("revealWinners", {
+                                                username: g.username,
+                                                points: g.pointsEarned,
+                                                exp: g.expGain,
+                                            })}
+                                            {g.streak >=
+                                                STREAK_DISPLAY_THRESHOLD && (
+                                                <span
+                                                    className="winner-streak"
+                                                    title={t("streakTitle", {
+                                                        streak: g.streak,
+                                                    })}
+                                                >
+                                                    🔥{g.streak}
+                                                </span>
+                                            )}
+                                            {g.timeToGuessMs !== null && (
+                                                <span
+                                                    className={`winner-time ${
+                                                        quick ? "quick" : ""
+                                                    }`}
+                                                >
+                                                    {quick ? "⚡" : ""}
+                                                    {(
+                                                        g.timeToGuessMs / 1000
+                                                    ).toFixed(1)}
+                                                    s
+                                                </span>
+                                            )}
+                                        </li>
+                                    );
                                 })}
-                            </span>
-                            <span className="live-badge">
-                                <span className="live-dot" />
-                                LIVE
-                            </span>
+                            </ul>
+                            <p className="song-counter">
+                                {t("songCounterLine", {
+                                    played: reveal.songCounter
+                                        .uniqueSongsPlayed,
+                                    total: reveal.songCounter.totalSongs,
+                                })}
+                            </p>
+                            {reveal.allGuesses.length > 0 && (
+                                <details className="all-guesses" open>
+                                    <summary>
+                                        {t("revealAllGuessesSummary", {
+                                            count: reveal.allGuesses.length,
+                                        })}
+                                    </summary>
+                                    <ul>
+                                        {reveal.allGuesses
+                                            .slice()
+                                            .sort((a, b) => a.ts - b.ts)
+                                            .map((g) => (
+                                                <li
+                                                    key={g.userID}
+                                                    className={
+                                                        g.isCorrect
+                                                            ? "correct"
+                                                            : ""
+                                                    }
+                                                >
+                                                    <span className="g-name">
+                                                        {g.username}
+                                                    </span>
+                                                    <span className="g-text">
+                                                        {g.guess || "—"}
+                                                    </span>
+                                                    {g.isCorrect && (
+                                                        <span className="g-mark">
+                                                            ✓
+                                                        </span>
+                                                    )}
+                                                </li>
+                                            ))}
+                                    </ul>
+                                </details>
+                            )}
                         </div>
-                        <div className="stage-countdown">
-                            <RoundTimer
-                                songStartedAt={round.songStartedAt}
-                                timerStartedAt={round.timerStartedAt}
-                                guessTimeoutSec={round.guessTimeoutSec}
-                            />
+                        <div className="thumbnail-slot">
+                            <button
+                                type="button"
+                                className="thumbnail-link"
+                                onClick={() =>
+                                    openExternalUrl(
+                                        `${YOUTUBE_WATCH_URL_PREFIX}${reveal.song.youtubeLink}`,
+                                    )
+                                }
+                                title={t("openOnYouTube")}
+                            >
+                                <RevealThumbnail
+                                    key={reveal.song.thumbnailUrl}
+                                    thumbnailUrl={reveal.song.thumbnailUrl}
+                                    alt=""
+                                />
+                                <span className="thumbnail-overlay">
+                                    {t("youtubePlayLabel")}
+                                </span>
+                            </button>
                         </div>
-                        {guesses.length > 0 ? (
-                            <GuessTicker guesses={guesses} />
+                    </div>
+                ) : (
+                    <div
+                        className={`round-area-body idle${
+                            winnerText && viewerWon ? " viewer-won" : ""
+                        }`}
+                    >
+                        {winnerText && viewerWon && <Confetti />}
+                        <div className="round-area-text">
+                            {winnerText ? (
+                                <p
+                                    className={`session-winner${
+                                        viewerWon ? " won" : ""
+                                    }`}
+                                >
+                                    {winnerText}
+                                </p>
+                            ) : (
+                                <p className="empty">
+                                    {t("waitingForNextRound")}
+                                </p>
+                            )}
+                        </div>
+                        {winnerText ? (
+                            history.length > 0 ? (
+                                <div className="thumbnail-slot session-montage">
+                                    <SongMontage history={history} />
+                                </div>
+                            ) : (
+                                <div className="thumbnail-slot session-winner-art">
+                                    <img src={thumbsUpUrl} alt="" />
+                                </div>
+                            )
                         ) : (
-                            <div className="stage-notes" aria-hidden>
+                            <div
+                                className="thumbnail-slot placeholder"
+                                aria-hidden
+                            >
                                 <span className="note-float">♪</span>
                                 <span className="note-float">♫</span>
                                 <span className="note-float">♩</span>
+                                <span className="note-main">🎵</span>
+                                <span className="listening-text">
+                                    waiting...
+                                </span>
                             </div>
                         )}
                     </div>
-                </div>
-            ) : reveal ? (
-                <div className="round-area-body has-reveal">
-                    <div className="round-area-text">
-                        <div className="reveal-header">
-                            <h3>{reveal.song.songName}</h3>
-                            {bookmarkSlot}
-                        </div>
-                        <p className="artist-line">
-                            {reveal.song.artistName} ({reveal.song.publishYear})
-                        </p>
-                        <ul className="winners">
-                            {reveal.correctGuessers.map((g) => {
-                                const quick =
-                                    g.timeToGuessMs !== null &&
-                                    g.timeToGuessMs <= QUICK_GUESS_MS;
-                                return (
-                                    <li key={g.id}>
-                                        {t("revealWinners", {
-                                            username: g.username,
-                                            points: g.pointsEarned,
-                                            exp: g.expGain,
-                                        })}
-                                        {g.streak >=
-                                            STREAK_DISPLAY_THRESHOLD && (
-                                            <span
-                                                className="winner-streak"
-                                                title={t("streakTitle", {
-                                                    streak: g.streak,
-                                                })}
-                                            >
-                                                🔥{g.streak}
-                                            </span>
-                                        )}
-                                        {g.timeToGuessMs !== null && (
-                                            <span
-                                                className={`winner-time ${
-                                                    quick ? "quick" : ""
-                                                }`}
-                                            >
-                                                {quick ? "⚡" : ""}
-                                                {(
-                                                    g.timeToGuessMs / 1000
-                                                ).toFixed(1)}
-                                                s
-                                            </span>
-                                        )}
-                                    </li>
-                                );
-                            })}
-                        </ul>
-                        <p className="song-counter">
-                            {t("songCounterLine", {
-                                played: reveal.songCounter.uniqueSongsPlayed,
-                                total: reveal.songCounter.totalSongs,
-                            })}
-                        </p>
-                        {reveal.allGuesses.length > 0 && (
-                            <details className="all-guesses" open>
-                                <summary>
-                                    {t("revealAllGuessesSummary", {
-                                        count: reveal.allGuesses.length,
-                                    })}
-                                </summary>
-                                <ul>
-                                    {reveal.allGuesses
-                                        .slice()
-                                        .sort((a, b) => a.ts - b.ts)
-                                        .map((g) => (
-                                            <li
-                                                key={g.userID}
-                                                className={
-                                                    g.isCorrect ? "correct" : ""
-                                                }
-                                            >
-                                                <span className="g-name">
-                                                    {g.username}
-                                                </span>
-                                                <span className="g-text">
-                                                    {g.guess || "—"}
-                                                </span>
-                                                {g.isCorrect && (
-                                                    <span className="g-mark">
-                                                        ✓
-                                                    </span>
-                                                )}
-                                            </li>
-                                        ))}
-                                </ul>
-                            </details>
-                        )}
-                    </div>
-                    <div className="thumbnail-slot">
-                        <button
-                            type="button"
-                            className="thumbnail-link"
-                            onClick={() =>
-                                openExternalUrl(
-                                    `${YOUTUBE_WATCH_URL_PREFIX}${reveal.song.youtubeLink}`,
-                                )
-                            }
-                            title={t("openOnYouTube")}
-                        >
-                            <RevealThumbnail
-                                key={reveal.song.thumbnailUrl}
-                                thumbnailUrl={reveal.song.thumbnailUrl}
-                                alt=""
-                            />
-                            <span className="thumbnail-overlay">
-                                {t("youtubePlayLabel")}
-                            </span>
-                        </button>
-                    </div>
-                </div>
-            ) : (
-                <div className="round-area-body idle">
-                    <div className="round-area-text">
-                        {winnerText ? (
-                            <p className="session-winner">{winnerText}</p>
-                        ) : (
-                            <p className="empty">{t("waitingForNextRound")}</p>
-                        )}
-                    </div>
-                    {winnerText ? (
-                        history.length > 0 ? (
-                            <div className="thumbnail-slot session-montage">
-                                <SongMontage history={history} />
-                            </div>
-                        ) : (
-                            <div className="thumbnail-slot session-winner-art">
-                                <img src={thumbsUpUrl} alt="" />
-                            </div>
-                        )
-                    ) : (
-                        <div className="thumbnail-slot placeholder" aria-hidden>
-                            <span className="note-float">♪</span>
-                            <span className="note-float">♫</span>
-                            <span className="note-float">♩</span>
-                            <span className="note-main">🎵</span>
-                            <span className="listening-text">waiting...</span>
-                        </div>
-                    )}
-                </div>
-            )}
+                )}
+            </CrossFade>
         </section>
     );
 }
@@ -1725,6 +1883,52 @@ function resolveWinnerText(
     });
 }
 
+/** Whether the viewer is among the (possibly tied) winners — drives the
+ *  end-of-game celebration. */
+function didViewerWin(
+    scoreboard: ActivityScoreboardSnapshot | null,
+    viewerUserID: string | null,
+): boolean {
+    if (!scoreboard || viewerUserID === null || scoreboard.highestScore === 0) {
+        return false;
+    }
+
+    return scoreboard.winnerIDs.includes(viewerUserID);
+}
+
+// A short, purely-decorative confetti shower for the win celebration. Pieces
+// are a fixed set (deterministic so renders are stable) with staggered delays
+// and varied colors/positions; the fall + fade is CSS-driven (see `.confetti`).
+const CONFETTI_PIECES = Array.from({ length: 16 }, (_, i) => ({
+    left: (i * 100) / 16 + (i % 3) * 2,
+    delay: (i % 6) * 0.18,
+    duration: 2.4 + (i % 4) * 0.35,
+    color: ["#e23b4e", "#f7b500", "#2dba75", "#4a8cff", "#b14aff"][i % 5]!,
+    drift: (i % 2 === 0 ? 1 : -1) * (12 + (i % 4) * 8),
+}));
+
+function Confetti() {
+    return (
+        <div className="confetti" aria-hidden>
+            {CONFETTI_PIECES.map((p, i) => (
+                <span
+                    key={i}
+                    className="confetti-piece"
+                    style={
+                        {
+                            left: `${p.left}%`,
+                            background: p.color,
+                            animationDelay: `${p.delay}s`,
+                            animationDuration: `${p.duration}s`,
+                            "--drift": `${p.drift}px`,
+                        } as React.CSSProperties
+                    }
+                />
+            ))}
+        </div>
+    );
+}
+
 const GENDER_OPTIONS: ActivityGender[] = ["male", "female", "coed"];
 const GUESS_MODE_OPTIONS: ActivityGuessMode[] = ["song", "artist", "both"];
 const SHUFFLE_OPTIONS: ActivityShuffle[] = [
@@ -1878,7 +2082,11 @@ function OptionsCategory({
                 <span>{label}</span>
                 <span className="options-chevron">▾</span>
             </button>
-            {open && <div className="options-panel">{children}</div>}
+            <div className={`collapse${open ? " open" : ""}`}>
+                <div className="collapse-inner">
+                    <div className="options-panel">{children}</div>
+                </div>
+            </div>
         </div>
     );
 }
@@ -3011,6 +3219,7 @@ function SongHistory({
     history,
     bookmarkedLinks,
     auth,
+    active,
     onBookmarked,
     t,
 }: {
@@ -3019,6 +3228,9 @@ function SongHistory({
     /** Auth context for bookmarking from the list; null before auth resolves
      *  (no buttons rendered then). */
     auth: { accessToken: string; instanceId: string } | null;
+    /** Whether a game is currently in progress. Bookmarking is only meaningful
+     *  during an active game, so the per-row stars are hidden otherwise. */
+    active: boolean;
     onBookmarked: (link: string) => void;
     t: Translator;
 }) {
@@ -3043,7 +3255,7 @@ function SongHistory({
                                 {song.artistName} ({song.publishYear})
                             </div>
                         </div>
-                        {auth && (
+                        {auth && active && (
                             <BookmarkStar
                                 accessToken={auth.accessToken}
                                 instanceId={auth.instanceId}
@@ -3119,6 +3331,10 @@ export default function App() {
     const profileCacheRef = useRef<ProfileCache>(new Map());
     const [profileRefreshNonce, setProfileRefreshNonce] = useState(0);
     const [myProfileOpen, setMyProfileOpen] = useState(false);
+    // Mount-through-close presence for the overlays so they animate out, not
+    // just in. (The `&& authState/ui.options` guards live at the render site.)
+    const myProfile = usePresence(myProfileOpen, 200);
+    const optionsPanel = usePresence(optionsOpen, 220);
 
     // A finished round (roundHistory grows) or a session end can change EXP /
     // level, so invalidate open profile cards by bumping the nonce.
@@ -3437,6 +3653,7 @@ export default function App() {
                         <SongHistory
                             history={ui.roundHistory}
                             bookmarkedLinks={ui.bookmarkedLinks}
+                            active={ui.session !== null && !ui.sessionEnded}
                             auth={
                                 authState
                                     ? {
@@ -3556,15 +3773,19 @@ export default function App() {
                             )}
                         </header>
 
-                        {authState && myProfileOpen && (
+                        {authState && myProfile.mounted && (
                             <div
-                                className="profile-modal-overlay"
+                                className={`profile-modal-overlay${
+                                    myProfile.visible ? " visible" : ""
+                                }`}
                                 role="dialog"
                                 aria-modal="true"
                                 onClick={() => setMyProfileOpen(false)}
                             >
                                 <div
-                                    className="profile-modal"
+                                    className={`profile-modal${
+                                        myProfile.visible ? " visible" : ""
+                                    }`}
                                     onClick={(e) => e.stopPropagation()}
                                 >
                                     <button
@@ -3625,6 +3846,15 @@ export default function App() {
                                           authState?.userID ?? null,
                                       )
                                     : null
+                            }
+                            viewerWon={
+                                ui.sessionEnded &&
+                                ui.hadSession &&
+                                !ui.lastReveal &&
+                                didViewerWin(
+                                    ui.scoreboard,
+                                    authState?.userID ?? null,
+                                )
                             }
                             bookmarkSlot={
                                 authState &&
@@ -3795,25 +4025,37 @@ export default function App() {
                                     <span>⚙ {t("options.heading")}</span>
                                     <span className="options-chevron">▾</span>
                                 </button>
-                                {optionsOpen && (
-                                    <OptionsPanel
-                                        accessToken={authState.accessToken}
-                                        instanceId={authState.instanceId}
-                                        options={ui.options}
-                                        t={t}
-                                        onOptimistic={(next) =>
-                                            setUi((prev) => ({
-                                                ...prev,
-                                                options: next,
-                                            }))
-                                        }
-                                        onRollback={(prevOpts) =>
-                                            setUi((prev) => ({
-                                                ...prev,
-                                                options: prevOpts,
-                                            }))
-                                        }
-                                    />
+                                {optionsPanel.mounted && (
+                                    <div
+                                        className={`collapse${
+                                            optionsPanel.visible ? " open" : ""
+                                        }`}
+                                    >
+                                        <div className="collapse-inner">
+                                            <OptionsPanel
+                                                accessToken={
+                                                    authState.accessToken
+                                                }
+                                                instanceId={
+                                                    authState.instanceId
+                                                }
+                                                options={ui.options}
+                                                t={t}
+                                                onOptimistic={(next) =>
+                                                    setUi((prev) => ({
+                                                        ...prev,
+                                                        options: next,
+                                                    }))
+                                                }
+                                                onRollback={(prevOpts) =>
+                                                    setUi((prev) => ({
+                                                        ...prev,
+                                                        options: prevOpts,
+                                                    }))
+                                                }
+                                            />
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         )}
