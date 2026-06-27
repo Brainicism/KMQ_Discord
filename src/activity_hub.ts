@@ -20,8 +20,12 @@ import type ActivityProfileArgs from "./interfaces/activity_profile_args";
 import type ActivityProfileResponse from "./interfaces/activity_profile_response";
 import type ActivityReplyMessage from "./interfaces/activity_reply_message";
 import type ActivityRequestOp from "./enums/activity_request_op";
+import type ActivitySearchSongsArgs from "./interfaces/activity_search_songs_args";
+import type ActivitySearchSongsResponse from "./interfaces/activity_search_songs_response";
 import type ActivitySetOptionArgs from "./interfaces/activity_set_option_args";
 import type ActivitySnapshot from "./interfaces/activity_snapshot";
+import type ActivitySongInfoArgs from "./interfaces/activity_song_info_args";
+import type ActivitySongInfoResponse from "./interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "./interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "./interfaces/activity_user_action_args";
 import type ActivityWorkerEventMessage from "./interfaces/activity_worker_event_message";
@@ -301,6 +305,54 @@ export default class ActivityHub {
         return this.sendRequest<ActivityAutocompleteArtistsResponse>(
             target,
             "autocompleteArtists",
+            args,
+        );
+    }
+
+    /**
+     * Looks up full metadata for a song by its YouTube ID. Routed by guild —
+     * `includedInOptions` depends on the guild's GuildPreference (and the
+     * localized names on its locale), so it must land on a worker that can
+     * resolve them.
+     * @param args - the guild + YouTube ID; see ActivitySongInfoArgs
+     * @returns the song info, or found:false when the ID isn't a known song
+     */
+    async songInfo(
+        args: ActivitySongInfoArgs,
+    ): Promise<ActivitySongInfoResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivitySongInfoResponse>(
+            target,
+            "songInfo",
+            args,
+        );
+    }
+
+    /**
+     * Searches the song catalog by name. Dispatched to any available worker —
+     * the song cache is identical across workers, so routing by guild isn't
+     * needed. Falls back to an empty result set if no worker is up yet.
+     * @param query - raw (untrimmed, any case) song-name query
+     * @param locale - locale picking which localized name to match + return
+     * @returns the worker's top-N matches
+     */
+    async searchSongs(
+        query: string,
+        locale: string,
+    ): Promise<ActivitySearchSongsResponse> {
+        if (this.clusterRanges.length === 0) {
+            await this.refreshClusterMap();
+        }
+
+        const target = this.clusterRanges[0]?.clusterID;
+        if (target === undefined) {
+            return { results: [] };
+        }
+
+        const args: ActivitySearchSongsArgs = { query, locale };
+        return this.sendRequest<ActivitySearchSongsResponse>(
+            target,
+            "searchSongs",
             args,
         );
     }
