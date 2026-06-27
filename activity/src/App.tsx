@@ -1,4 +1,11 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import {
+    useCallback,
+    useEffect,
+    useLayoutEffect,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import {
@@ -3839,6 +3846,20 @@ function GuessTicker({ guesses }: { guesses: UiState["recentGuesses"] }) {
  *  to the console rather than shown, so users see a friendly line. */
 type ConnectionError = { kind: "disconnected" } | { kind: "fatal" };
 
+// What the live stream delivers: the live game events plus the occasional full
+// snapshot (re-sync). Matches `openActivityStream`'s callback and `reduce`.
+type StreamEvent =
+    | ActivityEvent
+    | { type: "snapshot"; snapshot: ActivitySnapshot };
+
+// Minimum time the round-end reveal stays on screen before the next round (or
+// the game-over screen) is allowed to replace it. The reveal naturally shows
+// for the gap between rounds, which is the guild's `song_start_delay`; when
+// that's set low (0 is valid) the reveal would otherwise flash by unread. We
+// synthesise a readable gap on the client by deferring the event that tears it
+// down. A longer song_start_delay already exceeds this, so it's a no-op there.
+const MIN_REVEAL_HOLD_MS = 1500;
+
 export default function App() {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
@@ -3933,6 +3954,59 @@ export default function App() {
     }, []);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
+
+    // Reveal-hold bookkeeping (see MIN_REVEAL_HOLD_MS). `revealShownAt` marks
+    // when the current reveal appeared (set on roundEnd); while a tear-down
+    // event is held back, `holdTimer` is live and `heldQueue` buffers every
+    // event behind it so they apply in order once the hold elapses.
+    const revealShownAtRef = useRef<number | null>(null);
+    const holdTimerRef = useRef<number | null>(null);
+    const heldQueueRef = useRef<StreamEvent[]>([]);
+
+    // Dispatches a live stream event into UI state, holding the round-end reveal
+    // on screen for at least MIN_REVEAL_HOLD_MS. The events that clear a reveal
+    // (the next roundStart, or a sessionEnd after the final round) are deferred
+    // when they land too soon; everything that arrives during the hold is queued
+    // so ordering — and the new round's choices/guesses — is preserved.
+    const handleStreamEvent = useCallback((event: StreamEvent): void => {
+        const apply = (e: StreamEvent): void => {
+            if (e.type === "roundEnd") {
+                revealShownAtRef.current = Date.now();
+            }
+
+            setUi((prev) => reduce(prev, e));
+        };
+
+        if (holdTimerRef.current !== null) {
+            heldQueueRef.current.push(event);
+            return;
+        }
+
+        const clearsReveal =
+            event.type === "roundStart" || event.type === "sessionEnd";
+
+        if (clearsReveal && revealShownAtRef.current !== null) {
+            const remaining =
+                MIN_REVEAL_HOLD_MS - (Date.now() - revealShownAtRef.current);
+
+            if (remaining > 0) {
+                heldQueueRef.current = [event];
+                holdTimerRef.current = window.setTimeout(() => {
+                    holdTimerRef.current = null;
+                    revealShownAtRef.current = null;
+                    const queued = heldQueueRef.current;
+                    heldQueueRef.current = [];
+                    for (const queuedEvent of queued) {
+                        apply(queuedEvent);
+                    }
+                }, remaining);
+                return;
+            }
+        }
+
+        apply(event);
+    }, []);
+
     // Translator is stable for a given bundle. Seed with an English stub for
     // the two strings rendered before the /api/activity/i18n fetch resolves,
     // so the splash isn't "appTitle" / "statusConnecting".
@@ -4008,7 +4082,7 @@ export default function App() {
                     accessToken,
                     instanceId,
                     (event) => {
-                        setUi((prev) => reduce(prev, event));
+                        handleStreamEvent(event);
                     },
                     () => {
                         // Socket closed (often a flaky connection). Record the
@@ -4045,6 +4119,15 @@ export default function App() {
             cancelled = true;
             streamRef.current?.close();
             streamRef.current = null;
+            // Drop any pending reveal-hold so a reconnect's fresh snapshot
+            // isn't clobbered by stale queued events from the old stream.
+            if (holdTimerRef.current !== null) {
+                window.clearTimeout(holdTimerRef.current);
+                holdTimerRef.current = null;
+            }
+
+            heldQueueRef.current = [];
+            revealShownAtRef.current = null;
         };
         // Re-runs when connectNonce changes (the Reconnect button). t's
         // identity changes with the bundle, but we don't want a locale flip to
