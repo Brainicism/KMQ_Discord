@@ -334,6 +334,13 @@ body::before {
     top: 112px;
 }
 
+/* Left cluster, below profile. */
+.sidebar-toggle.search {
+    right: auto;
+    left: 16px;
+    top: 160px;
+}
+
 .sidebar-toggle:hover {
     background: var(--red-light);
     border-color: var(--red-primary);
@@ -365,12 +372,6 @@ body::before {
     display: flex;
     align-items: center;
     gap: 12px;
-}
-
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 .kmq-app header h1 {
@@ -2740,28 +2741,7 @@ fieldset.options-override:disabled .options-group {
     transform: scale(0.94);
 }
 
-/* ---- SONG LOOKUP (history popover + header search) ---- */
-
-/* Header 🔍 button: a circular icon button sized to sit beside the pill-shaped
-   control buttons. */
-.header-search-btn {
-    width: 34px;
-    height: 34px;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-    border-radius: var(--radius-pill);
-    background: var(--bg-elevated);
-    color: var(--text-secondary);
-    font-size: 0.9rem;
-    cursor: pointer;
-    transition: all 0.15s;
-}
-
-.header-search-btn:hover {
-    border-color: var(--border-red);
-    background: var(--red-light);
-    transform: translateY(-1px);
-}
+/* ---- SONG LOOKUP (history popover + search modal) ---- */
 
 /* The history row wraps its text in a hover/tap trigger button; keep it looking
    like the plain text it replaces (`.history-text`) so the row is unchanged

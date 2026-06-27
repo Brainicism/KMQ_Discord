@@ -4175,6 +4175,21 @@ export default function App() {
                 </button>
             )}
 
+            {/* Song lookup toggle — left cluster, below profile. */}
+            {authState && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle left search ${
+                        searchOpen ? "active" : ""
+                    }`}
+                    onClick={() => setSearchOpen(true)}
+                    aria-label={t("search.open")}
+                    title={t("search.open")}
+                >
+                    <span>🔍</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -4312,26 +4327,14 @@ export default function App() {
                             </div>
 
                             {authState && (
-                                <div className="header-right">
-                                    <button
-                                        type="button"
-                                        className="header-search-btn"
-                                        aria-label={t("search.open")}
-                                        title={t("search.open")}
-                                        onClick={() => setSearchOpen(true)}
-                                    >
-                                        🔍
-                                    </button>
-                                    <ControlButtons
-                                        accessToken={authState.accessToken}
-                                        instanceId={authState.instanceId}
-                                        hasSession={
-                                            ui.session !== null &&
-                                            !ui.sessionEnded
-                                        }
-                                        t={t}
-                                    />
-                                </div>
+                                <ControlButtons
+                                    accessToken={authState.accessToken}
+                                    instanceId={authState.instanceId}
+                                    hasSession={
+                                        ui.session !== null && !ui.sessionEnded
+                                    }
+                                    t={t}
+                                />
                             )}
                         </header>
 
