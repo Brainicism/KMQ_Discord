@@ -24,6 +24,7 @@ import {
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import { sql } from "kysely";
 import Eris from "eris";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
@@ -43,6 +44,7 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type HelpDocumentation from "../../interfaces/help";
 import type MatchedArtist from "src/interfaces/matched_artist";
+import type SongInfo from "../../interfaces/song_info";
 
 const COMMAND_NAME = "lookup";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -382,25 +384,28 @@ export default class LookupCommand implements BaseCommand {
         }
     }
 
-    static getDaisukiLink(id: number, isMV: boolean): string {
+    static getSoridataLink(id: number, isMV: boolean): string {
         if (isMV) {
-            return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
+            return `https://soridata.com/mv.html?id=${id}`;
         }
 
-        return `https://kpop.daisuki.com.br/audio_videos.html?playid=${id}`;
+        return `https://soridata.com/audio_videos.html?playid=${id}`;
     }
 
-    static async lookupByYoutubeID(
-        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+    /**
+     * Gathers all lookup metadata for a song by its YouTube video ID. Pure
+     * data assembly (no Discord / embed concerns) so both the slash command
+     * and the Activity can render it however they like.
+     * @param videoID - the YouTube video ID
+     * @param guildID - guild whose game options decide `includedInOptions`
+     * @param locale - locale for the localized song / artist names
+     * @returns the structured song info, or null when the ID isn't a known song
+     */
+    static async getSongInfo(
         videoID: string,
+        guildID: string,
         locale: LocaleType,
-    ): Promise<boolean> {
-        const guildID = (
-            messageOrInteraction instanceof Eris.CommandInteraction
-                ? messageOrInteraction.guild?.id
-                : messageOrInteraction.guildID
-        )!;
-
+    ): Promise<SongInfo | null> {
         const kmqSongEntry = await SongSelector.getSongByLink(videoID);
         const daisukiEntry = await dbContext.kpopVideos
             .selectFrom("app_kpop")
@@ -418,45 +423,28 @@ export default class LookupCommand implements BaseCommand {
             .executeTakeFirst();
 
         if (!daisukiEntry) {
-            // maybe it was falsely parsed as video ID? fallback to song name lookup
-            // eslint-disable-next-line @typescript-eslint/no-use-before-define
-            const found = await LookupCommand.lookupBySongName(
-                messageOrInteraction,
-                videoID,
-                locale,
-            );
-
-            if (found) {
-                logger.info(
-                    `Lookup succeeded through fallback lookup for: ${videoID}`,
-                );
-                return true;
-            }
-
-            return false;
+            return null;
         }
 
-        const daisukiLink = LookupCommand.getDaisukiLink(
+        const soridataLink = LookupCommand.getSoridataLink(
             daisukiEntry.id,
-            !!daisukiEntry,
+            true,
         );
 
-        let description: string;
-        let songName: string;
-        let artistName: string;
+        const tags = getEmojisFromSongTags(daisukiEntry);
         const songAliases: string[] = [];
         const artistAliases: string[] = [];
-        const tags: string = getEmojisFromSongTags(daisukiEntry);
+        const isKorean = locale === LocaleType.KO;
+        const inKMQ = !!kmqSongEntry;
+
+        let songName: string;
+        let artistName: string;
         let views: number;
         let publishDate: Date;
-        let songDuration: string | null = null;
-        let includedInOptions = false;
-        const isKorean = locale === LocaleType.KO;
+        let durationSeconds: number | null = null;
+        let includedInOptions: boolean | null = null;
 
         if (kmqSongEntry) {
-            description = i18n.translate(guildID, "command.lookup.inKMQ", {
-                link: daisukiLink,
-            });
             songName = kmqSongEntry.getLocalizedSongName(locale);
             artistName = kmqSongEntry.getLocalizedArtistName(locale);
 
@@ -481,20 +469,14 @@ export default class LookupCommand implements BaseCommand {
             views = kmqSongEntry.views;
             publishDate = kmqSongEntry.publishDate;
 
-            const durationInSeconds = (
-                await dbContext.kmq
-                    .selectFrom("cached_song_duration")
-                    .select("duration")
-                    .where("vlink", "=", videoID)
-                    .executeTakeFirst()
-            )?.duration;
-
-            // duration in minutes and seconds
-            if (durationInSeconds) {
-                const minutes = Math.floor(durationInSeconds / 60);
-                const seconds = durationInSeconds % 60;
-                songDuration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
-            }
+            durationSeconds =
+                (
+                    await dbContext.kmq
+                        .selectFrom("cached_song_duration")
+                        .select("duration")
+                        .where("vlink", "=", videoID)
+                        .executeTakeFirst()
+                )?.duration ?? null;
 
             const guildPreference =
                 await GuildPreference.getGuildPreference(guildID);
@@ -507,15 +489,9 @@ export default class LookupCommand implements BaseCommand {
                 .includes(videoID);
 
             logger.info(
-                `${getDebugLogHeader(
-                    messageOrInteraction,
-                )} | KMQ song lookup. videoID = ${videoID}. Included in options = ${includedInOptions}.`,
+                `KMQ song lookup. gid = ${guildID}. videoID = ${videoID}. Included in options = ${includedInOptions}.`,
             );
         } else {
-            description = i18n.translate(guildID, "command.lookup.notInKMQ", {
-                link: daisukiLink,
-            });
-
             songName =
                 daisukiEntry.kname && isKorean
                     ? daisukiEntry.kname
@@ -563,38 +539,177 @@ export default class LookupCommand implements BaseCommand {
             publishDate = new Date(daisukiEntry.publishedon);
 
             logger.info(
-                `${getDebugLogHeader(
-                    messageOrInteraction,
-                )} | Non-KMQ song lookup. videoID = ${videoID}.`,
+                `Non-KMQ song lookup. gid = ${guildID}. videoID = ${videoID}.`,
             );
         }
+
+        const songMetadata = await dbContext.kmq
+            .selectFrom("song_metadata")
+            .select(["correct_guesses", "rounds_played"])
+            .where("vlink", "=", videoID)
+            .executeTakeFirst();
+
+        const guessStats =
+            songMetadata && songMetadata.rounds_played > 0
+                ? {
+                      correctGuesses: songMetadata.correct_guesses,
+                      roundsPlayed: songMetadata.rounds_played,
+                  }
+                : null;
+
+        return {
+            inKMQ,
+            songName,
+            artistName,
+            youtubeLink: videoID,
+            thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+            soridataLink,
+            views,
+            publishDate: publishDate.toISOString(),
+            songAliases,
+            artistAliases,
+            tags,
+            durationSeconds,
+            includedInOptions,
+            guessStats,
+        };
+    }
+
+    /**
+     * Searches the playable catalog for songs whose name (or alias) matches a
+     * query, ranked by name-length then views — the same ordering `/lookup`
+     * uses for its by-name results. Shared with the Activity's song search.
+     * @param songName - the (non-empty) query substring
+     * @param locale - locale deciding which name column drives the ranking
+     * @param limit - max rows to return
+     * @returns the matching songs as QueriedSong instances
+     */
+    static async searchSongEntries(
+        songName: string,
+        locale: LocaleType,
+        limit: number,
+    ): Promise<QueriedSong[]> {
+        const contains = `%${songName}%`;
+        const prefix = `${songName}%`;
+        const nameCol =
+            locale === LocaleType.KO ? "song_name_ko" : "song_name_en";
+
+        const artistCol =
+            locale === LocaleType.KO ? "artist_name_ko" : "artist_name_en";
+
+        const rows = await dbContext.kmq
+            .selectFrom("available_songs")
+            .select(SongSelector.QueriedSongFields)
+            .where(({ or, eb }) =>
+                or([
+                    eb("song_name_en", "like", contains),
+                    eb("song_name_ko", "like", contains),
+                    eb("artist_name_en", "like", contains),
+                    eb("artist_name_ko", "like", contains),
+                    eb("song_aliases", "like", contains),
+                ]),
+            )
+            // Rank by how directly the query matches: a song-name prefix beats a
+            // song-name substring, which beats an artist match, which beats an
+            // alias-only match. Ties broken by views. Without this a short song
+            // whose alias merely contains the query (e.g. "00:00" for "bl")
+            // outranks the songs actually named "Bl...".
+            .orderBy(
+                sql`CASE
+                    WHEN ${sql.ref(nameCol)} LIKE ${prefix} THEN 0
+                    WHEN ${sql.ref(nameCol)} LIKE ${contains} THEN 1
+                    WHEN ${sql.ref(artistCol)} LIKE ${prefix} THEN 2
+                    WHEN ${sql.ref(artistCol)} LIKE ${contains} THEN 3
+                    ELSE 4
+                END`,
+                "asc",
+            )
+            .orderBy("views", "desc")
+            .limit(limit)
+            .execute();
+
+        return rows.map((x) => new QueriedSong(x));
+    }
+
+    static async lookupByYoutubeID(
+        messageOrInteraction: GuildTextableMessage | CommandInteraction,
+        videoID: string,
+        locale: LocaleType,
+    ): Promise<boolean> {
+        const guildID = (
+            messageOrInteraction instanceof Eris.CommandInteraction
+                ? messageOrInteraction.guild?.id
+                : messageOrInteraction.guildID
+        )!;
+
+        const songInfo = await LookupCommand.getSongInfo(
+            videoID,
+            guildID,
+            locale,
+        );
+
+        if (!songInfo) {
+            // maybe it was falsely parsed as video ID? fallback to song name lookup
+            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+            const found = await LookupCommand.lookupBySongName(
+                messageOrInteraction,
+                videoID,
+                locale,
+            );
+
+            if (found) {
+                logger.info(
+                    `Lookup succeeded through fallback lookup for: ${videoID}`,
+                );
+                return true;
+            }
+
+            return false;
+        }
+
+        const description = i18n.translate(
+            guildID,
+            songInfo.inKMQ ? "command.lookup.inKMQ" : "command.lookup.notInKMQ",
+            { link: songInfo.soridataLink },
+        );
 
         const viewsString = i18n.translate(guildID, "misc.views");
 
         const fields = [
             {
                 name: _.capitalize(viewsString),
-                value: friendlyFormattedNumber(views),
+                value: friendlyFormattedNumber(songInfo.views),
             },
             {
                 name: i18n.translate(guildID, "misc.releaseDate"),
-                value: friendlyFormattedDate(publishDate, guildID),
+                value: friendlyFormattedDate(
+                    new Date(songInfo.publishDate),
+                    guildID,
+                ),
             },
             {
                 name: i18n.translate(guildID, "misc.songAliases"),
                 value:
-                    songAliases.join(", ") ||
+                    songInfo.songAliases.join(", ") ||
                     i18n.translate(guildID, "misc.none"),
             },
             {
                 name: i18n.translate(guildID, "misc.artistAliases"),
                 value:
-                    artistAliases.join(", ") ||
+                    songInfo.artistAliases.join(", ") ||
                     i18n.translate(guildID, "misc.none"),
             },
         ];
 
-        if (kmqSongEntry) {
+        if (songInfo.inKMQ) {
+            // duration in minutes and seconds
+            let songDuration: string | null = null;
+            if (songInfo.durationSeconds) {
+                const minutes = Math.floor(songInfo.durationSeconds / 60);
+                const seconds = songInfo.durationSeconds % 60;
+                songDuration = `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+            }
+
             fields.push(
                 {
                     name: i18n.translate(guildID, "misc.duration"),
@@ -609,27 +724,21 @@ export default class LookupCommand implements BaseCommand {
                     ),
                     value: i18n.translate(
                         guildID,
-                        includedInOptions ? "misc.yes" : "misc.no",
+                        songInfo.includedInOptions ? "misc.yes" : "misc.no",
                     ),
                 },
             );
         }
 
-        const songMetadata = await dbContext.kmq
-            .selectFrom("song_metadata")
-            .select(["correct_guesses", "rounds_played"])
-            .where("vlink", "=", videoID)
-            .executeTakeFirst();
-
-        if (songMetadata && songMetadata.rounds_played > 0) {
+        if (songInfo.guessStats) {
             const guessRate = (
-                (100.0 * songMetadata.correct_guesses) /
-                songMetadata.rounds_played
+                (100.0 * songInfo.guessStats.correctGuesses) /
+                songInfo.guessStats.roundsPlayed
             ).toFixed(2);
 
             fields.push({
                 name: i18n.translate(guildID, "misc.guessRate"),
-                value: `${guessRate}% (${songMetadata.correct_guesses}/${songMetadata.rounds_played})`,
+                value: `${guessRate}% (${songInfo.guessStats.correctGuesses}/${songInfo.guessStats.roundsPlayed})`,
             });
         }
 
@@ -642,10 +751,10 @@ export default class LookupCommand implements BaseCommand {
         await sendInfoMessage(
             messageContext,
             {
-                title: `"${songName}" - ${artistName}${tags}`,
+                title: `"${songInfo.songName}" - ${songInfo.artistName}${songInfo.tags}`,
                 url: `https://youtu.be/${videoID}`,
                 description,
-                thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
+                thumbnailUrl: songInfo.thumbnailUrl,
                 fields: fields.map((x) => ({
                     name: x.name,
                     value: x.value,

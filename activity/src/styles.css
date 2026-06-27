@@ -334,6 +334,13 @@ body::before {
     top: 112px;
 }
 
+/* Left cluster, below profile. */
+.sidebar-toggle.search {
+    right: auto;
+    left: 16px;
+    top: 160px;
+}
+
 .sidebar-toggle:hover {
     background: var(--red-light);
     border-color: var(--red-primary);
@@ -2732,6 +2739,389 @@ fieldset.options-override:disabled .options-group {
 
 .sidebar-toggle:active {
     transform: scale(0.94);
+}
+
+/* ---- SONG LOOKUP (history popover + search modal) ---- */
+
+/* The history row wraps its text in a hover/tap trigger button; keep it looking
+   like the plain text it replaces (`.history-text`) so the row is unchanged
+   until interacted with. */
+.song-info-anchor {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.song-info-trigger {
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: none;
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+}
+
+.song-info-trigger:hover .history-song {
+    color: var(--red-primary);
+}
+
+/* Row-anchored popover (desktop) — positioned `fixed` from JS to escape the
+   history drawer's overflow clipping; opens rightward via songPopoverFixedStyle.
+   Mobile centres it (see breakpoint below). */
+.song-info-popover {
+    position: absolute;
+    top: 0;
+    left: 100%;
+    margin-left: 8px;
+    z-index: 200;
+    /* Grow to fit the title (capped) so short songs stay compact and long
+       names get more room instead of being squeezed beside the thumbnail. */
+    width: max-content;
+    min-width: 300px;
+    max-width: min(92vw, 440px);
+    max-height: 70vh;
+    overflow-y: auto;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.song-info-popover.visible {
+    opacity: 1;
+}
+
+@media (min-width: 901px) {
+    .song-info-popover {
+        transform-origin: left center;
+        transform: scale(0.94) translateX(-6px);
+    }
+
+    .song-info-popover.visible {
+        transform: scale(1) translateX(0);
+    }
+}
+
+/* Below the grid breakpoint the history is a drawer overlay; a row-anchored
+   popover would clip, so centre the card on-screen instead. */
+@media (max-width: 900px) {
+    .song-info-popover {
+        position: fixed;
+        inset: auto;
+        top: 50%;
+        left: 50%;
+        margin: 0;
+        transform: translate(-50%, -50%);
+        width: min(92vw, 320px);
+        max-height: 86vh;
+    }
+}
+
+.song-info-popover-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+    z-index: 1;
+}
+
+/* ---- SONG-INFO CARD (shared by popover + search detail) ---- */
+.song-info-card {
+    padding: 16px;
+}
+
+.song-info-status {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 8px 0;
+    text-align: center;
+}
+
+.song-info-head {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.song-info-thumb {
+    width: 180px;
+    aspect-ratio: 16 / 9;
+    flex-shrink: 0;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--bg-elevated);
+}
+
+.song-info-title {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    min-width: 0;
+}
+
+/* Single line that drives the popover's content-based width up to its cap,
+   then ellipsizes — long names stay on one tidy line instead of being cut. */
+.song-info-song {
+    font-weight: 800;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-info-artist {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.song-info-badge {
+    align-self: flex-start;
+    margin-top: 4px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    padding: 2px 8px;
+    border-radius: var(--radius-pill);
+}
+
+.song-info-badge.in-kmq {
+    background: var(--red-light);
+    color: var(--red-primary);
+}
+
+.song-info-badge.not-in-kmq {
+    background: var(--bg-elevated);
+    color: var(--text-tertiary);
+}
+
+.song-info-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin: 0 0 12px;
+}
+
+.song-info-stats div {
+    background: var(--bg-elevated);
+    border-radius: var(--radius-sm);
+    padding: 6px 8px;
+}
+
+.song-info-stats dt {
+    font-size: 0.68rem;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.song-info-stats dd {
+    margin: 2px 0 0;
+    font-size: 0.82rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.song-info-aliases {
+    margin: 0 0 8px;
+    font-size: 0.76rem;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.song-info-aliases-label {
+    font-weight: 700;
+    color: var(--text-tertiary);
+    text-transform: uppercase;
+    font-size: 0.66rem;
+    letter-spacing: 0.02em;
+}
+
+.song-info-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.song-info-link {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px;
+    border: 1px solid var(--border-red);
+    border-radius: var(--radius-pill);
+    background: var(--red-light);
+    color: var(--red-primary);
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.song-info-link:hover {
+    background: var(--red-primary);
+    color: #fff;
+    box-shadow: var(--shadow-glow);
+}
+
+/* ---- HEADER SEARCH MODAL ---- */
+.song-search-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 10vh 16px 16px;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.song-search-overlay.visible {
+    opacity: 1;
+}
+
+.song-search-modal {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: min(94vw, 460px);
+    max-height: 80vh;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    transform: scale(0.96) translateY(-8px);
+    opacity: 0;
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.song-search-modal.visible {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+.song-search-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.song-search-title {
+    font-weight: 800;
+    font-size: 1rem;
+}
+
+.song-search-close {
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.song-search-input {
+    margin: 14px 16px 8px;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.song-search-input:focus {
+    outline: none;
+    border-color: var(--border-red);
+}
+
+.song-search-status {
+    margin: 8px 16px 16px;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    text-align: center;
+}
+
+.song-search-results {
+    list-style: none;
+    margin: 0;
+    padding: 4px 8px 12px;
+    overflow-y: auto;
+}
+
+.song-search-results li {
+    margin: 0;
+}
+
+.song-search-results button {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    width: 100%;
+    padding: 8px 10px;
+    border: none;
+    border-radius: var(--radius-sm);
+    background: none;
+    text-align: left;
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.song-search-results button:hover {
+    background: var(--bg-hover);
+}
+
+.song-search-song {
+    font-size: 0.86rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.song-search-artist {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+}
+
+.song-search-detail {
+    overflow-y: auto;
+}
+
+.song-search-back {
+    margin: 12px 16px 0;
+    padding: 4px 0;
+    border: none;
+    background: none;
+    color: var(--red-primary);
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
 }
 
 /* Respect users who opt out of motion at the OS level: drop the decorative

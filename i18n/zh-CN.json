@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "排行榜",
         "scoreboardLeft": "(已离开)",
+        "search": {
+            "back": "返回结果",
+            "empty": "未找到歌曲。",
+            "hint": "输入至少 2 个字符以进行搜索。",
+            "open": "查找歌曲",
+            "placeholder": "按歌曲名称搜索...",
+            "searching": "搜索中...",
+            "title": "查找歌曲"
+        },
         "sessionEndedBanner": "没有进行中的游戏 — 使用上方按钮开始(或在此频道使用 {{playSlash}})。",
         "sessionWinnerNone": "游戏结束 — 未得分。",
         "sessionWinnerSoloMany": "🏆 {{username}} 以 {{score}} 分获胜!",
@@ -243,6 +252,25 @@
         "skipTitle": "投票跳过这首歌",
         "skipVoteFallback": "投票",
         "songCounterLine": "{{played}}/{{total}} 首歌曲已播放",
+        "songInfo": {
+            "artistAliases": "艺术家别名",
+            "close": "关闭",
+            "duration": "时长",
+            "guessRate": "猜测率",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "KMQ 中",
+            "inOptions": "在当前选项中",
+            "loadError": "无法加载歌曲信息。",
+            "loading": "加载中...",
+            "no": "否",
+            "notFound": "未找到歌曲。",
+            "notInKMQ": "不在KMQ中",
+            "releaseDate": "发布日期",
+            "songAliases": "歌曲别名",
+            "viewOnSoridata": "在Soridata上查看",
+            "views": "浏览量",
+            "yes": "是"
+        },
         "startGameBusy": "开始中…",
         "startGameButton": "开始游戏",
         "statusConnecting": "连接中…",
@@ -996,12 +1024,12 @@
                 "name": "查找"
             },
             "inCurrentGameOptions": "在当前游戏选项中？",
-            "inKMQ": "这首歌曲已包含在KMQ中！这是[Daisuki]({{link}})的链接。",
+            "inKMQ": "这首歌已包含在KMQ！这是[Soridata]({{link}})的链接。",
             "notFound": {
-                "description": "在KMQ的Daisuki数据库副本中未找到请求的歌曲，因此未包含在KMQ中。",
+                "description": "在 KMQ 的 Soridata 数据库副本中未找到请求的歌曲，因此不包含在 KMQ 中。",
                 "title": "未找到歌曲。"
             },
-            "notInKMQ": "这首歌在[Daisuki]({{link}})上有条目，但未包含在KMQ中。",
+            "notInKMQ": "这首歌在 [Soridata]({{link}}) 上有条目，但它不包含在 KMQ 中。",
             "songNameSearchResult": {
                 "notFoundDescription": "找不到任何名为该名称的歌曲。",
                 "successDescription": "以下歌曲可在KMQ中使用：",

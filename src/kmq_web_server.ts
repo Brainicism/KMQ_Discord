@@ -1319,6 +1319,53 @@ export default class KmqWebServer {
             },
         );
 
+        httpServer.get(
+            "/api/activity/song-search",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                if (!this.activityHub) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Activity not enabled" });
+                    return;
+                }
+
+                const user = await this.resolveAccessToken(
+                    extractBearer(request),
+                );
+
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                const q = (request.query as any)?.q;
+                const query = typeof q === "string" ? q : "";
+                const rawLocale = (request.query as any)?.locale as
+                    | string
+                    | undefined;
+
+                const locale = resolveServerLocale(rawLocale);
+
+                // Route to a worker — available_songs is queried per-worker;
+                // any worker can answer. Worker returns name matches capped at
+                // ACTIVITY_SONG_SEARCH_LIMIT.
+                try {
+                    const response = await this.activityHub.searchSongs(
+                        query,
+                        locale,
+                    );
+
+                    await reply.code(200).send(response);
+                } catch (e) {
+                    logger.warn(
+                        `Activity song-search failed. err=${(e as Error).message}`,
+                    );
+                    await reply.code(200).send({ results: [] });
+                }
+            },
+        );
+
         httpServer.post(
             "/api/activity/option",
             limit(ACTIVITY_RATE_LIMIT_ACTION),
@@ -1439,6 +1486,40 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity profile failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/song",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as {
+                    youtube_link?: string;
+                };
+
+                if (typeof body.youtube_link !== "string") {
+                    await reply
+                        .code(400)
+                        .send({ error: "Missing youtube_link" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.songInfo({
+                        guildID: ctx.instance.guildID,
+                        youtubeLink: body.youtube_link,
+                    });
+
+                    await reply.code(200).send(result);
+                } catch (e) {
+                    logger.warn(
+                        `Activity song lookup failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }

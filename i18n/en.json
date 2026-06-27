@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "Scoreboard",
         "scoreboardLeft": "(left)",
+        "search": {
+            "back": "Back to results",
+            "empty": "No songs found.",
+            "hint": "Type at least 2 characters to search.",
+            "open": "Look up a song",
+            "placeholder": "Search by song name...",
+            "searching": "Searching...",
+            "title": "Look up a song"
+        },
         "sessionEndedBanner": "No active game — start one with the button above (or {{playSlash}} in this channel).",
         "sessionWinnerNone": "Game over — no points scored.",
         "sessionWinnerSoloMany": "🏆 {{username}} wins with {{score}} points!",
@@ -243,6 +252,25 @@
         "skipTitle": "Vote to skip this song",
         "skipVoteFallback": "vote",
         "songCounterLine": "{{played}}/{{total}} songs played",
+        "songInfo": {
+            "artistAliases": "Artist Aliases",
+            "close": "Close",
+            "duration": "Duration",
+            "guessRate": "Guess Rate",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "In KMQ",
+            "inOptions": "In Current Options",
+            "loadError": "Couldn't load song info.",
+            "loading": "Loading...",
+            "no": "No",
+            "notFound": "Song not found.",
+            "notInKMQ": "Not in KMQ",
+            "releaseDate": "Release Date",
+            "songAliases": "Song Aliases",
+            "viewOnSoridata": "View on Soridata",
+            "views": "Views",
+            "yes": "Yes"
+        },
         "startGameBusy": "Starting...",
         "startGameButton": "Start game",
         "statusConnecting": "Connecting...",
@@ -996,12 +1024,12 @@
                 "name": "lookup"
             },
             "inCurrentGameOptions": "In Current Game Options?",
-            "inKMQ": "This song is included in KMQ! Here's the link to [Daisuki]({{link}}).",
+            "inKMQ": "This song is included in KMQ! Here's the link to [Soridata]({{link}}).",
             "notFound": {
-                "description": "The requested song was not found in KMQ's copy of the Daisuki database, therefore it is not included in KMQ.",
+                "description": "The requested song was not found in KMQ's copy of the Soridata database, therefore it is not included in KMQ.",
                 "title": "Song Not Found"
             },
-            "notInKMQ": "This song has an entry on [Daisuki]({{link}}), but it isn't included in KMQ.",
+            "notInKMQ": "This song has an entry on [Soridata]({{link}}), but it isn't included in KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Could not find any songs by that name",
                 "successDescription": "The following songs are available in KMQ:",

@@ -449,4 +449,79 @@ describe("ActivityHub", () => {
             assert.strictEqual(fleet.sent.length, 0);
         });
     });
+
+    describe("songInfo", () => {
+        it("routes to the guild's owning cluster with the right op and args", async () => {
+            const { hub, fleet } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+
+            fleet.autoReply = (payload) => {
+                fleet.emit(ACTIVITY_IPC_REPLY, {
+                    cid: payload.cid,
+                    payload: { found: true, info: { songName: "TT" } },
+                });
+            };
+
+            const res = await hub.songInfo({
+                guildID: "0",
+                youtubeLink: "abc123",
+            });
+
+            assert.deepStrictEqual(res, {
+                found: true,
+                info: { songName: "TT" },
+            });
+            assert.strictEqual(fleet.sent[0]!.payload.op, "songInfo");
+            assert.deepStrictEqual(fleet.sent[0]!.payload.args, {
+                guildID: "0",
+                youtubeLink: "abc123",
+            });
+        });
+    });
+
+    describe("searchSongs", () => {
+        it("routes to the first cluster regardless of guild", async () => {
+            const { hub, fleet } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+
+            fleet.autoReply = (payload) => {
+                fleet.emit(ACTIVITY_IPC_REPLY, {
+                    cid: payload.cid,
+                    payload: {
+                        results: [
+                            {
+                                youtubeLink: "abc123",
+                                songName: "TT",
+                                artistName: "TWICE",
+                                publishYear: 2016,
+                            },
+                        ],
+                    },
+                });
+            };
+
+            const res = await hub.searchSongs("tt", "en");
+            assert.deepStrictEqual(res.results, [
+                {
+                    youtubeLink: "abc123",
+                    songName: "TT",
+                    artistName: "TWICE",
+                    publishYear: 2016,
+                },
+            ]);
+            assert.strictEqual(fleet.sent[0]!.clusterID, 0);
+            assert.strictEqual(fleet.sent[0]!.payload.op, "searchSongs");
+            assert.deepStrictEqual(fleet.sent[0]!.payload.args, {
+                query: "tt",
+                locale: "en",
+            });
+        });
+
+        it("returns an empty result set when no worker is available", async () => {
+            const { hub, fleet } = makeHub([]); // no clusters
+            const res = await hub.searchSongs("tt", "en");
+            assert.deepStrictEqual(res, { results: [] });
+            assert.strictEqual(fleet.sent.length, 0);
+        });
+    });
 });

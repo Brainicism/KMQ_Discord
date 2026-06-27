@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "Papan Skor",
         "scoreboardLeft": "(keluar)",
+        "search": {
+            "back": "Kembali ke hasil",
+            "empty": "Tidak ada lagu yang ditemukan.",
+            "hint": "Ketik setidaknya 2 karakter untuk mencari.",
+            "open": "Cari lagu",
+            "placeholder": "Cari berdasarkan nama lagu...",
+            "searching": "Mencari...",
+            "title": "Cari lagu"
+        },
         "sessionEndedBanner": "Tidak ada permainan aktif — mulai satu dengan tombol di atas (atau {{playSlash}} di channel ini).",
         "sessionWinnerNone": "Permainan selesai — tidak ada poin.",
         "sessionWinnerSoloMany": "🏆 {{username}} menang dengan {{score}} poin!",
@@ -243,6 +252,25 @@
         "skipTitle": "Pilih untuk melewati lagu ini",
         "skipVoteFallback": "pilih",
         "songCounterLine": "{{played}}/{{total}} lagu diputar",
+        "songInfo": {
+            "artistAliases": "Alias Artis",
+            "close": "Tutup",
+            "duration": "Durasi",
+            "guessRate": "Tebak Persentase",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "Di KMQ",
+            "inOptions": "Di Pilihan Saat Ini",
+            "loadError": "Tidak dapat memuat info lagu.",
+            "loading": "Memuat...",
+            "no": "Tidak",
+            "notFound": "Lagu tidak ditemukan.",
+            "notInKMQ": "Tidak di KMQ",
+            "releaseDate": "Tanggal Rilis",
+            "songAliases": "Alias Lagu",
+            "viewOnSoridata": "Lihat di Soridata",
+            "views": "Tampilan",
+            "yes": "Ya"
+        },
         "startGameBusy": "Memulai…",
         "startGameButton": "Mulai permainan",
         "statusConnecting": "Menghubungkan…",
@@ -996,12 +1024,12 @@
                 "name": "pencarian"
             },
             "inCurrentGameOptions": "Dalam Opsi Permainan Saat Ini?",
-            "inKMQ": "Lagu ini disertakan dalam KMQ! Berikut tautan ke [Daisuki]({{link}}).",
+            "inKMQ": "Lagu ini termasuk dalam KMQ! Berikut adalah tautannya ke [Soridata]({{link}}).",
             "notFound": {
-                "description": "Lagu yang diminta tidak ditemukan dalam salinan basis data Daisuki KMQ, oleh karena itu tidak disertakan dalam KMQ.",
+                "description": "Lagu yang diminta tidak ditemukan dalam salinan database Soridata KMQ, oleh karena itu tidak termasuk dalam KMQ.",
                 "title": "Lagu Tidak Ditemukan"
             },
-            "notInKMQ": "Lagu ini memiliki entri di [Daisuki]({{link}}), tetapi tidak disertakan dalam KMQ.",
+            "notInKMQ": "Lagu ini memiliki entri di [Soridata]({{link}}), tetapi tidak termasuk dalam KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Tidak dapat menemukan lagu apa pun dengan nama itu",
                 "successDescription": "Lagu berikut tersedia di KMQ:",

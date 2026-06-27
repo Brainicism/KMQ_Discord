@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "Tabla de puntuación",
         "scoreboardLeft": "(se fue)",
+        "search": {
+            "back": "Volver a los resultados",
+            "empty": "No se encontraron canciones.",
+            "hint": "Escribe al menos 2 caracteres para buscar.",
+            "open": "Buscar una canción",
+            "placeholder": "Buscar por nombre de canción...",
+            "searching": "Buscando...",
+            "title": "Buscar una canción"
+        },
         "sessionEndedBanner": "No hay partida activa — inicia una con el botón de arriba (o {{playSlash}} en este canal).",
         "sessionWinnerNone": "Fin de la partida — no se anotaron puntos.",
         "sessionWinnerSoloMany": "🏆 ¡{{username}} gana con {{score}} puntos!",
@@ -243,6 +252,25 @@
         "skipTitle": "Vota para saltar esta canción",
         "skipVoteFallback": "votar",
         "songCounterLine": "{{played}}/{{total}} canciones reproducidas",
+        "songInfo": {
+            "artistAliases": "Alias del artista",
+            "close": "Cerrar",
+            "duration": "Duración",
+            "guessRate": "Tasa de aciertos",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "En KMQ",
+            "inOptions": "En opciones actuales",
+            "loadError": "No se pudo cargar la información de la canción.",
+            "loading": "Cargando...",
+            "no": "No",
+            "notFound": "Canción no encontrada.",
+            "notInKMQ": "No en KMQ",
+            "releaseDate": "Fecha de lanzamiento",
+            "songAliases": "Alias de la canción",
+            "viewOnSoridata": "Ver en Soridata",
+            "views": "Vistas",
+            "yes": "Sí"
+        },
         "startGameBusy": "Iniciando…",
         "startGameButton": "Iniciar partida",
         "statusConnecting": "Conectando…",
@@ -996,12 +1024,12 @@
                 "name": "búsqueda"
             },
             "inCurrentGameOptions": "¿En opciones de juego actuales?",
-            "inKMQ": "¡Esta canción está incluida en KMQ! Aquí está el enlace a [Daisuki]({{link}}).",
+            "inKMQ": "¡Esta canción está incluida en KMQ! Aquí está el enlace a [Soridata]({{link}}).",
             "notFound": {
-                "description": "La canción solicitada no se encontró en la copia de la base de datos de Daisuki de KMQ, por lo tanto, no está incluida en KMQ.",
+                "description": "La canción solicitada no se encontró en la copia de KMQ de la base de datos de Soridata, por lo tanto no está incluida en KMQ.",
                 "title": "Canción no encontrada"
             },
-            "notInKMQ": "Esta canción tiene una entrada en [Daisuki]({{link}}), pero no está incluida en KMQ.",
+            "notInKMQ": "Esta canción tiene una entrada en [Soridata]({{link}}), pero no está incluida en KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "No se encontraron canciones con ese nombre",
                 "successDescription": "Las siguientes canciones están disponibles en KMQ:",

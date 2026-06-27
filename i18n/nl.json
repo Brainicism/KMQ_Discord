@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "Scorebord",
         "scoreboardLeft": "(weg)",
+        "search": {
+            "back": "Terug naar resultaten",
+            "empty": "Geen nummers gevonden.",
+            "hint": "Typ minimaal 2 tekens om te zoeken.",
+            "open": "Zoek een lied op",
+            "placeholder": "Zoek op songnaam...",
+            "searching": "Zoeken...",
+            "title": "Zoek een lied op"
+        },
         "sessionEndedBanner": "Geen actief spel — start er een met de knop hierboven (of {{playSlash}} in dit kanaal).",
         "sessionWinnerNone": "Spel afgelopen — geen punten gescoord.",
         "sessionWinnerSoloMany": "🏆 {{username}} wint met {{score}} punten!",
@@ -243,6 +252,25 @@
         "skipTitle": "Stem om dit nummer over te slaan",
         "skipVoteFallback": "stem",
         "songCounterLine": "{{played}}/{{total}} nummers afgespeeld",
+        "songInfo": {
+            "artistAliases": "Artiest Aliassen",
+            "close": "Sluiten",
+            "duration": "Duur",
+            "guessRate": "Gokpercentage",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "In KMQ",
+            "inOptions": "In Huidige Opties",
+            "loadError": "Kon liedinformatie niet laden.",
+            "loading": "Laden...",
+            "no": "Nee",
+            "notFound": "Lied niet gevonden.",
+            "notInKMQ": "Niet in KMQ",
+            "releaseDate": "Uitgavedatum",
+            "songAliases": "Nummer Aliassen",
+            "viewOnSoridata": "Bekijk op Soridata",
+            "views": "Weergaven",
+            "yes": "Ja"
+        },
         "startGameBusy": "Starten…",
         "startGameButton": "Spel starten",
         "statusConnecting": "Verbinden…",
@@ -996,12 +1024,12 @@
                 "name": "zoeken"
             },
             "inCurrentGameOptions": "Ingesteld in huidige spelopties?",
-            "inKMQ": "Dit nummer is opgenomen in KMQ! Hier is de link naar [Daisuki]({{link}}).",
+            "inKMQ": "Dit liedje staat in KMQ! Hier is de link naar [Soridata]({{link}}).",
             "notFound": {
-                "description": "Het verzochte nummer werd niet gevonden in het KMQ-exemplaar van de Daisuki-database, daarom is het niet opgenomen in KMQ.",
+                "description": "Het gevraagde nummer is niet gevonden in KMQ's kopie van de Soridata-database, daarom is het niet opgenomen in KMQ.",
                 "title": "Nummer niet gevonden"
             },
-            "notInKMQ": "Dit nummer heeft een vermelding op [Daisuki]({{link}}), maar is niet opgenomen in KMQ.",
+            "notInKMQ": "Dit nummer heeft een vermelding op [Soridata]({{link}}), maar het is niet opgenomen in KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Kon geen nummers met die naam vinden",
                 "successDescription": "De volgende nummers zijn beschikbaar in KMQ:",

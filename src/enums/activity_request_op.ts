@@ -10,6 +10,8 @@ type ActivityRequestOp =
     | "setOption"
     | "autocompleteArtists"
     | "preset"
-    | "profile";
+    | "profile"
+    | "songInfo"
+    | "searchSongs";
 
 export default ActivityRequestOp;

@@ -14,6 +14,10 @@ import type {
     ActivitySubunits,
 } from "./types/activity_options_snapshot";
 import type { ActivityProfileResponse } from "./types/activity_profile";
+import type {
+    ActivitySongInfoResponse,
+    ActivitySongSearchResult,
+} from "./types/activity_song_info";
 import type ActivityEvent from "./types/activity_event";
 import type ActivitySessionResponse from "./types/activity_session_response";
 import type ActivitySnapshot from "./types/activity_snapshot";
@@ -323,6 +327,56 @@ export async function fetchProfile(
 
     if (!resp.ok) return null;
     return (await resp.json()) as ActivityProfileResponse;
+}
+
+/**
+ * Looks up full metadata for one song by its YouTube ID (used by the song-info
+ * card on history rows, the reveal, and search results). Returns `null` on a
+ * transport/auth error so callers can show a retry/empty state; a known-good
+ * fetch for an unknown ID resolves to `{ found: false }`.
+ */
+export async function fetchSongInfo(
+    accessToken: string,
+    instanceId: string,
+    youtubeLink: string,
+): Promise<ActivitySongInfoResponse | null> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/song`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({
+            instance_id: instanceId,
+            youtube_link: youtubeLink,
+        }),
+    });
+
+    if (!resp.ok) return null;
+    return (await resp.json()) as ActivitySongInfoResponse;
+}
+
+/**
+ * Searches the song catalog by name for the header lookup modal. `locale` is
+ * the resolved bundle locale so returned names match the UI language. Returns
+ * an empty list on any error.
+ */
+export async function searchSongs(
+    accessToken: string,
+    q: string,
+    locale: string,
+): Promise<ActivitySongSearchResult[]> {
+    const url = `${ACTIVITY_PROXY_BASE}/song-search?q=${encodeURIComponent(
+        q,
+    )}&locale=${encodeURIComponent(locale)}`;
+
+    const resp = await fetch(url, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+    });
+
+    if (!resp.ok) return [];
+    const body = (await resp.json()) as { results: ActivitySongSearchResult[] };
+    return body.results;
 }
 
 export async function submitGuess(

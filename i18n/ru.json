@@ -230,6 +230,15 @@
         "scoreboardExpGain": "+{{exp}} EXP",
         "scoreboardHeading": "Таблица",
         "scoreboardLeft": "(вышел)",
+        "search": {
+            "back": "Назад к результатам",
+            "empty": "Песни не найдены.",
+            "hint": "Введите не менее 2 символов для поиска.",
+            "open": "Найти песню",
+            "placeholder": "Поиск по названию песни...",
+            "searching": "Поиск...",
+            "title": "Найти песню"
+        },
         "sessionEndedBanner": "Активной игры нет — запустите кнопкой сверху (или {{playSlash}} в этом канале).",
         "sessionWinnerNone": "Игра окончена — очков не набрано.",
         "sessionWinnerSoloMany": "🏆 {{username}} побеждает с {{score}} очками!",
@@ -243,6 +252,25 @@
         "skipTitle": "Голосовать за пропуск песни",
         "skipVoteFallback": "голос",
         "songCounterLine": "{{played}}/{{total}} песен воспроизведено",
+        "songInfo": {
+            "artistAliases": "Псевдонимы исполнителя",
+            "close": "Закрыть",
+            "duration": "Продолжительность",
+            "guessRate": "Процент угадывания",
+            "guessRateValue": "{{rate}}% ({{correct}}/{{total}})",
+            "inKMQ": "В KMQ",
+            "inOptions": "В текущих параметрах",
+            "loadError": "Не удалось загрузить информацию о песне.",
+            "loading": "Загрузка...",
+            "no": "Нет",
+            "notFound": "Песня не найдена.",
+            "notInKMQ": "Не в KMQ",
+            "releaseDate": "Дата выпуска",
+            "songAliases": "Алиасы песни",
+            "viewOnSoridata": "Просмотреть на Soridata",
+            "views": "Просмотры",
+            "yes": "Да"
+        },
         "startGameBusy": "Запуск…",
         "startGameButton": "Начать игру",
         "statusConnecting": "Подключение…",
@@ -996,12 +1024,12 @@
                 "name": "поиск"
             },
             "inCurrentGameOptions": "В текущих параметрах игры?",
-            "inKMQ": "Эта песня есть в KMQ! Вот ссылка на [Daisuki]({{link}}).",
+            "inKMQ": "Эта песня включена в KMQ! Вот ссылка на [Soridata]({{link}}).",
             "notFound": {
-                "description": "Запрошенная песня не была найдена в копии базы данных Daisuki KMQ, поэтому она не включена в KMQ.",
+                "description": "Запрашиваемая песня не найдена в копии базы данных Soridata у KMQ, поэтому она не включена в KMQ.",
                 "title": "Песня не найдена"
             },
-            "notInKMQ": "У этой песни есть запись на [Daisuki]({{link}}), но она не включена в KMQ.",
+            "notInKMQ": "У этой песни есть запись на [Soridata]({{link}}), но она не включена в KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Не удалось найти песни с таким названием",
                 "successDescription": "Следующие песни доступны в KMQ:",

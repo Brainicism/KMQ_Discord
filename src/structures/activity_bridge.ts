@@ -3,6 +3,8 @@ import {
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
+    ACTIVITY_SONG_SEARCH_LIMIT,
+    DEFAULT_LOCALE,
     HIDDEN_DEFAULT_TIMER,
     youtubeThumbnailUrl,
 } from "../constants";
@@ -15,6 +17,7 @@ import {
 } from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import { parseKmqPlaylistIdentifier } from "../helpers/utils";
+import { songTagEmojisToUnicode } from "../helpers/game_utils";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
 import applyPlaylistFromURL from "../helpers/playlist_utils";
@@ -32,6 +35,8 @@ import GuildPreference from "./guild_preference";
 import HintCommand from "../commands/game_commands/hint";
 import KmqConfiguration from "../kmq_configuration";
 import KmqMember from "./kmq_member";
+import LocaleType from "../enums/locale_type";
+import LookupCommand from "../commands/misc_commands/lookup";
 import MessageContext from "./message_context";
 import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
 import ProfileCommand from "../commands/game_commands/profile";
@@ -57,10 +62,14 @@ import type ActivityProfileResponse from "../interfaces/activity_profile_respons
 import type ActivityRequestMessage from "../interfaces/activity_request_message";
 import type ActivityScoreboardPlayer from "../interfaces/activity_scoreboard_player";
 import type ActivityScoreboardSnapshot from "../interfaces/activity_scoreboard_snapshot";
+import type ActivitySearchSongsArgs from "../interfaces/activity_search_songs_args";
+import type ActivitySearchSongsResponse from "../interfaces/activity_search_songs_response";
 import type ActivitySessionMeta from "../interfaces/activity_session_meta";
 import type ActivitySetOptionArgs from "../interfaces/activity_set_option_args";
 import type ActivitySnapshot from "../interfaces/activity_snapshot";
 import type ActivitySnapshotArgs from "../interfaces/activity_snapshot_args";
+import type ActivitySongInfoArgs from "../interfaces/activity_song_info_args";
+import type ActivitySongInfoResponse from "../interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
 import type MatchedArtist from "../interfaces/matched_artist";
@@ -1596,6 +1605,113 @@ function ensureWorkerHandlerRegistered(): void {
                             );
 
                             reply({ found: false });
+                        });
+
+                    return;
+                }
+
+                case "songInfo": {
+                    // Read-only metadata lookup for a single (already-revealed)
+                    // song. Routed by guild so includedInOptions resolves
+                    // against this guild's GuildPreference; the localized names
+                    // use the guild locale (matching the round reveal).
+                    const songInfoArgs = args as ActivitySongInfoArgs;
+                    const reply = (payload: ActivitySongInfoResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    LookupCommand.getSongInfo(
+                        songInfoArgs.youtubeLink,
+                        songInfoArgs.guildID,
+                        State.getGuildLocale(songInfoArgs.guildID),
+                    )
+                        .then((info) =>
+                            reply(
+                                info
+                                    ? {
+                                          found: true,
+                                          // Web clients can't resolve Discord
+                                          // emoji shortcodes; send Unicode.
+                                          info: {
+                                              ...info,
+                                              tags: songTagEmojisToUnicode(
+                                                  info.tags,
+                                              ),
+                                          },
+                                      }
+                                    : { found: false },
+                            ),
+                        )
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity songInfo for gid=${songInfoArgs.guildID}, link=${songInfoArgs.youtubeLink}. err=${e}`,
+                            );
+
+                            reply({ found: false });
+                        });
+
+                    return;
+                }
+
+                case "searchSongs": {
+                    // Searches the song catalog by name. The available_songs
+                    // table is identical across workers, so no guild/session
+                    // context is needed.
+                    const searchArgs = args as ActivitySearchSongsArgs;
+                    const locale = (
+                        Object.values(LocaleType) as string[]
+                    ).includes(searchArgs.locale)
+                        ? (searchArgs.locale as LocaleType)
+                        : DEFAULT_LOCALE;
+
+                    const query = searchArgs.query.trim();
+                    if (query.length === 0) {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload: {
+                                results: [],
+                            } as ActivitySearchSongsResponse,
+                        });
+                        return;
+                    }
+
+                    LookupCommand.searchSongEntries(
+                        query,
+                        locale,
+                        ACTIVITY_SONG_SEARCH_LIMIT,
+                    )
+                        .then((entries) => {
+                            const payload: ActivitySearchSongsResponse = {
+                                results: entries.map((entry) => ({
+                                    youtubeLink: entry.youtubeLink,
+                                    songName:
+                                        entry.getLocalizedSongName(locale),
+                                    artistName:
+                                        entry.getLocalizedArtistName(locale),
+                                    publishYear:
+                                        entry.publishDate.getFullYear(),
+                                })),
+                            };
+
+                            State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                                cid,
+                                payload,
+                            });
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity searchSongs for query=${query}. err=${e}`,
+                            );
+
+                            State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                                cid,
+                                payload: {
+                                    results: [],
+                                } as ActivitySearchSongsResponse,
+                            });
                         });
 
                     return;

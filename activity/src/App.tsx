@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
@@ -16,9 +17,11 @@ import {
     fetchI18nBundle,
     fetchProfile,
     fetchSnapshot,
+    fetchSongInfo,
     hintVote as apiHintVote,
     openActivityStream,
     preset as apiPreset,
+    searchSongs,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
@@ -55,6 +58,11 @@ import type {
     ActivityProfileResponse,
     ActivityProfileStats,
 } from "./types/activity_profile";
+import type {
+    ActivitySongInfo,
+    ActivitySongInfoResponse,
+    ActivitySongSearchResult,
+} from "./types/activity_song_info";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
@@ -171,9 +179,11 @@ const THUMBNAIL_FALLBACK_CHAIN = [
 function RevealThumbnail({
     thumbnailUrl,
     alt,
+    className,
 }: {
     thumbnailUrl: string;
     alt: string;
+    className?: string;
 }): React.ReactElement | null {
     // Preload candidates via off-DOM Image() so the visible <img> only mounts
     // once we know a good URL. Otherwise the user sees a brief flash of
@@ -212,7 +222,7 @@ function RevealThumbnail({
     }, [thumbnailUrl]);
 
     if (!resolvedUrl) return null;
-    return <img src={resolvedUrl} alt={alt} />;
+    return <img className={className} src={resolvedUrl} alt={alt} />;
 }
 
 function rejectReasonText(
@@ -290,6 +300,13 @@ function RoundTimer({
 // bumps the nonce) forces open cards to refetch while idle re-opens stay cheap.
 type ProfileCacheEntry = { resp: ActivityProfileResponse; nonce: number };
 type ProfileCache = Map<string, ProfileCacheEntry>;
+
+// Cached song-info responses keyed by YouTube link. Like the profile cache,
+// `nonce` records the refresh nonce at fetch time so a round/options change
+// (which bumps the nonce) re-fetches the fields that drift — guess rate and
+// "in current options" — while everything else stays cheap on re-open.
+type SongInfoCacheEntry = { resp: ActivitySongInfoResponse; nonce: number };
+type SongInfoCache = Map<string, SongInfoCacheEntry>;
 
 /** True when the device supports a real hover pointer (desktop). */
 function useCanHover(): boolean {
@@ -777,6 +794,23 @@ function popoverFixedStyle(rect: DOMRect): CSSProperties {
         position: "fixed",
         right: window.innerWidth - rect.left + GAP,
         left: "auto",
+        margin: 0,
+        ...(inLowerHalf
+            ? { bottom: window.innerHeight - rect.bottom }
+            : { top: rect.top }),
+    };
+}
+
+// Mirror of popoverFixedStyle for the left-hand history drawer: opens rightward
+// (toward the centre) from the anchored row, flipping to grow upward when the
+// row sits in the lower half so it stays on-screen.
+function songPopoverFixedStyle(rect: DOMRect): CSSProperties {
+    const GAP = 8;
+    const inLowerHalf = rect.top > window.innerHeight / 2;
+    return {
+        position: "fixed",
+        left: rect.right + GAP,
+        right: "auto",
         margin: 0,
         ...(inLowerHalf
             ? { bottom: window.innerHeight - rect.bottom }
@@ -3215,23 +3249,508 @@ function NullableNumberGroup({
     );
 }
 
+function formatDuration(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s < 10 ? "0" : ""}${s}`;
+}
+
+// The body of the song-info card: the lookup metadata laid out once `info` has
+// resolved. Shared by the history-row popover and the search modal's detail
+// view. Mirrors what the `/lookup` slash command shows in chat.
+function SongInfoCardBody({
+    info,
+    t,
+}: {
+    info: ActivitySongInfo;
+    t: Translator;
+}): React.JSX.Element {
+    const releaseDate = (() => {
+        const d = new Date(info.publishDate);
+        return Number.isNaN(d.getTime())
+            ? null
+            : d.toLocaleDateString(undefined, {
+                  year: "numeric",
+                  month: "short",
+                  day: "numeric",
+              });
+    })();
+
+    const guessRate = info.guessStats
+        ? (
+              (100 * info.guessStats.correctGuesses) /
+              info.guessStats.roundsPlayed
+          ).toFixed(1)
+        : null;
+
+    return (
+        <div className="song-info-body">
+            <div className="song-info-head">
+                <RevealThumbnail
+                    className="song-info-thumb"
+                    thumbnailUrl={info.thumbnailUrl}
+                    alt=""
+                />
+                <div className="song-info-title">
+                    <span className="song-info-song">
+                        {info.songName}
+                        {info.tags}
+                    </span>
+                    <span className="song-info-artist">{info.artistName}</span>
+                    <span
+                        className={`song-info-badge ${
+                            info.inKMQ ? "in-kmq" : "not-in-kmq"
+                        }`}
+                    >
+                        {info.inKMQ
+                            ? t("songInfo.inKMQ")
+                            : t("songInfo.notInKMQ")}
+                    </span>
+                </div>
+            </div>
+
+            <dl className="song-info-stats">
+                <div>
+                    <dt>{t("songInfo.views")}</dt>
+                    <dd>{formatProfileNumber(info.views)}</dd>
+                </div>
+                {releaseDate && (
+                    <div>
+                        <dt>{t("songInfo.releaseDate")}</dt>
+                        <dd>{releaseDate}</dd>
+                    </div>
+                )}
+                {info.durationSeconds != null && (
+                    <div>
+                        <dt>{t("songInfo.duration")}</dt>
+                        <dd>{formatDuration(info.durationSeconds)}</dd>
+                    </div>
+                )}
+                {guessRate != null && info.guessStats && (
+                    <div>
+                        <dt>{t("songInfo.guessRate")}</dt>
+                        <dd>
+                            {t("songInfo.guessRateValue", {
+                                rate: guessRate,
+                                correct: info.guessStats.correctGuesses,
+                                total: info.guessStats.roundsPlayed,
+                            })}
+                        </dd>
+                    </div>
+                )}
+                {info.includedInOptions != null && (
+                    <div>
+                        <dt>{t("songInfo.inOptions")}</dt>
+                        <dd>
+                            {info.includedInOptions
+                                ? t("songInfo.yes")
+                                : t("songInfo.no")}
+                        </dd>
+                    </div>
+                )}
+            </dl>
+
+            {info.songAliases.length > 0 && (
+                <p className="song-info-aliases">
+                    <span className="song-info-aliases-label">
+                        {t("songInfo.songAliases")}
+                    </span>{" "}
+                    {info.songAliases.join(", ")}
+                </p>
+            )}
+            {info.artistAliases.length > 0 && (
+                <p className="song-info-aliases">
+                    <span className="song-info-aliases-label">
+                        {t("songInfo.artistAliases")}
+                    </span>{" "}
+                    {info.artistAliases.join(", ")}
+                </p>
+            )}
+
+            <div className="song-info-links">
+                <button
+                    type="button"
+                    className="song-info-link"
+                    onClick={() =>
+                        openExternalUrl(
+                            `${YOUTUBE_WATCH_URL_PREFIX}${info.youtubeLink}`,
+                        )
+                    }
+                >
+                    {t("openOnYouTube")}
+                </button>
+                <button
+                    type="button"
+                    className="song-info-link"
+                    onClick={() => openExternalUrl(info.soridataLink)}
+                >
+                    {t("songInfo.viewOnSoridata")}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+// Fetches (or reads from the shared session cache) and renders the song-info
+// card for one YouTube link. Mirrors ProfileCard's cache-then-refetch flow:
+// shows cached data instantly and only refetches when the refresh nonce moves.
+function SongInfoCard({
+    accessToken,
+    instanceId,
+    youtubeLink,
+    cache,
+    refreshNonce,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    youtubeLink: string;
+    cache: SongInfoCache;
+    refreshNonce: number;
+    t: Translator;
+}): React.JSX.Element {
+    const cached = cache.get(youtubeLink);
+    const [resp, setResp] = useState<ActivitySongInfoResponse | null>(
+        cached?.resp ?? null,
+    );
+    const [loading, setLoading] = useState(!cached);
+    const [errored, setErrored] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        const entry = cache.get(youtubeLink);
+        const fresh = entry && entry.nonce === refreshNonce;
+
+        if (entry) {
+            setResp(entry.resp);
+            setLoading(false);
+        }
+
+        if (fresh) return;
+
+        setLoading(!entry);
+        setErrored(false);
+        void (async () => {
+            const result = await fetchSongInfo(
+                accessToken,
+                instanceId,
+                youtubeLink,
+            );
+            if (cancelled) return;
+            if (!result) {
+                setErrored(true);
+                setLoading(false);
+                return;
+            }
+
+            cache.set(youtubeLink, { resp: result, nonce: refreshNonce });
+            setResp(result);
+            setLoading(false);
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [accessToken, instanceId, youtubeLink, refreshNonce, cache]);
+
+    return (
+        <div className="song-info-card">
+            {loading ? (
+                <p className="song-info-status">{t("songInfo.loading")}</p>
+            ) : errored ? (
+                <p className="song-info-status">{t("songInfo.loadError")}</p>
+            ) : resp && resp.found && resp.info ? (
+                <SongInfoCardBody info={resp.info} t={t} />
+            ) : (
+                <p className="song-info-status">{t("songInfo.notFound")}</p>
+            )}
+        </div>
+    );
+}
+
+// Wraps a trigger element (a history row's text) with the same hover/tap
+// popover machinery as the scoreboard profile cards: desktop opens on hover
+// and the popover is positioned `fixed` to escape the drawer's overflow
+// clipping; mobile toggles on tap and CSS centres the card.
+function SongInfoTrigger({
+    youtubeLink,
+    accessToken,
+    instanceId,
+    cache,
+    refreshNonce,
+    t,
+    children,
+}: {
+    youtubeLink: string;
+    accessToken: string;
+    instanceId: string;
+    cache: SongInfoCache;
+    refreshNonce: number;
+    t: Translator;
+    children: React.ReactNode;
+}): React.JSX.Element {
+    const canHover = useCanHover();
+    const [open, setOpen] = useState(false);
+    const [anchorRect, setAnchorRect] = useState<DOMRect | null>(null);
+    const closeTimer = useRef<number | null>(null);
+    const popover = usePresence(open, 200);
+
+    const clearCloseTimer = (): void => {
+        if (closeTimer.current !== null) {
+            window.clearTimeout(closeTimer.current);
+            closeTimer.current = null;
+        }
+    };
+
+    const scheduleClose = (): void => {
+        clearCloseTimer();
+        closeTimer.current = window.setTimeout(() => setOpen(false), 120);
+    };
+
+    useEffect(() => () => clearCloseTimer(), []);
+
+    return (
+        <div
+            className="song-info-anchor"
+            onMouseEnter={
+                canHover
+                    ? (e) => {
+                          clearCloseTimer();
+                          setAnchorRect(
+                              e.currentTarget.getBoundingClientRect(),
+                          );
+                          setOpen(true);
+                      }
+                    : undefined
+            }
+            onMouseLeave={canHover ? scheduleClose : undefined}
+        >
+            <button
+                type="button"
+                className="song-info-trigger"
+                aria-expanded={open}
+                onClick={(e) => {
+                    const anchor = e.currentTarget.closest(".song-info-anchor");
+                    if (anchor) {
+                        setAnchorRect(anchor.getBoundingClientRect());
+                    }
+
+                    setOpen((cur) => !cur);
+                }}
+            >
+                {children}
+            </button>
+            {popover.mounted &&
+                // Portal to <body>: the history drawer sets `transform` (for its
+                // slide-in) which makes it the containing block for our
+                // `position: fixed` popover, so it'd otherwise be clipped by the
+                // drawer's `overflow`. Portaling escapes the transformed ancestor.
+                createPortal(
+                    <div
+                        className={`song-info-popover${
+                            popover.visible ? " visible" : ""
+                        }`}
+                        style={
+                            canHover && anchorRect
+                                ? songPopoverFixedStyle(anchorRect)
+                                : undefined
+                        }
+                        onMouseEnter={canHover ? clearCloseTimer : undefined}
+                        onMouseLeave={canHover ? scheduleClose : undefined}
+                    >
+                        <button
+                            type="button"
+                            className="song-info-popover-close"
+                            aria-label={t("songInfo.close")}
+                            onClick={() => setOpen(false)}
+                        >
+                            ✕
+                        </button>
+                        <SongInfoCard
+                            accessToken={accessToken}
+                            instanceId={instanceId}
+                            youtubeLink={youtubeLink}
+                            cache={cache}
+                            refreshNonce={refreshNonce}
+                            t={t}
+                        />
+                    </div>,
+                    document.body,
+                )}
+        </div>
+    );
+}
+
+// Header "look up a song" modal: a debounced name search over the whole
+// catalog (not just played songs). Picking a result swaps to the shared
+// SongInfoCard detail view, with a back link to the results.
+function SongSearchModal({
+    accessToken,
+    instanceId,
+    locale,
+    cache,
+    refreshNonce,
+    visible,
+    onClose,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    locale: string;
+    cache: SongInfoCache;
+    refreshNonce: number;
+    visible: boolean;
+    onClose: () => void;
+    t: Translator;
+}): React.JSX.Element {
+    const [q, setQ] = useState("");
+    const [results, setResults] = useState<ActivitySongSearchResult[]>([]);
+    const [searching, setSearching] = useState(false);
+    const [selected, setSelected] = useState<string | null>(null);
+
+    // Debounce: wait for a pause in typing before hitting the search endpoint.
+    // Queries under 2 chars are treated as empty (too broad to be useful).
+    useEffect(() => {
+        const query = q.trim();
+        if (query.length < 2) {
+            setResults([]);
+            setSearching(false);
+            return undefined;
+        }
+
+        setSearching(true);
+        let cancelled = false;
+        const id = window.setTimeout(() => {
+            void (async () => {
+                const res = await searchSongs(accessToken, query, locale);
+                if (!cancelled) {
+                    setResults(res);
+                    setSearching(false);
+                }
+            })();
+        }, 250);
+
+        return () => {
+            cancelled = true;
+            window.clearTimeout(id);
+        };
+    }, [q, accessToken, locale]);
+
+    return (
+        <div
+            className={`song-search-overlay${visible ? " visible" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            onClick={onClose}
+        >
+            <div
+                className={`song-search-modal${visible ? " visible" : ""}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="song-search-head">
+                    <span className="song-search-title">
+                        {t("search.title")}
+                    </span>
+                    <button
+                        type="button"
+                        className="song-search-close"
+                        aria-label={t("songInfo.close")}
+                        onClick={onClose}
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {selected ? (
+                    <div className="song-search-detail">
+                        <button
+                            type="button"
+                            className="song-search-back"
+                            onClick={() => setSelected(null)}
+                        >
+                            ← {t("search.back")}
+                        </button>
+                        <SongInfoCard
+                            accessToken={accessToken}
+                            instanceId={instanceId}
+                            youtubeLink={selected}
+                            cache={cache}
+                            refreshNonce={refreshNonce}
+                            t={t}
+                        />
+                    </div>
+                ) : (
+                    <>
+                        <input
+                            type="text"
+                            className="song-search-input"
+                            value={q}
+                            // eslint-disable-next-line jsx-a11y/no-autofocus
+                            autoFocus
+                            placeholder={t("search.placeholder")}
+                            onChange={(e) => setQ(e.target.value)}
+                        />
+                        {searching ? (
+                            <p className="song-search-status">
+                                {t("search.searching")}
+                            </p>
+                        ) : q.trim().length < 2 ? (
+                            <p className="song-search-status">
+                                {t("search.hint")}
+                            </p>
+                        ) : results.length === 0 ? (
+                            <p className="song-search-status">
+                                {t("search.empty")}
+                            </p>
+                        ) : (
+                            <ul className="song-search-results">
+                                {results.map((r) => (
+                                    <li key={r.youtubeLink}>
+                                        <button
+                                            type="button"
+                                            onClick={() =>
+                                                setSelected(r.youtubeLink)
+                                            }
+                                        >
+                                            <span className="song-search-song">
+                                                {r.songName}
+                                            </span>
+                                            <span className="song-search-artist">
+                                                {r.artistName} ({r.publishYear})
+                                            </span>
+                                        </button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function SongHistory({
     history,
     bookmarkedLinks,
     auth,
     active,
     onBookmarked,
+    songInfoCache,
+    songInfoRefreshNonce,
     t,
 }: {
     history: UiState["roundHistory"];
     bookmarkedLinks: Set<string>;
-    /** Auth context for bookmarking from the list; null before auth resolves
-     *  (no buttons rendered then). */
+    /** Auth context for bookmarking + song lookup from the list; null before
+     *  auth resolves (rows are plain text, no popover, then). */
     auth: { accessToken: string; instanceId: string } | null;
     /** Whether a game is currently in progress. Bookmarking is only meaningful
      *  during an active game, so the per-row stars are hidden otherwise. */
     active: boolean;
     onBookmarked: (link: string) => void;
+    songInfoCache: SongInfoCache;
+    songInfoRefreshNonce: number;
     t: Translator;
 }) {
     if (history.length === 0) {
@@ -3246,15 +3765,31 @@ function SongHistory({
         <ol className="song-history">
             {ordered.map((song, i) => {
                 const roundNum = history.length - i;
+                const rowText = (
+                    <>
+                        <div className="history-song">{song.songName}</div>
+                        <div className="history-artist">
+                            {song.artistName} ({song.publishYear})
+                        </div>
+                    </>
+                );
                 return (
                     <li key={`${roundNum}-${song.youtubeLink}`}>
                         <span className="history-round">#{roundNum}</span>
-                        <div className="history-text">
-                            <div className="history-song">{song.songName}</div>
-                            <div className="history-artist">
-                                {song.artistName} ({song.publishYear})
-                            </div>
-                        </div>
+                        {auth ? (
+                            <SongInfoTrigger
+                                youtubeLink={song.youtubeLink}
+                                accessToken={auth.accessToken}
+                                instanceId={auth.instanceId}
+                                cache={songInfoCache}
+                                refreshNonce={songInfoRefreshNonce}
+                                t={t}
+                            >
+                                {rowText}
+                            </SongInfoTrigger>
+                        ) : (
+                            <div className="history-text">{rowText}</div>
+                        )}
                         {auth && active && (
                             <BookmarkStar
                                 accessToken={auth.accessToken}
@@ -3330,17 +3865,33 @@ export default function App() {
     // invalidate open cards (newly-earned EXP, level-ups).
     const profileCacheRef = useRef<ProfileCache>(new Map());
     const [profileRefreshNonce, setProfileRefreshNonce] = useState(0);
+    // Song-info cards (history popover + search modal). Shared cache for the
+    // session; nonce invalidates open cards when the fields that drift —
+    // guess rate and "in current options" — could have changed.
+    const songInfoCacheRef = useRef<SongInfoCache>(new Map());
+    const [songInfoRefreshNonce, setSongInfoRefreshNonce] = useState(0);
     const [myProfileOpen, setMyProfileOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
+    // Resolved bundle locale (KMQ LocaleType tag) — passed to song search so
+    // returned names match the UI language.
+    const [localeTag, setLocaleTag] = useState("en");
     // Mount-through-close presence for the overlays so they animate out, not
     // just in. (The `&& authState/ui.options` guards live at the render site.)
     const myProfile = usePresence(myProfileOpen, 200);
     const optionsPanel = usePresence(optionsOpen, 220);
+    const searchModal = usePresence(searchOpen, 200);
 
     // A finished round (roundHistory grows) or a session end can change EXP /
     // level, so invalidate open profile cards by bumping the nonce.
     useEffect(() => {
         setProfileRefreshNonce((n) => n + 1);
     }, [ui.roundHistory.length, ui.sessionEnded]);
+
+    // A finished round changes guess stats; an options change flips which songs
+    // are "in current options" — both invalidate cached song-info cards.
+    useEffect(() => {
+        setSongInfoRefreshNonce((n) => n + 1);
+    }, [ui.roundHistory.length, ui.sessionEnded, ui.options]);
 
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
@@ -3428,6 +3979,7 @@ export default function App() {
 
                 if (cancelled) return;
                 setBundle(initialBundle.strings);
+                setLocaleTag(initialBundle.locale);
                 setUi((prev) => applySnapshot(prev, snapshot));
                 setAuthState({ accessToken, instanceId, userID });
                 setReady(true);
@@ -3443,7 +3995,10 @@ export default function App() {
                 ) {
                     try {
                         const next = await fetchI18nBundle(sdkLocale);
-                        if (!cancelled) setBundle(next.strings);
+                        if (!cancelled) {
+                            setBundle(next.strings);
+                            setLocaleTag(next.locale);
+                        }
                     } catch (e) {
                         console.warn("locale swap failed", e);
                     }
@@ -3627,6 +4182,21 @@ export default function App() {
                 </button>
             )}
 
+            {/* Song lookup toggle — left cluster, below profile. */}
+            {authState && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle left search ${
+                        searchOpen ? "active" : ""
+                    }`}
+                    onClick={() => setSearchOpen(true)}
+                    aria-label={t("search.open")}
+                    title={t("search.open")}
+                >
+                    <span>🔍</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -3671,6 +4241,8 @@ export default function App() {
                                     ]),
                                 }))
                             }
+                            songInfoCache={songInfoCacheRef.current}
+                            songInfoRefreshNonce={songInfoRefreshNonce}
                             t={t}
                         />
                     </div>
@@ -3772,6 +4344,19 @@ export default function App() {
                                 />
                             )}
                         </header>
+
+                        {authState && searchModal.mounted && (
+                            <SongSearchModal
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                locale={localeTag}
+                                cache={songInfoCacheRef.current}
+                                refreshNonce={songInfoRefreshNonce}
+                                visible={searchModal.visible}
+                                onClose={() => setSearchOpen(false)}
+                                t={t}
+                            />
+                        )}
 
                         {authState && myProfile.mounted && (
                             <div
