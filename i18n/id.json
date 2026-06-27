@@ -25,6 +25,7 @@
     "8th": "Ke-8",
     "9th": "Ke-9",
     "activity": {
+        "achievementUnlocked": "🎉 Pencapaian Terbuka!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Bookmark lagu ini",
         "bookmarkTitleDone": "Di-bookmark — akan di-DM di akhir sesi",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} ke {{rank}}",
             "noStats": "Belum ada statistik - mainkan permainan untuk memulai profil Anda!",
             "overallRank": "Peringkat Keseluruhan",
+            "playStreak": "Rekor Bermain",
+            "playStreakValue": "🔥 {{current}} hari (terbaik {{longest}})",
             "rankOf": "#{{rank}} dari {{total}}",
             "songsGuessed": "Lagu Ditebak",
             "timesVoted": "Jumlah Suara",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Terakhir Aktif",
             "overallRank": "Peringkat Keseluruhan",
+            "playStreak": "Rekor Bermain",
+            "playStreakValue": "🔥 {{current}} hari (terpanjang: {{longest}})",
             "rank": {
                 "almighty": "Penguasa Tertinggi Tata Surya",
                 "aoty": "Artis Terbaik Tahun Ini",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} membuka {{achievements}}",
+            "title": "🎉 Pencapaian Terbuka!"
+        },
         "andManyOthers": "dan masih banyak lainnya...",
         "artist": "artis",
         "artistAliases": "Alias Artis",

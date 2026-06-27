@@ -25,6 +25,7 @@
     "8th": "8番目",
     "9th": "9番目",
     "activity": {
+        "achievementUnlocked": "🎉 実績を解除しました!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "この曲をブックマーク",
         "bookmarkTitleDone": "ブックマーク済み — セッション終了時にDM送信",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}}から{{rank}}まで",
             "noStats": "まだ統計がありません - プロフィールを始めるにはゲームをプレイしてみてください！",
             "overallRank": "総合ランク",
+            "playStreak": "再生連続日数",
+            "playStreakValue": "🔥 {{current}} 日（最高 {{longest}}）",
             "rankOf": "#{{rank}} / {{total}}",
             "songsGuessed": "予想した曲",
             "timesVoted": "投票回数",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "最終アクティブ",
             "overallRank": "総合ランキング",
+            "playStreak": "再生連続日数",
+            "playStreakValue": "🔥 {{current}} 日（最長: {{longest}}）",
             "rank": {
                 "almighty": "太陽系の全能の支配者",
                 "aoty": "今年のアーティスト",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} が {{achievements}} を解除しました",
+            "title": "🎉 実績を解除しました!"
+        },
         "andManyOthers": "その他多数...",
         "artist": "アーティスト",
         "artistAliases": "アーティストの別名",

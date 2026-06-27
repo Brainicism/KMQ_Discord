@@ -25,6 +25,7 @@
     "8th": "8वां",
     "9th": "9वां",
     "activity": {
+        "achievementUnlocked": "🎉 उपलब्धि अनलॉक हो गई!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "इस गाने को बुकमार्क करें",
         "bookmarkTitleDone": "बुकमार्क किया गया — सत्र के अंत में DM किया जाएगा",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} से {{rank}}",
             "noStats": "अभी तक कोई आँकड़े नहीं - अपनी प्रोफ़ाइल शुरू करने के लिए एक खेल खेलें!",
             "overallRank": "कुल रैंक",
+            "playStreak": "प्ले स्ट्रीक",
+            "playStreakValue": "🔥 {{current}} दिन (सर्वश्रेष्ठ {{longest}})",
             "rankOf": "#{{rank}} का {{total}}",
             "songsGuessed": "अनुमानित गाने",
             "timesVoted": "वोट किए गए समय",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "अंतिम सक्रिय",
             "overallRank": "कुल मिलाकर रैंक",
+            "playStreak": "प्ले स्ट्रीक",
+            "playStreakValue": "🔥 {{current}} दिन (सबसे लंबा: {{longest}})",
             "rank": {
                 "almighty": "सौर मंडल का सर्वशक्तिमान शासक",
                 "aoty": "वर्ष का कलाकार",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} ने {{achievements}} को अनलॉक किया",
+            "title": "🎉 उपलब्धि अनलॉक हो गई!"
+        },
         "andManyOthers": "और भी कई...",
         "artist": "कलाकार",
         "artistAliases": "कलाकार उपनाम",

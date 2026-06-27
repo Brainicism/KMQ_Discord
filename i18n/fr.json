@@ -25,6 +25,7 @@
     "8th": "8ème",
     "9th": "9ème",
     "activity": {
+        "achievementUnlocked": "🎉 Succès Débloqué !",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Mettre cette chanson en favori",
         "bookmarkTitleDone": "Mise en favori — envoyée en MP en fin de session",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} jusqu'à {{rank}}",
             "noStats": "Pas encore de statistiques - jouez une partie pour commencer votre profil !",
             "overallRank": "Classement général",
+            "playStreak": "Série de jeu",
+            "playStreakValue": "🔥 {{current}} jours (meilleur {{longest}})",
             "rankOf": "#{{rank}} sur {{total}}",
             "songsGuessed": "Chansons devinées",
             "timesVoted": "Fois voté",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Dernière activité",
             "overallRank": "Classement général",
+            "playStreak": "Série de jeu",
+            "playStreakValue": "🔥 {{current}} jours (plus long : {{longest}})",
             "rank": {
                 "almighty": "Roi tout-puissant du système solaire",
                 "aoty": "Artiste de l'année",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} a débloqué {{achievements}}",
+            "title": "🎉 Succès Débloqué !"
+        },
         "andManyOthers": "et bien d'autres...",
         "artist": "artiste",
         "artistAliases": "Alias d'artiste",

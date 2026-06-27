@@ -25,6 +25,7 @@
     "8th": "第8个",
     "9th": "第9个",
     "activity": {
+        "achievementUnlocked": "🎉 成就解锁!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "收藏这首歌",
         "bookmarkTitleDone": "已收藏 — 会在会话结束时私信发送",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} 到 {{rank}}",
             "noStats": "尚无统计数据 - 玩一局游戏以开始创建你的档案！",
             "overallRank": "总排名",
+            "playStreak": "连续游戏",
+            "playStreakValue": "🔥 {{current}} 天 (最佳 {{longest}})",
             "rankOf": "#{{rank}} 共计 {{total}}",
             "songsGuessed": "猜过的歌曲",
             "timesVoted": "投票次数",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "最后活跃时间",
             "overallRank": "总排名",
+            "playStreak": "连续游戏",
+            "playStreakValue": "🔥 {{current}} 天 (最长: {{longest}})",
             "rank": {
                 "almighty": "太阳系的全能统治者",
                 "aoty": "年度艺术家",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} 解锁了 {{achievements}}",
+            "title": "🎉 成就解锁!"
+        },
         "andManyOthers": "还有许多其他的事实...",
         "artist": "艺术家",
         "artistAliases": "艺术家别名",

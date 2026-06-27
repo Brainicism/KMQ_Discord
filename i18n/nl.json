@@ -25,6 +25,7 @@
     "8th": "8e",
     "9th": "9e",
     "activity": {
+        "achievementUnlocked": "🎉 Prestatie Ontgrendeld!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Dit nummer bladwijzeren",
         "bookmarkTitleDone": "Bladwijzer gezet — wordt aan het eind van de sessie ge-DM'd",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} naar {{rank}}",
             "noStats": "Nog geen statistieken - speel een spel om je profiel te starten!",
             "overallRank": "Algemene Rang",
+            "playStreak": "Speelreeks",
+            "playStreakValue": "🔥 {{current}} dagen (beste {{longest}})",
             "rankOf": "#{{rank}} van {{total}}",
             "songsGuessed": "Geraden liedjes",
             "timesVoted": "Aantal keer gestemd",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Laatst actief",
             "overallRank": "Algemene rang",
+            "playStreak": "Speelreeks",
+            "playStreakValue": "🔥 {{current}} dagen (langste: {{longest}})",
             "rank": {
                 "almighty": "Almachtige heerser van het zonnestelsel",
                 "aoty": "Artiest van het jaar",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} ontgrendelde {{achievements}}",
+            "title": "🎉 Prestatie Ontgrendeld!"
+        },
         "andManyOthers": "en nog veel meer...",
         "artist": "artiest",
         "artistAliases": "Artiestenaliassen",

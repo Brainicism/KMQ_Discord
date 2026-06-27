@@ -45,6 +45,7 @@ import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
 import type { ActivityMultipleChoiceOption } from "../interfaces/activity_round_meta";
+import type { PlayerAchievementUnlocks } from "./achievements";
 import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
@@ -1913,11 +1914,32 @@ export function attachActivityBridge(session: GameSession): void {
             type: "sessionEnd",
             reason: payload.reason,
         });
+    });
 
-        // Drop our listeners now that the session is over. The Session object
-        // becomes unreachable when State.gameSessions[guildID] is deleted; this
-        // just avoids holding extra references via the EventEmitter for the
-        // brief window before GC.
-        setImmediate(() => session.removeAllListeners());
+    session.on(
+        "achievementUnlocks",
+        (unlocks: Array<PlayerAchievementUnlocks>) => {
+            for (const unlock of unlocks) {
+                const { username, avatarUrl } = lookupName(unlock.userID);
+                pushEvent(guildID, {
+                    type: "achievementUnlocked",
+                    userID: unlock.userID,
+                    username,
+                    avatarUrl,
+                    achievements: unlock.achievements.map((a) => ({
+                        name: a.name,
+                    })),
+                });
+            }
+        },
+    );
+
+    // Drop our listeners once all end-of-session emits are done (sessionEnd is
+    // emitted early, before the awaited stats commit; achievementUnlocks fires
+    // during it). activityTeardown is emitted last, so listening for it avoids
+    // racing those later emits. The Session also becomes unreachable when
+    // State.gameSessions[guildID] is deleted, so this is just GC hygiene.
+    session.once("activityTeardown", () => {
+        session.removeAllListeners();
     });
 }

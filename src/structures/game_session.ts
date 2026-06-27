@@ -35,6 +35,8 @@ import {
 } from "../helpers/game_utils";
 import State from "../state";
 import dbContext from "../database_context";
+import evaluateAndAwardAchievements from "../helpers/achievement_manager";
+import type { PlayerAchievementUnlocks } from "./achievements";
 
 import {
     CLIP_LAST_REPLAY_DELAY_MS,
@@ -1478,7 +1480,7 @@ export default class GameSession extends Session {
             );
         }
 
-        const leveledUpPlayers: Array<LevelUpResult> =
+        const { leveledUpPlayers, achievementUnlocks } =
             await this.updatePlayerStats(endedDueToError);
 
         // send level up message
@@ -1527,6 +1529,47 @@ export default class GameSession extends Session {
             );
         }
 
+        // announce newly-unlocked achievements
+        if (achievementUnlocks.length > 0) {
+            const achievementMessages = achievementUnlocks
+                .map((unlock) =>
+                    i18n.translate(
+                        this.guildID,
+                        "misc.achievementUnlocked.entry",
+                        {
+                            user: this.scoreboard.getPlayerDisplayedName(
+                                unlock.userID,
+                            ),
+                            achievements: unlock.achievements
+                                .map((a) => codeLine(a.name))
+                                .join(", "),
+                        },
+                    ),
+                )
+                .slice(0, 10);
+
+            if (achievementUnlocks.length > 10) {
+                achievementMessages.push(
+                    i18n.translate(this.guildID, "misc.andManyOthers"),
+                );
+            }
+
+            await sendInfoMessage(
+                new MessageContext(this.textChannelID, null, this.guildID),
+                {
+                    title: i18n.translate(
+                        this.guildID,
+                        "misc.achievementUnlocked.title",
+                    ),
+                    description: achievementMessages.join("\n"),
+                    thumbnailUrl: KmqImages.THUMBS_UP,
+                },
+            );
+
+            // notify the Activity (no-op when no Activity is attached)
+            this.emit("achievementUnlocks", achievementUnlocks);
+        }
+
         // commit guild's game session
         const sessionLength = (Date.now() - this.startedAt) / (1000 * 60);
         const averageGuessTime =
@@ -1550,6 +1593,11 @@ export default class GameSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`,
         );
+
+        // Signal that all end-of-session emits (sessionEnd, achievementUnlocks)
+        // are done so the Activity bridge can safely drop its listeners. Emitted
+        // last to avoid the teardown racing the awaited stats commit above.
+        this.emit("activityTeardown");
     }
 
     /**
@@ -1716,6 +1764,35 @@ export default class GameSession extends Session {
                 server_id: this.guildID,
             })
             .ignore()
+            .execute();
+    }
+
+    /**
+     * Updates a user's consecutive-days-played streak. Uses a dedicated
+     * last_streak_date column so it stays independent of the first-game-of-day
+     * logic (last_game_started_at). MySQL evaluates SET assignments left-to-right,
+     * so last_streak_date is still the previous value while current_play_streak's
+     * CASE is computed, and longest_play_streak sees the freshly-set streak.
+     * @param userID - The player's Discord user ID
+     */
+    private async updatePlayStreak(userID: string): Promise<void> {
+        if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
+            return;
+        }
+
+        await dbContext.kmq
+            .updateTable("player_stats")
+            .where("player_id", "=", userID)
+            .set({
+                current_play_streak: sql`CASE
+                    WHEN last_streak_date IS NULL THEN 1
+                    WHEN last_streak_date = CURDATE() THEN current_play_streak
+                    WHEN last_streak_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY) THEN current_play_streak + 1
+                    ELSE 1
+                END`,
+                longest_play_streak: sql`GREATEST(longest_play_streak, current_play_streak)`,
+                last_streak_date: sql`CURDATE()`,
+            })
             .execute();
     }
 
@@ -1939,20 +2016,27 @@ export default class GameSession extends Session {
         );
     }
 
-    private async updatePlayerStats(
-        endedDueToError: boolean,
-    ): Promise<Array<LevelUpResult>> {
+    private async updatePlayerStats(endedDueToError: boolean): Promise<{
+        leveledUpPlayers: Array<LevelUpResult>;
+        achievementUnlocks: Array<PlayerAchievementUnlocks>;
+    }> {
         const leveledUpPlayers: Array<LevelUpResult> = [];
+        const achievementUnlocks: Array<PlayerAchievementUnlocks> = [];
 
         if (this.textChannelID === process.env.END_TO_END_TEST_BOT_CHANNEL) {
-            return [];
+            return { leveledUpPlayers, achievementUnlocks };
         }
+
+        const winnerIDs = new Set(
+            this.scoreboard.getWinners().map((x) => x.id),
+        );
 
         // commit player stats
         await Promise.allSettled(
             this.scoreboard.getPlayerIDs().map(async (participant) => {
                 const isFirstGame = await isFirstGameOfDay(participant);
                 await this.ensurePlayerStat(participant);
+                await this.updatePlayStreak(participant);
                 await this.incrementPlayerGamesPlayed(participant);
                 const playerCorrectGuessCount =
                     this.scoreboard.getPlayerCorrectGuessCount(participant);
@@ -1997,10 +2081,44 @@ export default class GameSession extends Session {
                             isFirstGame && endedDueToError ? 1 : 0,
                     })
                     .execute();
+
+                // evaluate automatic achievements against the now-committed stats
+                const committed = await dbContext.kmq
+                    .selectFrom("player_stats")
+                    .select([
+                        "games_played",
+                        "songs_guessed",
+                        "level",
+                        "longest_play_streak",
+                    ])
+                    .where("player_id", "=", participant)
+                    .executeTakeFirst();
+
+                if (committed) {
+                    const unlocked = await evaluateAndAwardAchievements(
+                        participant,
+                        {
+                            gamesPlayed: committed["games_played"],
+                            songsGuessed: committed["songs_guessed"],
+                            level: committed["level"],
+                            longestPlayStreak: committed["longest_play_streak"],
+                            wonGame:
+                                winnerIDs.has(participant) &&
+                                playerCorrectGuessCount > 0,
+                        },
+                    );
+
+                    if (unlocked.length > 0) {
+                        achievementUnlocks.push({
+                            userID: participant,
+                            achievements: unlocked,
+                        });
+                    }
+                }
             }),
         );
 
-        return leveledUpPlayers;
+        return { leveledUpPlayers, achievementUnlocks };
     }
 
     private async incrementGuildSongGuessCount(): Promise<void> {

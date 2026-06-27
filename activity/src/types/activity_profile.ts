@@ -28,6 +28,8 @@ export interface ActivityProfileStats {
     firstPlayMs: number;
     lastActiveMs: number;
     timesVoted: number;
+    currentPlayStreak: number;
+    longestPlayStreak: number;
     badges: string[];
     buffs: ActivityProfileBuffs;
     voteURL: string;

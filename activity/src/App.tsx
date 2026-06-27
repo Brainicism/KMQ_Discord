@@ -70,6 +70,7 @@ import type {
     ActivitySongInfoResponse,
     ActivitySongSearchResult,
 } from "./types/activity_song_info";
+import type AchievementToast from "./types/achievement_toast";
 import type ActivityEvent from "./types/activity_event";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
@@ -147,6 +148,7 @@ const initialUi: UiState = {
     hadSession: false,
     options: null,
     roundHistory: [],
+    achievementToasts: [],
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -631,6 +633,21 @@ function ProfileCardBody({
                     <dt>{t("profile.gamesPlayed")}</dt>
                     <dd>{formatProfileNumber(stats.gamesPlayed)}</dd>
                 </div>
+                {stats.currentPlayStreak > 0 && (
+                    <div>
+                        <dt>{t("profile.playStreak")}</dt>
+                        <dd>
+                            {t("profile.playStreakValue", {
+                                current: formatProfileNumber(
+                                    stats.currentPlayStreak,
+                                ),
+                                longest: formatProfileNumber(
+                                    stats.longestPlayStreak,
+                                ),
+                            })}
+                        </dd>
+                    </div>
+                )}
                 <div>
                     <dt>{t("profile.timesVoted")}</dt>
                     <dd>{formatProfileNumber(stats.timesVoted)}</dd>
@@ -1964,6 +1981,78 @@ function Confetti() {
                             "--drift": `${p.drift}px`,
                         } as React.CSSProperties
                     }
+                />
+            ))}
+        </div>
+    );
+}
+
+const ACHIEVEMENT_TOAST_MS = 5200;
+
+function AchievementToastItem({
+    toast,
+    isViewer,
+    onDismiss,
+    t,
+}: {
+    toast: AchievementToast;
+    isViewer: boolean;
+    onDismiss: (id: string) => void;
+    t: Translator;
+}) {
+    useEffect(() => {
+        const timer = window.setTimeout(
+            () => onDismiss(toast.id),
+            ACHIEVEMENT_TOAST_MS,
+        );
+        return () => window.clearTimeout(timer);
+    }, [toast.id, onDismiss]);
+
+    return (
+        <div className={`achievement-toast${isViewer ? " viewer" : ""}`}>
+            {isViewer && <Confetti />}
+            <div className="achievement-toast-heading">
+                {t("achievementUnlocked")}
+            </div>
+            <div className="achievement-toast-user">
+                {toast.avatarUrl && (
+                    <img src={toast.avatarUrl} alt="" aria-hidden />
+                )}
+                <span>{toast.username}</span>
+            </div>
+            <ul className="achievement-toast-list">
+                {toast.achievements.map((a) => (
+                    <li key={a.name}>{a.name}</li>
+                ))}
+            </ul>
+        </div>
+    );
+}
+
+function AchievementToasts({
+    toasts,
+    viewerUserID,
+    onDismiss,
+    t,
+}: {
+    toasts: AchievementToast[];
+    viewerUserID: string | null;
+    onDismiss: (id: string) => void;
+    t: Translator;
+}) {
+    if (toasts.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="achievement-toasts" aria-live="polite">
+            {toasts.map((toast) => (
+                <AchievementToastItem
+                    key={toast.id}
+                    toast={toast}
+                    isViewer={toast.userID === viewerUserID}
+                    onDismiss={onDismiss}
+                    t={t}
                 />
             ))}
         </div>
@@ -3864,6 +3953,15 @@ export default function App() {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
+    // Stable so the per-toast dismissal timer effect isn't re-armed each render.
+    const dismissAchievementToast = useCallback((id: string) => {
+        setUi((prev) => ({
+            ...prev,
+            achievementToasts: prev.achievementToasts.filter(
+                (toast) => toast.id !== id,
+            ),
+        }));
+    }, []);
     const [authState, setAuthState] = useState<{
         accessToken: string;
         instanceId: string;
@@ -4765,6 +4863,13 @@ export default function App() {
                     </div>
                 </aside>
             </div>
+
+            <AchievementToasts
+                toasts={ui.achievementToasts}
+                viewerUserID={authState?.userID ?? null}
+                onDismiss={dismissAchievementToast}
+                t={t}
+            />
         </>
     );
 }
@@ -4797,6 +4902,7 @@ function reduce(
                 currentRoundBookmarked: false,
                 hadSession: true,
                 roundHistory: [],
+                achievementToasts: [],
             };
         case "roundStart":
             return {
@@ -4908,6 +5014,22 @@ function reduce(
                 lastReveal: null,
                 hint: initialHint,
                 skip: initialSkip,
+            };
+        case "achievementUnlocked":
+            return {
+                ...prev,
+                achievementToasts: [
+                    ...prev.achievementToasts,
+                    {
+                        id: `${msg.userID}-${msg.achievements
+                            .map((a) => a.name)
+                            .join("|")}`,
+                        userID: msg.userID,
+                        username: msg.username,
+                        avatarUrl: msg.avatarUrl,
+                        achievements: msg.achievements,
+                    },
+                ],
             };
         case "optionsChanged":
             return { ...prev, options: msg.options };

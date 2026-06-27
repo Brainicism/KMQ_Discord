@@ -5,6 +5,7 @@ import type ActivityRoundMeta from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
 import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
+import type AchievementToast from "./achievement_toast";
 import type HintState from "./hint_state";
 import type RecentGuess from "./recent_guess";
 import type SkipState from "./skip_state";
@@ -36,4 +37,6 @@ export default interface UiState {
     /** Rounds revealed so far in the current session, oldest-first. Populated
      *  on roundEnd and reset on sessionStart. */
     roundHistory: ActivityRoundReveal[];
+    /** Pending "achievement unlocked" celebrations, dismissed on a timer. */
+    achievementToasts: AchievementToast[];
 }

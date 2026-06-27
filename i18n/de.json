@@ -25,6 +25,7 @@
     "8th": "8.",
     "9th": "9.",
     "activity": {
+        "achievementUnlocked": "🎉 Erfolg freigeschaltet!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Diesen Song als Lesezeichen speichern",
         "bookmarkTitleDone": "Gespeichert — per DM am Ende der Sitzung",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} bis {{rank}}",
             "noStats": "Noch keine Statistiken - spiele ein Spiel, um dein Profil zu starten!",
             "overallRank": "Gesamtrang",
+            "playStreak": "Spielserie",
+            "playStreakValue": "🔥 {{current}} Tage (beste {{longest}})",
             "rankOf": "#{{rank}} von {{total}}",
             "songsGuessed": "Lieder erraten",
             "timesVoted": "Abgegebene Stimmen",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Zuletzt aktiv",
             "overallRank": "Gesamtrang",
+            "playStreak": "Spielserie",
+            "playStreakValue": "🔥 {{current}} Tage (längste: {{longest}})",
             "rank": {
                 "almighty": "Allmächtiger Herrscher des Sonnensystems",
                 "aoty": "Künstler des Jahres",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} hat {{achievements}} freigeschaltet",
+            "title": "🎉 Erfolg freigeschaltet!"
+        },
         "andManyOthers": "und viele andere...",
         "artist": "Künstler",
         "artistAliases": "Künstler-Aliase",

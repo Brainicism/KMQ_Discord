@@ -25,6 +25,7 @@
     "8th": "8-ой",
     "9th": "9-ый",
     "activity": {
+        "achievementUnlocked": "🎉 Достижение открыто!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Сохранить песню в закладки",
         "bookmarkTitleDone": "В закладках — будет отправлено в ЛС в конце сессии",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} до {{rank}}",
             "noStats": "Статистики пока нет - сыграйте в игру, чтобы начать ваш профиль!",
             "overallRank": "Общий рейтинг",
+            "playStreak": "Серия игр",
+            "playStreakValue": "🔥 {{current}} дней (лучший результат {{longest}})",
             "rankOf": "#{{rank}} из {{total}}",
             "songsGuessed": "Угаданные песни",
             "timesVoted": "Кол-во голосов",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Последняя активность",
             "overallRank": "Общий рейтинг",
+            "playStreak": "Серия игр",
+            "playStreakValue": "🔥 {{current}} дней (самый длинный: {{longest}})",
             "rank": {
                 "almighty": "Всемогущий правитель Солнечной системы",
                 "aoty": "Артист года",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} разблокировал(а) {{achievements}}",
+            "title": "🎉 Достижение открыто!"
+        },
         "andManyOthers": "и многие другие...",
         "artist": "исполнитель",
         "artistAliases": "Псевдонимы артиста",

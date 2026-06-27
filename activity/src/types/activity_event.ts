@@ -34,6 +34,13 @@ type ActivityEvent =
           ts: number;
       }
     | { type: "sessionEnd"; reason: string }
+    | {
+          type: "achievementUnlocked";
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          achievements: Array<{ name: string }>;
+      }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

@@ -38,6 +38,15 @@ type ActivityEvent =
           ts: number;
       }
     | { type: "sessionEnd"; reason: string }
+    | {
+          // Pushed at session end for each player who unlocked one or more
+          // automatic achievements, so the client can celebrate them.
+          type: "achievementUnlocked";
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          achievements: Array<{ name: string }>;
+      }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

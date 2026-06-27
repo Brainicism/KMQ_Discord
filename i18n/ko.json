@@ -25,6 +25,7 @@
     "8th": "8",
     "9th": "9",
     "activity": {
+        "achievementUnlocked": "🎉 업적 달성!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "이 곡을 북마크",
         "bookmarkTitleDone": "북마크됨 — 세션 종료 시 DM 발송",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}}에서 {{rank}}까지",
             "noStats": "아직 통계가 없습니다 - 프로필을 시작하려면 게임을 플레이하세요!",
             "overallRank": "전체 순위",
+            "playStreak": "플레이 연속",
+            "playStreakValue": "🔥 {{current}}일 (최고 {{longest}}일)",
             "rankOf": "#{{rank}} / {{total}}",
             "songsGuessed": "추측한 노래",
             "timesVoted": "투표 횟수",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "마지막 활동",
             "overallRank": "전체 순위",
+            "playStreak": "플레이 연속",
+            "playStreakValue": "🔥 {{current}}일 (최장: {{longest}}일)",
             "rank": {
                 "almighty": "태양계의 전능한 통치자",
                 "aoty": "올해의 아티스트",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} 님이 {{achievements}}을(를) 잠금 해제했습니다",
+            "title": "🎉 업적 달성!"
+        },
         "andManyOthers": "그리고 많은 다른 사람들...",
         "artist": "아티스트",
         "artistAliases": "아티스트 별칭",

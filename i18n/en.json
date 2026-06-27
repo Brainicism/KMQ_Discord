@@ -25,6 +25,7 @@
     "8th": "8th",
     "9th": "9th",
     "activity": {
+        "achievementUnlocked": "🎉 Achievement Unlocked!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Bookmark this song",
         "bookmarkTitleDone": "Bookmarked — DM'd at end of session",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} to {{rank}}",
             "noStats": "No stats yet - play a game to start your profile!",
             "overallRank": "Overall Rank",
+            "playStreak": "Play Streak",
+            "playStreakValue": "🔥 {{current}} days (best {{longest}})",
             "rankOf": "#{{rank}} of {{total}}",
             "songsGuessed": "Songs Guessed",
             "timesVoted": "Times Voted",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Last Active",
             "overallRank": "Overall Rank",
+            "playStreak": "Play Streak",
+            "playStreakValue": "🔥 {{current}} days (longest: {{longest}})",
             "rank": {
                 "almighty": "Almighty Ruler of the Solar System",
                 "aoty": "Artist of the Year",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} unlocked {{achievements}}",
+            "title": "🎉 Achievement Unlocked!"
+        },
         "andManyOthers": "and many others...",
         "artist": "artist",
         "artistAliases": "Artist Aliases",

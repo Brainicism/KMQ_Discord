@@ -25,6 +25,7 @@
     "8th": "8.",
     "9th": "9.",
     "activity": {
+        "achievementUnlocked": "🎉 Conquista Desbloqueada!",
         "appTitle": "KMQ",
         "bookmarkTitleActive": "Favoritar esta música",
         "bookmarkTitleDone": "Favoritada — enviada por DM no fim da sessão",
@@ -201,6 +202,8 @@
             "nextRank": "{{levels}} até {{rank}}",
             "noStats": "Nenhuma estatística ainda - jogue uma partida para iniciar seu perfil!",
             "overallRank": "Classificação Geral",
+            "playStreak": "Série de Jogo",
+            "playStreakValue": "🔥 {{current}} dias (melhor {{longest}})",
             "rankOf": "#{{rank}} de {{total}}",
             "songsGuessed": "Músicas adivinhadas",
             "timesVoted": "Vezes Votadas",
@@ -1377,6 +1380,8 @@
             },
             "lastActive": "Última Atividade",
             "overallRank": "Classificação Geral",
+            "playStreak": "Série de Jogo",
+            "playStreakValue": "🔥 {{current}} dias (mais longo: {{longest}})",
             "rank": {
                 "almighty": "Governante Todo-Poderoso do Sistema Solar",
                 "aoty": "Artista do Ano",
@@ -1706,6 +1711,10 @@
         }
     },
     "misc": {
+        "achievementUnlocked": {
+            "entry": "{{user}} desbloqueou {{achievements}}",
+            "title": "🎉 Conquista Desbloqueada!"
+        },
         "andManyOthers": "e muitos outros...",
         "artist": "artista",
         "artistAliases": "Apelidos de Artistas",
