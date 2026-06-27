@@ -267,7 +267,7 @@
             "notInKMQ": "Niet in KMQ",
             "releaseDate": "Uitgavedatum",
             "songAliases": "Nummer Aliassen",
-            "viewOnDaisuki": "Bekijk op Daisuki",
+            "viewOnSoridata": "Bekijk op Soridata",
             "views": "Weergaven",
             "yes": "Ja"
         },
@@ -1024,12 +1024,12 @@
                 "name": "zoeken"
             },
             "inCurrentGameOptions": "Ingesteld in huidige spelopties?",
-            "inKMQ": "Dit nummer is opgenomen in KMQ! Hier is de link naar [Daisuki]({{link}}).",
+            "inKMQ": "Dit liedje staat in KMQ! Hier is de link naar [Soridata]({{link}}).",
             "notFound": {
-                "description": "Het verzochte nummer werd niet gevonden in het KMQ-exemplaar van de Daisuki-database, daarom is het niet opgenomen in KMQ.",
+                "description": "Het gevraagde nummer is niet gevonden in KMQ's kopie van de Soridata-database, daarom is het niet opgenomen in KMQ.",
                 "title": "Nummer niet gevonden"
             },
-            "notInKMQ": "Dit nummer heeft een vermelding op [Daisuki]({{link}}), maar is niet opgenomen in KMQ.",
+            "notInKMQ": "Dit nummer heeft een vermelding op [Soridata]({{link}}), maar het is niet opgenomen in KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Kon geen nummers met die naam vinden",
                 "successDescription": "De volgende nummers zijn beschikbaar in KMQ:",

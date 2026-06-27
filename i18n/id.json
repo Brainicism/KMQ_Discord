@@ -267,7 +267,7 @@
             "notInKMQ": "Tidak di KMQ",
             "releaseDate": "Tanggal Rilis",
             "songAliases": "Alias Lagu",
-            "viewOnDaisuki": "Lihat di Daisuki",
+            "viewOnSoridata": "Lihat di Soridata",
             "views": "Tampilan",
             "yes": "Ya"
         },
@@ -1024,12 +1024,12 @@
                 "name": "pencarian"
             },
             "inCurrentGameOptions": "Dalam Opsi Permainan Saat Ini?",
-            "inKMQ": "Lagu ini disertakan dalam KMQ! Berikut tautan ke [Daisuki]({{link}}).",
+            "inKMQ": "Lagu ini termasuk dalam KMQ! Berikut adalah tautannya ke [Soridata]({{link}}).",
             "notFound": {
-                "description": "Lagu yang diminta tidak ditemukan dalam salinan basis data Daisuki KMQ, oleh karena itu tidak disertakan dalam KMQ.",
+                "description": "Lagu yang diminta tidak ditemukan dalam salinan database Soridata KMQ, oleh karena itu tidak termasuk dalam KMQ.",
                 "title": "Lagu Tidak Ditemukan"
             },
-            "notInKMQ": "Lagu ini memiliki entri di [Daisuki]({{link}}), tetapi tidak disertakan dalam KMQ.",
+            "notInKMQ": "Lagu ini memiliki entri di [Soridata]({{link}}), tetapi tidak termasuk dalam KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Tidak dapat menemukan lagu apa pun dengan nama itu",
                 "successDescription": "Lagu berikut tersedia di KMQ:",

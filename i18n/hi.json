@@ -267,7 +267,7 @@
             "notInKMQ": "KMQ में नहीं",
             "releaseDate": "रिलीज की तारीख",
             "songAliases": "गीत उपनाम",
-            "viewOnDaisuki": "Daisuki पर देखें",
+            "viewOnSoridata": "Soridata पर देखें",
             "views": "दृश्य",
             "yes": "हाँ"
         },
@@ -1024,12 +1024,12 @@
                 "name": "खोजकरें"
             },
             "inCurrentGameOptions": "वर्तमान गेम विकल्पों में?",
-            "inKMQ": "यह गाना KMQ में शामिल है! यहां [Daisuki]({{link}}) का लिंक दिया गया है।",
+            "inKMQ": "यह गाना KMQ में शामिल है! यहाँ [Soridata]({{link}}) का लिंक है।",
             "notFound": {
-                "description": "अनुरोधित गीत KMQ की Daisuki डेटाबेस की कॉपी में नहीं मिला, इसलिए इसे KMQ में शामिल नहीं किया गया है।",
+                "description": "आवश्यक गाना KMQ की Soridata डेटाबेस की प्रति में नहीं मिला, इसलिए यह KMQ में शामिल नहीं है।",
                 "title": "गाना नहीं मिला"
             },
-            "notInKMQ": "इस गाने का [Daisuki]({{link}}) पर एक प्रविष्टि है, लेकिन यह KMQ में शामिल नहीं है।",
+            "notInKMQ": "इस गाने की [Soridata]({{link}}) पर एक प्रविष्टि है, लेकिन यह KMQ में शामिल नहीं है।",
             "songNameSearchResult": {
                 "notFoundDescription": "उस नाम से कोई गीत नहीं मिल सका",
                 "successDescription": "निम्नलिखित गाने KMQ में उपलब्ध हैं:",

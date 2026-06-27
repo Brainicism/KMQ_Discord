@@ -267,7 +267,7 @@
             "notInKMQ": "Не в KMQ",
             "releaseDate": "Дата выпуска",
             "songAliases": "Алиасы песни",
-            "viewOnDaisuki": "Посмотреть на Daisuki",
+            "viewOnSoridata": "Просмотреть на Soridata",
             "views": "Просмотры",
             "yes": "Да"
         },
@@ -1024,12 +1024,12 @@
                 "name": "поиск"
             },
             "inCurrentGameOptions": "В текущих параметрах игры?",
-            "inKMQ": "Эта песня есть в KMQ! Вот ссылка на [Daisuki]({{link}}).",
+            "inKMQ": "Эта песня включена в KMQ! Вот ссылка на [Soridata]({{link}}).",
             "notFound": {
-                "description": "Запрошенная песня не была найдена в копии базы данных Daisuki KMQ, поэтому она не включена в KMQ.",
+                "description": "Запрашиваемая песня не найдена в копии базы данных Soridata у KMQ, поэтому она не включена в KMQ.",
                 "title": "Песня не найдена"
             },
-            "notInKMQ": "У этой песни есть запись на [Daisuki]({{link}}), но она не включена в KMQ.",
+            "notInKMQ": "У этой песни есть запись на [Soridata]({{link}}), но она не включена в KMQ.",
             "songNameSearchResult": {
                 "notFoundDescription": "Не удалось найти песни с таким названием",
                 "successDescription": "Следующие песни доступны в KMQ:",

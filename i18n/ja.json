@@ -267,7 +267,7 @@
             "notInKMQ": "KMQにはない",
             "releaseDate": "発売日",
             "songAliases": "曲の別名",
-            "viewOnDaisuki": "Daisukiで見る",
+            "viewOnSoridata": "ソリデータで見る",
             "views": "閲覧数",
             "yes": "はい"
         },
@@ -1024,12 +1024,12 @@
                 "name": "検索"
             },
             "inCurrentGameOptions": "現在のゲームオプションに含まれていますか？",
-            "inKMQ": "この曲はKMQに含まれています！[Daisuki]({{link}})のリンクをここに示します。",
+            "inKMQ": "この曲はKMQに含まれています！こちらが[Soridata]({{link}})へのリンクです。",
             "notFound": {
-                "description": "要求された曲はKMQのDaisukiデータベースのコピーに見つかりませんでした。したがって、KMQには含まれていません。",
+                "description": "リクエストされた曲はKMQのSoridataデータベースに見つからなかったため、KMQには含まれていません。",
                 "title": "曲が見つかりませんでした。"
             },
-            "notInKMQ": "この曲は[Daisuki]({{link}})にエントリーされていますが、KMQには含まれていません。",
+            "notInKMQ": "この曲は[Soridata]({{link}})にエントリがありますが、KMQには含まれていません。",
             "songNameSearchResult": {
                 "notFoundDescription": "その名前の曲は見つかりませんでした。",
                 "successDescription": "以下の曲がKMQで利用可能です。",
