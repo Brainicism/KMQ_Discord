@@ -24,6 +24,7 @@ import {
 } from "../../helpers/discord_utils";
 import { getEmojisFromSongTags } from "../../helpers/game_utils";
 import { sendValidationErrorMessage } from "../../helpers/validate";
+import { sql } from "kysely";
 import Eris from "eris";
 import GameRound from "../../structures/game_round";
 import GuildPreference from "../../structures/guild_preference";
@@ -383,12 +384,12 @@ export default class LookupCommand implements BaseCommand {
         }
     }
 
-    static getDaisukiLink(id: number, isMV: boolean): string {
+    static getSoridataLink(id: number, isMV: boolean): string {
         if (isMV) {
-            return `https://kpop.daisuki.com.br/mv.html?id=${id}`;
+            return `https://soridata.com/mv.html?id=${id}`;
         }
 
-        return `https://kpop.daisuki.com.br/audio_videos.html?playid=${id}`;
+        return `https://soridata.com/audio_videos.html?playid=${id}`;
     }
 
     /**
@@ -425,7 +426,11 @@ export default class LookupCommand implements BaseCommand {
             return null;
         }
 
-        const daisukiLink = LookupCommand.getDaisukiLink(daisukiEntry.id, true);
+        const soridataLink = LookupCommand.getSoridataLink(
+            daisukiEntry.id,
+            true,
+        );
+
         const tags = getEmojisFromSongTags(daisukiEntry);
         const songAliases: string[] = [];
         const artistAliases: string[] = [];
@@ -558,7 +563,7 @@ export default class LookupCommand implements BaseCommand {
             artistName,
             youtubeLink: videoID,
             thumbnailUrl: `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`,
-            daisukiLink,
+            soridataLink,
             views,
             publishDate: publishDate.toISOString(),
             songAliases,
@@ -584,23 +589,39 @@ export default class LookupCommand implements BaseCommand {
         locale: LocaleType,
         limit: number,
     ): Promise<QueriedSong[]> {
+        const contains = `%${songName}%`;
+        const prefix = `${songName}%`;
+        const nameCol =
+            locale === LocaleType.KO ? "song_name_ko" : "song_name_en";
+
+        const artistCol =
+            locale === LocaleType.KO ? "artist_name_ko" : "artist_name_en";
+
         const rows = await dbContext.kmq
             .selectFrom("available_songs")
             .select(SongSelector.QueriedSongFields)
             .where(({ or, eb }) =>
                 or([
-                    eb("song_name_en", "like", `%${songName}%`),
-                    eb("song_name_ko", "like", `%${songName}%`),
-                    eb("song_aliases", "like", `%${songName}%`),
+                    eb("song_name_en", "like", contains),
+                    eb("song_name_ko", "like", contains),
+                    eb("artist_name_en", "like", contains),
+                    eb("artist_name_ko", "like", contains),
+                    eb("song_aliases", "like", contains),
                 ]),
             )
+            // Rank by how directly the query matches: a song-name prefix beats a
+            // song-name substring, which beats an artist match, which beats an
+            // alias-only match. Ties broken by views. Without this a short song
+            // whose alias merely contains the query (e.g. "00:00" for "bl")
+            // outranks the songs actually named "Bl...".
             .orderBy(
-                (eb) =>
-                    eb.fn("CHAR_LENGTH", [
-                        locale === LocaleType.KO
-                            ? "song_name_ko"
-                            : "song_name_en",
-                    ]),
+                sql`CASE
+                    WHEN ${sql.ref(nameCol)} LIKE ${prefix} THEN 0
+                    WHEN ${sql.ref(nameCol)} LIKE ${contains} THEN 1
+                    WHEN ${sql.ref(artistCol)} LIKE ${prefix} THEN 2
+                    WHEN ${sql.ref(artistCol)} LIKE ${contains} THEN 3
+                    ELSE 4
+                END`,
                 "asc",
             )
             .orderBy("views", "desc")
@@ -649,7 +670,7 @@ export default class LookupCommand implements BaseCommand {
         const description = i18n.translate(
             guildID,
             songInfo.inKMQ ? "command.lookup.inKMQ" : "command.lookup.notInKMQ",
-            { link: songInfo.daisukiLink },
+            { link: songInfo.soridataLink },
         );
 
         const viewsString = i18n.translate(guildID, "misc.views");

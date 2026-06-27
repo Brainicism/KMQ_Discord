@@ -13,8 +13,8 @@ export default interface SongInfo {
     artistName: string;
     youtubeLink: string;
     thumbnailUrl: string;
-    /** kpop.daisuki.com.br page for the song. */
-    daisukiLink: string;
+    /** soridata.com page for the song. */
+    soridataLink: string;
     views: number;
     /** Release date as an ISO 8601 string (the renderer formats per locale). */
     publishDate: string;

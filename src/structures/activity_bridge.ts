@@ -17,6 +17,7 @@ import {
 } from "../helpers/discord_utils";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import { parseKmqPlaylistIdentifier } from "../helpers/utils";
+import { songTagEmojisToUnicode } from "../helpers/game_utils";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
 import applyPlaylistFromURL from "../helpers/playlist_utils";
@@ -1629,7 +1630,19 @@ function ensureWorkerHandlerRegistered(): void {
                     )
                         .then((info) =>
                             reply(
-                                info ? { found: true, info } : { found: false },
+                                info
+                                    ? {
+                                          found: true,
+                                          // Web clients can't resolve Discord
+                                          // emoji shortcodes; send Unicode.
+                                          info: {
+                                              ...info,
+                                              tags: songTagEmojisToUnicode(
+                                                  info.tags,
+                                              ),
+                                          },
+                                      }
+                                    : { found: false },
                             ),
                         )
                         .catch((e) => {

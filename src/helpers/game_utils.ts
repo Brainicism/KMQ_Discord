@@ -493,6 +493,30 @@ export function getEmojisFromSongTags(daisukiEntry: {
     return tagText;
 }
 
+// Discord renders `:shortcode:` emoji in embeds, but plain web clients (the
+// Activity) show the literal text. Map the shortcodes emitted by
+// getEmojisFromSongTags to their Unicode equivalents for non-Discord surfaces.
+const SONG_TAG_EMOJI_UNICODE: Record<string, string> = {
+    ":flag_gb:": "🇬🇧",
+    ":flag_cn:": "🇨🇳",
+    ":flag_jp:": "🇯🇵",
+    ":flag_es:": "🇪🇸",
+    ":globe_with_meridians:": "🌐",
+};
+
+/**
+ * Converts the Discord emoji shortcodes produced by getEmojisFromSongTags into
+ * Unicode emoji, for clients that don't resolve shortcodes themselves.
+ * @param tagText - the shortcode string (may be empty)
+ * @returns the same string with shortcodes replaced by Unicode emoji
+ */
+export function songTagEmojisToUnicode(tagText: string): string {
+    return tagText.replace(
+        /:[a-z_]+:/g,
+        (match) => SONG_TAG_EMOJI_UNICODE[match] ?? match,
+    );
+}
+
 /** @returns whether its a KMQ power hour */
 export function isPowerHour(): boolean {
     const date = new Date();
