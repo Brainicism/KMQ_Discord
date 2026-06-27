@@ -463,29 +463,40 @@ describe("game utils", () => {
             });
         });
 
-        describe("cleanupInactiveGameSessions", async () => {
+        describe("cleanupInactiveGameSessions", () => {
             const guildId = "123";
-            sandbox
-                .stub(discordUtils, "getCurrentVoiceMembers")
-                .callsFake((_voiceChannelID) => []);
-            guildPreference = await getMockGuildPreference();
-            const gameSession = new GameSession(
-                guildPreference,
-                "id",
-                "id",
-                guildId,
-                new KmqMember("id"),
-                GameType.CLASSIC,
-            );
+            let gameSession: GameSession;
+            let endSessionStub: sinon.SinonStub;
 
-            sandbox.restore();
-            const endSandbox = sinon.createSandbox();
-            const endSessionStub = sandbox.stub(gameSession, "endSession");
+            // Build the stubbed session in a hook rather than in the describe
+            // body. An async describe callback defers the rest of the body
+            // (and the nested suites/stub) into microtasks, which races spec
+            // collection and made this block order-dependent on whatever file
+            // loads next.
+            before(async () => {
+                sandbox
+                    .stub(discordUtils, "getCurrentVoiceMembers")
+                    .callsFake((_voiceChannelID) => []);
+
+                const cleanupGuildPreference = await getMockGuildPreference();
+                gameSession = new GameSession(
+                    cleanupGuildPreference,
+                    "id",
+                    "id",
+                    guildId,
+                    new KmqMember("id"),
+                    GameType.CLASSIC,
+                );
+
+                endSessionStub = sandbox.stub(gameSession, "endSession");
+            });
+
             after(() => {
-                endSandbox.restore();
+                sandbox.restore();
             });
 
             beforeEach(() => {
+                endSessionStub.resetHistory();
                 State.gameSessions = {
                     [guildId]: gameSession,
                 };
@@ -493,6 +504,7 @@ describe("game utils", () => {
 
             describe("no inactive gamesessions", () => {
                 it("should not clean up", async () => {
+                    gameSession.lastActive = Date.now();
                     await cleanupInactiveGameSessions(State.gameSessions);
                     assert.strictEqual(
                         State.gameSessions[guildId],
