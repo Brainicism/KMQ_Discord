@@ -114,7 +114,7 @@
         "eslint-plugin-only-warn": "^1.1.0",
         "eslint-plugin-sort-imports-es6-autofix": "^0.6.0",
         "eslint-plugin-tsdoc": "^0.3.0",
-        "i18n-ai-translate": "^5.0.1",
+        "i18n-ai-translate": "taahamahdi/i18n-ai-translate#master",
         "kysely-codegen": "^0.20.0",
         "prettier": "3.8.3",
         "typescript": "^5.5.4"
