@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import type { CSSProperties } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
@@ -3539,37 +3540,43 @@ function SongInfoTrigger({
             >
                 {children}
             </button>
-            {popover.mounted && (
-                <div
-                    className={`song-info-popover${
-                        popover.visible ? " visible" : ""
-                    }`}
-                    style={
-                        canHover && anchorRect
-                            ? songPopoverFixedStyle(anchorRect)
-                            : undefined
-                    }
-                    onMouseEnter={canHover ? clearCloseTimer : undefined}
-                    onMouseLeave={canHover ? scheduleClose : undefined}
-                >
-                    <button
-                        type="button"
-                        className="song-info-popover-close"
-                        aria-label={t("songInfo.close")}
-                        onClick={() => setOpen(false)}
+            {popover.mounted &&
+                // Portal to <body>: the history drawer sets `transform` (for its
+                // slide-in) which makes it the containing block for our
+                // `position: fixed` popover, so it'd otherwise be clipped by the
+                // drawer's `overflow`. Portaling escapes the transformed ancestor.
+                createPortal(
+                    <div
+                        className={`song-info-popover${
+                            popover.visible ? " visible" : ""
+                        }`}
+                        style={
+                            canHover && anchorRect
+                                ? songPopoverFixedStyle(anchorRect)
+                                : undefined
+                        }
+                        onMouseEnter={canHover ? clearCloseTimer : undefined}
+                        onMouseLeave={canHover ? scheduleClose : undefined}
                     >
-                        ✕
-                    </button>
-                    <SongInfoCard
-                        accessToken={accessToken}
-                        instanceId={instanceId}
-                        youtubeLink={youtubeLink}
-                        cache={cache}
-                        refreshNonce={refreshNonce}
-                        t={t}
-                    />
-                </div>
-            )}
+                        <button
+                            type="button"
+                            className="song-info-popover-close"
+                            aria-label={t("songInfo.close")}
+                            onClick={() => setOpen(false)}
+                        >
+                            ✕
+                        </button>
+                        <SongInfoCard
+                            accessToken={accessToken}
+                            instanceId={instanceId}
+                            youtubeLink={youtubeLink}
+                            cache={cache}
+                            refreshNonce={refreshNonce}
+                            t={t}
+                        />
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }
