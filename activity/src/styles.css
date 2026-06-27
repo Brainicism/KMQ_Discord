@@ -2777,7 +2777,11 @@ fieldset.options-override:disabled .options-group {
     left: 100%;
     margin-left: 8px;
     z-index: 200;
-    width: 300px;
+    /* Grow to fit the title (capped) so short songs stay compact and long
+       names get more room instead of being squeezed beside the thumbnail. */
+    width: max-content;
+    min-width: 300px;
+    max-width: min(92vw, 440px);
     max-height: 70vh;
     overflow-y: auto;
     background: var(--bg-surface);
@@ -2865,19 +2869,28 @@ fieldset.options-override:disabled .options-group {
 .song-info-title {
     display: flex;
     flex-direction: column;
+    justify-content: center;
     gap: 2px;
     min-width: 0;
 }
 
+/* Single line that drives the popover's content-based width up to its cap,
+   then ellipsizes — long names stay on one tidy line instead of being cut. */
 .song-info-song {
     font-weight: 800;
     font-size: 0.95rem;
     color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .song-info-artist {
     font-size: 0.82rem;
     color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .song-info-badge {
