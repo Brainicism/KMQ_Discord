@@ -2853,8 +2853,8 @@ fieldset.options-override:disabled .options-group {
 }
 
 .song-info-thumb {
-    width: 120px;
-    height: 90px;
+    width: 180px;
+    aspect-ratio: 16 / 9;
     flex-shrink: 0;
     object-fit: cover;
     border-radius: var(--radius-sm);
