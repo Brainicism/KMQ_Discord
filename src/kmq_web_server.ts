@@ -233,8 +233,12 @@ function nullableIntInRange(
     min: number,
     max: number,
 ): number | null | undefined {
+    // null explicitly clears the option; a present-but-invalid value (wrong
+    // type or out of range) is signalled as `undefined` so the caller rejects
+    // it with a 400 rather than silently coercing it to a reset.
     if (v === null) return null;
-    return intInRange(v, min, max);
+    const parsed = intInRange(v, min, max);
+    return parsed === null ? undefined : parsed;
 }
 
 function floatInRange(v: unknown, min: number, max: number): number | null {
@@ -251,7 +255,7 @@ function floatInRange(v: unknown, min: number, max: number): number | null {
  * @returns A validated SetOptionBody, or null if the shape/enum mismatch
  * means the caller should respond 400.
  */
-function parseSetOptionBody(body: unknown): SetOptionBody | null {
+export function parseSetOptionBody(body: unknown): SetOptionBody | null {
     if (!body || typeof body !== "object") return null;
     const obj = body as Record<string, unknown>;
     switch (obj["kind"]) {
