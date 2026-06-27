@@ -5,6 +5,7 @@ import {
     ACTIVITY_REQUEST_TIMEOUT_MS,
 } from "../../../constants";
 import ActivityHub from "../../../activity_hub";
+import GameType from "../../../enums/game_type";
 import assert from "assert";
 import sinon from "sinon";
 import type { ActivitySubscriber } from "../../../activity_hub";
@@ -522,6 +523,141 @@ describe("ActivityHub", () => {
             const res = await hub.searchSongs("tt", "en");
             assert.deepStrictEqual(res, { results: [] });
             assert.strictEqual(fleet.sent.length, 0);
+        });
+    });
+
+    describe("guild-routed action ops", () => {
+        // Each action method resolves the owning cluster for its guild and
+        // forwards a request under a fixed op with the caller's args. These
+        // pin the op name + args shape so a rename/refactor can't silently
+        // reroute a player action. guild "0" → shard 0 → cluster 0.
+        async function dispatch(
+            invoke: (hub: ActivityHub) => Promise<unknown>,
+        ): Promise<SentRequest> {
+            const { hub, fleet } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+            fleet.autoReply = (payload) => {
+                fleet.emit(ACTIVITY_IPC_REPLY, {
+                    cid: payload.cid,
+                    payload: { ok: true },
+                });
+            };
+
+            await invoke(hub);
+            assert.strictEqual(fleet.sent.length, 1);
+            return fleet.sent[0]!;
+        }
+
+        it("submitMcGuess → mcGuess", async () => {
+            const sent = await dispatch((hub) =>
+                hub.submitMcGuess("0", "user1", "choice-uuid", 12345),
+            );
+
+            assert.strictEqual(sent.clusterID, 0);
+            assert.strictEqual(sent.payload.op, "mcGuess");
+            assert.deepStrictEqual(sent.payload.args, {
+                guildID: "0",
+                userID: "user1",
+                choiceID: "choice-uuid",
+                ts: 12345,
+            });
+        });
+
+        it("startGame → startGame", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                voiceChannelID: "vc1",
+                textChannelID: "tc1",
+                gameType: GameType.CLASSIC,
+            };
+
+            const sent = await dispatch((hub) => hub.startGame(args));
+            assert.strictEqual(sent.clusterID, 0);
+            assert.strictEqual(sent.payload.op, "startGame");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("skipVote → skipVote", async () => {
+            const args = { guildID: "0", userID: "user1" };
+            const sent = await dispatch((hub) => hub.skipVote(args));
+            assert.strictEqual(sent.payload.op, "skipVote");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("endGame → endGame", async () => {
+            const args = { guildID: "0", userID: "user1" };
+            const sent = await dispatch((hub) => hub.endGame(args));
+            assert.strictEqual(sent.payload.op, "endGame");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("hint → hint", async () => {
+            const args = { guildID: "0", userID: "user1" };
+            const sent = await dispatch((hub) => hub.hint(args));
+            assert.strictEqual(sent.payload.op, "hint");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("bookmark → bookmark", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                youtubeLink: "abc123",
+            };
+
+            const sent = await dispatch((hub) => hub.bookmark(args));
+            assert.strictEqual(sent.payload.op, "bookmark");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("setOption → setOption (carries the discriminated payload)", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                kind: "limit" as const,
+                limitStart: 0,
+                limitEnd: 100,
+            };
+
+            const sent = await dispatch((hub) => hub.setOption(args));
+            assert.strictEqual(sent.payload.op, "setOption");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("preset → preset", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                action: "save" as const,
+                name: "my-preset",
+            };
+
+            const sent = await dispatch((hub) => hub.preset(args));
+            assert.strictEqual(sent.payload.op, "preset");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("profile → profile (forwards the optional target)", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                targetUserID: "user2",
+            };
+
+            const sent = await dispatch((hub) => hub.profile(args));
+            assert.strictEqual(sent.payload.op, "profile");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("routes to the cluster owning the guild, not always cluster 0", async () => {
+            // guild 2^23 → shard 2 → cluster 1
+            const guildID = String(2 ** 23);
+            const sent = await dispatch((hub) =>
+                hub.skipVote({ guildID, userID: "u" }),
+            );
+
+            assert.strictEqual(sent.clusterID, 1);
         });
     });
 });
