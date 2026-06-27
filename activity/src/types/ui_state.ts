@@ -7,6 +7,7 @@ import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
 import type ChatMessage from "./chat_message";
 import type FloatingEmote from "./floating_emote";
+import type AchievementToast from "./achievement_toast";
 import type HintState from "./hint_state";
 import type LevelUp from "./level_up";
 import type RecentGuess from "./recent_guess";
@@ -51,4 +52,6 @@ export default interface UiState {
      *  celebration. Empty until a `levelUp` event arrives; reset on a new
      *  session. */
     levelUps: LevelUp[];
+    /** Pending "achievement unlocked" celebrations, dismissed on a timer. */
+    achievementToasts: AchievementToast[];
 }

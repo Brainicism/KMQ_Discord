@@ -53,6 +53,8 @@ interface RawProfileData {
     /** Vote-bonus expiry, or null when the player has no active bonus. */
     voteBuffExpiry: Date | null;
     badges: string[];
+    currentPlayStreak: number;
+    longestPlayStreak: number;
 }
 
 const COMMAND_NAME = "profile";
@@ -434,6 +436,8 @@ export default class ProfileCommand implements BaseCommand {
                 "exp",
                 "level",
                 "rank_ineligible",
+                "current_play_streak",
+                "longest_play_streak",
             ])
             .where("player_id", "=", playerID)
             .executeTakeFirst();
@@ -521,6 +525,8 @@ export default class ProfileCommand implements BaseCommand {
                 ? new Date(voteData["buff_expiry_date"])
                 : null,
             badges,
+            currentPlayStreak: playerStats["current_play_streak"],
+            longestPlayStreak: playerStats["longest_play_streak"],
         };
     }
 
@@ -594,6 +600,8 @@ export default class ProfileCommand implements BaseCommand {
             firstPlayMs: raw.firstPlay.getTime(),
             lastActiveMs: raw.lastActive.getTime(),
             timesVoted: raw.timesVoted,
+            currentPlayStreak: raw.currentPlayStreak,
+            longestPlayStreak: raw.longestPlayStreak,
             badges: raw.badges,
             buffs: {
                 powerHour,
@@ -703,6 +711,21 @@ export default class ProfileCommand implements BaseCommand {
                 inline: true,
             },
         ];
+
+        if (raw.currentPlayStreak > 0) {
+            fields.push({
+                name: i18n.translate(guildID, "command.profile.playStreak"),
+                value: i18n.translate(
+                    guildID,
+                    "command.profile.playStreakValue",
+                    {
+                        current: friendlyFormattedNumber(raw.currentPlayStreak),
+                        longest: friendlyFormattedNumber(raw.longestPlayStreak),
+                    },
+                ),
+                inline: true,
+            });
+        }
 
         // Optional fields
         const badges = raw.badges.join("\n");

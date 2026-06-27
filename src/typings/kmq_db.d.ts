@@ -220,13 +220,16 @@ export interface PlayerServers {
 }
 
 export interface PlayerStats {
+    current_play_streak: Generated<number>;
     exp: Generated<number>;
     first_play: Generated<Date>;
     games_played: Generated<number>;
     last_active: Generated<Date>;
     last_game_played_errored: Generated<number>;
     last_game_started_at: Generated<Date | null>;
+    last_streak_date: Date | null;
     level: Generated<number>;
+    longest_play_streak: Generated<number>;
     player_id: string;
     rank_ineligible: Generated<number>;
     songs_guessed: Generated<number>;

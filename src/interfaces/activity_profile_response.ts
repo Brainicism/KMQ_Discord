@@ -46,6 +46,10 @@ export interface ActivityProfileStats {
     firstPlayMs: number;
     lastActiveMs: number;
     timesVoted: number;
+    /** Consecutive days played up to and including the most recent play day. */
+    currentPlayStreak: number;
+    /** Best consecutive-days-played streak the player has ever reached. */
+    longestPlayStreak: number;
     badges: string[];
     buffs: ActivityProfileBuffs;
     /** top.gg vote link for the "vote for bonus EXP" CTA. */
