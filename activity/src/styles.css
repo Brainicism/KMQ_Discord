@@ -367,6 +367,12 @@ body::before {
     gap: 12px;
 }
 
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
 .kmq-app header h1 {
     font-size: 1.5rem;
     font-weight: 800;

@@ -8,7 +8,7 @@ export interface ActivitySongInfo {
     artistName: string;
     youtubeLink: string;
     thumbnailUrl: string;
-    daisukiLink: string;
+    soridataLink: string;
     views: number;
     /** ISO 8601 string; the client formats it per locale. */
     publishDate: string;

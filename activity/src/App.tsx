@@ -178,9 +178,11 @@ const THUMBNAIL_FALLBACK_CHAIN = [
 function RevealThumbnail({
     thumbnailUrl,
     alt,
+    className,
 }: {
     thumbnailUrl: string;
     alt: string;
+    className?: string;
 }): React.ReactElement | null {
     // Preload candidates via off-DOM Image() so the visible <img> only mounts
     // once we know a good URL. Otherwise the user sees a brief flash of
@@ -219,7 +221,7 @@ function RevealThumbnail({
     }, [thumbnailUrl]);
 
     if (!resolvedUrl) return null;
-    return <img src={resolvedUrl} alt={alt} />;
+    return <img className={className} src={resolvedUrl} alt={alt} />;
 }
 
 function rejectReasonText(
@@ -3283,12 +3285,10 @@ function SongInfoCardBody({
     return (
         <div className="song-info-body">
             <div className="song-info-head">
-                <img
+                <RevealThumbnail
                     className="song-info-thumb"
-                    src={info.thumbnailUrl}
+                    thumbnailUrl={info.thumbnailUrl}
                     alt=""
-                    width={120}
-                    height={90}
                 />
                 <div className="song-info-title">
                     <span className="song-info-song">
@@ -3381,9 +3381,9 @@ function SongInfoCardBody({
                 <button
                     type="button"
                     className="song-info-link"
-                    onClick={() => openExternalUrl(info.daisukiLink)}
+                    onClick={() => openExternalUrl(info.soridataLink)}
                 >
-                    {t("songInfo.viewOnDaisuki")}
+                    {t("songInfo.viewOnSoridata")}
                 </button>
             </div>
         </div>
@@ -4312,25 +4312,26 @@ export default function App() {
                             </div>
 
                             {authState && (
-                                <button
-                                    type="button"
-                                    className="header-search-btn"
-                                    aria-label={t("search.open")}
-                                    title={t("search.open")}
-                                    onClick={() => setSearchOpen(true)}
-                                >
-                                    🔍
-                                </button>
-                            )}
-                            {authState && (
-                                <ControlButtons
-                                    accessToken={authState.accessToken}
-                                    instanceId={authState.instanceId}
-                                    hasSession={
-                                        ui.session !== null && !ui.sessionEnded
-                                    }
-                                    t={t}
-                                />
+                                <div className="header-right">
+                                    <button
+                                        type="button"
+                                        className="header-search-btn"
+                                        aria-label={t("search.open")}
+                                        title={t("search.open")}
+                                        onClick={() => setSearchOpen(true)}
+                                    >
+                                        🔍
+                                    </button>
+                                    <ControlButtons
+                                        accessToken={authState.accessToken}
+                                        instanceId={authState.instanceId}
+                                        hasSession={
+                                            ui.session !== null &&
+                                            !ui.sessionEnded
+                                        }
+                                        t={t}
+                                    />
+                                </div>
                             )}
                         </header>
 
