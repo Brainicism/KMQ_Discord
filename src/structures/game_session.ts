@@ -1178,7 +1178,20 @@ export default class GameSession extends Session {
             ? 0
             : this.guildPreference.getSongStartDelay() * 1000;
 
-        if (this.sessionInitialized) {
+        // Only wait out the song-start delay when we're actually going to start
+        // a round. endRoundCore() already chains startRoundCore() to begin the
+        // next round, so guessSong's explicit startRound() in the "everybody
+        // guessed, nobody correct" path is usually redundant — a round already
+        // exists. Without skipping the delay here, that redundant call would
+        // hold the lifecycleMutex for the full song-start delay before the guard
+        // below bails, blocking the next round's endRound() (i.e. the next
+        // guess) for ~songStartDelay seconds.
+        if (
+            this.sessionInitialized &&
+            !this.finished &&
+            !this.round &&
+            !this.pendingEndSession
+        ) {
             // Only add a delay if the game has already started
             await delay(
                 this.multiguessDelayIsActive(this.guildPreference)
