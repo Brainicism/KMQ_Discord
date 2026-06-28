@@ -606,6 +606,11 @@ export default class GameSession extends Session {
      * @param messageContext - context for the synthesized guess
      * @param onCorrect - invoked once, right before the correct-guess scoring
      * runs, so an interaction-based caller can acknowledge within the deadline
+     * @param onAccepted - invoked once with the (incorrect/correct) outcome as
+     * soon as the pick is accepted, BEFORE the round-lifecycle transition
+     * (guessSong → endRound) runs. Lets a caller acknowledge immediately
+     * instead of blocking on the lifecycleMutex, which can be contended for
+     * many seconds. Not called for ineligible picks.
      * @returns whether the pick was ineligible, incorrect, or correct
      */
     async submitMultipleChoiceGuess(
@@ -614,6 +619,11 @@ export default class GameSession extends Session {
         createdAt: number,
         messageContext: MessageContext,
         onCorrect?: () => Promise<unknown>,
+        onAccepted?: (
+            outcome:
+                | MultipleChoiceGuessResult.INCORRECT
+                | MultipleChoiceGuessResult.CORRECT,
+        ) => void,
     ): Promise<MultipleChoiceGuessResult> {
         const round = this.round;
         if (!round) return MultipleChoiceGuessResult.INELIGIBLE;
@@ -644,6 +654,7 @@ export default class GameSession extends Session {
                     (button) => button.custom_id === choiceID,
                 )?.label ?? "";
 
+            onAccepted?.(MultipleChoiceGuessResult.INCORRECT);
             await this.guessSong(messageContext, chosenLabel, createdAt);
             return MultipleChoiceGuessResult.INCORRECT;
         }
@@ -652,6 +663,7 @@ export default class GameSession extends Session {
             await onCorrect();
         }
 
+        onAccepted?.(MultipleChoiceGuessResult.CORRECT);
         await this.guessSong(
             messageContext,
             this.guildPreference.gameOptions.guessModeType !==

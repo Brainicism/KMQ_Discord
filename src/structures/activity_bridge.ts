@@ -571,20 +571,39 @@ function ensureWorkerHandlerRegistered(): void {
                         session.guildID,
                     );
 
+                    // Reply at most once. The pick is accepted (and recorded)
+                    // before the round-lifecycle transition runs, so we ack as
+                    // soon as it's accepted via onAccepted rather than waiting
+                    // for guessSong → endRound, which can block on the
+                    // lifecycleMutex for many seconds and blow past the
+                    // client's request timeout even though the guess landed.
+                    let replied = false;
+                    const replyOnce = (
+                        payload: ActivityGuessResponse,
+                    ): void => {
+                        if (replied) return;
+                        replied = true;
+                        reply(payload);
+                    };
+
                     session
                         .submitMultipleChoiceGuess(
                             mcArgs.userID,
                             mcArgs.choiceID,
                             mcArgs.ts,
                             messageContext,
-                        )
-                        .then((result) => {
-                            // INELIGIBLE = no round / already picked / not
-                            // eligible → reject so the client can surface it.
+                            undefined,
                             // CORRECT/INCORRECT both accepted the pick; the
                             // client learns correctness from the guessReceived
                             // / roundEnd events.
-                            reply(
+                            () => replyOnce({ ok: true }),
+                        )
+                        .then((result) => {
+                            // onAccepted never fired → INELIGIBLE (no round /
+                            // already picked / not eligible). Reject so the
+                            // client can surface it. (If it did fire, this is a
+                            // no-op.)
+                            replyOnce(
                                 result === MultipleChoiceGuessResult.INELIGIBLE
                                     ? { ok: false, reason: "no_round" }
                                     : { ok: true },
@@ -594,7 +613,9 @@ function ensureWorkerHandlerRegistered(): void {
                             logger.error(
                                 `Error in activity mc-guess for gid=${mcArgs.guildID}, uid=${mcArgs.userID}. err=${e}`,
                             );
-                            reply({ ok: false, reason: "internal" });
+                            // If we already acked the accepted pick, the round
+                            // transition just failed downstream — keep the ack.
+                            replyOnce({ ok: false, reason: "internal" });
                         });
 
                     return;
