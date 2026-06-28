@@ -9,6 +9,7 @@ import {
     chunkArray,
     codeLine,
     delay,
+    friendlyFormattedNumber,
     getMention,
     getOrdinalNum,
     setDifference,
@@ -77,6 +78,7 @@ import TeamScoreboard from "./team_scoreboard";
 import i18n from "../helpers/localization_manager";
 import type { ButtonActionRow, GuildTextableMessage } from "../types";
 import type { CommandInteraction } from "eris";
+import type GameSessionRecap from "../interfaces/game_session_recap";
 import type GuildPreference from "./guild_preference";
 import type PlayerRoundResult from "../interfaces/player_round_result";
 import type QueriedSong from "./queried_song";
@@ -135,6 +137,12 @@ export default class GameSession extends Session {
     /** The most recent Guesser, including their current streak */
     private lastGuesser: LastGuesser | null;
 
+    /** Fastest correct guess this session (for the end-game recap). */
+    private fastestGuess: { userID: string; timeMs: number } | null;
+
+    /** Longest guess streak reached this session (for the end-game recap). */
+    private longestStreak: { userID: string; streak: number } | null;
+
     /** Manages updating a message with current guessers with hidden enabled */
     private hiddenUpdateTimer: NodeJS.Timeout | null;
 
@@ -168,6 +176,8 @@ export default class GameSession extends Session {
         this.round = null;
         this.songStats = {};
         this.lastGuesser = null;
+        this.fastestGuess = null;
+        this.longestStreak = null;
         this.hiddenUpdateTimer = null;
         this.clipDurationLength = clipDurationLength || null;
         this.clipPlayNewClip = clipPlayNewClip || null;
@@ -453,6 +463,26 @@ export default class GameSession extends Session {
 
     getCorrectGuesses(): number {
         return this.correctGuesses;
+    }
+
+    /**
+     * Builds the end-of-session recap from accumulated session state. userIDs
+     * stay raw; consumers resolve names.
+     * @returns the recap summary
+     */
+    buildRecap(): GameSessionRecap {
+        const winners = this.scoreboard.getWinners();
+        const topWinner = winners[0];
+        return {
+            mvp:
+                topWinner && topWinner.getScore() > 0
+                    ? { userID: topWinner.id, score: topWinner.getScore() }
+                    : null,
+            fastestGuess: this.fastestGuess,
+            longestStreak: this.longestStreak,
+            totalCorrect: this.correctGuesses,
+            totalRounds: this.roundsPlayed,
+        };
     }
 
     isGameSession(): this is GameSession {
@@ -884,6 +914,11 @@ export default class GameSession extends Session {
                 this.guildID,
             );
 
+            const recapField = this.buildRecapEmbedField();
+            if (recapField) {
+                fields.push(recapField);
+            }
+
             const endGameMessage = await getGameInfoMessage(this.guildID);
 
             if (
@@ -1074,6 +1109,63 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
     ): Promise<Round | null> {
         return this.startRoundCore(messageContext);
+    }
+
+    /**
+     * Formats the recap as an embed field for the legacy end-game message, or
+     * null when there's nothing noteworthy to show.
+     * @returns the recap field, or null
+     */
+    private buildRecapEmbedField(): {
+        name: string;
+        value: string;
+        inline: boolean;
+    } | null {
+        const recap = this.buildRecap();
+        const lines: string[] = [];
+
+        if (recap.mvp) {
+            lines.push(
+                i18n.translate(this.guildID, "misc.recap.mvp", {
+                    user: this.scoreboard.getPlayerDisplayedName(
+                        recap.mvp.userID,
+                    ),
+                    score: friendlyFormattedNumber(recap.mvp.score),
+                }),
+            );
+        }
+
+        if (recap.fastestGuess) {
+            lines.push(
+                i18n.translate(this.guildID, "misc.recap.fastest", {
+                    user: this.scoreboard.getPlayerDisplayedName(
+                        recap.fastestGuess.userID,
+                    ),
+                    seconds: (recap.fastestGuess.timeMs / 1000).toFixed(1),
+                }),
+            );
+        }
+
+        if (recap.longestStreak) {
+            lines.push(
+                i18n.translate(this.guildID, "misc.recap.streak", {
+                    user: this.scoreboard.getPlayerDisplayedName(
+                        recap.longestStreak.userID,
+                    ),
+                    streak: friendlyFormattedNumber(recap.longestStreak.streak),
+                }),
+            );
+        }
+
+        if (lines.length === 0) {
+            return null;
+        }
+
+        return {
+            name: i18n.translate(this.guildID, "misc.recap.title"),
+            value: lines.join("\n"),
+            inline: false,
+        };
     }
 
     /**
@@ -1305,6 +1397,27 @@ export default class GameSession extends Session {
                 this.lastGuesser.streak++;
             }
 
+            // Track session-best stats for the end-game recap.
+            if (
+                this.longestStreak === null ||
+                this.lastGuesser.streak > this.longestStreak.streak
+            ) {
+                this.longestStreak = {
+                    userID: this.lastGuesser.userID,
+                    streak: this.lastGuesser.streak,
+                };
+            }
+
+            if (
+                this.fastestGuess === null ||
+                timePlayed < this.fastestGuess.timeMs
+            ) {
+                this.fastestGuess = {
+                    userID: correctGuessers[0]!.id,
+                    timeMs: timePlayed,
+                };
+            }
+
             this.guessTimes.push(timePlayed);
             await this.updateScoreboard(
                 round,
@@ -1460,6 +1573,10 @@ export default class GameSession extends Session {
         }
 
         this.finished = true;
+        // Emit recap before sessionEnd: both are synchronous, so the Activity
+        // bridge handles them before its sessionEnd teardown (scheduled via
+        // setImmediate) runs.
+        this.emit("recap", this.buildRecap());
         this.emit("sessionEnd", { reason });
         if (this.gameType === GameType.COMPETITION) {
             // log scoreboard

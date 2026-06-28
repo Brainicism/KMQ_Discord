@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Diesen Song als Lesezeichen speichern",
         "bookmarkTitleDone": "Gespeichert — per DM am Ende der Sitzung",
         "connectFailed": "Konnte keine Verbindung zu KMQ herstellen. Bitte versuche es erneut.",
+        "emoteBarLabel": "Eine Reaktion senden",
         "endGameBusy": "Wird beendet…",
         "endGameButton": "Spiel beenden",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Abgegebene Stimmen",
             "voteCta": "Stimme für 2x EXP",
             "voteExpires": "Läuft ab in {{time}}"
+        },
+        "recap": {
+            "copied": "Kopiert!",
+            "copy": "Ergebnis kopieren",
+            "fastest": "⚡ Schnellste: {{user}} ({{seconds}}s)",
+            "fastestLabel": "Schnellste Vermutung",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ-Zusammenfassung",
+            "songs": "✅ {{correct}}/{{rounds}} Lieder erraten",
+            "songsLabel": "Erratene Lieder",
+            "streak": "🔥 Längste Serie: {{user}} (×{{streak}})",
+            "streakLabel": "Längste Serie",
+            "title": "Spielzusammenfassung"
         },
         "reconnectButton": "Erneut verbinden",
         "reconnecting": "Erneute Verbindung wird hergestellt...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "Du kannst diese Option nicht ändern, wenn du von einer Wiedergabeliste aus spielst. Verwende {{playlistResetCommand}}, bevor du diese Option änderst.",
             "notSuddenDeath": "Das kannst du während des Modus - plötzlicher Tod nicht machen.",
             "title": "Warten..."
+        },
+        "recap": {
+            "fastest": "⚡ Schnellste Vermutung: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} Pkt)",
+            "streak": "🔥 Längste Serie: {{user}} (×{{streak}})",
+            "title": "Spielzusammenfassung"
         },
         "releaseDate": "Erscheinungsdatum",
         "restart": {

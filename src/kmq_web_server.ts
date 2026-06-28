@@ -1282,6 +1282,41 @@ export default class KmqWebServer {
             },
         );
 
+        httpServer.post(
+            "/api/activity/emote",
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as { emote?: string };
+                if (typeof body.emote !== "string") {
+                    await reply.code(400).send({ error: "Missing emote" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.emote({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        emote: body.emote,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity emote failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
         httpServer.get(
             "/api/activity/artist-autocomplete",
             limit(ACTIVITY_RATE_LIMIT_READ),

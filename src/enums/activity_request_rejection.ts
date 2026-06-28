@@ -9,6 +9,7 @@ type ActivityRequestRejection =
     | "session_already_running"
     | "no_round"
     | "hint_unavailable"
+    | "invalid_emote"
     | "song_not_found"
     // Playlist set failures (POST /api/activity/option, kind="playlist").
     | "playlist_invalid_url"

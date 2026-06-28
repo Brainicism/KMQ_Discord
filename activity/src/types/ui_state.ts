@@ -5,8 +5,10 @@ import type ActivityRoundMeta from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
 import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
+import type FloatingEmote from "./floating_emote";
 import type HintState from "./hint_state";
 import type RecentGuess from "./recent_guess";
+import type SessionRecap from "./session_recap";
 import type SkipState from "./skip_state";
 
 export default interface UiState {
@@ -36,4 +38,8 @@ export default interface UiState {
     /** Rounds revealed so far in the current session, oldest-first. Populated
      *  on roundEnd and reset on sessionStart. */
     roundHistory: ActivityRoundReveal[];
+    /** In-flight floating emotes, removed on a timer once their animation ends. */
+    floatingEmotes: FloatingEmote[];
+    /** End-of-session recap, shown on the game-over screen. Null until received. */
+    recap: SessionRecap | null;
 }

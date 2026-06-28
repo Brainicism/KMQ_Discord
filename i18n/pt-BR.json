@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Favoritar esta música",
         "bookmarkTitleDone": "Favoritada — enviada por DM no fim da sessão",
         "connectFailed": "Não foi possível conectar ao KMQ. Por favor, tente novamente.",
+        "emoteBarLabel": "Envie uma reação",
         "endGameBusy": "Encerrando…",
         "endGameButton": "Encerrar jogo",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Vezes Votadas",
             "voteCta": "Vote por 2x EXP",
             "voteExpires": "Expira em {{time}}"
+        },
+        "recap": {
+            "copied": "Copiado!",
+            "copy": "Copiar resultado",
+            "fastest": "⚡ Mais rápido: {{user}} ({{seconds}}s)",
+            "fastestLabel": "Adivinhação mais rápida",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 Recapitulação KMQ",
+            "songs": "✅ {{correct}}/{{rounds}} músicas adivinhadas",
+            "songsLabel": "Músicas adivinhadas",
+            "streak": "🔥 Maior sequência: {{user}} (×{{streak}})",
+            "streakLabel": "Maior sequência",
+            "title": "Recapitulação do Jogo"
         },
         "reconnectButton": "Reconectar",
         "reconnecting": "Reconectando...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "Você não pode alterar essa opção ao tocar a partir de uma lista de reprodução. Use {{playlistResetCommand}} antes de alterar esta opção.",
             "notSuddenDeath": "Você não pode fazer isso durante morte súbita.",
             "title": "Espere..."
+        },
+        "recap": {
+            "fastest": "⚡ Adivinhação mais rápida: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Maior sequência: {{user}} (×{{streak}})",
+            "title": "Recapitulação do Jogo"
         },
         "releaseDate": "Data de Lançamento",
         "restart": {

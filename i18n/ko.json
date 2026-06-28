@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "이 곡을 북마크",
         "bookmarkTitleDone": "북마크됨 — 세션 종료 시 DM 발송",
         "connectFailed": "KMQ에 연결할 수 없습니다. 다시 시도해 주세요.",
+        "emoteBarLabel": "반응 표시 보내기",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "투표 횟수",
             "voteCta": "2배 EXP 투표하기",
             "voteExpires": "{{time}} 후 만료됨"
+        },
+        "recap": {
+            "copied": "복사 완료!",
+            "copy": "결과 복사",
+            "fastest": "⚡ 가장 빠름: {{user}} ({{seconds}}초)",
+            "fastestLabel": "가장 빠른 추측",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ 요약",
+            "songs": "✅ {{rounds}}곡 중 {{correct}}곡 맞춤",
+            "songsLabel": "맞힌 노래",
+            "streak": "🔥 최장 연승: {{user}} (×{{streak}})",
+            "streakLabel": "최장 연승",
+            "title": "게임 요약"
         },
         "reconnectButton": "다시 연결",
         "reconnecting": "다시 연결 중...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "재생 목록에서 재생할 때 해당 옵션을 변경할 수 없습니다. 이 옵션을 변경하기 전에 {{playlistResetCommand}}를 사용하세요.",
             "notSuddenDeath": "폭사 게임 중에는 그렇게 할 수 없습니다.",
             "title": "잠시만 기다려주십시오..."
+        },
+        "recap": {
+            "fastest": "⚡ 가장 빠른 추측: {{user}} ({{seconds}}초)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 최장 연승: {{user}} (×{{streak}})",
+            "title": "게임 요약"
         },
         "releaseDate": "발매 날짜",
         "restart": {
