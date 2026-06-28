@@ -178,91 +178,116 @@ export default class ServiceWorker extends BaseServiceWorker {
             }),
         );
 
-        for (const locale of Object.values(LocaleType)) {
-            for (const range of Object.values(NewsRange)) {
-                const newsIdentifier = `${locale}-${range}`;
+        const locales = Object.values(LocaleType);
+        const freshnessCutoff = new Date(new Date().getTime() - 60 * 60 * 1000);
+
+        for (const range of Object.values(NewsRange)) {
+            const topPosts = rangeToTopPosts[range];
+            if (!topPosts) {
+                logger.warn(
+                    `Skipping generating news for ${range} because topPosts is null`,
+                );
+                continue;
+            }
+
+            // Skip locales whose entry was generated within the last hour.
+            // eslint-disable-next-line no-await-in-loop
+            const freshEntries = await dbContext.kmq
+                .selectFrom("news")
+                .select("identifier")
+                .where(
+                    "identifier",
+                    "in",
+                    locales.map((locale) => `${locale}-${range}`),
+                )
+                .where("generated_at", ">", freshnessCutoff)
+                .execute();
+
+            const freshIdentifiers = new Set(
+                freshEntries.map((entry) => entry.identifier),
+            );
+
+            const localesToGenerate = locales.filter(
+                (locale) => !freshIdentifiers.has(`${locale}-${range}`),
+            );
+
+            if (localesToGenerate.length === 0) {
+                logger.info(
+                    `Skipping news generation for ${range}, all locale entries too fresh.`,
+                );
+                continue;
+            }
+
+            try {
+                // One request per range covers every locale. A call per locale
+                // exhausted the requests-per-minute quota while barely using
+                // the token allowance, so batch the languages together. Retry
+                // only fires when the whole batch is unusable, keeping us well
+                // under the RPM limit even on partial failures.
                 // eslint-disable-next-line no-await-in-loop
-                const latestEntry = await dbContext.kmq
-                    .selectFrom("news")
-                    .select("generated_at")
-                    .where("identifier", "=", newsIdentifier)
-                    .executeTakeFirst();
+                await retryJob<void | Error>(
+                    async () => {
+                        const summaries = await geminiClient.getPostSummaries(
+                            range as NewsRange,
+                            topPosts,
+                            localesToGenerate,
+                        );
 
-                // skip generation if news was generated in the past hour
-                if (
-                    latestEntry &&
-                    latestEntry.generated_at >
-                        new Date(new Date().getTime() - 60 * 60 * 1000)
-                ) {
-                    logger.info(
-                        `Skipping news generation for ${newsIdentifier}, entry too fresh. ${latestEntry.generated_at.toISOString()}`,
-                    );
-                    continue;
-                }
-
-                try {
-                    // eslint-disable-next-line no-await-in-loop
-                    await retryJob<void | Error>(
-                        async () => {
-                            const topPosts = rangeToTopPosts[range];
-                            if (!topPosts) {
+                        const rows: Array<Insertable<News>> = [];
+                        for (const locale of localesToGenerate) {
+                            const summary = summaries.get(locale);
+                            if (!summary) {
                                 logger.warn(
-                                    `Skipping generating news for ${locale} ${range} because topPosts is null`,
+                                    `Missing news summary for ${locale} ${range}`,
                                 );
-                                return Promise.resolve();
-                            }
-
-                            const summary = await geminiClient.getPostSummary(
-                                locale as LocaleType,
-                                range as NewsRange,
-                                topPosts,
-                            );
-
-                            if (summary === "") {
-                                logger.warn(
-                                    `Error generating news for ${locale} ${range}`,
-                                );
-                                return Promise.reject(
-                                    new Error(
-                                        `Error generating news for ${locale} ${range}`,
-                                    ),
-                                );
+                                continue;
                             }
 
                             if (summary.length < 300 || summary.length > 2500) {
-                                return Promise.reject(
-                                    new Error(
-                                        `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
-                                    ),
+                                logger.warn(
+                                    `Received abnormally sized news entry for ${locale} ${range}. length = ${summary.length}`,
                                 );
+                                continue;
                             }
 
-                            const updatePayload: Insertable<News> = {
-                                identifier: newsIdentifier,
+                            rows.push({
+                                identifier: `${locale}-${range}`,
                                 content: summary,
                                 generated_at: new Date(),
-                            };
+                            });
+                        }
 
-                            await dbContext.kmq
-                                .insertInto("news")
-                                .values(updatePayload)
-                                .onDuplicateKeyUpdate(updatePayload)
-                                .execute();
-
-                            logger.info(
-                                `Generated news for ${locale} ${range}`,
+                        if (rows.length === 0) {
+                            return Promise.reject(
+                                new Error(`Error generating news for ${range}`),
                             );
-                            return Promise.resolve();
-                        },
-                        [],
-                        3,
-                        true,
-                        60 * 1000,
-                        false,
-                    );
-                } catch (err) {
-                    logger.warn(`Failed to generate news. err = ${err}`);
-                }
+                        }
+
+                        await Promise.all(
+                            rows.map((row) =>
+                                dbContext.kmq
+                                    .insertInto("news")
+                                    .values(row)
+                                    .onDuplicateKeyUpdate(row)
+                                    .execute(),
+                            ),
+                        );
+
+                        logger.info(
+                            `Generated news for ${range} (${rows.length}/${localesToGenerate.length} locales)`,
+                        );
+                        return Promise.resolve();
+                    },
+                    [],
+                    3,
+                    true,
+                    60 * 1000,
+                    false,
+                );
+            } catch (err) {
+                logger.warn(
+                    `Failed to generate news for ${range}. err = ${err}`,
+                );
             }
         }
     }
