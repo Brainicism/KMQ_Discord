@@ -20,6 +20,7 @@ import {
 } from "../../helpers/game_utils";
 import { attachActivityBridge } from "../../structures/activity_bridge";
 import { bold, durationDays, getMention, isWeekend } from "../../helpers/utils";
+import { buildDailyGuildPreference } from "../../helpers/daily_challenge";
 import {
     clickableSlashCommand,
     fetchChannel,
@@ -1002,6 +1003,7 @@ export default class PlayCommand implements BaseCommand {
         hiddenMode: boolean,
         newClip: boolean,
         interaction?: Eris.CommandInteraction,
+        dailyChallengeDate: string | null = null,
     ): Promise<void> {
         const guildID = messageContext.guildID;
 
@@ -1020,6 +1022,7 @@ export default class PlayCommand implements BaseCommand {
                 hiddenMode,
                 newClip,
                 interaction,
+                dailyChallengeDate,
             );
         });
     }
@@ -1234,6 +1237,7 @@ export default class PlayCommand implements BaseCommand {
      * @param hiddenMode - Whether hidden mode is enabled
      * @param newClip - Whether to play a new clip
      * @param interaction - The interaction that started the game
+     * @param dailyChallengeDate - When set, runs the Daily Challenge for this ISO date
      */
     private static async startGameLocked(
         messageContext: MessageContext,
@@ -1242,10 +1246,15 @@ export default class PlayCommand implements BaseCommand {
         hiddenMode: boolean,
         newClip: boolean,
         interaction?: Eris.CommandInteraction,
+        dailyChallengeDate: string | null = null,
     ): Promise<void> {
         const guildID = messageContext.guildID;
-        const guildPreference =
-            await GuildPreference.getGuildPreference(guildID);
+        // Daily Challenge runs with a locked, non-persisted GuildPreference
+        // (fixed deterministic song set + locked options) instead of the
+        // guild's saved preferences.
+        const guildPreference = dailyChallengeDate
+            ? await buildDailyGuildPreference(guildID, dailyChallengeDate)
+            : await GuildPreference.getGuildPreference(guildID);
 
         const currentGameSession = State.gameSessions[guildID];
         const voiceChannel = getUserVoiceChannel(messageContext);
@@ -1526,6 +1535,11 @@ export default class PlayCommand implements BaseCommand {
                 clipDuration,
                 gameType === GameType.CLIP ? newClip : undefined,
             );
+
+            if (dailyChallengeDate) {
+                gameSession.dailyChallenge = true;
+                gameSession.dailyChallengeDate = dailyChallengeDate;
+            }
         }
 
         // prevent any duplicate game sessions

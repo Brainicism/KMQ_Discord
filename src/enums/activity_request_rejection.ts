@@ -13,6 +13,8 @@ type ActivityRequestRejection =
     | "empty_message"
     | "message_too_long"
     | "song_not_found"
+    // Daily Challenge: the viewer already played today's challenge.
+    | "already_completed"
     // Playlist set failures (POST /api/activity/option, kind="playlist").
     | "playlist_invalid_url"
     | "playlist_unsupported_url"

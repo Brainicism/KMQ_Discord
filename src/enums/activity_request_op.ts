@@ -15,6 +15,8 @@ type ActivityRequestOp =
     | "profile"
     | "songInfo"
     | "searchSongs"
-    | "webRoomMembership";
+    | "webRoomMembership"
+    | "dailyChallengeInfo"
+    | "startDailyChallenge";
 
 export default ActivityRequestOp;
