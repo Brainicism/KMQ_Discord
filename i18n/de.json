@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Diesen Song als Lesezeichen speichern",
         "bookmarkTitleDone": "Gespeichert — per DM am Ende der Sitzung",
         "connectFailed": "Konnte keine Verbindung zu KMQ herstellen. Bitte versuche es erneut.",
+        "daily": {
+            "close": "Schließen",
+            "copied": "Kopiert!",
+            "copy": "Ergebnis kopieren",
+            "ctaText": "{{rounds}} Songs, für alle gleich — einmal am Tag.",
+            "leaderboardEmpty": "Keine Gewinner bisher — sei der Erste!",
+            "leaderboardTitle": "Bestenliste",
+            "loading": "Wird geladen...",
+            "play": "Spiele die heutige Herausforderung",
+            "shareHeader": "🎵 KMQ Täglich {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} Pkt",
+            "startFailed": "Konnte die Herausforderung nicht starten.",
+            "starting": "Starten...",
+            "streakLabel": "Beste Serie: {{streak}}",
+            "summary": "{{correct}}/{{total}} erraten · {{score}} Pkt",
+            "title": "Tagesherausforderung"
+        },
         "emoteBarLabel": "Eine Reaktion senden",
         "endGameBusy": "Wird beendet…",
         "endGameButton": "Spiel beenden",
@@ -426,6 +443,24 @@
                     "rangeOption": "Wähle Songs für jedes Jahr zwischen [beginning_year] und [ending_year]"
                 },
                 "name": "cutoff"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Spiele die heutige Tagesherausforderung — eine festgelegte Reihe von Liedern, die jeder einmal pro Tag erhält. Starte sie nach dem Beenden erneut, um dein Ergebnis und die Rangliste zu sehen.",
+                "example": {
+                    "play": "Starte (oder, falls heute bereits erledigt, sieh dir die) Tagesherausforderung an"
+                },
+                "name": "täglich"
+            },
+            "leaderboard": {
+                "empty": "Niemand hat die heutige Herausforderung bisher beendet.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} korrekt)",
+                "title": "**Heutige Rangliste**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} erraten · {{score}} Punkte · beste Serie {{streak}}",
+                "title": "Tägliche Herausforderung — {{date}}"
             }
         },
         "debug": {

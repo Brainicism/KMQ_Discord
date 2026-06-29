@@ -73,6 +73,16 @@ export interface CompetitionModerators {
     user_id: string;
 }
 
+export interface DailyChallengeResults {
+    best_streak: Generated<number>;
+    challenge_date: Date;
+    completed_at: Date;
+    correct_count: Generated<number>;
+    player_id: string;
+    score: Generated<number>;
+    total_count: Generated<number>;
+}
+
 export interface DailyStats {
     date: Date;
     gameSessions: Generated<number>;
@@ -282,6 +292,7 @@ export interface KmqDB {
     bookmarked_songs: BookmarkedSongs;
     cached_song_duration: CachedSongDuration;
     competition_moderators: CompetitionModerators;
+    daily_challenge_results: DailyChallengeResults;
     daily_stats: DailyStats;
     dead_links: DeadLinks;
     expected_available_songs: ExpectedAvailableSongs;

@@ -11,6 +11,9 @@ import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomp
 import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
+import type ActivityDailyInfoArgs from "./interfaces/activity_daily_info_args";
+import type ActivityDailyInfoResponse from "./interfaces/activity_daily_info_response";
+import type ActivityDailyStartArgs from "./interfaces/activity_daily_start_args";
 import type ActivityEmoteArgs from "./interfaces/activity_emote_args";
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
@@ -336,6 +339,39 @@ export default class ActivityHub {
         return this.sendRequest<ActivitySongInfoResponse>(
             target,
             "songInfo",
+            args,
+        );
+    }
+
+    /**
+     * Fetches the viewer's Daily Challenge status + the day's leaderboard.
+     * Routed by guild only to land on a worker; the data is process-wide.
+     * @param args - the requesting guild + user
+     * @returns today's status and leaderboard
+     */
+    async dailyChallengeInfo(
+        args: ActivityDailyInfoArgs,
+    ): Promise<ActivityDailyInfoResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityDailyInfoResponse>(
+            target,
+            "dailyChallengeInfo",
+            args,
+        );
+    }
+
+    /**
+     * Starts the Daily Challenge in the caller's guild.
+     * @param args - the guild, user, and text channel
+     * @returns the worker's accept/reject response
+     */
+    async startDailyChallenge(
+        args: ActivityDailyStartArgs,
+    ): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(
+            target,
+            "startDailyChallenge",
             args,
         );
     }

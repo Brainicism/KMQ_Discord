@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "收藏这首歌",
         "bookmarkTitleDone": "已收藏 — 会在会话结束时私信发送",
         "connectFailed": "无法连接到KMQ。请再试一次。",
+        "daily": {
+            "close": "关闭",
+            "copied": "已复制！",
+            "copy": "复制结果",
+            "ctaText": "{{rounds}} 首歌曲，所有人相同 — 每天一次。",
+            "leaderboardEmpty": "尚无人完成 — 成为第一个吧！",
+            "leaderboardTitle": "排行榜",
+            "loading": "加载中...",
+            "play": "参与今天的挑战",
+            "shareHeader": "🎵 KMQ 每日 {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} 分",
+            "startFailed": "无法启动挑战。",
+            "starting": "开始中...",
+            "streakLabel": "最佳连胜：{{streak}}",
+            "summary": "{{correct}}/{{total}} 猜对 · {{score}} 分",
+            "title": "每日挑战"
+        },
         "emoteBarLabel": "发送反应",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
@@ -426,6 +443,24 @@
                     "rangeOption": "选择从 [beginning_year] 到 [ending_year] 之间的每年的歌曲"
                 },
                 "name": "截止年份"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "进行今天的每日挑战——每个人每天都会得到一组固定的歌曲。完成后再次运行以查看您的结果和排行榜。",
+                "example": {
+                    "play": "开始（或如果今天已经完成，查看）每日挑战"
+                },
+                "name": "每日"
+            },
+            "leaderboard": {
+                "empty": "还没有人完成今天的挑战。",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} 正确)",
+                "title": "**今日排行榜**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} 猜对 · {{score}} 分 · 最佳连胜 {{streak}}",
+                "title": "每日挑战 — {{date}}"
             }
         },
         "debug": {

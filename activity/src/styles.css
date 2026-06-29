@@ -1829,6 +1829,200 @@ body::before {
     padding: 16px;
 }
 
+/* ---- DAILY CHALLENGE PANEL ---- */
+.daily-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    padding: 16px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.daily-overlay.visible {
+    opacity: 1;
+}
+
+.daily-modal {
+    position: relative;
+    width: min(92vw, 360px);
+    max-height: 86vh;
+    overflow-y: auto;
+    padding: 18px 16px 16px;
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    opacity: 0;
+    transform: translateY(12px) scale(0.96);
+    transition:
+        opacity 0.2s ease,
+        transform 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.daily-modal.visible {
+    opacity: 1;
+    transform: none;
+}
+
+.daily-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 26px;
+    height: 26px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.daily-title {
+    font-weight: 800;
+    font-size: 1.05rem;
+    text-align: center;
+}
+
+.daily-subtitle {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.78rem;
+    margin-top: 2px;
+}
+
+.daily-loading {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 18px 0;
+}
+
+.daily-result {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.daily-grid {
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    word-break: break-all;
+    text-align: center;
+}
+
+.daily-summary {
+    font-weight: 700;
+}
+
+.daily-streak {
+    color: var(--text-secondary);
+    font-size: 0.82rem;
+}
+
+.daily-copy,
+.daily-play {
+    margin-top: 6px;
+    padding: 9px 18px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition:
+        transform 0.1s ease,
+        background 0.15s ease;
+}
+
+.daily-play {
+    background: var(--green);
+    color: #fff;
+    border-color: var(--green);
+    font-weight: 700;
+}
+
+.daily-copy:hover,
+.daily-play:hover:not(:disabled) {
+    transform: translateY(-1px);
+}
+
+.daily-play:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
+.daily-cta {
+    margin-top: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.daily-cta-text {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin: 0;
+}
+
+.daily-error {
+    color: var(--red-primary);
+    font-size: 0.78rem;
+    margin: 4px 0 0;
+}
+
+.daily-leaderboard {
+    margin-top: 16px;
+    border-top: 1px solid var(--border);
+    padding-top: 12px;
+}
+
+.daily-lb-title {
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-bottom: 6px;
+}
+
+.daily-lb-empty {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    margin: 0;
+}
+
+.daily-lb-list {
+    margin: 0;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.daily-lb-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.daily-lb-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.daily-lb-score {
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
 .profile-header {
     display: flex;
     align-items: center;

@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Bookmark this song",
         "bookmarkTitleDone": "Bookmarked — DM'd at end of session",
         "connectFailed": "Couldn't connect to KMQ. Please try again.",
+        "daily": {
+            "close": "Close",
+            "copied": "Copied!",
+            "copy": "Copy result",
+            "ctaText": "{{rounds}} songs, same for everyone — once a day.",
+            "leaderboardEmpty": "No finishers yet — be the first!",
+            "leaderboardTitle": "Leaderboard",
+            "loading": "Loading...",
+            "play": "Play today's challenge",
+            "shareHeader": "🎵 KMQ Daily {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "startFailed": "Couldn't start the challenge.",
+            "starting": "Starting...",
+            "streakLabel": "Best streak: {{streak}}",
+            "summary": "{{correct}}/{{total}} guessed · {{score}} pts",
+            "title": "Daily Challenge"
+        },
         "emoteBarLabel": "Send a reaction",
         "endGameBusy": "Ending...",
         "endGameButton": "End game",
@@ -426,6 +443,24 @@
                     "rangeOption": "Pick songs for every year between [beginning_year] and [ending_year]"
                 },
                 "name": "cutoff"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Play today's Daily Challenge — a fixed set of songs everyone gets, once per day. Run it again after finishing to see your result and the leaderboard.",
+                "example": {
+                    "play": "Start (or, if already done today, view) the Daily Challenge"
+                },
+                "name": "daily"
+            },
+            "leaderboard": {
+                "empty": "No one has finished today's challenge yet.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} correct)",
+                "title": "**Today's Leaderboard**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} guessed · {{score}} points · best streak {{streak}}",
+                "title": "Daily Challenge — {{date}}"
             }
         },
         "debug": {

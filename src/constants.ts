@@ -397,6 +397,15 @@ export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"
 // Per-user cooldown between accepted emotes, to curb spam (ms).
 export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
 
+// Daily Challenge: a fixed, deterministic-per-day song set everyone can play
+// once. Rounds is the song count; pool size is how many of the most popular
+// songs the day's seed shuffles to pick from (kept popular so they're
+// guessable); the timeout + guess mode are locked for fairness.
+export const DAILY_CHALLENGE_ROUNDS = 7;
+export const DAILY_CHALLENGE_POOL_SIZE = 1500;
+export const DAILY_CHALLENGE_GUESS_TIMEOUT_SEC = 20;
+export const DAILY_CHALLENGE_LEADERBOARD_SIZE = 10;
+
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";
 export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;

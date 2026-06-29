@@ -92,6 +92,10 @@ export default class SongSelector {
     /** The shadowbanned artists */
     public shadowBannedArtists: Array<number> = [];
 
+    /** When set (Daily Challenge), queryRandomSong serves these in fixed order
+     *  instead of selecting randomly. Null for normal games. */
+    private fixedQueue: QueriedSong[] | null = null;
+
     /** The guild preference */
     private guildPreference: GuildPreference;
 
@@ -164,7 +168,30 @@ export default class SongSelector {
         }
     }
 
+    /**
+     * Forces a fixed, ordered set of songs (the Daily Challenge). While set,
+     * queryRandomSong returns them in order rather than selecting at random.
+     * @param songs - the ordered songs to play
+     */
+    setFixedQueue(songs: QueriedSong[]): void {
+        this.fixedQueue = [...songs];
+        this.selectedSongs = {
+            songs: new Set(songs),
+            countBeforeLimit: songs.length,
+        };
+    }
+
     queryRandomSong(): QueriedSong | null {
+        // Daily Challenge: serve the pre-built set in order, ignoring shuffle.
+        if (this.fixedQueue !== null) {
+            const next = this.fixedQueue.shift() ?? null;
+            if (next) {
+                this.uniqueSongsPlayed.add(next.youtubeLink);
+            }
+
+            return next;
+        }
+
         let randomSong: QueriedSong | null;
         const ignoredSongs = new Set([...this.uniqueSongsPlayed]);
 

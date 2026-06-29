@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Marcar esta canción",
         "bookmarkTitleDone": "Marcada — se enviará por MD al final de la sesión",
         "connectFailed": "No se pudo conectar a KMQ. Por favor, inténtalo de nuevo.",
+        "daily": {
+            "close": "Cerrar",
+            "copied": "¡Copiado!",
+            "copy": "Copiar resultado",
+            "ctaText": "{{rounds}} canciones, iguales para todos — una vez al día.",
+            "leaderboardEmpty": "Nadie ha terminado todavía — ¡sé el primero!",
+            "leaderboardTitle": "Clasificación",
+            "loading": "Cargando...",
+            "play": "Jugar el desafío de hoy",
+            "shareHeader": "🎵 KMQ Diario {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "startFailed": "No se pudo iniciar el desafío.",
+            "starting": "Comenzando...",
+            "streakLabel": "Mejor racha: {{streak}}",
+            "summary": "{{correct}}/{{total}} adivinados · {{score}} pts",
+            "title": "Desafío Diario"
+        },
         "emoteBarLabel": "Envía una reacción",
         "endGameBusy": "Finalizando…",
         "endGameButton": "Finalizar partida",
@@ -426,6 +443,24 @@
                     "rangeOption": "Elegir canciones para cada año entre [año_inicial] y [año_final]"
                 },
                 "name": "rango"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Juega el Desafío Diario de hoy — un conjunto fijo de canciones que todos reciben, una vez por día. Ejecútalo de nuevo después de terminar para ver tu resultado y la clasificación.",
+                "example": {
+                    "play": "Iniciar (o, si ya lo hiciste hoy, ver) el Desafío Diario"
+                },
+                "name": "diario"
+            },
+            "leaderboard": {
+                "empty": "Nadie ha terminado el desafío de hoy todavía.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} correctos)",
+                "title": "**Clasificación de hoy**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} adivinados · {{score}} puntos · mejor racha {{streak}}",
+                "title": "Desafío Diario — {{date}}"
             }
         },
         "debug": {

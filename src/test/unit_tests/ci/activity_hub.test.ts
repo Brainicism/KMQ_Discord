@@ -662,6 +662,26 @@ describe("ActivityHub", () => {
             assert.deepStrictEqual(sent.payload.args, args);
         });
 
+        it("dailyChallengeInfo → dailyChallengeInfo", async () => {
+            const args = { guildID: "0", userID: "user1" };
+            const sent = await dispatch((hub) => hub.dailyChallengeInfo(args));
+
+            assert.strictEqual(sent.payload.op, "dailyChallengeInfo");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
+        it("startDailyChallenge → startDailyChallenge", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                textChannelID: "tc1",
+            };
+
+            const sent = await dispatch((hub) => hub.startDailyChallenge(args));
+            assert.strictEqual(sent.payload.op, "startDailyChallenge");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
         it("routes to the cluster owning the guild, not always cluster 0", async () => {
             // guild 2^23 → shard 2 → cluster 1
             const guildID = String(2 ** 23);
