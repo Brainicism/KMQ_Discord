@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Bookmark lagu ini",
         "bookmarkTitleDone": "Di-bookmark — akan di-DM di akhir sesi",
         "connectFailed": "Tidak dapat terhubung ke KMQ. Silakan coba lagi.",
+        "emoteBarLabel": "Kirim reaksi",
         "endGameBusy": "Mengakhiri…",
         "endGameButton": "Akhiri permainan",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Jumlah Suara",
             "voteCta": "Pilih untuk 2x EXP",
             "voteExpires": "Kadaluwarsa dalam {{time}}"
+        },
+        "recap": {
+            "copied": "Disalin!",
+            "copy": "Salin hasil",
+            "fastest": "⚡ Tercepat: {{user}} ({{seconds}}d)",
+            "fastestLabel": "Tebakan tercepat",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 Rekap KMQ",
+            "songs": "✅ {{correct}}/{{rounds}} lagu ditebak",
+            "songsLabel": "Lagu yang ditebak",
+            "streak": "🔥 Rentetan terpanjang: {{user}} (×{{streak}})",
+            "streakLabel": "Rentetan terpanjang",
+            "title": "Rekap Permainan"
         },
         "reconnectButton": "Sambungkan kembali",
         "reconnecting": "Menyambungkan kembali...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "Anda tidak dapat mengubah opsi itu saat memutar dari daftar putar. Gunakan {{playlistResetCommand}} sebelum mengubah opsi ini.",
             "notSuddenDeath": "Kamu tidak boleh melakukan itu selama tiba-tiba",
             "title": "Tunggu dulu..."
+        },
+        "recap": {
+            "fastest": "⚡ Tebakan tercepat: {{user}} ({{seconds}}d)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Rentetan terpanjang: {{user}} (×{{streak}})",
+            "title": "Rekap Permainan"
         },
         "releaseDate": "Tanggal Rilis",
         "restart": {

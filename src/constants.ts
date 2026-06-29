@@ -390,6 +390,13 @@ export const ACTIVITY_RATE_LIMIT_READ = 60;
 export const ACTIVITY_RATE_LIMIT_ACTION = 60;
 export const ACTIVITY_RATE_LIMIT_GUESS = 120;
 
+// Fixed set of emotes a player can fling during an Activity round. Server-side
+// allow-list so the broadcast can't be used to inject arbitrary content.
+export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
+
+// Per-user cooldown between accepted emotes, to curb spam (ms).
+export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
+
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";
 export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;

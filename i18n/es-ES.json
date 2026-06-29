@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Marcar esta canción",
         "bookmarkTitleDone": "Marcada — se enviará por MD al final de la sesión",
         "connectFailed": "No se pudo conectar a KMQ. Por favor, inténtalo de nuevo.",
+        "emoteBarLabel": "Envía una reacción",
         "endGameBusy": "Finalizando…",
         "endGameButton": "Finalizar partida",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Veces votado",
             "voteCta": "Vota por 2x EXP",
             "voteExpires": "Expira en {{time}}"
+        },
+        "recap": {
+            "copied": "¡Copiado!",
+            "copy": "Copiar resultado",
+            "fastest": "⚡ Más rápido: {{user}} ({{seconds}}s)",
+            "fastestLabel": "Adivinanza más rápida",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 Resumen de KMQ",
+            "songs": "✅ {{correct}}/{{rounds}} canciones adivinadas",
+            "songsLabel": "Canciones adivinadas",
+            "streak": "🔥 Racha más larga: {{user}} (×{{streak}})",
+            "streakLabel": "Racha más larga",
+            "title": "Resumen del juego"
         },
         "reconnectButton": "Volver a conectar",
         "reconnecting": "Reconectando...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "No puedes cambiar esa opción cuando reproduces desde una lista de reproducción. Usa {{playlistResetCommand}} antes de cambiar esta opción.",
             "notSuddenDeath": "No puedes hacer eso durante la muerte súbita.",
             "title": "Espera..."
+        },
+        "recap": {
+            "fastest": "⚡ Adivinanza más rápida: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Racha más larga: {{user}} (×{{streak}})",
+            "title": "Resumen del juego"
         },
         "releaseDate": "Fecha de lanzamiento",
         "restart": {

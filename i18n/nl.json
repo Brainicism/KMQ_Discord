@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Dit nummer bladwijzeren",
         "bookmarkTitleDone": "Bladwijzer gezet — wordt aan het eind van de sessie ge-DM'd",
         "connectFailed": "Kon geen verbinding maken met KMQ. Probeer het opnieuw.",
+        "emoteBarLabel": "Stuur een reactie",
         "endGameBusy": "Beëindigen…",
         "endGameButton": "Spel beëindigen",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Aantal keer gestemd",
             "voteCta": "Stem voor 2x EXP",
             "voteExpires": "Verloopt in {{time}}"
+        },
+        "recap": {
+            "copied": "Gekopieerd!",
+            "copy": "Kopieer resultaat",
+            "fastest": "⚡ Snelste: {{user}} ({{seconds}}s)",
+            "fastestLabel": "Snelste gok",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ Overzicht",
+            "songs": "✅ {{correct}}/{{rounds}} liedjes geraden",
+            "songsLabel": "Geraden liedjes",
+            "streak": "🔥 Langste reeks: {{user}} (×{{streak}})",
+            "streakLabel": "Langste reeks",
+            "title": "Speloverzicht"
         },
         "reconnectButton": "Opnieuw verbinden",
         "reconnecting": "Opnieuw verbinden...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "Je kunt die optie niet wijzigen wanneer je vanaf een afspeellijst afspeelt. Gebruik {{playlistResetCommand}} voordat je deze optie wijzigt.",
             "notSuddenDeath": "Dat kan niet tijdens een plotselinge dood.",
             "title": "Wachten..."
+        },
+        "recap": {
+            "fastest": "⚡ Snelste gok: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Langste reeks: {{user}} (×{{streak}})",
+            "title": "Speloverzicht"
         },
         "releaseDate": "Uitgavedatum",
         "restart": {

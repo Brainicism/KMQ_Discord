@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "इस गाने को बुकमार्क करें",
         "bookmarkTitleDone": "बुकमार्क किया गया — सत्र के अंत में DM किया जाएगा",
         "connectFailed": "KMQ से कनेक्ट नहीं हो सका। कृपया फिर से प्रयास करें।",
+        "emoteBarLabel": "प्रतिक्रिया भेजें",
         "endGameBusy": "समाप्त हो रहा है…",
         "endGameButton": "खेल समाप्त करें",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "वोट किए गए समय",
             "voteCta": "2x EXP के लिए वोट करें",
             "voteExpires": "{{time}} में समाप्त होता है"
+        },
+        "recap": {
+            "copied": "कॉपी किया गया!",
+            "copy": "परिणाम कॉपी करें",
+            "fastest": "⚡ सबसे तेज़: {{user}} ({{seconds}}s)",
+            "fastestLabel": "सबसे तेज़ सही अनुमान",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ सारांश",
+            "songs": "✅ {{correct}}/{{rounds}} गाने का सही अनुमान लगाया",
+            "songsLabel": "गाने पहचाने गए",
+            "streak": "🔥 सबसे लंबी स्ट्रीक: {{user}} (×{{streak}})",
+            "streakLabel": "सबसे लंबी शृंखला",
+            "title": "खेल सारांश"
         },
         "reconnectButton": "पुनः कनेक्ट करें",
         "reconnecting": "पुन: कनेक्ट किया जा रहा है...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "आप किसी प्लेलिस्ट से खेलते समय उस विकल्प को नहीं बदल सकते। इस विकल्प को बदलने से पहले {{playlistResetCommand}} का उपयोग करें।",
             "notSuddenDeath": "आप अचानक मौत के दौरान ऐसा नहीं कर सकते।",
             "title": "प्रतीक्षा करें..."
+        },
+        "recap": {
+            "fastest": "⚡ सबसे तेज़ अनुमान: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} अंक)",
+            "streak": "🔥 सबसे लंबी स्ट्रीक: {{user}} (×{{streak}})",
+            "title": "खेल सारांश"
         },
         "releaseDate": "रिलीज़ तिथि",
         "restart": {

@@ -11,6 +11,7 @@ import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomp
 import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
+import type ActivityEmoteArgs from "./interfaces/activity_emote_args";
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
 import type ActivityMcGuessArgs from "./interfaces/activity_mc_guess_args";
@@ -221,6 +222,17 @@ export default class ActivityHub {
     async hint(args: ActivityUserActionArgs): Promise<ActivityGuessResponse> {
         const target = await this.resolveCluster(args.guildID);
         return this.sendRequest<ActivityGuessResponse>(target, "hint", args);
+    }
+
+    /**
+     * Flings an emote into the round; the worker re-broadcasts it to all
+     * viewers of the guild.
+     * @param args - guildID/userID/emote
+     * @returns the worker's accept/reject response
+     */
+    async emote(args: ActivityEmoteArgs): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(target, "emote", args);
     }
 
     /**

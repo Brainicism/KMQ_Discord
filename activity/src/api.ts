@@ -122,7 +122,7 @@ export async function fetchSnapshot(
 async function postAction(
     accessToken: string,
     instanceId: string,
-    path: "start" | "skip" | "end" | "hint",
+    path: "start" | "skip" | "end" | "hint" | "emote",
     extra?: Record<string, unknown>,
 ): Promise<GuessResult> {
     const resp = await fetch(`${ACTIVITY_PROXY_BASE}/${path}`, {
@@ -179,6 +179,12 @@ export const endGame = (accessToken: string, instanceId: string) =>
 
 export const hintVote = (accessToken: string, instanceId: string) =>
     postAction(accessToken, instanceId, "hint");
+
+export const sendEmote = (
+    accessToken: string,
+    instanceId: string,
+    emote: string,
+) => postAction(accessToken, instanceId, "emote", { emote });
 
 /**
  * Submit a GuildPreference change. Server validates the shape and accepts

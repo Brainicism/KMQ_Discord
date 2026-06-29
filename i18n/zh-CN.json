@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "收藏这首歌",
         "bookmarkTitleDone": "已收藏 — 会在会话结束时私信发送",
         "connectFailed": "无法连接到KMQ。请再试一次。",
+        "emoteBarLabel": "发送反应",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "投票次数",
             "voteCta": "投票以获取 2x 经验",
             "voteExpires": "{{time}} 后到期"
+        },
+        "recap": {
+            "copied": "已复制!",
+            "copy": "复制结果",
+            "fastest": "⚡ 最快: {{user}} ({{seconds}}秒)",
+            "fastestLabel": "最快猜测",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ 总结",
+            "songs": "✅ {{correct}}/{{rounds}} 首歌曲猜对",
+            "songsLabel": "猜对的歌曲",
+            "streak": "🔥 最长连胜: {{user}} (×{{streak}})",
+            "streakLabel": "最长连胜",
+            "title": "游戏总结"
         },
         "reconnectButton": "重新连接",
         "reconnecting": "重新连接中...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "从播放列表播放时，您不能更改该选项。更改此选项之前，请使用{{playlistResetCommand}}。",
             "notSuddenDeath": "你无法在突然死亡比赛中这样做。",
             "title": "请稍等..."
+        },
+        "recap": {
+            "fastest": "⚡ 最快猜测: {{user}} ({{seconds}}秒)",
+            "mvp": "👑 MVP: {{user}} ({{score}} 分)",
+            "streak": "🔥 最长连胜: {{user}} (×{{streak}})",
+            "title": "游戏总结"
         },
         "releaseDate": "发布日期",
         "restart": {

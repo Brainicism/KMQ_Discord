@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Сохранить песню в закладки",
         "bookmarkTitleDone": "В закладках — будет отправлено в ЛС в конце сессии",
         "connectFailed": "Не удалось подключиться к KMQ. Пожалуйста, попробуйте снова.",
+        "emoteBarLabel": "Отправьте реакцию",
         "endGameBusy": "Завершение…",
         "endGameButton": "Завершить игру",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Кол-во голосов",
             "voteCta": "Голосуйте за 2x EXP",
             "voteExpires": "Истекает через {{time}}"
+        },
+        "recap": {
+            "copied": "Скопировано!",
+            "copy": "Скопировать результат",
+            "fastest": "⚡ Быстрее всех: {{user}} ({{seconds}}с)",
+            "fastestLabel": "Самая быстрая догадка",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 Обзор KMQ",
+            "songs": "✅ {{correct}}/{{rounds}} угаданных песен",
+            "songsLabel": "Песни угадали",
+            "streak": "🔥 Самая длинная серия: {{user}} (×{{streak}})",
+            "streakLabel": "Самая длинная серия",
+            "title": "Итоги игры"
         },
         "reconnectButton": "Переподключиться",
         "reconnecting": "Переподключение...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "Вы не можете изменить этот параметр при игре из плейлиста. Используйте {{playlistResetCommand}} перед изменением этого параметра.",
             "notSuddenDeath": "Во время внезапной смерти такого делать нельзя.",
             "title": "Подождите..."
+        },
+        "recap": {
+            "fastest": "⚡ Самая быстрая догадка: {{user}} ({{seconds}}с)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Самая длинная серия: {{user}} (×{{streak}})",
+            "title": "Итоги игры"
         },
         "releaseDate": "Дата выпуска",
         "restart": {

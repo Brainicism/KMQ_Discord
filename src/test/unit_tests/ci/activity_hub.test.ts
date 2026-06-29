@@ -650,6 +650,18 @@ describe("ActivityHub", () => {
             assert.deepStrictEqual(sent.payload.args, args);
         });
 
+        it("emote → emote", async () => {
+            const args = {
+                guildID: "0",
+                userID: "user1",
+                emote: "🔥",
+            };
+
+            const sent = await dispatch((hub) => hub.emote(args));
+            assert.strictEqual(sent.payload.op, "emote");
+            assert.deepStrictEqual(sent.payload.args, args);
+        });
+
         it("routes to the cluster owning the guild, not always cluster 0", async () => {
             // guild 2^23 → shard 2 → cluster 1
             const guildID = String(2 ** 23);

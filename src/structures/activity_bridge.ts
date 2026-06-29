@@ -1,5 +1,7 @@
 import {
     ACTIVITY_AUTOCOMPLETE_LIMIT,
+    ACTIVITY_EMOTES,
+    ACTIVITY_EMOTE_COOLDOWN_MS,
     ACTIVITY_IPC_EVENT,
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
@@ -50,6 +52,7 @@ import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_aut
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
 import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
+import type ActivityEmoteArgs from "../interfaces/activity_emote_args";
 import type ActivityEvent from "../interfaces/activity_event";
 import type ActivityGuessArgs from "../interfaces/activity_guess_args";
 import type ActivityGuessResponse from "../interfaces/activity_guess_response";
@@ -72,6 +75,7 @@ import type ActivitySongInfoArgs from "../interfaces/activity_song_info_args";
 import type ActivitySongInfoResponse from "../interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
+import type GameSessionRecap from "../interfaces/game_session_recap";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
 import type PlayerRoundResult from "../interfaces/player_round_result";
@@ -304,6 +308,11 @@ function userInVoiceChannel(
 ): boolean {
     return getUserVoiceChannelID(guildID, userID) === voiceChannelID;
 }
+
+// Per-user emote cooldown, keyed by `${guildID}:${userID}`. Module-scoped so it
+// persists across requests within the worker; bounded by natural churn (one
+// entry per recently-active emoter).
+const emoteCooldowns = new Map<string, number>();
 
 function pushEvent(guildID: string, event: ActivityEvent): void {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -929,6 +938,65 @@ function ensureWorkerHandlerRegistered(): void {
                             reply({ ok: false, reason: "internal" });
                         }
                     });
+                    return;
+                }
+
+                case "emote": {
+                    const emoteArgs = args as ActivityEmoteArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    if (
+                        !(ACTIVITY_EMOTES as readonly string[]).includes(
+                            emoteArgs.emote,
+                        )
+                    ) {
+                        reply({ ok: false, reason: "invalid_emote" });
+                        return;
+                    }
+
+                    const session = Session.getSession(emoteArgs.guildID);
+                    if (!session) {
+                        reply({ ok: false, reason: "no_session" });
+                        return;
+                    }
+
+                    if (
+                        !userInVoiceChannel(
+                            emoteArgs.guildID,
+                            emoteArgs.userID,
+                            session.voiceChannelID,
+                        )
+                    ) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    // Per-user cooldown to curb spam.
+                    const cooldownKey = `${emoteArgs.guildID}:${emoteArgs.userID}`;
+                    const now = Date.now();
+                    const last = emoteCooldowns.get(cooldownKey) ?? 0;
+                    if (now - last < ACTIVITY_EMOTE_COOLDOWN_MS) {
+                        reply({ ok: false, reason: "rate_limit" });
+                        return;
+                    }
+
+                    emoteCooldowns.set(cooldownKey, now);
+
+                    const cachedUser = State.client.users.get(emoteArgs.userID);
+                    pushEvent(emoteArgs.guildID, {
+                        type: "emote",
+                        userID: emoteArgs.userID,
+                        username: cachedUser?.username || emoteArgs.userID,
+                        avatarUrl: cachedUser?.avatarURL || null,
+                        emote: emoteArgs.emote,
+                    });
+
+                    reply({ ok: true });
                     return;
                 }
 
@@ -1905,6 +1973,35 @@ export function attachActivityBridge(session: GameSession): void {
             avatarUrl,
             isCorrect: payload.isCorrect,
             ts: payload.ts,
+        });
+    });
+
+    session.on("recap", (recap: GameSessionRecap) => {
+        pushEvent(guildID, {
+            type: "recap",
+            mvp: recap.mvp
+                ? {
+                      userID: recap.mvp.userID,
+                      username: lookupName(recap.mvp.userID).username,
+                      score: recap.mvp.score,
+                  }
+                : null,
+            fastestGuess: recap.fastestGuess
+                ? {
+                      userID: recap.fastestGuess.userID,
+                      username: lookupName(recap.fastestGuess.userID).username,
+                      timeMs: recap.fastestGuess.timeMs,
+                  }
+                : null,
+            longestStreak: recap.longestStreak
+                ? {
+                      userID: recap.longestStreak.userID,
+                      username: lookupName(recap.longestStreak.userID).username,
+                      streak: recap.longestStreak.streak,
+                  }
+                : null,
+            totalCorrect: recap.totalCorrect,
+            totalRounds: recap.totalRounds,
         });
     });
 
