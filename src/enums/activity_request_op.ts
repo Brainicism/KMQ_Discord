@@ -6,6 +6,7 @@ type ActivityRequestOp =
     | "skipVote"
     | "endGame"
     | "hint"
+    | "emote"
     | "bookmark"
     | "setOption"
     | "autocompleteArtists"

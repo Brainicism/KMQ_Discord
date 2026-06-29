@@ -34,6 +34,29 @@ type ActivityEvent =
           ts: number;
       }
     | { type: "sessionEnd"; reason: string }
+    | {
+          type: "recap";
+          mvp: { userID: string; username: string; score: number } | null;
+          fastestGuess: {
+              userID: string;
+              username: string;
+              timeMs: number;
+          } | null;
+          longestStreak: {
+              userID: string;
+              username: string;
+              streak: number;
+          } | null;
+          totalCorrect: number;
+          totalRounds: number;
+      }
+    | {
+          type: "emote";
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          emote: string;
+      }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

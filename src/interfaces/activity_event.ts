@@ -38,6 +38,33 @@ type ActivityEvent =
           ts: number;
       }
     | { type: "sessionEnd"; reason: string }
+    | {
+          // Pushed once at session end with the standout stats, for the recap
+          // card on the game-over screen. Names resolved server-side.
+          type: "recap";
+          mvp: { userID: string; username: string; score: number } | null;
+          fastestGuess: {
+              userID: string;
+              username: string;
+              timeMs: number;
+          } | null;
+          longestStreak: {
+              userID: string;
+              username: string;
+              streak: number;
+          } | null;
+          totalCorrect: number;
+          totalRounds: number;
+      }
+    | {
+          // Broadcast to every viewer when a player flings an emote, for a
+          // transient floating-emote animation. Not persisted.
+          type: "emote";
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          emote: string;
+      }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

@@ -29,6 +29,7 @@
         "bookmarkTitleActive": "Bookmark this song",
         "bookmarkTitleDone": "Bookmarked — DM'd at end of session",
         "connectFailed": "Couldn't connect to KMQ. Please try again.",
+        "emoteBarLabel": "Send a reaction",
         "endGameBusy": "Ending...",
         "endGameButton": "End game",
         "gameType": {
@@ -206,6 +207,20 @@
             "timesVoted": "Times Voted",
             "voteCta": "Vote for 2x EXP",
             "voteExpires": "Expires in {{time}}"
+        },
+        "recap": {
+            "copied": "Copied!",
+            "copy": "Copy result",
+            "fastest": "⚡ Fastest: {{user}} ({{seconds}}s)",
+            "fastestLabel": "Fastest guess",
+            "mvp": "👑 MVP: {{user}} ({{score}})",
+            "mvpLabel": "MVP",
+            "shareHeader": "🎵 KMQ Recap",
+            "songs": "✅ {{correct}}/{{rounds}} songs guessed",
+            "songsLabel": "Songs guessed",
+            "streak": "🔥 Longest streak: {{user}} (×{{streak}})",
+            "streakLabel": "Longest streak",
+            "title": "Game Recap"
         },
         "reconnectButton": "Reconnect",
         "reconnecting": "Reconnecting...",
@@ -1935,6 +1950,12 @@
             "notPlaylist": "You can't change that option when playing from a playlist. Use {{playlistResetCommand}} before changing this option.",
             "notSuddenDeath": "You can't do that during sudden death.",
             "title": "Wait..."
+        },
+        "recap": {
+            "fastest": "⚡ Fastest guess: {{user}} ({{seconds}}s)",
+            "mvp": "👑 MVP: {{user}} ({{score}} pts)",
+            "streak": "🔥 Longest streak: {{user}} (×{{streak}})",
+            "title": "Game Recap"
         },
         "releaseDate": "Release Date",
         "restart": {

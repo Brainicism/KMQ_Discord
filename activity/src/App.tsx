@@ -29,6 +29,7 @@ import {
     openActivityStream,
     preset as apiPreset,
     searchSongs,
+    sendEmote as apiSendEmote,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
@@ -71,12 +72,14 @@ import type {
     ActivitySongSearchResult,
 } from "./types/activity_song_info";
 import type ActivityEvent from "./types/activity_event";
+import type FloatingEmote from "./types/floating_emote";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
 import type ActivityScoreboardSnapshot from "./types/activity_scoreboard_snapshot";
 import type ActivitySnapshot from "./types/activity_snapshot";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type HintState from "./types/hint_state";
+import type SessionRecap from "./types/session_recap";
 import type SkipState from "./types/skip_state";
 import type UiState from "./types/ui_state";
 
@@ -147,6 +150,8 @@ const initialUi: UiState = {
     hadSession: false,
     options: null,
     roundHistory: [],
+    floatingEmotes: [],
+    recap: null,
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -1067,6 +1072,140 @@ function SongMontage({ history }: { history: UiState["roundHistory"] }) {
     );
 }
 
+/**
+ * Copies text to the clipboard, working inside the Discord Activity's sandboxed
+ * iframe where `navigator.clipboard.writeText` is often blocked (missing
+ * `clipboard-write` permission, or the document isn't focused). Tries the modern
+ * async API first, then falls back to a hidden-textarea `execCommand("copy")`,
+ * which a sandboxed iframe still honours on a user gesture.
+ * @param text - the text to copy
+ * @returns whether the copy succeeded
+ */
+async function copyToClipboard(text: string): Promise<boolean> {
+    if (navigator.clipboard?.writeText) {
+        try {
+            await navigator.clipboard.writeText(text);
+            return true;
+        } catch {
+            // Fall through to the legacy path below.
+        }
+    }
+
+    try {
+        const textarea = document.createElement("textarea");
+        textarea.value = text;
+        textarea.setAttribute("readonly", "");
+        textarea.style.position = "fixed";
+        textarea.style.top = "-9999px";
+        textarea.style.opacity = "0";
+        document.body.appendChild(textarea);
+        textarea.focus();
+        textarea.select();
+        textarea.setSelectionRange(0, text.length);
+        const ok = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        return ok;
+    } catch {
+        return false;
+    }
+}
+
+function buildRecapShareText(recap: SessionRecap, t: Translator): string {
+    const lines = [t("recap.shareHeader")];
+    lines.push(
+        t("recap.songs", {
+            correct: String(recap.totalCorrect),
+            rounds: String(recap.totalRounds),
+        }),
+    );
+    if (recap.mvp) {
+        lines.push(
+            t("recap.mvp", {
+                user: recap.mvp.username,
+                score: String(recap.mvp.score),
+            }),
+        );
+    }
+
+    if (recap.fastestGuess) {
+        lines.push(
+            t("recap.fastest", {
+                user: recap.fastestGuess.username,
+                seconds: (recap.fastestGuess.timeMs / 1000).toFixed(1),
+            }),
+        );
+    }
+
+    if (recap.longestStreak) {
+        lines.push(
+            t("recap.streak", {
+                user: recap.longestStreak.username,
+                streak: String(recap.longestStreak.streak),
+            }),
+        );
+    }
+
+    return lines.join("\n");
+}
+
+function RecapCard({ recap, t }: { recap: SessionRecap; t: Translator }) {
+    const [copied, setCopied] = useState(false);
+
+    const onCopy = (): void => {
+        void copyToClipboard(buildRecapShareText(recap, t)).then((ok) => {
+            if (ok) {
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 2000);
+            }
+
+            return undefined;
+        });
+    };
+
+    return (
+        <div className="recap-card">
+            <div className="recap-title">{t("recap.title")}</div>
+            <dl className="recap-stats">
+                <div>
+                    <dt>{t("recap.songsLabel")}</dt>
+                    <dd>
+                        {recap.totalCorrect}/{recap.totalRounds}
+                    </dd>
+                </div>
+                {recap.mvp && (
+                    <div>
+                        <dt>{t("recap.mvpLabel")}</dt>
+                        <dd>
+                            {recap.mvp.username} ({recap.mvp.score})
+                        </dd>
+                    </div>
+                )}
+                {recap.fastestGuess && (
+                    <div>
+                        <dt>{t("recap.fastestLabel")}</dt>
+                        <dd>
+                            {recap.fastestGuess.username} (
+                            {(recap.fastestGuess.timeMs / 1000).toFixed(1)}s)
+                        </dd>
+                    </div>
+                )}
+                {recap.longestStreak && (
+                    <div>
+                        <dt>{t("recap.streakLabel")}</dt>
+                        <dd>
+                            {recap.longestStreak.username} (×
+                            {recap.longestStreak.streak})
+                        </dd>
+                    </div>
+                )}
+            </dl>
+            <button type="button" className="recap-copy" onClick={onCopy}>
+                {copied ? t("recap.copied") : t("recap.copy")}
+            </button>
+        </div>
+    );
+}
+
 function CurrentRound({
     round,
     reveal,
@@ -1075,6 +1214,7 @@ function CurrentRound({
     viewerWon,
     history,
     guesses,
+    recap,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -1090,6 +1230,8 @@ function CurrentRound({
     history: UiState["roundHistory"];
     /** Live guesses, shown in the in-round stage as they come in. */
     guesses: UiState["recentGuesses"];
+    /** End-of-session recap, shown on the game-over screen. */
+    recap: SessionRecap | null;
     t: Translator;
 }) {
     return (
@@ -1273,6 +1415,9 @@ function CurrentRound({
                                 <p className="empty">
                                     {t("waitingForNextRound")}
                                 </p>
+                            )}
+                            {winnerText && recap && (
+                                <RecapCard recap={recap} t={t} />
                             )}
                         </div>
                         {winnerText ? (
@@ -1964,6 +2109,102 @@ function Confetti() {
                             "--drift": `${p.drift}px`,
                         } as React.CSSProperties
                     }
+                />
+            ))}
+        </div>
+    );
+}
+
+// Mirror of ACTIVITY_EMOTES (server constants). Kept in sync manually; the
+// server re-validates, so an out-of-date client can only fail closed.
+const EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
+const FLOATING_EMOTE_LIMIT = 30;
+const EMOTE_FLOAT_MS = 2600;
+const EMOTE_CLIENT_COOLDOWN_MS = 500;
+
+function EmoteBar({
+    accessToken,
+    instanceId,
+    enabled,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    enabled: boolean;
+    t: Translator;
+}) {
+    const lastSentRef = useRef(0);
+
+    const send = (emote: string): void => {
+        const now = Date.now();
+        if (now - lastSentRef.current < EMOTE_CLIENT_COOLDOWN_MS) return;
+        lastSentRef.current = now;
+        // Fire-and-forget: the broadcast drives the floating animation, so a
+        // failed send just means no emote appears — nothing to roll back.
+        void apiSendEmote(accessToken, instanceId, emote);
+    };
+
+    return (
+        <div className="emote-bar" role="group" aria-label={t("emoteBarLabel")}>
+            {EMOTES.map((emote) => (
+                <button
+                    key={emote}
+                    type="button"
+                    className="emote-button"
+                    disabled={!enabled}
+                    onClick={() => send(emote)}
+                >
+                    {emote}
+                </button>
+            ))}
+        </div>
+    );
+}
+
+function FloatingEmoteItem({
+    emote,
+    onDismiss,
+}: {
+    emote: FloatingEmote;
+    onDismiss: (id: string) => void;
+}) {
+    useEffect(() => {
+        const timer = window.setTimeout(
+            () => onDismiss(emote.id),
+            EMOTE_FLOAT_MS,
+        );
+        return () => window.clearTimeout(timer);
+    }, [emote.id, onDismiss]);
+
+    return (
+        <span
+            className="floating-emote"
+            style={{ left: `${emote.left}%` }}
+            aria-hidden
+        >
+            {emote.emote}
+        </span>
+    );
+}
+
+function FloatingEmotes({
+    emotes,
+    onDismiss,
+}: {
+    emotes: FloatingEmote[];
+    onDismiss: (id: string) => void;
+}) {
+    if (emotes.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="floating-emotes" aria-hidden>
+            {emotes.map((emote) => (
+                <FloatingEmoteItem
+                    key={emote.id}
+                    emote={emote}
+                    onDismiss={onDismiss}
                 />
             ))}
         </div>
@@ -3864,6 +4105,13 @@ export default function App() {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
+    // Stable so each floating emote's dismissal timer effect isn't re-armed.
+    const dismissFloatingEmote = useCallback((id: string) => {
+        setUi((prev) => ({
+            ...prev,
+            floatingEmotes: prev.floatingEmotes.filter((e) => e.id !== id),
+        }));
+    }, []);
     const [authState, setAuthState] = useState<{
         accessToken: string;
         instanceId: string;
@@ -4503,6 +4751,7 @@ export default function App() {
                             reveal={ui.lastReveal}
                             history={ui.roundHistory}
                             guesses={ui.recentGuesses}
+                            recap={ui.recap}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
@@ -4680,6 +4929,15 @@ export default function App() {
                             </div>
                         )}
 
+                        {authState && (
+                            <EmoteBar
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                enabled={!ui.sessionEnded}
+                                t={t}
+                            />
+                        )}
+
                         {authState && ui.options && (
                             <div className="options-section">
                                 <button
@@ -4765,6 +5023,11 @@ export default function App() {
                     </div>
                 </aside>
             </div>
+
+            <FloatingEmotes
+                emotes={ui.floatingEmotes}
+                onDismiss={dismissFloatingEmote}
+            />
         </>
     );
 }
@@ -4797,6 +5060,8 @@ function reduce(
                 currentRoundBookmarked: false,
                 hadSession: true,
                 roundHistory: [],
+                floatingEmotes: [],
+                recap: null,
             };
         case "roundStart":
             return {
@@ -4908,6 +5173,29 @@ function reduce(
                 lastReveal: null,
                 hint: initialHint,
                 skip: initialSkip,
+            };
+        case "recap":
+            return {
+                ...prev,
+                recap: {
+                    mvp: msg.mvp,
+                    fastestGuess: msg.fastestGuess,
+                    longestStreak: msg.longestStreak,
+                    totalCorrect: msg.totalCorrect,
+                    totalRounds: msg.totalRounds,
+                },
+            };
+        case "emote":
+            return {
+                ...prev,
+                floatingEmotes: [
+                    ...prev.floatingEmotes.slice(-FLOATING_EMOTE_LIMIT),
+                    {
+                        id: `${msg.userID}-${Date.now()}-${Math.random()}`,
+                        emote: msg.emote,
+                        left: 8 + Math.random() * 84,
+                    },
+                ],
             };
         case "optionsChanged":
             return { ...prev, options: msg.options };
