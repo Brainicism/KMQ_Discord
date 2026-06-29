@@ -587,15 +587,35 @@ export default class GameSession extends Session {
             }
         }
 
-        // Acknowledge a correct pick before scoring runs: a correct guess can
-        // trigger the multiguess delay + round-end work, which would blow past
-        // Discord's 3s interaction deadline if we acked afterwards.
+        // Acknowledge the pick before the round-end work runs: both a correct
+        // pick AND an incorrect one can trigger that work (in solo MC an
+        // incorrect pick is "everybody guessed, nobody correct", which ends the
+        // round and starts the next one — several seconds of song loading).
+        // Acking afterwards would blow past Discord's 3s interaction deadline
+        // and fail the interaction, so we ack from the callbacks that fire
+        // before the transition: onCorrect for a correct pick, onAccepted's
+        // INCORRECT branch (the "you're out this round" notice) for a wrong one.
         const mcResult = await this.submitMultipleChoiceGuess(
             interaction.member!.id,
             interaction.data.custom_id,
             interaction.createdAt,
             messageContext,
             () => tryInteractionAcknowledge(interaction),
+            (outcome) => {
+                if (outcome === MultipleChoiceGuessResult.INCORRECT) {
+                    // Fire-and-forget so the ack is dispatched before the
+                    // round-end transition rather than awaited after it.
+                    // eslint-disable-next-line @typescript-eslint/no-floating-promises
+                    tryCreateInteractionErrorAcknowledgement(
+                        interaction,
+                        null,
+                        i18n.translate(
+                            this.guildID,
+                            "misc.failure.interaction.eliminated",
+                        ),
+                    ).catch(() => undefined);
+                }
+            },
         );
 
         if (mcResult === MultipleChoiceGuessResult.INELIGIBLE) {
@@ -610,18 +630,8 @@ export default class GameSession extends Session {
             return true;
         }
 
-        if (mcResult === MultipleChoiceGuessResult.INCORRECT) {
-            await tryCreateInteractionErrorAcknowledgement(
-                interaction,
-                null,
-                i18n.translate(
-                    this.guildID,
-                    "misc.failure.interaction.eliminated",
-                ),
-            );
-            return true;
-        }
-
+        // INCORRECT was acknowledged early in the onAccepted callback above
+        // (before the round-end transition); nothing left to do here.
         return true;
     }
 
