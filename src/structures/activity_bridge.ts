@@ -157,9 +157,9 @@ function resolveArtistIDs(artistIDs: number[]): MatchedArtist[] {
     return out;
 }
 
-function snapshotOptions(
+async function snapshotOptions(
     guildPreference: GuildPreference,
-): ActivityOptionsSnapshot {
+): Promise<ActivityOptionsSnapshot> {
     const opts = guildPreference.gameOptions;
     const playlistID = guildPreference.getKmqPlaylistID();
     const toActivity = (
@@ -167,7 +167,14 @@ function snapshotOptions(
     ): { id: number; name: string }[] | null =>
         list === null ? null : list.map((a) => ({ id: a.id, name: a.name }));
 
+    // countBeforeLimit is the size of the matched pool before the limit window
+    // is applied — the effective upper bound the client surfaces for `limitEnd`.
+    // The selector is reloaded on any reload-impacting option change before this
+    // broadcast fires, so the cached count is current.
+    const songCount = await guildPreference.getAvailableSongCount();
+
     return {
+        matchedSongCount: songCount.countBeforeLimit ?? null,
         gender: [...opts.gender],
         guessMode: opts.guessModeType,
         multiguess: opts.multiGuessType,
@@ -221,16 +228,16 @@ function snapshotMultipleChoiceOptions(
     }));
 }
 
-function buildSessionSnapshot(
+async function buildSessionSnapshot(
     session: GameSession,
     guildPreference: GuildPreference,
-): ActivitySnapshot {
+): Promise<ActivitySnapshot> {
     const round = session.round;
     return {
         hasSession: true,
         session: snapshotSessionMeta(session),
         scoreboard: snapshotScoreboard(session.scoreboard),
-        options: snapshotOptions(guildPreference),
+        options: await snapshotOptions(guildPreference),
         currentRound:
             round && round.songStartedAt !== null
                 ? {
@@ -333,7 +340,7 @@ async function broadcastOptionsChangedCore(guildID: string): Promise<void> {
 
         pushEvent(guildID, {
             type: "optionsChanged",
-            options: snapshotOptions(guildPreference),
+            options: await snapshotOptions(guildPreference),
         });
     } catch (e) {
         logger.warn(
@@ -361,13 +368,15 @@ async function handleSnapshotRequestCore(
         const guildPreference =
             await GuildPreference.getGuildPreference(guildID);
 
-        const options = snapshotOptions(guildPreference);
         const session = Session.getSession(guildID);
 
         const payload: ActivitySnapshot =
             session && session.isGameSession()
-                ? buildSessionSnapshot(session, guildPreference)
-                : { hasSession: false, options };
+                ? await buildSessionSnapshot(session, guildPreference)
+                : {
+                      hasSession: false,
+                      options: await snapshotOptions(guildPreference),
+                  };
 
         State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, { cid, payload });
     } catch (e) {

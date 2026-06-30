@@ -118,6 +118,7 @@
             "limitRangeError": "End must be greater than start.",
             "male": "Male",
             "managedByGroups": "Managed by the selected groups.",
+            "matchedSongs": "{{count}} songs match your filters",
             "medium": "Multiple Choice (Medium)",
             "middle": "Middle",
             "multiguess": "Multiguess",
