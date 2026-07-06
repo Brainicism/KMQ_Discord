@@ -6,6 +6,7 @@ import type { ActivityMultipleChoiceOption } from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
 import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
+import type LevelUp from "./level_up";
 
 type ActivityEvent =
     | { type: "sessionStart"; session: ActivitySessionMeta }
@@ -57,6 +58,7 @@ type ActivityEvent =
           avatarUrl: string | null;
           emote: string;
       }
+    | { type: "levelUp"; levelUps: LevelUp[] }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

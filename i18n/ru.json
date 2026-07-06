@@ -51,6 +51,12 @@
         "hintVoteFallback": "голос",
         "historyEmpty": "Песен пока нет.",
         "historyHeading": "История песен",
+        "levelUp": {
+            "levels": "Ур {{start}} → {{end}}",
+            "more": "+{{count}} больше",
+            "rankUpTitle": "Повышение ранга!",
+            "title": "Повышение уровня!"
+        },
         "networkError": "Ошибка сети",
         "notInVCWarning": "Присоединитесь к голосовому каналу, чтобы начать игру.",
         "openOnYouTube": "Открыть на YouTube",
@@ -267,6 +273,7 @@
         "skipDone": "Пропущено",
         "skipTitle": "Голосовать за пропуск песни",
         "skipVoteFallback": "голос",
+        "soClose": "почти получилось!",
         "songCounterLine": "{{played}}/{{total}} песен воспроизведено",
         "songInfo": {
             "artistAliases": "Псевдонимы исполнителя",

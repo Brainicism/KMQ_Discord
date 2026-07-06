@@ -437,6 +437,15 @@ interface SessionEndPayload {
     reason: string;
 }
 
+/** One entry of the GameSession `levelUp` event (names resolved by the bridge). */
+interface LevelUpEventEntry {
+    userID: string;
+    startLevel: number;
+    endLevel: number;
+    rank: string;
+    isRankUp: boolean;
+}
+
 /**
  * Registers a single worker-wide IPC listener for admiral→worker activity
  * requests. Idempotent: subsequent calls are a no-op. No-op when running
@@ -2019,11 +2028,28 @@ export function attachActivityBridge(session: GameSession): void {
             type: "sessionEnd",
             reason: payload.reason,
         });
+    });
 
-        // Drop our listeners now that the session is over. The Session object
-        // becomes unreachable when State.gameSessions[guildID] is deleted; this
-        // just avoids holding extra references via the EventEmitter for the
-        // brief window before GC.
+    session.on("levelUp", (levelUps: Array<LevelUpEventEntry>) => {
+        pushEvent(guildID, {
+            type: "levelUp",
+            levelUps: levelUps.map((l) => ({
+                userID: l.userID,
+                username: lookupName(l.userID).username,
+                startLevel: l.startLevel,
+                endLevel: l.endLevel,
+                rank: l.rank,
+                isRankUp: l.isRankUp,
+            })),
+        });
+    });
+
+    // Emitted last by endSessionCore, after all post-session events (sessionEnd,
+    // levelUp). Drop our listeners now that the session is over. The Session
+    // object becomes unreachable when State.gameSessions[guildID] is deleted;
+    // this just avoids holding extra references via the EventEmitter for the
+    // brief window before GC.
+    session.on("activityTeardown", () => {
         setImmediate(() => session.removeAllListeners());
     });
 }

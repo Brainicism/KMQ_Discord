@@ -7,6 +7,7 @@ import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
 import type FloatingEmote from "./floating_emote";
 import type HintState from "./hint_state";
+import type LevelUp from "./level_up";
 import type RecentGuess from "./recent_guess";
 import type SessionRecap from "./session_recap";
 import type SkipState from "./skip_state";
@@ -42,4 +43,8 @@ export default interface UiState {
     floatingEmotes: FloatingEmote[];
     /** End-of-session recap, shown on the game-over screen. Null until received. */
     recap: SessionRecap | null;
+    /** Per-player level-ups from the just-ended session, shown as a game-over
+     *  celebration. Empty until a `levelUp` event arrives; reset on a new
+     *  session. */
+    levelUps: LevelUp[];
 }
