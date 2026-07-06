@@ -2582,13 +2582,16 @@ function OptionsPanel({
     // let the optionsChanged broadcast refresh `options.playlist`/`limitEnd`.
     const [playlistInput, setPlaylistInput] = useState("");
     const [playlistBusy, setPlaylistBusy] = useState(false);
+    // Playlist errors (e.g. an unresolvable URL) render inline next to the
+    // input rather than in the panel-wide feedback area at the bottom.
+    const [playlistError, setPlaylistError] = useState<string | null>(null);
     const playlistActive = options.playlist !== null;
 
     const submitPlaylist = async (): Promise<void> => {
         const url = playlistInput.trim();
         if (!url || playlistBusy) return;
         setPlaylistBusy(true);
-        setFeedback(null);
+        setPlaylistError(null);
         try {
             const result = await apiSetOption(accessToken, instanceId, {
                 kind: "playlist",
@@ -2597,10 +2600,12 @@ function OptionsPanel({
             if (result.ok) {
                 setPlaylistInput("");
             } else {
-                setFeedback(rejectReasonText(t, result.reason));
+                setPlaylistError(rejectReasonText(t, result.reason));
             }
         } catch (e) {
-            setFeedback(e instanceof Error ? e.message : t("networkError"));
+            setPlaylistError(
+                e instanceof Error ? e.message : t("networkError"),
+            );
         } finally {
             setPlaylistBusy(false);
         }
@@ -2609,15 +2614,18 @@ function OptionsPanel({
     const clearPlaylist = async (): Promise<void> => {
         if (playlistBusy) return;
         setPlaylistBusy(true);
-        setFeedback(null);
+        setPlaylistError(null);
         try {
             const result = await apiSetOption(accessToken, instanceId, {
                 kind: "playlist",
                 playlistURL: null,
             });
-            if (!result.ok) setFeedback(rejectReasonText(t, result.reason));
+            if (!result.ok)
+                setPlaylistError(rejectReasonText(t, result.reason));
         } catch (e) {
-            setFeedback(e instanceof Error ? e.message : t("networkError"));
+            setPlaylistError(
+                e instanceof Error ? e.message : t("networkError"),
+            );
         } finally {
             setPlaylistBusy(false);
         }
@@ -2703,15 +2711,10 @@ function OptionsPanel({
         );
     };
 
+    // The range/cross-field validation (end > start, begin <= end) runs inline
+    // in NumberRangeGroup via `validateRange`, so these only receive values the
+    // engine accepts and just forward the change.
     const submitLimit = (start: number, end: number): void => {
-        // The game engine requires end > start (a zero/negative-width range
-        // selects no songs), matching the /limit slash command. Surface a
-        // message instead of silently dropping the change (e.g. "1 - 1").
-        if (start >= end) {
-            setFeedback(t("options.limitRangeError"));
-            return;
-        }
-
         void submit(
             { kind: "limit", limitStart: start, limitEnd: end },
             { ...options, limitStart: start, limitEnd: end },
@@ -2719,11 +2722,6 @@ function OptionsPanel({
     };
 
     const submitCutoff = (beginning: number, end: number): void => {
-        if (beginning > end) {
-            setFeedback(t("options.cutoffRangeError"));
-            return;
-        }
-
         void submit(
             { kind: "cutoff", beginningYear: beginning, endYear: end },
             { ...options, beginningYear: beginning, endYear: end },
@@ -2972,6 +2970,9 @@ function OptionsPanel({
                             </button>
                         </div>
                     )}
+                    {playlistError && (
+                        <p className="option-error">{playlistError}</p>
+                    )}
                 </div>
 
                 {playlistActive && (
@@ -2994,6 +2995,9 @@ function OptionsPanel({
                         endMin={1900}
                         endMax={new Date().getFullYear()}
                         onCommit={submitCutoff}
+                        validateRange={(b, e) =>
+                            b > e ? t("options.cutoffRangeError") : null
+                        }
                     />
 
                     <NumberRangeGroup
@@ -3007,6 +3011,9 @@ function OptionsPanel({
                         endMax={100000}
                         onCommit={submitLimit}
                         clampEndTo={options.matchedSongCount}
+                        validateRange={(s, e) =>
+                            s >= e ? t("options.limitRangeError") : null
+                        }
                         note={
                             options.matchedSongCount === null
                                 ? undefined
@@ -3389,6 +3396,7 @@ function NumberRangeGroup({
     onCommit,
     note,
     clampEndTo,
+    validateRange,
 }: {
     label: string;
     help?: string;
@@ -3401,29 +3409,49 @@ function NumberRangeGroup({
     onCommit: (start: number, end: number) => void;
     note?: string;
     clampEndTo?: number | null;
+    /** Cross-field check run after clamping; return an error message to show
+     *  inline (blocking the commit), or null when the pair is valid. */
+    validateRange?: (start: number, end: number) => string | null;
 }) {
     const [start, setStart] = useState(String(startValue));
     const [end, setEnd] = useState(String(endValue));
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => setStart(String(startValue)), [startValue]);
     useEffect(() => setEnd(String(endValue)), [endValue]);
+    // A committed external value is valid by definition — drop any stale error.
+    useEffect(() => setError(null), [startValue, endValue]);
 
     const commit = (): void => {
-        const s = parseInt(start, 10);
-        let e = parseInt(end, 10);
-        if (!Number.isInteger(s) || !Number.isInteger(e)) {
+        const sRaw = parseInt(start, 10);
+        const eRaw = parseInt(end, 10);
+        if (!Number.isInteger(sRaw) || !Number.isInteger(eRaw)) {
             setStart(String(startValue));
             setEnd(String(endValue));
+            setError(null);
             return;
         }
+        // Clamp to the allowed bounds so out-of-range values (negatives, zero,
+        // or above the max) can't be committed — matching the min/max the
+        // legacy slash commands enforce.
+        const s = Math.min(Math.max(sRaw, startMin), startMax);
+        let e = Math.min(Math.max(eRaw, endMin), endMax);
         // Snap the end of the range down to the matched-song upper bound:
         // entering a limit above the number of songs that actually match
         // (e.g. 10000 when 3000 match) clamps to that bound rather than
         // silently overshooting. Skip when the bound is unknown or zero.
         if (clampEndTo != null && clampEndTo > 0 && e > clampEndTo) {
             e = clampEndTo;
-            setEnd(String(e));
         }
+        if (String(s) !== start) setStart(String(s));
+        if (String(e) !== end) setEnd(String(e));
+
+        const rangeError = validateRange?.(s, e) ?? null;
+        if (rangeError) {
+            setError(rangeError);
+            return;
+        }
+        setError(null);
         if (s === startValue && e === endValue) return;
         onCommit(s, e);
     };
@@ -3452,6 +3480,7 @@ function NumberRangeGroup({
                     onBlur={commit}
                 />
             </div>
+            {error && <p className="option-error">{error}</p>}
             {note && <p className="option-note">{note}</p>}
         </div>
     );
