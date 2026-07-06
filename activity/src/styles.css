@@ -467,6 +467,10 @@ body::before {
     flex-wrap: wrap;
     gap: 8px;
     align-items: center;
+    /* Keep the block hugging the right edge of the header. Without this, adding
+       the wrapped `.control-feedback` line (e.g. "Join the voice channel
+       first.") reflows the container and slides the pills/Start button left. */
+    justify-content: flex-end;
 }
 
 .control-buttons button {
@@ -513,6 +517,10 @@ body::before {
 .control-feedback {
     color: var(--red-primary);
     font-size: 0.85rem;
+    /* Break onto its own line under the block and right-align, matching the
+       right-anchored pills/Start button above it. */
+    flex-basis: 100%;
+    text-align: right;
 }
 
 /* ---- START-GAME CONFIG (game type + params) ---- */
@@ -520,7 +528,14 @@ body::before {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    width: 100%;
+    /* Size to the pills row (its widest child), NOT the parent container. A
+       wrapping flex container's max-content width is the *sum* of its children,
+       so once the `.control-feedback` line appears, a `width: 100%` here would
+       stretch with the widened container — ballooning the Start button and
+       sliding the block left. Pinning to fit-content keeps the button at the
+       pills-row width and the block anchored right (justify-content: flex-end)
+       regardless of the feedback. */
+    width: fit-content;
 }
 
 .start-game-types {
