@@ -876,6 +876,18 @@ body::before {
     z-index: 1;
 }
 
+/* No active game: a calm, neutral glyph rather than the pink pulsing "waiting"
+   placeholder — nothing is loading, so nothing should animate or read as busy. */
+.thumbnail-slot.placeholder.idle-empty {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+.idle-empty .note-main {
+    animation: none;
+    opacity: 0.35;
+}
+
 .thumbnail-slot.session-winner-art img {
     width: 100%;
     height: 100%;
