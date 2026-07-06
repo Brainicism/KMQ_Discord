@@ -2075,6 +2075,15 @@ body::before {
     font-weight: 500;
 }
 
+/* Inline validation error under an option's field (range inputs, playlist URL),
+   in place of the panel-wide feedback at the bottom. */
+.option-error {
+    margin: 4px 0 0;
+    color: var(--red-primary);
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
 .pills {
     display: flex;
     flex-wrap: wrap;
