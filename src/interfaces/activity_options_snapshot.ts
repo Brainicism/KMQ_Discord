@@ -69,4 +69,10 @@ export default interface ActivityOptionsSnapshot {
      * matched-song count is reflected in `limitEnd`.
      */
     playlist: { type: "spotify" | "youtube"; identifier: string } | null;
+    /**
+     * Total number of songs matching the current filters before the `limit`
+     * window is applied — i.e. the effective upper bound for `limitEnd`. Null
+     * when the count couldn't be computed (e.g. a song-data load failure).
+     */
+    matchedSongCount: number | null;
 }

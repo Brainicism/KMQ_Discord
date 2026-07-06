@@ -118,6 +118,7 @@
             "limitRangeError": "Einde moet groter zijn dan begin.",
             "male": "Mannelijk",
             "managedByGroups": "Beheerd door de geselecteerde groepen.",
+            "matchedSongs": "{{count}} nummers komen overeen met je filters",
             "medium": "Meerkeuze (Gemiddeld)",
             "middle": "Midden",
             "multiguess": "Multiraad",

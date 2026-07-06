@@ -118,6 +118,7 @@
             "limitRangeError": "O fim deve ser maior que o início.",
             "male": "Masculino",
             "managedByGroups": "Gerenciado pelos grupos selecionados.",
+            "matchedSongs": "{{count}} músicas correspondem aos seus filtros",
             "medium": "Escolha Múltipla (Médio)",
             "middle": "Meio",
             "multiguess": "Multiadivinhar",

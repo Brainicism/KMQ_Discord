@@ -3006,6 +3006,15 @@ function OptionsPanel({
                         endMin={1}
                         endMax={100000}
                         onCommit={submitLimit}
+                        note={
+                            options.matchedSongCount === null
+                                ? undefined
+                                : t("options.matchedSongs", {
+                                      count: formatProfileNumber(
+                                          options.matchedSongCount,
+                                      ),
+                                  })
+                        }
                     />
 
                     <PillField
@@ -3377,6 +3386,7 @@ function NumberRangeGroup({
     endMin,
     endMax,
     onCommit,
+    note,
 }: {
     label: string;
     help?: string;
@@ -3387,6 +3397,7 @@ function NumberRangeGroup({
     endMin: number;
     endMax: number;
     onCommit: (start: number, end: number) => void;
+    note?: string;
 }) {
     const [start, setStart] = useState(String(startValue));
     const [end, setEnd] = useState(String(endValue));
@@ -3430,6 +3441,7 @@ function NumberRangeGroup({
                     onBlur={commit}
                 />
             </div>
+            {note && <p className="option-note">{note}</p>}
         </div>
     );
 }

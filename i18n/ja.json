@@ -118,6 +118,7 @@
             "limitRangeError": "終了は開始より大きくなければなりません。",
             "male": "男性",
             "managedByGroups": "選択されたグループによって管理されます。",
+            "matchedSongs": "{{count}} 曲がフィルターに一致します",
             "medium": "選択式（中級）",
             "middle": "中央",
             "multiguess": "マルチ推測",

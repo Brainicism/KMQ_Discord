@@ -2051,6 +2051,15 @@ body::before {
     line-height: 1.35;
 }
 
+/* Inline note under a numeric option (e.g. the matched-song count beneath the
+   limit range), distinct from the toggled help popover above. */
+.option-note {
+    margin: 4px 0 0;
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
 .pills {
     display: flex;
     flex-wrap: wrap;
