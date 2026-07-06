@@ -3006,6 +3006,7 @@ function OptionsPanel({
                         endMin={1}
                         endMax={100000}
                         onCommit={submitLimit}
+                        clampEndTo={options.matchedSongCount}
                         note={
                             options.matchedSongCount === null
                                 ? undefined
@@ -3387,6 +3388,7 @@ function NumberRangeGroup({
     endMax,
     onCommit,
     note,
+    clampEndTo,
 }: {
     label: string;
     help?: string;
@@ -3398,6 +3400,7 @@ function NumberRangeGroup({
     endMax: number;
     onCommit: (start: number, end: number) => void;
     note?: string;
+    clampEndTo?: number | null;
 }) {
     const [start, setStart] = useState(String(startValue));
     const [end, setEnd] = useState(String(endValue));
@@ -3407,11 +3410,19 @@ function NumberRangeGroup({
 
     const commit = (): void => {
         const s = parseInt(start, 10);
-        const e = parseInt(end, 10);
+        let e = parseInt(end, 10);
         if (!Number.isInteger(s) || !Number.isInteger(e)) {
             setStart(String(startValue));
             setEnd(String(endValue));
             return;
+        }
+        // Snap the end of the range down to the matched-song upper bound:
+        // entering a limit above the number of songs that actually match
+        // (e.g. 10000 when 3000 match) clamps to that bound rather than
+        // silently overshooting. Skip when the bound is unknown or zero.
+        if (clampEndTo != null && clampEndTo > 0 && e > clampEndTo) {
+            e = clampEndTo;
+            setEnd(String(e));
         }
         if (s === startValue && e === endValue) return;
         onCommit(s, e);
