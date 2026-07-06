@@ -876,6 +876,18 @@ body::before {
     z-index: 1;
 }
 
+/* No active game: a calm, neutral glyph rather than the pink pulsing "waiting"
+   placeholder — nothing is loading, so nothing should animate or read as busy. */
+.thumbnail-slot.placeholder.idle-empty {
+    background: var(--bg-surface);
+    border-color: var(--border);
+}
+
+.idle-empty .note-main {
+    animation: none;
+    opacity: 0.35;
+}
+
 .thumbnail-slot.session-winner-art img {
     width: 100%;
     height: 100%;
@@ -1217,6 +1229,42 @@ body::before {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 8px;
+}
+
+/* Game-start entrance: these controls only mount once a game is active, so they
+   otherwise pop in instantly. Fade + slide them up, staggered top-to-bottom
+   (guess input → votes → emotes) to match the reveal-line-in cascade elsewhere.
+   Runs once on mount and stays put across rounds since the elements persist.
+   Neutralised by the global prefers-reduced-motion guard. */
+.guess-input,
+.mc-input,
+.vote-row,
+.emote-bar {
+    animation: control-enter 0.32s cubic-bezier(0.2, 0.8, 0.3, 1) both;
+}
+
+.guess-input,
+.mc-input {
+    animation-delay: 0.04s;
+}
+
+.vote-row {
+    animation-delay: 0.11s;
+}
+
+.emote-bar {
+    animation-delay: 0.18s;
+}
+
+@keyframes control-enter {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 /* ---- EMOTE BAR + FLOATING EMOTES ---- */

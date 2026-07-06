@@ -1215,6 +1215,7 @@ function CurrentRound({
     history,
     guesses,
     recap,
+    noActiveGame,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -1223,6 +1224,10 @@ function CurrentRound({
     /** If non-null, the round-area idle state renders the session-end winner
      *  line in place of "Waiting for next round". */
     winnerText: string | null;
+    /** True when there is no active game. Distinguishes a genuine empty state
+     *  ("no game running") from the between-rounds pause of a live game (which
+     *  legitimately shows a "Waiting for the next round..." loading placeholder). */
+    noActiveGame: boolean;
     /** Whether the viewer won the just-ended game — triggers the confetti +
      *  celebratory styling on the winner line. */
     viewerWon: boolean;
@@ -1411,6 +1416,12 @@ function CurrentRound({
                                 >
                                     {winnerText}
                                 </p>
+                            ) : noActiveGame ? (
+                                <p className="empty">
+                                    {t("sessionEndedBanner", {
+                                        playSlash: "/play",
+                                    })}
+                                </p>
                             ) : (
                                 <p className="empty">
                                     {t("waitingForNextRound")}
@@ -1430,6 +1441,16 @@ function CurrentRound({
                                     <img src={thumbsUpUrl} alt="" />
                                 </div>
                             )
+                        ) : noActiveGame ? (
+                            // No game running: a calm, static music glyph — not the
+                            // pulsing "waiting..." placeholder, which implies a round
+                            // is loading when nothing is actually happening.
+                            <div
+                                className="thumbnail-slot placeholder idle-empty"
+                                aria-hidden
+                            >
+                                <span className="note-main">🎵</span>
+                            </div>
                         ) : (
                             <div
                                 className="thumbnail-slot placeholder"
@@ -4790,20 +4811,13 @@ export default function App() {
                             </div>
                         )}
 
-                        {ui.sessionEnded && (
-                            <div className="banner">
-                                {t("sessionEndedBanner", {
-                                    playSlash: "/play",
-                                })}
-                            </div>
-                        )}
-
                         <CurrentRound
                             round={ui.currentRound}
                             reveal={ui.lastReveal}
                             history={ui.roundHistory}
                             guesses={ui.recentGuesses}
                             recap={ui.recap}
+                            noActiveGame={ui.sessionEnded}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
@@ -4868,6 +4882,7 @@ export default function App() {
                         />
 
                         {authState &&
+                            !ui.sessionEnded &&
                             (ui.options &&
                             MC_ANSWER_TYPES.has(ui.options.answerType) ? (
                                 <MultipleChoiceInput
@@ -4895,7 +4910,7 @@ export default function App() {
                                 />
                             ))}
 
-                        {authState && (
+                        {authState && !ui.sessionEnded && (
                             <div className="vote-row">
                                 {/* Hints are disabled server-side in multiple
                                     choice mode, so hide the control rather than
@@ -4981,7 +4996,7 @@ export default function App() {
                             </div>
                         )}
 
-                        {authState && (
+                        {authState && !ui.sessionEnded && (
                             <EmoteBar
                                 accessToken={authState.accessToken}
                                 instanceId={authState.instanceId}
