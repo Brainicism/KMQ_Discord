@@ -65,6 +65,17 @@ type ActivityEvent =
           avatarUrl: string | null;
           emote: string;
       }
+    | {
+          type: "levelUp";
+          levelUps: Array<{
+              userID: string;
+              username: string;
+              startLevel: number;
+              endLevel: number;
+              rank: string;
+              isRankUp: boolean;
+          }>;
+      }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
     | { type: "skipProgress"; requesters: number; threshold: number }

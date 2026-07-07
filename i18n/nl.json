@@ -51,6 +51,12 @@
         "hintVoteFallback": "stem",
         "historyEmpty": "Nog geen nummers.",
         "historyHeading": "Geschiedenis van nummers",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} meer",
+            "rankUpTitle": "Rank omhoog!",
+            "title": "Level omhoog!"
+        },
         "networkError": "Netwerkfout",
         "notInVCWarning": "Neem deel aan het spraakkanaal om een spel te starten.",
         "openOnYouTube": "Openen op YouTube",
@@ -267,6 +273,7 @@
         "skipDone": "Overgeslagen",
         "skipTitle": "Stem om dit nummer over te slaan",
         "skipVoteFallback": "stem",
+        "soClose": "zo dichtbij!",
         "songCounterLine": "{{played}}/{{total}} nummers afgespeeld",
         "songInfo": {
             "artistAliases": "Artiest Aliassen",
