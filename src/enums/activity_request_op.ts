@@ -13,6 +13,8 @@ type ActivityRequestOp =
     | "preset"
     | "profile"
     | "songInfo"
-    | "searchSongs";
+    | "searchSongs"
+    | "dailyChallengeInfo"
+    | "startDailyChallenge";
 
 export default ActivityRequestOp;

@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Mettre cette chanson en favori",
         "bookmarkTitleDone": "Mise en favori — envoyée en MP en fin de session",
         "connectFailed": "Impossible de se connecter à KMQ. Veuillez réessayer.",
+        "daily": {
+            "close": "Fermer",
+            "copied": "Copié !",
+            "copy": "Copier le résultat",
+            "ctaText": "{{rounds}} chansons, les mêmes pour tout le monde — une fois par jour.",
+            "leaderboardEmpty": "Personne n'a encore fini — soyez le premier !",
+            "leaderboardTitle": "Classement",
+            "loading": "Chargement...",
+            "play": "Jouer le défi d'aujourd'hui",
+            "shareHeader": "🎵 KMQ Quotidien {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "startFailed": "Impossible de démarrer le défi.",
+            "starting": "Démarrage...",
+            "streakLabel": "Meilleure série : {{streak}}",
+            "summary": "{{correct}}/{{total}} devinés · {{score}} pts",
+            "title": "Défi Quotidien"
+        },
         "emoteBarLabel": "Envoyez une réaction",
         "endGameBusy": "Fin en cours…",
         "endGameButton": "Terminer la partie",
@@ -433,6 +450,24 @@
                     "rangeOption": "Choisir des chansons pour chaque année entre [beginning_year] et [ending_year]"
                 },
                 "name": "plagededates"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Jouez au Défi Quotidien d'aujourd'hui — un ensemble fixe de chansons que tout le monde reçoit, une fois par jour. Rejouez-le après avoir terminé pour voir votre résultat et le classement.",
+                "example": {
+                    "play": "Commencer (ou, si déjà fait aujourd'hui, voir) le Défi Quotidien"
+                },
+                "name": "quotidien"
+            },
+            "leaderboard": {
+                "empty": "Personne n'a encore terminé le défi d'aujourd'hui.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} corrects)",
+                "title": "**Classement d'aujourd'hui**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} devinés · {{score}} points · meilleure série {{streak}}",
+                "title": "Défi Quotidien — {{date}}"
             }
         },
         "debug": {

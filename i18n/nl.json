@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Dit nummer bladwijzeren",
         "bookmarkTitleDone": "Bladwijzer gezet — wordt aan het eind van de sessie ge-DM'd",
         "connectFailed": "Kon geen verbinding maken met KMQ. Probeer het opnieuw.",
+        "daily": {
+            "close": "Sluit",
+            "copied": "Gekopieerd!",
+            "copy": "Kopieer resultaat",
+            "ctaText": "{{rounds}} nummers, hetzelfde voor iedereen — één keer per dag.",
+            "leaderboardEmpty": "Nog geen finishers — wees de eerste!",
+            "leaderboardTitle": "Scorebord",
+            "loading": "Laden...",
+            "play": "Speel de uitdaging van vandaag",
+            "shareHeader": "🎵 KMQ Dagelijkse {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} punten",
+            "startFailed": "Kon de uitdaging niet starten.",
+            "starting": "Starten...",
+            "streakLabel": "Beste reeks: {{streak}}",
+            "summary": "{{correct}}/{{total}} geraden · {{score}} punten",
+            "title": "Dagelijkse Uitdaging"
+        },
         "emoteBarLabel": "Stuur een reactie",
         "endGameBusy": "Beëindigen…",
         "endGameButton": "Spel beëindigen",
@@ -433,6 +450,24 @@
                     "rangeOption": "Kies nummers voor elk jaar tussen [beginjaar] en [eindjaar]"
                 },
                 "name": "uitsluiten"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Speel de dagelijkse uitdaging van vandaag — een vaste set nummers die iedereen krijgt, één keer per dag. Voer het opnieuw uit na voltooiing om je resultaat en het klassement te zien.",
+                "example": {
+                    "play": "Start (of bekijk, als het al vandaag is gedaan) de Daily Challenge"
+                },
+                "name": "dagelijks"
+            },
+            "leaderboard": {
+                "empty": "Niemand heeft de uitdaging van vandaag nog voltooid.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} goed)",
+                "title": "**Het Klassement van Vandaag**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} geraden · {{score}} punten · beste reeks {{streak}}",
+                "title": "Dagelijkse Uitdaging — {{date}}"
             }
         },
         "debug": {

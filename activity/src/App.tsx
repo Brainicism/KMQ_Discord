@@ -21,6 +21,7 @@ import {
     bookmarkSong,
     endGame as apiEndGame,
     fetchArtistAutocomplete,
+    fetchDailyInfo,
     fetchI18nBundle,
     fetchProfile,
     fetchSnapshot,
@@ -32,6 +33,7 @@ import {
     sendEmote as apiSendEmote,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
+    startDaily as apiStartDaily,
     startGame as apiStartGame,
     submitGuess,
     submitMcGuess,
@@ -77,6 +79,7 @@ import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
 import type ActivityScoreboardSnapshot from "./types/activity_scoreboard_snapshot";
 import type ActivitySnapshot from "./types/activity_snapshot";
+import type DailyInfo from "./types/daily_info";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type HintState from "./types/hint_state";
 import type LevelUp from "./types/level_up";
@@ -4338,6 +4341,204 @@ type StreamEvent =
 // down. A longer song_start_delay already exceeds this, so it's a no-op there.
 const MIN_REVEAL_HOLD_MS = 1500;
 
+/** A Wordle-style grid from an aggregate result. */
+function dailyGrid(correct: number, total: number): string {
+    return "🟩".repeat(correct) + "⬛".repeat(Math.max(0, total - correct));
+}
+
+/**
+ * The Daily Challenge panel: today's status + leaderboard. If the viewer hasn't
+ * played, a CTA starts it; if they have, their result + a copyable share card.
+ */
+function DailyPanel({
+    accessToken,
+    instanceId,
+    visible,
+    refreshNonce,
+    onClose,
+    onStarted,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    visible: boolean;
+    refreshNonce: number;
+    onClose: () => void;
+    onStarted: () => void;
+    t: Translator;
+}): React.JSX.Element {
+    const [info, setInfo] = useState<DailyInfo | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [starting, setStarting] = useState(false);
+    const [startError, setStartError] = useState<string | null>(null);
+    const [copied, setCopied] = useState(false);
+
+    useEffect(() => {
+        let cancelled = false;
+        setLoading(true);
+        void (async () => {
+            const data = await fetchDailyInfo(accessToken, instanceId);
+            if (!cancelled) {
+                setInfo(data);
+                setLoading(false);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [accessToken, instanceId, refreshNonce]);
+
+    const onStart = async (): Promise<void> => {
+        setStarting(true);
+        setStartError(null);
+        const res = await apiStartDaily(accessToken, instanceId);
+        setStarting(false);
+        if (res.ok) {
+            onStarted();
+            onClose();
+        } else {
+            setStartError(res.reason ?? "internal");
+        }
+    };
+
+    const onCopy = (result: NonNullable<DailyInfo["result"]>): void => {
+        if (!info) return;
+        const text = [
+            t("daily.shareHeader", { date: info.date }),
+            dailyGrid(result.correctCount, result.totalCount),
+            t("daily.shareLine", {
+                correct: String(result.correctCount),
+                total: String(result.totalCount),
+                score: String(result.score),
+            }),
+        ].join("\n");
+
+        void copyToClipboard(text).then((ok) => {
+            if (ok) {
+                setCopied(true);
+                window.setTimeout(() => setCopied(false), 1500);
+            }
+
+            return undefined;
+        });
+    };
+
+    return (
+        <div
+            className={`daily-overlay${visible ? " visible" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            onClick={onClose}
+        >
+            <div
+                className={`daily-modal${visible ? " visible" : ""}`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <button
+                    type="button"
+                    className="daily-close"
+                    aria-label={t("daily.close")}
+                    onClick={onClose}
+                >
+                    ✕
+                </button>
+                <div className="daily-title">🗓 {t("daily.title")}</div>
+                {info && <div className="daily-subtitle">{info.date}</div>}
+
+                {loading ? (
+                    <p className="daily-loading">{t("daily.loading")}</p>
+                ) : !info ? (
+                    <p className="daily-loading">{t("networkError")}</p>
+                ) : (
+                    <>
+                        {info.completed && info.result ? (
+                            <div className="daily-result">
+                                <div className="daily-grid">
+                                    {dailyGrid(
+                                        info.result.correctCount,
+                                        info.result.totalCount,
+                                    )}
+                                </div>
+                                <div className="daily-summary">
+                                    {t("daily.summary", {
+                                        correct: String(
+                                            info.result.correctCount,
+                                        ),
+                                        total: String(info.result.totalCount),
+                                        score: String(info.result.score),
+                                    })}
+                                </div>
+                                <div className="daily-streak">
+                                    {t("daily.streakLabel", {
+                                        streak: String(info.result.bestStreak),
+                                    })}
+                                </div>
+                                <button
+                                    type="button"
+                                    className="daily-copy"
+                                    onClick={() => onCopy(info.result!)}
+                                >
+                                    {copied
+                                        ? t("daily.copied")
+                                        : t("daily.copy")}
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="daily-cta">
+                                <p className="daily-cta-text">
+                                    {t("daily.ctaText", {
+                                        rounds: String(info.rounds),
+                                    })}
+                                </p>
+                                <button
+                                    type="button"
+                                    className="daily-play"
+                                    onClick={() => void onStart()}
+                                    disabled={starting}
+                                >
+                                    {starting
+                                        ? t("daily.starting")
+                                        : t("daily.play")}
+                                </button>
+                                {startError && (
+                                    <p className="daily-error">
+                                        {t("daily.startFailed")}
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
+                        <div className="daily-leaderboard">
+                            <div className="daily-lb-title">
+                                {t("daily.leaderboardTitle")}
+                            </div>
+                            {info.leaderboard.length === 0 ? (
+                                <p className="daily-lb-empty">
+                                    {t("daily.leaderboardEmpty")}
+                                </p>
+                            ) : (
+                                <ol className="daily-lb-list">
+                                    {info.leaderboard.map((entry) => (
+                                        <li key={entry.userID}>
+                                            <span className="daily-lb-name">
+                                                {entry.username}
+                                            </span>
+                                            <span className="daily-lb-score">
+                                                {entry.score}
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ol>
+                            )}
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
 export default function App() {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
@@ -4378,6 +4579,8 @@ export default function App() {
     const [songInfoRefreshNonce, setSongInfoRefreshNonce] = useState(0);
     const [myProfileOpen, setMyProfileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [dailyOpen, setDailyOpen] = useState(false);
+    const [dailyRefreshNonce, setDailyRefreshNonce] = useState(0);
     // Resolved bundle locale (KMQ LocaleType tag) — passed to song search so
     // returned names match the UI language.
     const [localeTag, setLocaleTag] = useState("en");
@@ -4386,6 +4589,13 @@ export default function App() {
     const myProfile = usePresence(myProfileOpen, 200);
     const optionsPanel = usePresence(optionsOpen, 220);
     const searchModal = usePresence(searchOpen, 200);
+    const dailyPanel = usePresence(dailyOpen, 200);
+
+    // A finished session may have been a daily challenge; refresh the panel's
+    // status/leaderboard so a reopen shows the completed result.
+    useEffect(() => {
+        setDailyRefreshNonce((n) => n + 1);
+    }, [ui.sessionEnded]);
 
     // A finished round (roundHistory grows) or a session end can change EXP /
     // level, so invalidate open profile cards by bumping the nonce.
@@ -4765,6 +4975,21 @@ export default function App() {
                 </button>
             )}
 
+            {/* Daily Challenge toggle — left cluster, below search. */}
+            {authState && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle left daily ${
+                        dailyOpen ? "active" : ""
+                    }`}
+                    onClick={() => setDailyOpen(true)}
+                    aria-label={t("daily.title")}
+                    title={t("daily.title")}
+                >
+                    <span>🗓</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -4922,6 +5147,20 @@ export default function App() {
                                 refreshNonce={songInfoRefreshNonce}
                                 visible={searchModal.visible}
                                 onClose={() => setSearchOpen(false)}
+                                t={t}
+                            />
+                        )}
+
+                        {authState && dailyPanel.mounted && (
+                            <DailyPanel
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                visible={dailyPanel.visible}
+                                refreshNonce={dailyRefreshNonce}
+                                onClose={() => setDailyOpen(false)}
+                                onStarted={() =>
+                                    setDailyRefreshNonce((n) => n + 1)
+                                }
                                 t={t}
                             />
                         )}

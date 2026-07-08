@@ -23,6 +23,7 @@ import type ActivitySessionResponse from "./types/activity_session_response";
 import type ActivitySnapshot from "./types/activity_snapshot";
 import type ActivityStreamHandle from "./types/activity_stream_handle";
 import type BookmarkResult from "./types/bookmark_result";
+import type DailyInfo from "./types/daily_info";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type GuessResult from "./types/guess_result";
 
@@ -333,6 +334,56 @@ export async function fetchProfile(
 
     if (!resp.ok) return null;
     return (await resp.json()) as ActivityProfileResponse;
+}
+
+/**
+ * Fetches the viewer's Daily Challenge status + the day's leaderboard. Returns
+ * null on a transport/auth error so callers can show a retry/empty state.
+ */
+export async function fetchDailyInfo(
+    accessToken: string,
+    instanceId: string,
+): Promise<DailyInfo | null> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/daily-info`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId }),
+    });
+
+    if (!resp.ok) return null;
+    return (await resp.json()) as DailyInfo;
+}
+
+/** Starts today's Daily Challenge in the caller's guild. */
+export async function startDaily(
+    accessToken: string,
+    instanceId: string,
+): Promise<GuessResult> {
+    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/daily-start`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ instance_id: instanceId }),
+    });
+
+    if (resp.ok) return { ok: true };
+    if (resp.status === 401) return { ok: false, reason: "unauthorized" };
+    if (resp.status === 403) return { ok: false, reason: "forbidden" };
+    if (resp.status === 400) return { ok: false, reason: "bad_request" };
+
+    let parsed: { error?: GuessRejectReason } = {};
+    try {
+        parsed = (await resp.json()) as { error?: GuessRejectReason };
+    } catch {
+        // ignore
+    }
+
+    return { ok: false, reason: parsed.error ?? "internal" };
 }
 
 /**

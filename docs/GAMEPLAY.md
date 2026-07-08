@@ -210,6 +210,7 @@ Use `/help action:[command_name]` for more details about the following commands:
 ## General Commands
 
 -   `/play`: Begin a game of KMQ. The bot will play a random song based on the chosen filters
+-   `/daily`: Play today's Daily Challenge — a fixed set of songs everyone gets, once per day. Run it again after finishing to see your result and the leaderboard
 -   `/end`: Stop the current game of KMQ. The bot will display the winner of the game
 -   `/hint`: Show a hint for the current song playing
 -   `/forcehint`: The person that started the game can force-hint the current song, no majority necessary

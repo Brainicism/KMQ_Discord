@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "この曲をブックマーク",
         "bookmarkTitleDone": "ブックマーク済み — セッション終了時にDM送信",
         "connectFailed": "KMQに接続できませんでした。もう一度お試しください。",
+        "daily": {
+            "close": "閉じる",
+            "copied": "コピーしました！",
+            "copy": "結果をコピー",
+            "ctaText": "{{rounds}} 曲、全員同じ — 1日1回。",
+            "leaderboardEmpty": "まだクリアした人はいません — 最初のクリア者になろう！",
+            "leaderboardTitle": "リーダーボード",
+            "loading": "読み込み中...",
+            "play": "今日のチャレンジをプレイする",
+            "shareHeader": "🎵 KMQ デイリー {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} ポイント",
+            "startFailed": "チャレンジを開始できませんでした。",
+            "starting": "開始中...",
+            "streakLabel": "ベスト連勝数: {{streak}}",
+            "summary": "{{correct}}/{{total}} 正答 · {{score}} ポイント",
+            "title": "デイリーチャレンジ"
+        },
         "emoteBarLabel": "リアクションを送る",
         "endGameBusy": "終了中…",
         "endGameButton": "ゲーム終了",
@@ -433,6 +450,24 @@
                     "rangeOption": "[beginning_year]から[ending_year]までのすべての年の曲を選択する"
                 },
                 "name": "カットオフ"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "今日のデイリーチャレンジをプレイしましょう — 1日1回、皆が同じセットを受け取ります。終了後にもう一度実行して、結果とリーダーボードを見ましょう。",
+                "example": {
+                    "play": "開始（または、今日すでに行っている場合は表示）デイリーチャレンジ"
+                },
+                "name": "デイリー"
+            },
+            "leaderboard": {
+                "empty": "今日のチャレンジはまだ誰もクリアしていません。",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} 正解)",
+                "title": "**今日のリーダーボード**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} 正解 · {{score}} ポイント · 最高連勝数 {{streak}}",
+                "title": "デイリーチャレンジ — {{date}}"
             }
         },
         "debug": {

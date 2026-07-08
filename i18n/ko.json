@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "이 곡을 북마크",
         "bookmarkTitleDone": "북마크됨 — 세션 종료 시 DM 발송",
         "connectFailed": "KMQ에 연결할 수 없습니다. 다시 시도해 주세요.",
+        "daily": {
+            "close": "닫기",
+            "copied": "복사됨!",
+            "copy": "결과 복사",
+            "ctaText": "{{rounds}} 곡, 모두에게 동일 — 하루에 한 번.",
+            "leaderboardEmpty": "아직 완주자가 없습니다 — 첫 번째가 되세요!",
+            "leaderboardTitle": "리더보드",
+            "loading": "로딩 중...",
+            "play": "오늘의 챌린지를 플레이하세요",
+            "shareHeader": "🎵 KMQ 데일리 {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} 점",
+            "startFailed": "챌린지를 시작할 수 없습니다.",
+            "starting": "시작 중...",
+            "streakLabel": "최고 연승: {{streak}}",
+            "summary": "{{correct}}/{{total}} 정답 · {{score}} 점",
+            "title": "데일리 챌린지"
+        },
         "emoteBarLabel": "반응 표시 보내기",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
@@ -433,6 +450,24 @@
                     "rangeOption": "[beginning_year]와 [ending_year] 사이의 연도별 곡 선택"
                 },
                 "name": "연도설정"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "오늘의 데일리 챌린지를 플레이하세요 — 모두가 받는 고정된 노래 세트, 하루에 한 번. 완료 후 결과와 리더보드 보기 위해 다시 실행하세요.",
+                "example": {
+                    "play": "데일리 챌린지 시작 (또는, 오늘 이미 완료한 경우 보기)"
+                },
+                "name": "데일리"
+            },
+            "leaderboard": {
+                "empty": "아직 오늘의 챌린지를 완료한 사람이 없습니다.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} 정답)",
+                "title": "**오늘의 리더보드**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} 정답 · {{score}} 포인트 · 최고 연승 {{streak}}",
+                "title": "데일리 챌린지 — {{date}}"
             }
         },
         "debug": {

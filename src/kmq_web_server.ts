@@ -1532,6 +1532,63 @@ export default class KmqWebServer {
         );
 
         httpServer.post(
+            "/api/activity/daily-info",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                try {
+                    const result = await this.activityHub!.dailyChallengeInfo({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                    });
+
+                    await reply.code(200).send(result);
+                } catch (e) {
+                    logger.warn(
+                        `Activity daily-info failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/daily-start",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                if (!ctx.instance.channelID) {
+                    await reply.code(400).send({ error: "No channel" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.startDailyChallenge({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        textChannelID: ctx.instance.channelID,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity daily-start failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
             "/api/activity/song",
             limit(ACTIVITY_RATE_LIMIT_READ),
             async (request, reply) => {

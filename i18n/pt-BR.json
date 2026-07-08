@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Favoritar esta música",
         "bookmarkTitleDone": "Favoritada — enviada por DM no fim da sessão",
         "connectFailed": "Não foi possível conectar ao KMQ. Por favor, tente novamente.",
+        "daily": {
+            "close": "Fechar",
+            "copied": "Copiado!",
+            "copy": "Copiar resultado",
+            "ctaText": "{{rounds}} músicas, igual para todos — uma vez por dia.",
+            "leaderboardEmpty": "Ainda não há vencedores — seja o primeiro!",
+            "leaderboardTitle": "Placar",
+            "loading": "Carregando...",
+            "play": "Jogue o desafio de hoje",
+            "shareHeader": "🎵 KMQ Diário {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "startFailed": "Não foi possível iniciar o desafio.",
+            "starting": "Iniciando...",
+            "streakLabel": "Melhor sequência: {{streak}}",
+            "summary": "{{correct}}/{{total}} adivinhados · {{score}} pts",
+            "title": "Desafio Diário"
+        },
         "emoteBarLabel": "Envie uma reação",
         "endGameBusy": "Encerrando…",
         "endGameButton": "Encerrar jogo",
@@ -433,6 +450,24 @@
                     "rangeOption": "Escolha músicas entre [beginning_year] e [ending_year]"
                 },
                 "name": "limite"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Jogue o Desafio Diário de hoje — um conjunto fixo de músicas que todos recebem, uma vez por dia. Execute-o novamente após terminar para ver seu resultado e o placar.",
+                "example": {
+                    "play": "Inicie (ou, se já feito hoje, veja) o Desafio Diário"
+                },
+                "name": "diário"
+            },
+            "leaderboard": {
+                "empty": "Ninguém terminou o desafio de hoje ainda.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} corretos)",
+                "title": "**Placar de Hoje**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} adivinhado · {{score}} pontos · melhor sequência {{streak}}",
+                "title": "Desafio Diário — {{date}}"
             }
         },
         "debug": {

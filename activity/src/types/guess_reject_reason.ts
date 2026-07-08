@@ -13,6 +13,7 @@ type GuessRejectReason =
     | "no_round"
     | "hint_unavailable"
     | "song_not_found"
+    | "already_completed"
     | "playlist_invalid_url"
     | "playlist_unsupported_url"
     | "playlist_no_matches"

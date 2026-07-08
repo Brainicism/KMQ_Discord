@@ -29,6 +29,7 @@ import {
     tryCreateInteractionSuccessAcknowledgement,
     tryInteractionAcknowledge,
 } from "../helpers/discord_utils";
+import { dailyChallengeDateValue } from "../helpers/daily_challenge";
 import {
     getMultipleChoiceOptions,
     isFirstGameOfDay,
@@ -43,6 +44,7 @@ import {
     CLIP_PADDING_BEGINNING_MS,
     CLIP_VC_END_TIMEOUT_MS,
     CUM_EXP_TABLE,
+    DAILY_CHALLENGE_ROUNDS,
     ELIMINATION_DEFAULT_LIVES,
     EMBED_FIELDS_PER_PAGE,
     EMBED_SUCCESS_BONUS_COLOR,
@@ -116,6 +118,15 @@ export default class GameSession extends Session {
     /** The current GameRound */
     public round: GameRound | null;
 
+    /** True for a Daily Challenge session: a fixed deterministic song set,
+     *  locked options, ends after DAILY_CHALLENGE_ROUNDS, and writes a per-player
+     *  result row on completion. */
+    public dailyChallenge = false;
+
+    /** The ISO `YYYY-MM-DD` this daily session counts toward (only when
+     *  dailyChallenge is true). */
+    public dailyChallengeDate: string | null = null;
+
     /** The number of songs correctly guessed */
     private correctGuesses: number;
 
@@ -149,6 +160,13 @@ export default class GameSession extends Session {
     /** Set immediately when endSession is requested, before the mutex is acquired.
      *  Allows startRoundCore to abort its between-round delay even while the mutex is held. */
     private pendingEndSession = false;
+
+    /** Per-player Daily Challenge tallies, accumulated across rounds and
+     *  persisted at session end. Keyed by userID. */
+    private dailyPlayerStats: Map<
+        string,
+        { correct: number; currentStreak: number; bestStreak: number }
+    > = new Map();
 
     constructor(
         guildPreference: GuildPreference,
@@ -1382,6 +1400,10 @@ export default class GameSession extends Session {
             this.correctGuesses++;
         }
 
+        if (this.dailyChallenge) {
+            this.updateDailyPlayerStats(correctGuessers.map((g) => g.id));
+        }
+
         await this.stopHiddenUpdateTimer();
 
         try {
@@ -1538,8 +1560,15 @@ export default class GameSession extends Session {
         const gameFinishedDueToSuddenDeath =
             this.gameType === GameType.SUDDEN_DEATH && !isCorrectGuess;
 
+        // Daily Challenge ends after a fixed number of rounds (roundsPlayed was
+        // just bumped in super.endRound for the round that ended).
+        const gameFinishedDueToDaily =
+            this.dailyChallenge && this.roundsPlayed >= DAILY_CHALLENGE_ROUNDS;
+
         const gameFinished =
-            gameFinishedDueToGameOptions || gameFinishedDueToSuddenDeath;
+            gameFinishedDueToGameOptions ||
+            gameFinishedDueToSuddenDeath ||
+            gameFinishedDueToDaily;
 
         if (this.isClipMode() && !gameFinished) {
             // Play what immediately follows the clip after the round ends
@@ -1564,6 +1593,8 @@ export default class GameSession extends Session {
             );
         } else if (gameFinishedDueToSuddenDeath) {
             await this.endSessionCore("Sudden death game ended", false);
+        } else if (gameFinishedDueToDaily) {
+            await this.endSessionCore("Daily challenge complete", false);
         }
 
         await this.startRoundCore(messageContext);
@@ -1691,6 +1722,10 @@ export default class GameSession extends Session {
                 : -1;
 
         await this.persistGameSession(averageGuessTime, sessionLength);
+
+        if (this.dailyChallenge) {
+            await this.persistDailyChallengeResults();
+        }
 
         // commit session's song plays and correct guesses
         if (!this.isMultipleChoiceMode()) {
@@ -1821,6 +1856,72 @@ export default class GameSession extends Session {
         }
 
         return true;
+    }
+
+    /**
+     * Accumulates Daily Challenge per-player tallies for the round that just
+     * ended: correct guessers extend their streak, everyone else resets.
+     * @param correctUserIDs - IDs of players who guessed this round correctly
+     */
+    private updateDailyPlayerStats(correctUserIDs: string[]): void {
+        const correct = new Set(correctUserIDs);
+        for (const player of this.scoreboard.getPlayers()) {
+            const entry = this.dailyPlayerStats.get(player.id) ?? {
+                correct: 0,
+                currentStreak: 0,
+                bestStreak: 0,
+            };
+
+            if (correct.has(player.id)) {
+                entry.correct += 1;
+                entry.currentStreak += 1;
+                entry.bestStreak = Math.max(
+                    entry.bestStreak,
+                    entry.currentStreak,
+                );
+            } else {
+                entry.currentStreak = 0;
+            }
+
+            this.dailyPlayerStats.set(player.id, entry);
+        }
+    }
+
+    /**
+     * Writes one daily_challenge_results row per participant. Idempotent per
+     * (player, date) via the unique constraint (ignore re-inserts) so a replay
+     * or a second worker can't overwrite a player's completed result.
+     */
+    private async persistDailyChallengeResults(): Promise<void> {
+        if (!this.dailyChallenge || this.dailyChallengeDate === null) {
+            return;
+        }
+
+        const completedAt = new Date();
+        const challengeDate = dailyChallengeDateValue(this.dailyChallengeDate);
+        await Promise.all(
+            this.scoreboard.getPlayers().map((player) => {
+                const stats = this.dailyPlayerStats.get(player.id) ?? {
+                    correct: 0,
+                    currentStreak: 0,
+                    bestStreak: 0,
+                };
+
+                return dbContext.kmq
+                    .insertInto("daily_challenge_results")
+                    .ignore()
+                    .values({
+                        player_id: player.id,
+                        challenge_date: challengeDate,
+                        score: player.getScore(),
+                        correct_count: stats.correct,
+                        total_count: DAILY_CHALLENGE_ROUNDS,
+                        best_streak: stats.bestStreak,
+                        completed_at: completedAt,
+                    })
+                    .execute();
+            }),
+        );
     }
 
     private async persistGameSession(

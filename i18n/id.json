@@ -29,6 +29,23 @@
         "bookmarkTitleActive": "Bookmark lagu ini",
         "bookmarkTitleDone": "Di-bookmark — akan di-DM di akhir sesi",
         "connectFailed": "Tidak dapat terhubung ke KMQ. Silakan coba lagi.",
+        "daily": {
+            "close": "Tutup",
+            "copied": "Disalin!",
+            "copy": "Salin hasil",
+            "ctaText": "{{rounds}} lagu, sama untuk semua orang — sekali sehari.",
+            "leaderboardEmpty": "Belum ada yang menyelesaikan — jadilah yang pertama!",
+            "leaderboardTitle": "Papan Peringkat",
+            "loading": "Memuat...",
+            "play": "Mainkan tantangan hari ini",
+            "shareHeader": "🎵 KMQ Harian {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} poin",
+            "startFailed": "Tidak dapat memulai tantangan.",
+            "starting": "Memulai...",
+            "streakLabel": "Rekor terbaik: {{streak}}",
+            "summary": "{{correct}}/{{total}} ditebak · {{score}} poin",
+            "title": "Tantangan Harian"
+        },
         "emoteBarLabel": "Kirim reaksi",
         "endGameBusy": "Mengakhiri…",
         "endGameButton": "Akhiri permainan",
@@ -433,6 +450,24 @@
                     "rangeOption": "Pilih lagu untuk setiap tahun antara [beginning_year] dan [ending_year]"
                 },
                 "name": "pemotongan"
+            }
+        },
+        "daily": {
+            "help": {
+                "description": "Mainkan Tantangan Harian hari ini — satu set lagu tetap yang diterima semua orang, sekali per hari. Jalankan lagi setelah selesai untuk melihat hasil Anda dan papan peringkat.",
+                "example": {
+                    "play": "Mulai (atau, jika sudah dilakukan hari ini, lihat) Tantangan Harian"
+                },
+                "name": "harian"
+            },
+            "leaderboard": {
+                "empty": "Belum ada yang menyelesaikan tantangan hari ini.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} benar)",
+                "title": "**Papan Peringkat Hari Ini**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} ditebak · {{score}} poin · rekor terbaik {{streak}}",
+                "title": "Tantangan Harian — {{date}}"
             }
         },
         "debug": {
