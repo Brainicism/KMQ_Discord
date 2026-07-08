@@ -1685,6 +1685,34 @@ export default class GameSession extends Session {
             );
         }
 
+        // Surface level-ups to the Activity for a game-over celebration. The
+        // sessionEnd listener defers its teardown to `activityTeardown` (emitted
+        // last), so this still has a live listener despite running post-await.
+        if (leveledUpPlayers.length > 0) {
+            this.emit(
+                "levelUp",
+                leveledUpPlayers.map((p) => {
+                    const startRank = ProfileCommand.getRankNameByLevel(
+                        p.startLevel,
+                        this.guildID,
+                    );
+
+                    const endRank = ProfileCommand.getRankNameByLevel(
+                        p.endLevel,
+                        this.guildID,
+                    );
+
+                    return {
+                        userID: p.userID,
+                        startLevel: p.startLevel,
+                        endLevel: p.endLevel,
+                        rank: endRank,
+                        isRankUp: startRank !== endRank,
+                    };
+                }),
+            );
+        }
+
         // commit guild's game session
         const sessionLength = (Date.now() - this.startedAt) / (1000 * 60);
         const averageGuessTime =
@@ -1712,6 +1740,11 @@ export default class GameSession extends Session {
         logger.info(
             `gid: ${this.guildID} | Game session ended. rounds_played = ${this.roundsPlayed}. session_length = ${sessionLength}. gameType = ${this.gameType}`,
         );
+
+        // Final signal for the Activity bridge to drop its listeners, emitted
+        // after all post-session events (sessionEnd, levelUp) so none are lost
+        // to an early teardown.
+        this.emit("activityTeardown");
     }
 
     /**

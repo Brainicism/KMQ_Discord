@@ -68,6 +68,12 @@
         "hintVoteFallback": "votar",
         "historyEmpty": "Aún no hay canciones.",
         "historyHeading": "Historial de canciones",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} más",
+            "rankUpTitle": "¡Aumentar de rango!",
+            "title": "¡Subir de nivel!"
+        },
         "networkError": "Error de red",
         "notInVCWarning": "Únete al canal de voz para comenzar un juego.",
         "openOnYouTube": "Abrir en YouTube",
@@ -284,6 +290,7 @@
         "skipDone": "Saltada",
         "skipTitle": "Vota para saltar esta canción",
         "skipVoteFallback": "votar",
+        "soClose": "¡tan cerca!",
         "songCounterLine": "{{played}}/{{total}} canciones reproducidas",
         "songInfo": {
             "artistAliases": "Alias del artista",

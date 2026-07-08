@@ -68,6 +68,12 @@
         "hintVoteFallback": "voter",
         "historyEmpty": "Aucune chanson pour l'instant.",
         "historyHeading": "Historique des chansons",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} de plus",
+            "rankUpTitle": "Montée en grade!",
+            "title": "Monte en niveau !"
+        },
         "networkError": "Erreur réseau",
         "notInVCWarning": "Rejoignez le canal vocal pour commencer une partie.",
         "openOnYouTube": "Ouvrir sur YouTube",
@@ -284,6 +290,7 @@
         "skipDone": "Passée",
         "skipTitle": "Voter pour passer cette chanson",
         "skipVoteFallback": "voter",
+        "soClose": "si près!",
         "songCounterLine": "{{played}}/{{total}} chansons lues",
         "songInfo": {
             "artistAliases": "Alias de l'artiste",

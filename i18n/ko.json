@@ -68,6 +68,12 @@
         "hintVoteFallback": "투표",
         "historyEmpty": "아직 노래가 없습니다.",
         "historyHeading": "노래 기록",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} 더",
+            "rankUpTitle": "랭크 업!",
+            "title": "레벨 업!"
+        },
         "networkError": "네트워크 오류",
         "notInVCWarning": "게임을 시작하려면 음성 채널에 참여하세요.",
         "openOnYouTube": "YouTube에서 열기",
@@ -284,6 +290,7 @@
         "skipDone": "스킵됨",
         "skipTitle": "이 곡 스킵에 투표",
         "skipVoteFallback": "투표",
+        "soClose": "거의 다 왔어요!",
         "songCounterLine": "{{played}}/{{total}} 곡 재생됨",
         "songInfo": {
             "artistAliases": "아티스트 별명",

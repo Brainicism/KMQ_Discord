@@ -82,6 +82,7 @@ import type ActivitySnapshot from "./types/activity_snapshot";
 import type DailyInfo from "./types/daily_info";
 import type GuessRejectReason from "./types/guess_reject_reason";
 import type HintState from "./types/hint_state";
+import type LevelUp from "./types/level_up";
 import type SessionRecap from "./types/session_recap";
 import type SkipState from "./types/skip_state";
 import type UiState from "./types/ui_state";
@@ -114,8 +115,57 @@ const THEME_STORAGE_KEY = "kmq:theme";
 // Mirrors the bot's QUICK_GUESS_MS (src/constants.ts) — guesses at or under
 // this get a ⚡ in the round-end reveal, matching the legacy text-chat look.
 const QUICK_GUESS_MS = 3500;
+// A blazing-fast guess gets an extra-emphatic ⚡⚡ flourish.
+const VERY_QUICK_GUESS_MS = 1500;
 // Legacy shows the 🔥 streak flair starting at 5 in a row.
 const STREAK_DISPLAY_THRESHOLD = 5;
+
+/** Strips casing/punctuation/whitespace so near-miss comparison is forgiving. */
+function normalizeForCompare(s: string): string {
+    return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+/** Levenshtein edit distance between two short strings. */
+function editDistance(a: string, b: string): number {
+    const m = a.length;
+    const n = b.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+    let prev = Array.from({ length: n + 1 }, (_, i) => i);
+    let curr = new Array<number>(n + 1);
+    for (let i = 1; i <= m; i++) {
+        curr[0] = i;
+        for (let j = 1; j <= n; j++) {
+            const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+            curr[j] = Math.min(
+                prev[j]! + 1,
+                curr[j - 1]! + 1,
+                prev[j - 1]! + cost,
+            );
+        }
+
+        [prev, curr] = [curr, prev];
+    }
+
+    return prev[n]!;
+}
+
+/** True when an *incorrect* guess is within a small edit distance of one of the
+ *  answers (song or artist) — a "so close!" near-miss. Purely client-side. */
+function isNearMiss(guess: string, targets: string[]): boolean {
+    const g = normalizeForCompare(guess);
+    if (g.length < 2) return false;
+    return targets.some((target) => {
+        const t = normalizeForCompare(target);
+        if (t.length === 0 || g === t) return false;
+        const tol = Math.min(
+            3,
+            Math.max(1, Math.floor(Math.max(g.length, t.length) * 0.2)),
+        );
+
+        return editDistance(g, t) <= tol;
+    });
+}
 
 function readInitialTheme(): Theme {
     // localStorage can throw in sandboxed contexts (rare inside Discord's
@@ -155,6 +205,7 @@ const initialUi: UiState = {
     roundHistory: [],
     floatingEmotes: [],
     recap: null,
+    levelUps: [],
 };
 
 function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
@@ -1209,6 +1260,70 @@ function RecapCard({ recap, t }: { recap: SessionRecap; t: Translator }) {
     );
 }
 
+/** Game-over level-up flourish: the viewer's own level-up (if any) leads, with
+ *  confetti, and rank-ups get extra emphasis. Other players' level-ups follow. */
+function LevelUpCelebration({
+    levelUps,
+    viewerID,
+    t,
+}: {
+    levelUps: LevelUp[];
+    viewerID: string | null;
+    t: Translator;
+}) {
+    // Viewer's level-up first, then most levels gained; cap the visible rows so
+    // a large lobby can't overflow the game-over card.
+    const ordered = [...levelUps].sort((a, b) => {
+        if (a.userID === viewerID) return -1;
+        if (b.userID === viewerID) return 1;
+        return b.endLevel - b.startLevel - (a.endLevel - a.startLevel);
+    });
+
+    const shown = ordered.slice(0, 6);
+    const viewerLeveled =
+        viewerID !== null && levelUps.some((l) => l.userID === viewerID);
+    const viewerRankUp = levelUps.some(
+        (l) => l.userID === viewerID && l.isRankUp,
+    );
+
+    return (
+        <div className="level-up-celebration">
+            {viewerLeveled && <Confetti />}
+            <div className={`level-up-title${viewerRankUp ? " rank-up" : ""}`}>
+                {viewerRankUp ? t("levelUp.rankUpTitle") : t("levelUp.title")}
+            </div>
+            <ul className="level-up-list">
+                {shown.map((l) => (
+                    <li
+                        key={l.userID}
+                        className={`level-up-row${
+                            l.userID === viewerID ? " viewer" : ""
+                        }${l.isRankUp ? " rank-up" : ""}`}
+                    >
+                        <span className="level-up-user">{l.username}</span>
+                        <span className="level-up-levels">
+                            {t("levelUp.levels", {
+                                start: String(l.startLevel),
+                                end: String(l.endLevel),
+                            })}
+                        </span>
+                        {l.isRankUp && (
+                            <span className="level-up-rank">⭐ {l.rank}</span>
+                        )}
+                    </li>
+                ))}
+                {ordered.length > shown.length && (
+                    <li className="level-up-more">
+                        {t("levelUp.more", {
+                            count: String(ordered.length - shown.length),
+                        })}
+                    </li>
+                )}
+            </ul>
+        </div>
+    );
+}
+
 function CurrentRound({
     round,
     reveal,
@@ -1219,6 +1334,8 @@ function CurrentRound({
     guesses,
     recap,
     noActiveGame,
+    levelUps,
+    viewerID,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -1240,6 +1357,10 @@ function CurrentRound({
     guesses: UiState["recentGuesses"];
     /** End-of-session recap, shown on the game-over screen. */
     recap: SessionRecap | null;
+    /** Per-player level-ups from the just-ended session (game-over screen). */
+    levelUps: UiState["levelUps"];
+    /** The viewer's Discord ID, to highlight their own level-up. */
+    viewerID: string | null;
     t: Translator;
 }) {
     return (
@@ -1302,6 +1423,17 @@ function CurrentRound({
                                     const quick =
                                         g.timeToGuessMs !== null &&
                                         g.timeToGuessMs <= QUICK_GUESS_MS;
+                                    const veryQuick =
+                                        g.timeToGuessMs !== null &&
+                                        g.timeToGuessMs <= VERY_QUICK_GUESS_MS;
+                                    // Escalate the streak flair: tier 1 at 5+,
+                                    // tier 2 at 10+, tier 3 at 15+.
+                                    const streakTier =
+                                        g.streak >= 15
+                                            ? 3
+                                            : g.streak >= 10
+                                              ? 2
+                                              : 1;
                                     return (
                                         <li key={g.id}>
                                             {t("revealWinners", {
@@ -1312,7 +1444,7 @@ function CurrentRound({
                                             {g.streak >=
                                                 STREAK_DISPLAY_THRESHOLD && (
                                                 <span
-                                                    className="winner-streak"
+                                                    className={`winner-streak streak-tier-${streakTier}`}
                                                     title={t("streakTitle", {
                                                         streak: g.streak,
                                                     })}
@@ -1324,9 +1456,17 @@ function CurrentRound({
                                                 <span
                                                     className={`winner-time ${
                                                         quick ? "quick" : ""
+                                                    }${
+                                                        veryQuick
+                                                            ? " very-quick"
+                                                            : ""
                                                     }`}
                                                 >
-                                                    {quick ? "⚡" : ""}
+                                                    {veryQuick
+                                                        ? "⚡⚡"
+                                                        : quick
+                                                          ? "⚡"
+                                                          : ""}
                                                     {(
                                                         g.timeToGuessMs / 1000
                                                     ).toFixed(1)}
@@ -1355,28 +1495,45 @@ function CurrentRound({
                                         {reveal.allGuesses
                                             .slice()
                                             .sort((a, b) => a.ts - b.ts)
-                                            .map((g) => (
-                                                <li
-                                                    key={g.userID}
-                                                    className={
-                                                        g.isCorrect
-                                                            ? "correct"
-                                                            : ""
-                                                    }
-                                                >
-                                                    <span className="g-name">
-                                                        {g.username}
-                                                    </span>
-                                                    <span className="g-text">
-                                                        {g.guess || "—"}
-                                                    </span>
-                                                    {g.isCorrect && (
-                                                        <span className="g-mark">
-                                                            ✓
+                                            .map((g) => {
+                                                const nearMiss =
+                                                    !g.isCorrect &&
+                                                    isNearMiss(g.guess, [
+                                                        reveal.song.songName,
+                                                        reveal.song.artistName,
+                                                    ]);
+                                                return (
+                                                    <li
+                                                        key={g.userID}
+                                                        className={`${
+                                                            g.isCorrect
+                                                                ? "correct"
+                                                                : ""
+                                                        }${
+                                                            nearMiss
+                                                                ? " near-miss"
+                                                                : ""
+                                                        }`}
+                                                    >
+                                                        <span className="g-name">
+                                                            {g.username}
                                                         </span>
-                                                    )}
-                                                </li>
-                                            ))}
+                                                        <span className="g-text">
+                                                            {g.guess || "—"}
+                                                        </span>
+                                                        {g.isCorrect && (
+                                                            <span className="g-mark">
+                                                                ✓
+                                                            </span>
+                                                        )}
+                                                        {nearMiss && (
+                                                            <span className="g-near">
+                                                                {t("soClose")}
+                                                            </span>
+                                                        )}
+                                                    </li>
+                                                );
+                                            })}
                                     </ul>
                                 </details>
                             )}
@@ -1434,6 +1591,13 @@ function CurrentRound({
                                 <RecapCard recap={recap} t={t} />
                             )}
                         </div>
+                        {winnerText && levelUps.length > 0 && (
+                            <LevelUpCelebration
+                                levelUps={levelUps}
+                                viewerID={viewerID}
+                                t={t}
+                            />
+                        )}
                         {winnerText ? (
                             history.length > 0 ? (
                                 <div className="thumbnail-slot session-montage">
@@ -5057,6 +5221,8 @@ export default function App() {
                             guesses={ui.recentGuesses}
                             recap={ui.recap}
                             noActiveGame={ui.sessionEnded}
+                            levelUps={ui.levelUps}
+                            viewerID={authState?.userID ?? null}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
@@ -5368,6 +5534,7 @@ function reduce(
                 roundHistory: [],
                 floatingEmotes: [],
                 recap: null,
+                levelUps: [],
             };
         case "roundStart":
             return {
@@ -5503,6 +5670,10 @@ function reduce(
                     },
                 ],
             };
+        case "levelUp":
+            // Arrives just after sessionEnd (server emits it post-stats), so it
+            // lands on the game-over screen as a celebration.
+            return { ...prev, levelUps: msg.levelUps };
         case "optionsChanged":
             return { ...prev, options: msg.options };
         case "roundTimerChanged":

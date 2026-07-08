@@ -68,6 +68,12 @@
         "hintVoteFallback": "投票",
         "historyEmpty": "まだ曲がありません。",
         "historyHeading": "曲の履歴",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} もっと",
+            "rankUpTitle": "ランクアップ！",
+            "title": "レベルアップ！"
+        },
         "networkError": "ネットワークエラー",
         "notInVCWarning": "ゲームを始めるにはボイスチャンネルに参加してください。",
         "openOnYouTube": "YouTubeで開く",
@@ -284,6 +290,7 @@
         "skipDone": "スキップ済み",
         "skipTitle": "この曲をスキップするか投票",
         "skipVoteFallback": "投票",
+        "soClose": "あと少し！",
         "songCounterLine": "{{played}}/{{total}} 曲再生済み",
         "songInfo": {
             "artistAliases": "アーティストの別名",

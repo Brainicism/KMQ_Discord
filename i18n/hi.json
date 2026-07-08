@@ -68,6 +68,12 @@
         "hintVoteFallback": "वोट",
         "historyEmpty": "अभी तक कोई गाना नहीं।",
         "historyHeading": "गाने का इतिहास",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} और",
+            "rankUpTitle": "रैंक ऊपर!",
+            "title": "स्तर ऊपर!"
+        },
         "networkError": "नेटवर्क त्रुटि",
         "notInVCWarning": "खेल शुरू करने के लिए वॉयस चैनल से जुड़ें।",
         "openOnYouTube": "YouTube पर खोलें",
@@ -284,6 +290,7 @@
         "skipDone": "छोड़ दिया",
         "skipTitle": "इस गाने को छोड़ने के लिए वोट दें",
         "skipVoteFallback": "वोट",
+        "soClose": "बहुत करीब!",
         "songCounterLine": "{{played}}/{{total}} गाने बजाए",
         "songInfo": {
             "artistAliases": "कलाकार उपनाम",

@@ -68,6 +68,12 @@
         "hintVoteFallback": "vote",
         "historyEmpty": "No songs yet.",
         "historyHeading": "Song History",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} more",
+            "rankUpTitle": "Rank Up!",
+            "title": "Level Up!"
+        },
         "networkError": "Network error",
         "notInVCWarning": "Join the voice channel to start a game.",
         "openOnYouTube": "Open on YouTube",
@@ -284,6 +290,7 @@
         "skipDone": "Skipped",
         "skipTitle": "Vote to skip this song",
         "skipVoteFallback": "vote",
+        "soClose": "so close!",
         "songCounterLine": "{{played}}/{{total}} songs played",
         "songInfo": {
             "artistAliases": "Artist Aliases",

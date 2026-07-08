@@ -68,6 +68,12 @@
         "hintVoteFallback": "pilih",
         "historyEmpty": "Belum ada lagu.",
         "historyHeading": "Riwayat Lagu",
+        "levelUp": {
+            "levels": "Lv {{start}} → {{end}}",
+            "more": "+{{count}} lagi",
+            "rankUpTitle": "Rank Up!",
+            "title": "Level Up!"
+        },
         "networkError": "Kesalahan jaringan",
         "notInVCWarning": "Bergabunglah dengan saluran suara untuk memulai permainan.",
         "openOnYouTube": "Buka di YouTube",
@@ -284,6 +290,7 @@
         "skipDone": "Dilewati",
         "skipTitle": "Pilih untuk melewati lagu ini",
         "skipVoteFallback": "pilih",
+        "soClose": "begitu dekat!",
         "songCounterLine": "{{played}}/{{total}} lagu diputar",
         "songInfo": {
             "artistAliases": "Alias Artis",

@@ -68,6 +68,12 @@
         "hintVoteFallback": "投票",
         "historyEmpty": "暂无歌曲。",
         "historyHeading": "歌曲历史",
+        "levelUp": {
+            "levels": "等級 {{start}} → {{end}}",
+            "more": "+{{count}} 更多",
+            "rankUpTitle": "提升等级！",
+            "title": "升级！"
+        },
         "networkError": "网络错误",
         "notInVCWarning": "加入语音频道开始游戏。",
         "openOnYouTube": "在 YouTube 中打开",
@@ -284,6 +290,7 @@
         "skipDone": "已跳过",
         "skipTitle": "投票跳过这首歌",
         "skipVoteFallback": "投票",
+        "soClose": "差点啦！",
         "songCounterLine": "{{played}}/{{total}} 首歌曲已播放",
         "songInfo": {
             "artistAliases": "艺术家别名",
