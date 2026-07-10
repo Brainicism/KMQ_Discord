@@ -2,53 +2,100 @@ import { useEffect, useState } from "react";
 import {
     beginLogin,
     completeLoginFromUrl,
+    createRoom,
+    fetchRoom,
     getStoredSession,
+    joinRoom,
+    leaveRoom,
     logout,
+    roomCodeFromLocation,
+    roomPath,
     validateSession,
 } from "../platform/webPlatform";
+import App from "../App";
+import RoomBar from "./RoomBar";
 import kmqLogoUrl from "../assets/kmq_logo.png";
-import type { WebSession } from "../platform/webPlatform";
+import type { WebRoomView, WebSession } from "../platform/webPlatform";
 
 type LandingState =
     | { phase: "loading" }
     | { phase: "loggedOut"; error: string | null }
-    | { phase: "loggedIn"; session: WebSession };
+    | { phase: "loggedIn"; session: WebSession; error: string | null }
+    | { phase: "inRoom"; session: WebSession; room: WebRoomView };
+
+function roomErrorText(error: string): string {
+    switch (error) {
+        case "not_found":
+            return "That room doesn't exist (or everyone left).";
+        case "full":
+            return "That room is full.";
+        case "unauthorized":
+            return "Your login expired. Please log in again.";
+        default:
+            return "Something went wrong. Please try again.";
+    }
+}
 
 /**
- * Standalone-website entry view (Phase 1: login only). Resolves the session
- * from the OAuth callback's one-time login code or from storage, and shows
- * a login/logout surface. Room creation/joining mounts here in a later
- * phase.
+ * Standalone-website shell. Resolves the session (OAuth login code, then
+ * storage), then the room (invite URL, then server-side membership), and
+ * mounts the full game <App> once inside one. The room's invite code is the
+ * game's instance_id, so everything downstream of App is shared with the
+ * embedded Activity untouched.
  */
 export default function LandingPage(): JSX.Element {
     const [state, setState] = useState<LandingState>({ phase: "loading" });
+    const [joinCode, setJoinCode] = useState("");
+    const [busy, setBusy] = useState(false);
 
     useEffect(() => {
         let cancelled = false;
         (async () => {
             try {
-                const fromUrl = await completeLoginFromUrl();
-                if (cancelled) return;
-                if (fromUrl) {
-                    setState({ phase: "loggedIn", session: fromUrl });
-                    return;
-                }
+                const session =
+                    (await completeLoginFromUrl()) ??
+                    (getStoredSession()
+                        ? await validateSession(getStoredSession()!)
+                        : null);
 
-                const stored = getStoredSession();
-                if (!stored) {
+                if (cancelled) return;
+                if (!session) {
                     setState({ phase: "loggedOut", error: null });
                     return;
                 }
 
-                const validated = await validateSession(stored);
+                // An invite link takes precedence; otherwise rejoin whatever
+                // room the server still counts us in (refresh/reconnect).
+                const inviteCode = roomCodeFromLocation();
+                const result = inviteCode
+                    ? await joinRoom(session, inviteCode)
+                    : await fetchRoom(session, null);
+
                 if (cancelled) return;
-                setState(
-                    validated
-                        ? { phase: "loggedIn", session: validated }
-                        : { phase: "loggedOut", error: null },
-                );
+                if ("room" in result) {
+                    window.history.replaceState(
+                        null,
+                        "",
+                        roomPath(result.room.code),
+                    );
+
+                    setState({ phase: "inRoom", session, room: result.room });
+                    return;
+                }
+
+                if (inviteCode) {
+                    window.history.replaceState(null, "", "/play");
+                }
+
+                setState({
+                    phase: "loggedIn",
+                    session,
+                    // Only surface an error when an invite link failed; not
+                    // being in any room is the normal logged-in state.
+                    error: inviteCode ? roomErrorText(result.error) : null,
+                });
             } catch (e) {
-                console.warn("Web login bootstrap failed", e);
+                console.warn("Web bootstrap failed", e);
                 if (!cancelled) {
                     setState({
                         phase: "loggedOut",
@@ -63,13 +110,97 @@ export default function LandingPage(): JSX.Element {
         };
     }, []);
 
+    const enterRoom = (session: WebSession, room: WebRoomView): void => {
+        window.history.pushState(null, "", roomPath(room.code));
+        setState({ phase: "inRoom", session, room });
+    };
+
+    const exitRoom = (session: WebSession, error: string | null): void => {
+        window.history.pushState(null, "", "/play");
+        setState({ phase: "loggedIn", session, error });
+    };
+
+    const handleCreate = async (session: WebSession): Promise<void> => {
+        setBusy(true);
+        try {
+            const result = await createRoom(session);
+            if ("room" in result) {
+                enterRoom(session, result.room);
+            } else {
+                setState({
+                    phase: "loggedIn",
+                    session,
+                    error: roomErrorText(result.error),
+                });
+            }
+        } finally {
+            setBusy(false);
+        }
+    };
+
+    const handleJoin = async (session: WebSession): Promise<void> => {
+        // Accept a pasted invite URL or a bare code.
+        const raw = joinCode.trim();
+        const fromUrl = /\/play\/r\/([^/\s?#]+)/.exec(raw);
+        const code = fromUrl ? decodeURIComponent(fromUrl[1]!) : raw;
+        if (!code) return;
+
+        setBusy(true);
+        try {
+            const result = await joinRoom(session, code);
+            if ("room" in result) {
+                setJoinCode("");
+                enterRoom(session, result.room);
+            } else {
+                setState({
+                    phase: "loggedIn",
+                    session,
+                    error: roomErrorText(result.error),
+                });
+            }
+        } finally {
+            setBusy(false);
+        }
+    };
+
     const handleLogout = async (): Promise<void> => {
         const session =
-            state.phase === "loggedIn" ? state.session : getStoredSession();
+            state.phase === "loggedIn" || state.phase === "inRoom"
+                ? state.session
+                : getStoredSession();
 
         setState({ phase: "loggedOut", error: null });
         await logout(session);
     };
+
+    if (state.phase === "inRoom") {
+        return (
+            <>
+                <App
+                    key={state.room.code}
+                    webAuth={{
+                        accessToken: state.session.token,
+                        instanceId: state.room.code,
+                        userID: state.session.user.id,
+                    }}
+                />
+                <RoomBar
+                    session={state.session}
+                    room={state.room}
+                    onLeave={() => {
+                        void leaveRoom(state.session);
+                        exitRoom(state.session, null);
+                    }}
+                    onEvicted={() =>
+                        exitRoom(
+                            state.session,
+                            "You were removed from the room.",
+                        )
+                    }
+                />
+            </>
+        );
+    }
 
     return (
         <div className="kmq-web-landing">
@@ -91,7 +222,13 @@ export default function LandingPage(): JSX.Element {
                     <button
                         type="button"
                         className="kmq-web-landing-button"
-                        onClick={beginLogin}
+                        onClick={() =>
+                            beginLogin(
+                                roomCodeFromLocation()
+                                    ? window.location.pathname
+                                    : undefined,
+                            )
+                        }
                     >
                         Log in with Discord
                     </button>
@@ -111,9 +248,43 @@ export default function LandingPage(): JSX.Element {
                         Logged in as{" "}
                         <strong>{state.session.user.username}</strong>
                     </p>
-                    <p className="kmq-web-landing-tagline">
-                        Game rooms are coming soon.
-                    </p>
+
+                    {state.error && (
+                        <p className="kmq-web-landing-error">{state.error}</p>
+                    )}
+
+                    <button
+                        type="button"
+                        className="kmq-web-landing-button"
+                        disabled={busy}
+                        onClick={() => void handleCreate(state.session)}
+                    >
+                        Create a room
+                    </button>
+
+                    <form
+                        className="kmq-web-landing-join"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void handleJoin(state.session);
+                        }}
+                    >
+                        <input
+                            className="kmq-web-landing-input"
+                            value={joinCode}
+                            onChange={(e) => setJoinCode(e.target.value)}
+                            placeholder="Invite code or link"
+                            aria-label="Invite code or link"
+                        />
+                        <button
+                            type="submit"
+                            className="kmq-web-landing-button kmq-web-landing-button-secondary"
+                            disabled={busy || !joinCode.trim()}
+                        >
+                            Join
+                        </button>
+                    </form>
+
                     <button
                         type="button"
                         className="kmq-web-landing-button kmq-web-landing-button-secondary"

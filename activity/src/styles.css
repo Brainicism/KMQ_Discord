@@ -3567,6 +3567,144 @@ fieldset.options-override:disabled .options-group {
     box-shadow: var(--shadow-sm);
 }
 
+.kmq-web-landing-join {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+    align-items: stretch;
+}
+
+.kmq-web-landing-join .kmq-web-landing-button {
+    margin-top: 0;
+}
+
+.kmq-web-landing-input {
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    min-width: 0;
+    width: 220px;
+}
+
+.kmq-web-landing-input:focus {
+    outline: 2px solid var(--red-primary);
+    outline-offset: -1px;
+}
+
+/* Floating room widget (standalone website): invite link, presence, leave.
+   Fixed overlay so it never disturbs the game layout underneath. */
+.kmq-room-bar {
+    position: fixed;
+    right: 12px;
+    bottom: 12px;
+    z-index: 60;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    font-size: 0.85rem;
+}
+
+.kmq-room-bar-toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+.kmq-room-bar-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+.kmq-room-bar-body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-md);
+    max-width: 240px;
+}
+
+.kmq-room-bar-members {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.kmq-room-bar-member {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.kmq-room-bar-member[data-connected="false"] {
+    opacity: 0.45;
+}
+
+.kmq-room-bar-avatar {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.kmq-room-bar-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.kmq-room-bar-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.kmq-room-bar-actions {
+    display: flex;
+    gap: 6px;
+}
+
+.kmq-room-bar-button {
+    flex: 1;
+    padding: 6px 10px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kmq-room-bar-button-danger {
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    border: 1px solid var(--border);
+}
+
 /* Respect users who opt out of motion at the OS level: drop the decorative
    loops (confetti, floating notes, etc.) and collapse entrance animations /
    transitions to a near-instant change. */

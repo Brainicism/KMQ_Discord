@@ -405,6 +405,19 @@ export const WEB_LOGIN_CODE_TTL_MS = 60_000;
 export const WEB_OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
 export const WEB_OAUTH_STATE_COOKIE = "kmq_oauth_state";
 
+// Standalone-website multiplayer rooms. A room's synthetic guild ID sets bit
+// 62, which real Discord snowflakes won't reach until ~2049, so rooms flow
+// through every guild-keyed code path (game options, sessions, IPC shard
+// routing) without colliding with real guilds. Derived from the creator's
+// user ID so a recreated room keeps its game options and presets.
+export const WEB_ROOM_ID_FLAG = 1n << 62n;
+export const WEB_ROOM_MAX_MEMBERS = 8;
+// A member with no open websocket is dropped from the room after this grace
+// period (survives refreshes and brief network blips); a room with no members
+// left is closed.
+export const WEB_ROOM_DISCONNECT_GRACE_MS = 60_000;
+export const WEB_ROOM_SWEEP_INTERVAL_MS = 30_000;
+
 // Fixed set of emotes a player can fling during an Activity round. Server-side
 // allow-list so the broadcast can't be used to inject arbitrary content.
 export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;

@@ -15,9 +15,15 @@ export interface WebSession {
     user: PlatformUser;
 }
 
-/** Navigates to the server's OAuth entrypoint (full page redirect). */
-export function beginLogin(): void {
-    window.location.href = "/api/web/login";
+/**
+ * Navigates to the server's OAuth entrypoint (full page redirect).
+ * @param next - in-site /play path to land on after login (e.g. an invite
+ * link); the server validates it against open redirects
+ */
+export function beginLogin(next?: string): void {
+    window.location.href = next
+        ? `/api/web/login?next=${encodeURIComponent(next)}`
+        : "/api/web/login";
 }
 
 export function getStoredSession(): WebSession | null {
@@ -132,6 +138,116 @@ export async function logout(session: WebSession | null): Promise<void> {
 /** Web equivalent of the SDK's live-locale lookup. */
 export function readLocale(): string | null {
     return navigator.language || null;
+}
+
+// ---------------------------------------------------------------------------
+// Multiplayer rooms. A room's invite code doubles as the `instance_id` for
+// every /api/activity/* call, so the game client works unchanged inside one.
+
+export interface WebRoomMemberView {
+    id: string;
+    username: string;
+    avatarUrl: string | null;
+    connected: boolean;
+}
+
+export interface WebRoomView {
+    code: string;
+    ownerID: string;
+    members: WebRoomMemberView[];
+}
+
+export type WebRoomResult =
+    | { room: WebRoomView }
+    | { error: "not_found" | "full" | "unauthorized" | "unavailable" };
+
+async function roomRequest(
+    session: WebSession,
+    path: string,
+    init?: RequestInit,
+): Promise<WebRoomResult> {
+    let resp: Response;
+    try {
+        resp = await fetch(path, {
+            ...init,
+            headers: {
+                Authorization: `Bearer ${session.token}`,
+                ...(init?.body ? { "Content-Type": "application/json" } : {}),
+            },
+        });
+    } catch {
+        return { error: "unavailable" };
+    }
+
+    if (resp.status === 401 || resp.status === 403) {
+        return { error: "unauthorized" };
+    }
+
+    if (resp.status === 404) return { error: "not_found" };
+    if (resp.status === 409) return { error: "full" };
+    if (!resp.ok) return { error: "unavailable" };
+
+    const body = (await resp.json()) as { room?: WebRoomView };
+    if (!body?.room?.code) return { error: "unavailable" };
+    return { room: body.room };
+}
+
+export async function createRoom(session: WebSession): Promise<WebRoomResult> {
+    return roomRequest(session, "/api/web/room", { method: "POST" });
+}
+
+export async function joinRoom(
+    session: WebSession,
+    code: string,
+): Promise<WebRoomResult> {
+    return roomRequest(session, "/api/web/room/join", {
+        method: "POST",
+        body: JSON.stringify({ code }),
+    });
+}
+
+/**
+ * @param session - the web session
+ * @param code - the room to read; null reads whatever room the server still
+ * counts the user a member of (refresh/reconnect)
+ * @returns the room, or why it couldn't be read
+ */
+export async function fetchRoom(
+    session: WebSession,
+    code: string | null,
+): Promise<WebRoomResult> {
+    return roomRequest(
+        session,
+        code
+            ? `/api/web/room?code=${encodeURIComponent(code)}`
+            : "/api/web/room",
+    );
+}
+
+export async function leaveRoom(session: WebSession): Promise<void> {
+    try {
+        await fetch("/api/web/room/leave", {
+            method: "POST",
+            headers: { Authorization: `Bearer ${session.token}` },
+        });
+    } catch {
+        // The server sweeps abandoned seats after the disconnect grace
+        // period regardless.
+    }
+}
+
+/** @returns the invite path for a room code (append to the site origin) */
+export function roomPath(code: string): string {
+    return `/play/r/${encodeURIComponent(code)}`;
+}
+
+/**
+ * @returns the room code embedded in an invite URL path (/play/r/<code>),
+ * if the current location is one
+ */
+export function roomCodeFromLocation(): string | null {
+    const match = /^\/play\/r\/([^/]+)$/.exec(window.location.pathname);
+    return match ? decodeURIComponent(match[1]!) : null;
 }
 
 /** Web equivalent of sdk.commands.openExternalLink. */

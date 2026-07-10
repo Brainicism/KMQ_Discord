@@ -25,6 +25,7 @@ import {
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
+    WEB_ROOM_SWEEP_INTERVAL_MS,
     discordAvatarUrl,
 } from "./constants";
 import { IPCLogger } from "./logger";
@@ -52,6 +53,7 @@ import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
+import WebRoomManager from "./web_room_manager";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -513,8 +515,10 @@ export default class KmqWebServer {
         }
     > = new Map();
 
-    // OAuth `state` nonces awaiting the web-login callback.
-    private webOauthStates: Map<string, number> = new Map();
+    // OAuth `state` nonces awaiting the web-login callback. `next` is the
+    // validated in-site path to land on after login (e.g. an invite link).
+    private webOauthStates: Map<string, { expiresAt: number; next: string }> =
+        new Map();
 
     // One-time codes bridging the OAuth callback redirect to the SPA. Values
     // hold the freshly minted session token until the SPA collects it.
@@ -527,12 +531,35 @@ export default class KmqWebServer {
         }
     > = new Map();
 
+    private webRoomManager: WebRoomManager | null = null;
+
     constructor(
         databaseContext: DatabaseContext,
         activityHub: ActivityHub | null = null,
     ) {
         this.dbContext = databaseContext;
         this.activityHub = activityHub;
+
+        if (activityHub) {
+            this.webRoomManager = new WebRoomManager({
+                onRoomClosed: (roomID, lastMemberID) => {
+                    // End any game running against the room's synthetic guild
+                    // ID. Fire-and-forget: with no session the worker just
+                    // reports no_session.
+                    activityHub
+                        .endGame({ guildID: roomID, userID: lastMemberID })
+                        .catch((e) => {
+                            logger.debug(
+                                `endGame for closed web room ${roomID} failed. err=${(e as Error).message}`,
+                            );
+                        });
+                },
+            });
+
+            setInterval(() => {
+                this.webRoomManager?.sweep();
+            }, WEB_ROOM_SWEEP_INTERVAL_MS).unref();
+        }
     }
 
     /**
@@ -1045,6 +1072,7 @@ export default class KmqWebServer {
         );
 
         this.registerWebAuthRoutes(httpServer, limit);
+        this.registerWebRoomRoutes(httpServer, limit);
 
         httpServer.get(
             "/api/activity/i18n",
@@ -1112,7 +1140,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance) {
                     await reply.code(404).send({ error: "Unknown instance" });
                     return;
@@ -1179,7 +1207,7 @@ export default class KmqWebServer {
                 return null;
             }
 
-            const instance = await this.resolveActivityInstance(instanceId);
+            const instance = await this.resolveInstanceOrRoom(instanceId);
             if (!instance || !instance.participantIDs.has(user.id)) {
                 await reply.code(403).send({ error: "Forbidden" });
                 return null;
@@ -1730,7 +1758,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance || !instance.participantIDs.has(user.id)) {
                     await reply.code(403).send({ error: "Forbidden" });
                     return;
@@ -1801,7 +1829,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance || !instance.participantIDs.has(user.id)) {
                     await reply.code(403).send({ error: "Forbidden" });
                     return;
@@ -1922,6 +1950,9 @@ export default class KmqWebServer {
                 };
 
                 this.activityHub.subscribe(guildID, subscriber);
+                // For web rooms the instance ID is the room code; an open
+                // socket is what marks the member present.
+                this.webRoomManager?.memberConnected(instanceId, userID);
 
                 let alive = true;
                 const heartbeat = setInterval(() => {
@@ -1952,6 +1983,8 @@ export default class KmqWebServer {
                     if (this.activityHub) {
                         this.activityHub.unsubscribe(guildID, subscriber);
                     }
+
+                    this.webRoomManager?.memberDisconnected(instanceId, userID);
                 });
 
                 try {
@@ -2061,6 +2094,34 @@ export default class KmqWebServer {
             );
             return null;
         }
+    }
+
+    /**
+     * Resolves a client-supplied instance ID to its guild/participants. Web
+     * room codes and Discord Activity instance IDs share the `instance_id`
+     * field on the wire; a room-code hit wins (codes are unguessable random
+     * strings, so a real Activity instance ID can't collide with a live one).
+     * @param instanceId - Activity instance ID or web room invite code
+     * @returns the instance context, or null if neither resolves
+     */
+    private async resolveInstanceOrRoom(instanceId: string): Promise<{
+        guildID: string;
+        channelID: string | null;
+        participantIDs: Set<string>;
+        webRoom: boolean;
+    } | null> {
+        const room = this.webRoomManager?.getRoomByCode(instanceId);
+        if (room) {
+            return {
+                guildID: room.roomID,
+                channelID: null,
+                participantIDs: new Set(room.members.keys()),
+                webRoom: true,
+            };
+        }
+
+        const instance = await this.resolveActivityInstance(instanceId);
+        return instance ? { ...instance, webRoom: false } : null;
     }
 
     private async resolveActivityInstance(instanceId: string): Promise<{
@@ -2217,7 +2278,7 @@ export default class KmqWebServer {
         httpServer.get(
             "/api/web/login",
             limit(ACTIVITY_RATE_LIMIT_TOKEN),
-            async (_request, reply) => {
+            async (request, reply) => {
                 if (!(await requireWebMode(reply))) return;
 
                 const baseUrl = webPublicBaseUrl();
@@ -2237,12 +2298,23 @@ export default class KmqWebServer {
                 }
 
                 const state = uuid.v4();
-                const now = Date.now();
-                for (const [key, expiresAt] of this.webOauthStates) {
-                    if (expiresAt <= now) this.webOauthStates.delete(key);
-                }
+                pruneExpired(this.webOauthStates);
 
-                this.webOauthStates.set(state, now + WEB_OAUTH_STATE_TTL_MS);
+                // Where to land after login. Restricted to in-site /play
+                // paths so the callback can't be used as an open redirect —
+                // this is how invite links survive the OAuth round-trip.
+                const rawNext = (request.query as { next?: string }).next;
+                const next =
+                    rawNext &&
+                    rawNext.startsWith("/play") &&
+                    !rawNext.startsWith("//")
+                        ? rawNext
+                        : "/play";
+
+                this.webOauthStates.set(state, {
+                    expiresAt: Date.now() + WEB_OAUTH_STATE_TTL_MS,
+                    next,
+                });
 
                 const params = new URLSearchParams({
                     client_id: process.env.BOT_CLIENT_ID,
@@ -2280,10 +2352,14 @@ export default class KmqWebServer {
                 );
 
                 const state = query.state;
+                const stateEntry = state
+                    ? this.webOauthStates.get(state)
+                    : undefined;
+
                 const stateValid =
                     !!state &&
                     cookieState === state &&
-                    (this.webOauthStates.get(state) ?? 0) > Date.now();
+                    (stateEntry?.expiresAt ?? 0) > Date.now();
 
                 if (state) this.webOauthStates.delete(state);
 
@@ -2369,8 +2445,10 @@ export default class KmqWebServer {
                         expiresAt: Date.now() + WEB_LOGIN_CODE_TTL_MS,
                     });
 
+                    const next = stateEntry?.next ?? "/play";
+                    const joiner = next.includes("?") ? "&" : "?";
                     await expireStateCookie().redirect(
-                        `/play?login_code=${encodeURIComponent(loginCode)}`,
+                        `${next}${joiner}login_code=${encodeURIComponent(loginCode)}`,
                     );
                 } catch (e) {
                     const err = e as {
@@ -2475,10 +2553,166 @@ export default class KmqWebServer {
                         );
                     }
 
+                    // A logged-out user can't hold a room seat.
+                    const cached = this.accessTokenCache.get(token);
+                    if (cached) {
+                        this.webRoomManager?.leaveRoom(cached.user.id);
+                    }
+
                     this.accessTokenCache.delete(token);
                 }
 
                 await reply.code(204).send();
+            },
+        );
+    }
+
+    /**
+     * Registers the standalone-website room routes (/api/web/room*): create/
+     * join/leave/read multiplayer rooms whose invite code doubles as the
+     * client's instance_id for every gameplay route. Gated behind the same
+     * webModeEnabled feature switch as the auth routes.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebRoomRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        // Resolves the requester or replies with the right error; returns
+        // null when a response has already been sent.
+        const requireWebUser = async (
+            request: any,
+            reply: any,
+        ): Promise<CachedDiscordUser | null> => {
+            if (!KmqConfiguration.Instance.webModeEnabled()) {
+                await reply.code(503).send({ error: "Web mode disabled" });
+                return null;
+            }
+
+            if (!this.webRoomManager) {
+                await reply.code(503).send({ error: "Rooms not enabled" });
+                return null;
+            }
+
+            const header = request.headers["authorization"] as
+                | string
+                | undefined;
+
+            const token = header?.startsWith("Bearer ")
+                ? header.slice(7)
+                : undefined;
+
+            const user = await this.resolveAccessToken(token);
+            if (!user) {
+                await reply.code(401).send({ error: "Unauthorized" });
+                return null;
+            }
+
+            return user;
+        };
+
+        httpServer.post(
+            "/api/web/room",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                const result = this.webRoomManager!.createRoom({
+                    id: user.id,
+                    username: user.username,
+                    avatarUrl: user.avatarUrl,
+                });
+
+                if ("error" in result) {
+                    // Only possible when rejoining one's own still-alive room
+                    // that has since filled up.
+                    await reply.code(409).send({ error: result.error });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(result.room),
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/room/join",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                const code = (request.body as { code?: string } | null)?.code;
+                if (!code || typeof code !== "string") {
+                    await reply.code(400).send({ error: "Missing code" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.joinRoom(code, {
+                    id: user.id,
+                    username: user.username,
+                    avatarUrl: user.avatarUrl,
+                });
+
+                if ("error" in result) {
+                    await reply
+                        .code(result.error === "not_found" ? 404 : 409)
+                        .send({ error: result.error });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(result.room),
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/room/leave",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                this.webRoomManager!.leaveRoom(user.id);
+                await reply.code(204).send();
+            },
+        );
+
+        httpServer.get(
+            "/api/web/room",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                // With ?code=, read that room (members only — the code is
+                // the room's bearer capability, but presence/usernames still
+                // shouldn't leak to non-members probing codes). Without it,
+                // resolve the requester's current room for reconnects.
+                const code = (request.query as { code?: string }).code;
+                const room = code
+                    ? this.webRoomManager!.getRoomByCode(code)
+                    : this.webRoomManager!.getRoomForUser(user.id);
+
+                if (!room) {
+                    await reply.code(404).send({ error: "No room" });
+                    return;
+                }
+
+                if (!room.members.has(user.id)) {
+                    await reply.code(403).send({ error: "Not a member" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(room),
+                });
             },
         );
     }

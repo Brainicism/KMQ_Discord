@@ -4342,7 +4342,19 @@ type StreamEvent =
 // down. A longer song_start_delay already exceeds this, so it's a no-op there.
 const MIN_REVEAL_HOLD_MS = 1500;
 
-export default function App() {
+/**
+ * Credentials injected by the standalone-website shell: the web session token
+ * plus room code stand in for the Discord SDK's OAuth handshake and instance
+ * ID. When present, the connect flow skips every SDK call, so the Discord
+ * SDK chunk is never loaded on the web.
+ */
+export interface WebAuth {
+    accessToken: string;
+    instanceId: string;
+    userID: string;
+}
+
+export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
@@ -4522,6 +4534,10 @@ export default function App() {
                     accessToken = existingAuth.accessToken;
                     instanceId = existingAuth.instanceId;
                     userID = existingAuth.userID;
+                } else if (webAuth) {
+                    accessToken = webAuth.accessToken;
+                    instanceId = webAuth.instanceId;
+                    userID = webAuth.userID;
                 } else {
                     const auth = await authenticate();
                     if (cancelled) return;
@@ -4549,8 +4565,11 @@ export default function App() {
 
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
-                // matching bundle and swap if it's different.
-                const sdkLocale = await readSdkLocale();
+                // matching bundle and swap if it's different. On the web
+                // there's no SDK (and calling in would load its chunk); the
+                // snapshot's viewerLocale — the login-time Discord locale —
+                // already won.
+                const sdkLocale = webAuth ? null : await readSdkLocale();
                 if (
                     !cancelled &&
                     sdkLocale &&

@@ -1,3 +1,4 @@
+import { isEmbedded } from "./index";
 import type { AuthedSession } from "../discordSdk";
 
 /**
@@ -18,6 +19,13 @@ export async function readSdkLocale(): Promise<string | null> {
 }
 
 export async function openExternalUrl(url: string): Promise<void> {
+    // On the standalone website there's no iframe to escape — a plain new
+    // tab does it (and keeps the SDK chunk unloaded).
+    if (!isEmbedded()) {
+        window.open(url, "_blank", "noopener,noreferrer");
+        return;
+    }
+
     const sdkModule = await import("../discordSdk");
     return sdkModule.openExternalUrl(url);
 }
