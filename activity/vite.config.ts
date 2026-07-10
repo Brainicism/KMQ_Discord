@@ -17,6 +17,16 @@ export default defineConfig({
     },
     server: {
         port: 5173,
+        // Standalone-website dev: forward API + WS calls to the bot's web
+        // server so `vite dev` works without CORS or a reverse proxy. The
+        // embedded Activity path is unaffected (it goes through /.proxy/).
+        proxy: {
+            "/api": "http://127.0.0.1:5858",
+            "/ws": {
+                target: "http://127.0.0.1:5858",
+                ws: true,
+            },
+        },
     },
     build: {
         outDir: "dist",

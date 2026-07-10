@@ -44,5 +44,6 @@ declare namespace NodeJS {
         POWER_HOUR_NOTIF_WEBHOOK_URL: string | undefined;
         DISCORD_CLIENT_SECRET?: string | undefined;
         ACTIVITY_PUBLIC_BASE_URL?: string | undefined;
+        WEB_PUBLIC_BASE_URL?: string | undefined;
     }
 }

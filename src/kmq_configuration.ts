@@ -103,4 +103,14 @@ export default class KmqConfiguration {
     activityReducedEmbeds(): boolean {
         return this.config["activityReducedEmbeds"] ?? false;
     }
+
+    /**
+     * Gates the standalone-website surface (`/api/web/*` routes and web-room
+     * game starts). Off by default so the port can ship dark and be enabled
+     * per-environment via feature_switch_config.json + reload_config.
+     * @returns whether web mode is enabled
+     */
+    webModeEnabled(): boolean {
+        return this.config["webModeEnabled"] ?? false;
+    }
 }

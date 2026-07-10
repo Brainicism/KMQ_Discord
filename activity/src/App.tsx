@@ -36,7 +36,11 @@ import {
     submitGuess,
     submitMcGuess,
 } from "./api";
-import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
+import {
+    authenticate,
+    openExternalUrl,
+    readSdkLocale,
+} from "./platform/discordPlatform";
 import { makeTranslator } from "./i18n/translator";
 import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";

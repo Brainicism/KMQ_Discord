@@ -3480,6 +3480,93 @@ fieldset.options-override:disabled .options-group {
     cursor: pointer;
 }
 
+/* ============================================================
+   Standalone-website landing (web target only)
+   ============================================================ */
+
+.kmq-web-landing {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    background: var(--bg-base);
+    color: var(--text-primary);
+    text-align: center;
+}
+
+.kmq-web-landing-logo {
+    width: 96px;
+    height: 96px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+}
+
+.kmq-web-landing-title {
+    margin: 8px 0 0;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.kmq-web-landing-tagline {
+    margin: 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+.kmq-web-landing-status {
+    margin: 12px 0 0;
+    font-size: 1rem;
+}
+
+.kmq-web-landing-error {
+    margin: 12px 0 0;
+    color: var(--red-primary);
+    font-size: 0.9rem;
+}
+
+.kmq-web-landing-button {
+    margin-top: 16px;
+    padding: 12px 28px;
+    border: none;
+    border-radius: var(--radius-pill);
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: var(--shadow-glow);
+    transition: transform 0.1s ease;
+}
+
+.kmq-web-landing-button:hover {
+    transform: translateY(-1px);
+}
+
+.kmq-web-landing-button-secondary {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-sm);
+}
+
+.kmq-web-landing-account {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.kmq-web-landing-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    box-shadow: var(--shadow-sm);
+}
+
 /* Respect users who opt out of motion at the OS level: drop the decorative
    loops (confetti, floating notes, etc.) and collapse entrance animations /
    transitions to a near-instant change. */

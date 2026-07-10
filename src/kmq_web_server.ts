@@ -16,14 +16,25 @@ import {
     CLIP_MIN_DURATION_SEC,
     DEFAULT_LOCALE,
     DISCORD_ACTIVITY_INSTANCE_URL,
+    DISCORD_OAUTH_AUTHORIZE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
     EARLIEST_BEGINNING_SEARCH_YEAR,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
+    WEB_LOGIN_CODE_TTL_MS,
+    WEB_OAUTH_STATE_COOKIE,
+    WEB_OAUTH_STATE_TTL_MS,
+    discordAvatarUrl,
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
+import {
+    createWebSession,
+    deleteWebSession,
+    isWebSessionToken,
+    resolveWebSession,
+} from "./helpers/web_session_manager";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
@@ -31,6 +42,7 @@ import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import GameType from "./enums/game_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
+import KmqConfiguration from "./kmq_configuration";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
@@ -55,6 +67,7 @@ import path from "path";
 import type { ActivityPresetAction } from "./interfaces/activity_preset_args";
 import type { ActivitySubscriber } from "./activity_hub";
 import type { DatabaseContext } from "./database_context";
+import type { FastifyInstance } from "fastify";
 import type { Fleet, Stats } from "eris-fleet";
 import type { GenderModeOptions } from "./enums/option_types/gender";
 import type ActivityHub from "./activity_hub";
@@ -95,6 +108,7 @@ interface CachedDiscordUser {
     username: string;
     /** Discord user locale (e.g. "en-US"). Empty if Discord didn't return one. */
     locale: string;
+    avatarUrl: string | null;
     cachedAt: number;
 }
 
@@ -499,6 +513,20 @@ export default class KmqWebServer {
         }
     > = new Map();
 
+    // OAuth `state` nonces awaiting the web-login callback.
+    private webOauthStates: Map<string, number> = new Map();
+
+    // One-time codes bridging the OAuth callback redirect to the SPA. Values
+    // hold the freshly minted session token until the SPA collects it.
+    private webLoginCodes: Map<
+        string,
+        {
+            token: string;
+            user: CachedDiscordUser;
+            expiresAt: number;
+        }
+    > = new Map();
+
     constructor(
         databaseContext: DatabaseContext,
         activityHub: ActivityHub | null = null,
@@ -571,26 +599,47 @@ export default class KmqWebServer {
             // there so the SPA can pick up the params from window.location.
             const activityIndexPath = path.join(activityDistRoot, "index.html");
 
+            const serveActivityIndex = async (
+                _request: unknown,
+                reply: any,
+            ): Promise<void> => {
+                try {
+                    const html = await fs.promises.readFile(
+                        activityIndexPath,
+                        "utf8",
+                    );
+
+                    await reply.type("text/html").send(html);
+                } catch (e) {
+                    logger.warn(
+                        `Failed to serve activity index. err=${
+                            (e as Error).message
+                        }`,
+                    );
+                    await reply.code(500).send();
+                }
+            };
+
             httpServer.get(
                 "/",
                 limit(ACTIVITY_RATE_LIMIT_READ),
-                async (request, reply) => {
-                    try {
-                        const html = await fs.promises.readFile(
-                            activityIndexPath,
-                            "utf8",
-                        );
+                serveActivityIndex,
+            );
 
-                        await reply.type("text/html").send(html);
-                    } catch (e) {
-                        logger.warn(
-                            `Failed to serve activity index. err=${
-                                (e as Error).message
-                            }`,
-                        );
-                        await reply.code(500).send();
-                    }
-                },
+            // The standalone website mounts the same SPA at /play; deep links
+            // like /play/r/<room-code> must also resolve to the index so the
+            // client can route from the path. Asset URLs are absolute
+            // (/activity/...), so serving the index at any depth is safe.
+            httpServer.get(
+                "/play",
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                serveActivityIndex,
+            );
+
+            httpServer.get(
+                "/play/*",
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                serveActivityIndex,
             );
         } else {
             logger.info(
@@ -643,6 +692,9 @@ export default class KmqWebServer {
                 return;
             }
 
+            // The admiral process reads feature switches too (web-mode
+            // gating), so reload locally in addition to the clusters.
+            KmqConfiguration.reload();
             await fleet.ipc.allClustersCommand("reload_config");
             await reply.code(200).send();
         });
@@ -991,6 +1043,8 @@ export default class KmqWebServer {
                 }
             },
         );
+
+        this.registerWebAuthRoutes(httpServer, limit);
 
         httpServer.get(
             "/api/activity/i18n",
@@ -1941,6 +1995,38 @@ export default class KmqWebServer {
             return cached.user;
         }
 
+        // Web session tokens resolve against the local web_sessions store;
+        // everything else is a Discord OAuth access token from the embedded
+        // Activity and resolves via users/@me.
+        if (isWebSessionToken(token)) {
+            try {
+                const webUser = await resolveWebSession(token);
+                if (!webUser) return null;
+
+                const user: CachedDiscordUser = {
+                    id: webUser.id,
+                    username: webUser.username,
+                    locale: webUser.locale,
+                    avatarUrl: webUser.avatarUrl,
+                    cachedAt: now,
+                };
+
+                this.accessTokenCache.set(token, {
+                    user,
+                    expiresAt: now + ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+                });
+
+                return user;
+            } catch (e) {
+                logger.warn(
+                    `Failed to resolve web session token. err=${
+                        (e as Error).message
+                    }`,
+                );
+                return null;
+            }
+        }
+
         try {
             const response = await axios.get(DISCORD_USERS_ME_URL, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1954,6 +2040,10 @@ export default class KmqWebServer {
                     typeof response.data.locale === "string"
                         ? response.data.locale
                         : "",
+                avatarUrl: discordAvatarUrl(
+                    response.data.id,
+                    response.data.avatar,
+                ),
                 cachedAt: now,
             };
 
@@ -2051,5 +2141,345 @@ export default class KmqWebServer {
             );
             return null;
         }
+    }
+
+    /**
+     * Registers the standalone-website auth routes (/api/web/*): a standard
+     * Discord OAuth2 redirect flow that ends in an opaque `web_`-prefixed
+     * bearer token the SPA uses exactly like the Activity's access token.
+     * All routes 503 while the webModeEnabled feature switch is off.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebAuthRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        // WEB_PUBLIC_BASE_URL is the site origin used to build the OAuth
+        // redirect_uri; it falls back to the Activity tunnel URL so a dev
+        // setup configured for the Activity works for the website too.
+        const webPublicBaseUrl = (): string | null => {
+            const base =
+                process.env.WEB_PUBLIC_BASE_URL ||
+                process.env.ACTIVITY_PUBLIC_BASE_URL;
+
+            return base ? base.replace(/\/+$/, "") : null;
+        };
+
+        const requireWebMode = async (reply: any): Promise<boolean> => {
+            if (KmqConfiguration.Instance.webModeEnabled()) {
+                return true;
+            }
+
+            await reply.code(503).send({ error: "Web mode disabled" });
+            return false;
+        };
+
+        const parseCookie = (
+            header: string | undefined,
+            name: string,
+        ): string | null => {
+            if (!header) return null;
+            for (const part of header.split(";")) {
+                const eq = part.indexOf("=");
+                if (eq === -1) continue;
+                if (part.slice(0, eq).trim() === name) {
+                    return part.slice(eq + 1).trim();
+                }
+            }
+
+            return null;
+        };
+
+        const stateCookie = (value: string, maxAgeSec: number): string => {
+            const secure = webPublicBaseUrl()?.startsWith("https")
+                ? "; Secure"
+                : "";
+
+            // SameSite=Lax still sends the cookie on the top-level GET
+            // navigation back from Discord's consent screen.
+            return `${WEB_OAUTH_STATE_COOKIE}=${value}; Max-Age=${maxAgeSec}; Path=/api/web; HttpOnly; SameSite=Lax${secure}`;
+        };
+
+        const pruneExpired = (
+            map: Map<string, { expiresAt: number }>,
+        ): void => {
+            const now = Date.now();
+            for (const [key, value] of map) {
+                if (value.expiresAt <= now) {
+                    map.delete(key);
+                }
+            }
+        };
+
+        httpServer.get(
+            "/api/web/login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (_request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const baseUrl = webPublicBaseUrl();
+                if (
+                    !baseUrl ||
+                    !process.env.BOT_CLIENT_ID ||
+                    !process.env.DISCORD_CLIENT_SECRET
+                ) {
+                    logger.error(
+                        "Web login misconfigured: WEB_PUBLIC_BASE_URL, BOT_CLIENT_ID, or DISCORD_CLIENT_SECRET missing",
+                    );
+
+                    await reply
+                        .code(500)
+                        .send({ error: "OAuth not configured" });
+                    return;
+                }
+
+                const state = uuid.v4();
+                const now = Date.now();
+                for (const [key, expiresAt] of this.webOauthStates) {
+                    if (expiresAt <= now) this.webOauthStates.delete(key);
+                }
+
+                this.webOauthStates.set(state, now + WEB_OAUTH_STATE_TTL_MS);
+
+                const params = new URLSearchParams({
+                    client_id: process.env.BOT_CLIENT_ID,
+                    response_type: "code",
+                    redirect_uri: `${baseUrl}/api/web/callback`,
+                    scope: "identify",
+                    state,
+                });
+
+                await reply
+                    .header(
+                        "set-cookie",
+                        stateCookie(state, WEB_OAUTH_STATE_TTL_MS / 1000),
+                    )
+                    .redirect(
+                        `${DISCORD_OAUTH_AUTHORIZE_URL}?${params.toString()}`,
+                    );
+            },
+        );
+
+        httpServer.get(
+            "/api/web/callback",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const query = request.query as {
+                    code?: string;
+                    state?: string;
+                };
+
+                const cookieState = parseCookie(
+                    request.headers.cookie,
+                    WEB_OAUTH_STATE_COOKIE,
+                );
+
+                const state = query.state;
+                const stateValid =
+                    !!state &&
+                    cookieState === state &&
+                    (this.webOauthStates.get(state) ?? 0) > Date.now();
+
+                if (state) this.webOauthStates.delete(state);
+
+                // Expire the state cookie regardless of outcome.
+                const expireStateCookie = (): typeof reply =>
+                    reply.header("set-cookie", stateCookie("", 0));
+
+                if (!stateValid || !query.code) {
+                    await expireStateCookie()
+                        .code(400)
+                        .send({ error: "Invalid OAuth state or code" });
+                    return;
+                }
+
+                const baseUrl = webPublicBaseUrl();
+                if (
+                    !baseUrl ||
+                    !process.env.BOT_CLIENT_ID ||
+                    !process.env.DISCORD_CLIENT_SECRET
+                ) {
+                    await expireStateCookie()
+                        .code(500)
+                        .send({ error: "OAuth not configured" });
+                    return;
+                }
+
+                try {
+                    const params = new URLSearchParams();
+                    params.set("client_id", process.env.BOT_CLIENT_ID);
+                    params.set(
+                        "client_secret",
+                        process.env.DISCORD_CLIENT_SECRET,
+                    );
+                    params.set("grant_type", "authorization_code");
+                    params.set("code", query.code);
+                    params.set("redirect_uri", `${baseUrl}/api/web/callback`);
+
+                    const tokenResponse = await axios.post(
+                        DISCORD_OAUTH_TOKEN_URL,
+                        params.toString(),
+                        {
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                            },
+                            timeout: ACTIVITY_HTTP_TIMEOUT_MS,
+                        },
+                    );
+
+                    const meResponse = await axios.get(DISCORD_USERS_ME_URL, {
+                        headers: {
+                            Authorization: `Bearer ${tokenResponse.data.access_token}`,
+                        },
+                        timeout: ACTIVITY_HTTP_TIMEOUT_MS,
+                    });
+
+                    const user: CachedDiscordUser = {
+                        id: meResponse.data.id,
+                        username: meResponse.data.username,
+                        locale:
+                            typeof meResponse.data.locale === "string"
+                                ? meResponse.data.locale
+                                : "",
+                        avatarUrl: discordAvatarUrl(
+                            meResponse.data.id,
+                            meResponse.data.avatar,
+                        ),
+                        cachedAt: Date.now(),
+                    };
+
+                    const token = await createWebSession({
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                        locale: user.locale,
+                    });
+
+                    pruneExpired(this.webLoginCodes);
+                    const loginCode = uuid.v4();
+                    this.webLoginCodes.set(loginCode, {
+                        token,
+                        user,
+                        expiresAt: Date.now() + WEB_LOGIN_CODE_TTL_MS,
+                    });
+
+                    await expireStateCookie().redirect(
+                        `/play?login_code=${encodeURIComponent(loginCode)}`,
+                    );
+                } catch (e) {
+                    const err = e as {
+                        message: string;
+                        response?: { status?: number };
+                    };
+
+                    logger.warn(
+                        `Web OAuth callback failed. err=${err.message} status=${err.response?.status}`,
+                    );
+
+                    await expireStateCookie()
+                        .code(401)
+                        .send({ error: "Login failed" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/web/complete-login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const loginCode = (request.body as any)?.login_code as
+                    | string
+                    | undefined;
+
+                if (!loginCode) {
+                    await reply.code(400).send({ error: "Missing login_code" });
+                    return;
+                }
+
+                const entry = this.webLoginCodes.get(loginCode);
+                // Single-use: consumed on first attempt, valid or not.
+                this.webLoginCodes.delete(loginCode);
+
+                if (!entry || entry.expiresAt <= Date.now()) {
+                    await reply
+                        .code(401)
+                        .send({ error: "Invalid or expired login code" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    token: entry.token,
+                    user: {
+                        id: entry.user.id,
+                        username: entry.user.username,
+                        avatarUrl: entry.user.avatarUrl,
+                    },
+                });
+            },
+        );
+
+        httpServer.get(
+            "/api/web/session",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const header = request.headers["authorization"];
+                const token = header?.startsWith("Bearer ")
+                    ? header.slice(7)
+                    : undefined;
+
+                const user = await this.resolveAccessToken(token);
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                    },
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/logout",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const header = request.headers["authorization"];
+                const token = header?.startsWith("Bearer ")
+                    ? header.slice(7)
+                    : undefined;
+
+                if (token && isWebSessionToken(token)) {
+                    try {
+                        await deleteWebSession(token);
+                    } catch (e) {
+                        logger.warn(
+                            `Web logout failed to delete session. err=${
+                                (e as Error).message
+                            }`,
+                        );
+                    }
+
+                    this.accessTokenCache.delete(token);
+                }
+
+                await reply.code(204).send();
+            },
+        );
     }
 }

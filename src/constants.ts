@@ -390,6 +390,21 @@ export const ACTIVITY_RATE_LIMIT_READ = 60;
 export const ACTIVITY_RATE_LIMIT_ACTION = 60;
 export const ACTIVITY_RATE_LIMIT_GUESS = 120;
 
+// Standalone-website ("web mode") auth. Web session tokens are opaque bearer
+// strings prefixed so resolveAccessToken can route them to the local
+// web_sessions store instead of Discord's users/@me.
+export const WEB_SESSION_TOKEN_PREFIX = "web_";
+export const WEB_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+// Sliding-expiry writes are throttled: only touch the row when the last use
+// is older than this, so hot sessions don't write on every request.
+export const WEB_SESSION_TOUCH_INTERVAL_MS = 60 * 60 * 1000;
+// One-time codes bridging the OAuth callback redirect to the SPA (keeps the
+// real session token out of URLs, logs, and browser history).
+export const WEB_LOGIN_CODE_TTL_MS = 60_000;
+// OAuth `state` nonces pending callback (mirrored in a short-lived cookie).
+export const WEB_OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
+export const WEB_OAUTH_STATE_COOKIE = "kmq_oauth_state";
+
 // Fixed set of emotes a player can fling during an Activity round. Server-side
 // allow-list so the broadcast can't be used to inject arbitrary content.
 export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
@@ -400,7 +415,18 @@ export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";
 export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;
+export const DISCORD_OAUTH_AUTHORIZE_URL = `${DISCORD_API_BASE}/oauth2/authorize`;
 export const DISCORD_USERS_ME_URL = `${DISCORD_API_BASE}/users/@me`;
+export const discordAvatarUrl = (
+    userID: string,
+    avatarHash: string | null | undefined,
+): string | null =>
+    avatarHash
+        ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(
+              userID,
+          )}/${encodeURIComponent(avatarHash)}.png`
+        : null;
+
 export const DISCORD_ACTIVITY_INSTANCE_URL = (
     appId: string,
     instanceId: string,
