@@ -69,6 +69,12 @@ interface WebRoomManagerOptions {
      */
     onRoomClosed?: (roomID: string, lastMemberID: string) => void;
 
+    /**
+     * Called when a room's member set changes (create/join/leave) — the hook
+     * that mirrors membership to the worker owning the room's guild ID.
+     */
+    onRoomChanged?: (room: WebRoom) => void;
+
     /** Clock override for tests. */
     now?: () => number;
 }
@@ -87,10 +93,13 @@ export default class WebRoomManager {
 
     private onRoomClosed: (roomID: string, lastMemberID: string) => void;
 
+    private onRoomChanged: (room: WebRoom) => void;
+
     private now: () => number;
 
     constructor(options: WebRoomManagerOptions = {}) {
         this.onRoomClosed = options.onRoomClosed ?? ((): void => {});
+        this.onRoomChanged = options.onRoomChanged ?? ((): void => {});
         this.now = options.now ?? ((): number => Date.now());
     }
 
@@ -132,6 +141,7 @@ export default class WebRoomManager {
         this.roomsByCode.set(room.code, room);
         this.roomCodeByRoomID.set(roomID, room.code);
         this.roomCodeByUserID.set(user.id, room.code);
+        this.onRoomChanged(room);
         return { room };
     }
 
@@ -162,6 +172,7 @@ export default class WebRoomManager {
         this.leaveRoom(user.id);
         room.members.set(user.id, this.newMember(user));
         this.roomCodeByUserID.set(user.id, code);
+        this.onRoomChanged(room);
         return { room };
     }
 
@@ -188,6 +199,8 @@ export default class WebRoomManager {
         if (room.ownerID === userID) {
             room.ownerID = room.members.keys().next().value as string;
         }
+
+        this.onRoomChanged(room);
     }
 
     /**

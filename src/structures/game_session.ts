@@ -17,11 +17,8 @@ import {
 import {
     clickableSlashCommand,
     fetchUser,
-    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
-    getMajorityCount,
-    getNumParticipants,
     getUserVoiceChannel,
     sendInfoMessage,
     sendPaginationedEmbed,
@@ -355,9 +352,8 @@ export default class GameSession extends Session {
         createdAt: number,
     ): Promise<void> {
         // Allow clip mode guesses in between clip replays
-        if (!this.isClipMode()) {
-            if (!this.connection) return;
-            if (this.connection.listenerCount("end") === 0) return;
+        if (!this.isClipMode() && !this.isPlaybackActive()) {
+            return;
         }
 
         if (!this.round) return;
@@ -437,13 +433,7 @@ export default class GameSession extends Session {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
                 setDifference(
-                    [
-                        ...new Set(
-                            getCurrentVoiceMembers(this.voiceChannelID).map(
-                                (x) => x.id,
-                            ),
-                        ),
-                    ],
+                    [...new Set(this.getParticipantIDs())],
                     [...incorrectGuessers],
                 ).size === 0
             ) {
@@ -495,11 +485,12 @@ export default class GameSession extends Session {
             return;
         }
 
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
-            (x) => x.id !== process.env.BOT_CLIENT_ID,
+        const voiceMemberIDs = new Set(
+            this.getParticipantIDs().filter(
+                (x) => x !== process.env.BOT_CLIENT_ID,
+            ),
         );
 
-        const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
             return;
         }
@@ -557,9 +548,7 @@ export default class GameSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                                guildID,
-                            )}`,
+                            skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
                         },
                     ),
                 );
@@ -571,9 +560,7 @@ export default class GameSession extends Session {
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
-                        skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                            guildID,
-                        )}`,
+                        skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
                     }),
                 );
 
@@ -754,9 +741,7 @@ export default class GameSession extends Session {
      * Sequential iteration prevents concurrent addPlayer/setPlayerInVC interleaving.
      */
     async syncAllVoiceMembers(): Promise<void> {
-        const currentVoiceMemberIds = getCurrentVoiceMembers(
-            this.voiceChannelID,
-        ).map((x) => x.id);
+        const currentVoiceMemberIds = this.getParticipantIDs();
 
         const departedPlayers = this.scoreboard
             .getPlayerIDs()
@@ -779,7 +764,14 @@ export default class GameSession extends Session {
             // eslint-disable-next-line no-await-in-loop
             const firstGameOfDay = await isFirstGameOfDay(playerId);
             // eslint-disable-next-line no-await-in-loop
-            const player = (await fetchUser(playerId)) as Eris.User;
+            const player = await fetchUser(playerId);
+            if (!player) {
+                logger.warn(
+                    `gid: ${this.guildID} | Couldn't fetch user ${playerId} for scoreboard, skipping`,
+                );
+                continue;
+            }
+
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
                     ? EliminationPlayer.fromUser(
@@ -1778,14 +1770,7 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         createdAt: number,
     ): boolean {
-        const userVoiceChannel = getUserVoiceChannel(messageContext);
-        // if user isn't in the same voice channel
-        if (!userVoiceChannel || userVoiceChannel.id !== this.voiceChannelID) {
-            return false;
-        }
-
-        // if message isn't in the active game session's text channel
-        if (messageContext.textChannelID !== this.textChannelID) {
+        if (!this.guesserInSessionChannels(messageContext)) {
             return false;
         }
 
@@ -2198,8 +2183,32 @@ export default class GameSession extends Session {
         return expBase + expJitter;
     }
 
+    /**
+     * Transport hook: whether the guesser is in the session's channels
+     * (Discord: same voice + text channel; web: a room member).
+     * @param messageContext - The context of the guess
+     * @returns whether the guess comes from inside the session
+     */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    protected guesserInSessionChannels(
+        messageContext: MessageContext,
+    ): boolean {
+        const userVoiceChannel = getUserVoiceChannel(messageContext);
+        // if user isn't in the same voice channel
+        if (!userVoiceChannel || userVoiceChannel.id !== this.voiceChannelID) {
+            return false;
+        }
+
+        // if message isn't in the active game session's text channel
+        if (messageContext.textChannelID !== this.textChannelID) {
+            return false;
+        }
+
+        return true;
+    }
+
     private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
-        const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
+        const playerIsAlone = this.getParticipantCount() === 1;
         return (
             guildPreference.gameOptions.multiGuessType === MultiGuessType.ON &&
             !playerIsAlone &&
@@ -2224,7 +2233,7 @@ export default class GameSession extends Session {
                 const expGain = await ExpCommand.calculateTotalRoundExp(
                     guildPreference,
                     round,
-                    getNumParticipants(this.voiceChannelID),
+                    this.getParticipantCount(),
                     idx === 0 ? lastGuesserStreak : 0,
                     round.getTimeToGuessMs(correctGuesser.id, isHidden),
                     guessPosition,

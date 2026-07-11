@@ -29,6 +29,7 @@ import type ActivitySongInfoArgs from "./interfaces/activity_song_info_args";
 import type ActivitySongInfoResponse from "./interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "./interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "./interfaces/activity_user_action_args";
+import type ActivityWebRoomMembershipArgs from "./interfaces/activity_web_room_membership_args";
 import type ActivityWorkerEventMessage from "./interfaces/activity_worker_event_message";
 
 const logger = new IPCLogger("activity_hub");
@@ -212,6 +213,23 @@ export default class ActivityHub {
     ): Promise<ActivityGuessResponse> {
         const target = await this.resolveCluster(args.guildID);
         return this.sendRequest<ActivityGuessResponse>(target, "endGame", args);
+    }
+
+    /**
+     * Pushes a web room's membership snapshot to the worker owning its
+     * synthetic guild ID (empty members = room closed, ends any game).
+     * @param args - guildID/members
+     * @returns the worker's ack
+     */
+    async webRoomMembership(
+        args: ActivityWebRoomMembershipArgs,
+    ): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(
+            target,
+            "webRoomMembership",
+            args,
+        );
     }
 
     /**
@@ -444,6 +462,13 @@ export default class ActivityHub {
     }
 
     private handleWorkerEvent(msg: ActivityWorkerEventMessage): void {
+        // roundAudio carries the raw playback spec, which names the song —
+        // it must never reach clients pre-reveal. Phase 4 turns it into an
+        // opaque audio-stream token; until then it stops here.
+        if (msg.event.type === "roundAudio") {
+            return;
+        }
+
         const subscribers = this.guildSubscribers.get(msg.guildID);
         if (!subscribers || subscribers.size === 0) {
             return;
@@ -489,7 +514,8 @@ export default class ActivityHub {
             | ActivityBookmarkArgs
             | ActivitySetOptionArgs
             | ActivityAutocompleteArtistsArgs
-            | ActivityPresetArgs,
+            | ActivityPresetArgs
+            | ActivityWebRoomMembershipArgs,
     ): Promise<T> {
         const cid = uuid.v4();
         return new Promise<T>((resolve, reject) => {

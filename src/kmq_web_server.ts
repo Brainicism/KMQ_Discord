@@ -541,18 +541,40 @@ export default class KmqWebServer {
         this.activityHub = activityHub;
 
         if (activityHub) {
+            // Mirror membership to the worker owning the room's guild ID —
+            // it feeds WebGameSession participants; an empty push means the
+            // room closed and tears any running game down. Fire-and-forget:
+            // a lost push self-heals on the next membership change.
+            const pushMembership = (
+                roomID: string,
+                members: Array<{
+                    id: string;
+                    username: string;
+                    avatarUrl: string | null;
+                }>,
+            ): void => {
+                activityHub
+                    .webRoomMembership({ guildID: roomID, members })
+                    .catch((e) => {
+                        logger.warn(
+                            `Web room membership push failed for ${roomID}. err=${(e as Error).message}`,
+                        );
+                    });
+            };
+
             this.webRoomManager = new WebRoomManager({
-                onRoomClosed: (roomID, lastMemberID) => {
-                    // End any game running against the room's synthetic guild
-                    // ID. Fire-and-forget: with no session the worker just
-                    // reports no_session.
-                    activityHub
-                        .endGame({ guildID: roomID, userID: lastMemberID })
-                        .catch((e) => {
-                            logger.debug(
-                                `endGame for closed web room ${roomID} failed. err=${(e as Error).message}`,
-                            );
-                        });
+                onRoomClosed: (roomID) => {
+                    pushMembership(roomID, []);
+                },
+                onRoomChanged: (room) => {
+                    pushMembership(
+                        room.roomID,
+                        [...room.members.values()].map((m) => ({
+                            id: m.id,
+                            username: m.username,
+                            avatarUrl: m.avatarUrl,
+                        })),
+                    );
                 },
             });
 
@@ -1187,6 +1209,7 @@ export default class KmqWebServer {
                 guildID: string;
                 channelID: string | null;
                 participantIDs: Set<string>;
+                webRoom: boolean;
             };
         } | null> => {
             if (!this.activityHub) {
@@ -1223,7 +1246,7 @@ export default class KmqWebServer {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
 
-                if (!ctx.instance.channelID) {
+                if (!ctx.instance.webRoom && !ctx.instance.channelID) {
                     await reply.code(400).send({ error: "Missing channel" });
                     return;
                 }
@@ -1283,14 +1306,33 @@ export default class KmqWebServer {
                 }
 
                 try {
+                    // Web rooms have no channels; the worker gets the room's
+                    // membership inline so the first round can't race the
+                    // separate membership push.
+                    const room = ctx.instance.webRoom
+                        ? this.webRoomManager?.getRoomForUser(ctx.user.id)
+                        : undefined;
+
                     const result = await this.activityHub!.startGame({
                         guildID: ctx.instance.guildID,
                         userID: ctx.user.id,
-                        voiceChannelID: ctx.instance.channelID,
-                        textChannelID: ctx.instance.channelID,
+                        voiceChannelID: ctx.instance.channelID ?? "",
+                        textChannelID: ctx.instance.channelID ?? "",
                         gameType,
                         eliminationLives,
                         clipDuration,
+                        ...(ctx.instance.webRoom
+                            ? {
+                                  mode: "web" as const,
+                                  members: [
+                                      ...(room?.members.values() ?? []),
+                                  ].map((m) => ({
+                                      id: m.id,
+                                      username: m.username,
+                                      avatarUrl: m.avatarUrl,
+                                  })),
+                              }
+                            : {}),
                     });
 
                     if (!result.ok) {

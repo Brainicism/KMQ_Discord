@@ -85,6 +85,20 @@ type ActivityEvent =
           type: "roundTimerChanged";
           guessTimeoutSec: number | null;
           timerStartedAt: number;
+      }
+    | {
+          // Web sessions only: the playback spec for the round's audio.
+          // Worker → admiral ONLY: the hub must intercept this (it names the
+          // song) and mint an opaque streaming URL instead of forwarding.
+          type: "roundAudio";
+          youtubeLink: string;
+          songLocation: string;
+          seekLocation: number;
+          songDuration: number;
+          inputArgs: string[];
+          encoderArgs: string[];
+          playbackDurationSec: number;
+          songStartedAt: number | null;
       };
 
 export default ActivityEvent;

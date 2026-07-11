@@ -17,6 +17,7 @@ import {
     getAverageVolume,
     getCurrentVoiceMembers,
     getDebugLogHeader,
+    getMajorityCount,
     sendBookmarkedSongs,
     sendErrorMessage,
     sendInfoMessage,
@@ -58,10 +59,26 @@ import type KmqMember from "./kmq_member";
 import type ListeningSession from "./listening_session";
 import type QueriedSong from "./queried_song";
 import type Round from "./round";
+import type SpecialType from "../enums/option_types/special_type";
 
 import { SessionState, SessionStateMachine } from "./session_state";
 
 const logger = new IPCLogger("session");
+
+/**
+ * The fully resolved audio parameters for one playback, as computed by
+ * playSong: everything a transport needs to actually produce sound (Discord:
+ * ffmpeg args into the voice connection; web: an audio stream spec).
+ */
+export interface PlaybackSpec {
+    songLocation: string;
+    seekLocation: number;
+    songDuration: number;
+    inputArgs: string[];
+    encoderArgs: { [arg: string]: Array<string> };
+    isClipMode: boolean;
+    specialType: SpecialType | null;
+}
 
 export default abstract class Session extends EventEmitter {
     /** The ID of text channel in which the Session was started in, and will be active in */
@@ -303,86 +320,7 @@ export default abstract class Session extends EventEmitter {
         const round = this.prepareRound(randomSong);
         this.round = round;
 
-        const voiceChannel = State.client.getChannel(
-            this.voiceChannelID,
-        ) as Eris.VoiceChannel | null;
-
-        if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
-            await this.endSessionFromLifecycle(
-                "Voice channel is empty, during startRound",
-                false,
-            );
-            return null;
-        }
-
-        // join voice channel and start round
-        try {
-            await this.ensureVoiceConnection(State.client);
-            // TODO: fix status update
-            // if (!voiceChannel.status) {
-            //     try {
-            //         await State.client.setVoiceChannelStatus(
-            //             this.voiceChannelID,
-            //             KMQ_EMOJI,
-            //         );
-            //     } catch (e) {
-            //         logger.debug(
-            //             `${getDebugLogHeader(messageContext)} Couldn't set voice channel status for ${voiceChannel.id}. e = ${e}`,
-            //         );
-            //     }
-            // }
-        } catch (err) {
-            await this.endSessionFromLifecycle(
-                "Unable to obtain voice connection",
-                true,
-            );
-            if (err instanceof Error) {
-                const knownErrorStrings = [
-                    "Voice connection timeout",
-                    "Disconnected",
-                    "Insufficient permission to connect to voice channel",
-                ];
-
-                let isError = true;
-                if (
-                    knownErrorStrings.some((x) =>
-                        (err as Error).message.includes(x),
-                    )
-                ) {
-                    isError = false;
-                }
-
-                if (isError) {
-                    logger.error(
-                        `${getDebugLogHeader(
-                            messageContext,
-                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
-                    );
-                } else {
-                    logger.warn(
-                        `${getDebugLogHeader(
-                            messageContext,
-                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
-                    );
-                }
-            } else {
-                logger.error(
-                    `${getDebugLogHeader(
-                        messageContext,
-                    )} | Error obtaining voice connection. Unexpected error type. err = ${err.toString()}`,
-                );
-            }
-
-            await sendErrorMessage(messageContext, {
-                title: i18n.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.title",
-                ),
-                description: i18n.translate(
-                    this.guildID,
-                    "misc.failure.vcJoin.description",
-                ),
-            });
+        if (!(await this.preparePlaybackChannel(messageContext))) {
             return null;
         }
 
@@ -790,6 +728,128 @@ export default abstract class Session extends EventEmitter {
      */
     protected abstract prepareRound(randomSong: QueriedSong): Round;
 
+    /** @returns whether this session plays to a web room instead of a Discord VC */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    isWebSession(): boolean {
+        return false;
+    }
+
+    /**
+     * Transport hook: the users participating in this session (Discord: VC
+     * members, bots and banned players excluded; web: room members).
+     * @returns participant user IDs
+     */
+    protected getParticipantIDs(): string[] {
+        return getCurrentVoiceMembers(this.voiceChannelID).map((x) => x.id);
+    }
+
+    /** @returns the number of session participants */
+    protected getParticipantCount(): number {
+        return this.getParticipantIDs().length;
+    }
+
+    /** @returns votes needed for a skip/hint to pass (majority of participants) */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    getVoteMajorityCount(): number {
+        return getMajorityCount(this.guildID);
+    }
+
+    /**
+     * Transport hook: readies the playback channel before a round starts
+     * (Discord: requires a non-empty VC and joins it). On failure the session
+     * has already been ended / the error reported.
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     * @returns whether the round may proceed
+     */
+    protected async preparePlaybackChannel(
+        messageContext: MessageContext,
+    ): Promise<boolean> {
+        const voiceChannel = State.client.getChannel(
+            this.voiceChannelID,
+        ) as Eris.VoiceChannel | null;
+
+        if (!voiceChannel || voiceChannel.voiceMembers.size === 0) {
+            await this.endSessionFromLifecycle(
+                "Voice channel is empty, during startRound",
+                false,
+            );
+            return false;
+        }
+
+        // join voice channel and start round
+        try {
+            await this.ensureVoiceConnection(State.client);
+            // TODO: fix status update
+            // if (!voiceChannel.status) {
+            //     try {
+            //         await State.client.setVoiceChannelStatus(
+            //             this.voiceChannelID,
+            //             KMQ_EMOJI,
+            //         );
+            //     } catch (e) {
+            //         logger.debug(
+            //             `${getDebugLogHeader(messageContext)} Couldn't set voice channel status for ${voiceChannel.id}. e = ${e}`,
+            //         );
+            //     }
+            // }
+        } catch (err) {
+            await this.endSessionFromLifecycle(
+                "Unable to obtain voice connection",
+                true,
+            );
+            if (err instanceof Error) {
+                const knownErrorStrings = [
+                    "Voice connection timeout",
+                    "Disconnected",
+                    "Insufficient permission to connect to voice channel",
+                ];
+
+                let isError = true;
+                if (
+                    knownErrorStrings.some((x) =>
+                        (err as Error).message.includes(x),
+                    )
+                ) {
+                    isError = false;
+                }
+
+                if (isError) {
+                    logger.error(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
+                    );
+                } else {
+                    logger.warn(
+                        `${getDebugLogHeader(
+                            messageContext,
+                        )} | Error obtaining voice connection. err = ${extractErrorString(err)}`,
+                    );
+                }
+            } else {
+                logger.error(
+                    `${getDebugLogHeader(
+                        messageContext,
+                    )} | Error obtaining voice connection. Unexpected error type. err = ${err.toString()}`,
+                );
+            }
+
+            await sendErrorMessage(messageContext, {
+                title: i18n.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.title",
+                ),
+                description: i18n.translate(
+                    this.guildID,
+                    "misc.failure.vcJoin.description",
+                ),
+            });
+            return false;
+        }
+
+        return true;
+    }
+
     /**
      * Begin playing the Round's song in the VoiceChannel, listen on VoiceConnection events
      * @param messageContext - An object containing relevant parts of Eris.Message
@@ -807,12 +867,7 @@ export default abstract class Session extends EventEmitter {
             return false;
         }
 
-        if (!this.connection) {
-            logger.error(
-                `${getDebugLogHeader(
-                    messageContext,
-                )} | Unexpectedly null connection in playSong. clipAction = ${clipAction}`,
-            );
+        if (!this.playbackChannelReady(messageContext, clipAction)) {
             return false;
         }
 
@@ -873,7 +928,7 @@ export default abstract class Session extends EventEmitter {
             }. clip mode = ${isClipMode}. clip action = ${clipAction}.`,
         );
 
-        this.connection.stopPlaying();
+        this.stopPlayback();
 
         try {
             let inputArgs = ["-ss", seekLocation.toString()];
@@ -976,26 +1031,18 @@ export default abstract class Session extends EventEmitter {
                 });
             }
 
-            await this.ensureConnectionReady();
-
-            let voiceDataTimeout: number | undefined;
-            if (isClipMode) {
-                voiceDataTimeout = CLIP_VC_END_TIMEOUT_MS;
-            } else if (specialType) {
-                voiceDataTimeout = 7500;
-            } else {
-                voiceDataTimeout = 2000;
-            }
-
-            this.connection.play(songLocation, {
-                inputArgs,
-                encoderArgs: Object.entries(encoderArgs).flatMap((x) => [
-                    x[0],
-                    x[1].join(","),
-                ]),
-                // opusPassthrough: specialType === null && !isClipMode,
-                voiceDataTimeout,
-            });
+            await this.beginPlayback(
+                {
+                    songLocation,
+                    seekLocation,
+                    songDuration,
+                    inputArgs,
+                    encoderArgs,
+                    isClipMode,
+                    specialType,
+                },
+                round,
+            );
         } catch (e) {
             if (e instanceof Error) {
                 if (e.message.includes("Not ready yet")) {
@@ -1019,7 +1066,95 @@ export default abstract class Session extends EventEmitter {
 
         this.startGuessTimeout(messageContext);
 
-        this.connection.once("end", async () => {
+        this.armPlaybackEnd(messageContext, round, clipAction);
+
+        return true;
+    }
+
+    /**
+     * Transport hook: whether playback can proceed at all (Discord: the voice
+     * connection exists). Runs before any per-round work.
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param clipAction - The clip action, for logging
+     * @returns whether playback can proceed
+     */
+    protected playbackChannelReady(
+        messageContext: MessageContext,
+        clipAction: ClipAction | null,
+    ): boolean {
+        if (!this.connection) {
+            logger.error(
+                `${getDebugLogHeader(
+                    messageContext,
+                )} | Unexpectedly null connection in playSong. clipAction = ${clipAction}`,
+            );
+            return false;
+        }
+
+        return true;
+    }
+
+    /** Transport hook: halts any in-flight playback (Discord: the encoder). */
+    protected stopPlayback(): void {
+        this.connection?.stopPlaying();
+    }
+
+    /**
+     * Transport hook: whether a song is currently playing with round-end
+     * handling armed (Discord: the connection's "end" listener; web: the
+     * round-end timer).
+     * @returns whether playback is active
+     */
+    protected isPlaybackActive(): boolean {
+        return !!this.connection && this.connection.listenerCount("end") > 0;
+    }
+
+    /**
+     * Transport hook: starts playing the computed audio (Discord: ffmpeg into
+     * the voice connection). Throwing here restarts the round.
+     * @param spec - The resolved audio parameters for this playback
+     * @param _round - The round being played (used by the web transport)
+     */
+    protected async beginPlayback(
+        spec: PlaybackSpec,
+        _round: Round,
+    ): Promise<void> {
+        await this.ensureConnectionReady();
+
+        let voiceDataTimeout: number | undefined;
+        if (spec.isClipMode) {
+            voiceDataTimeout = CLIP_VC_END_TIMEOUT_MS;
+        } else if (spec.specialType) {
+            voiceDataTimeout = 7500;
+        } else {
+            voiceDataTimeout = 2000;
+        }
+
+        this.connection!.play(spec.songLocation, {
+            inputArgs: spec.inputArgs,
+            encoderArgs: Object.entries(spec.encoderArgs).flatMap((x) => [
+                x[0],
+                x[1].join(","),
+            ]),
+            // opusPassthrough: specialType === null && !isClipMode,
+            voiceDataTimeout,
+        });
+    }
+
+    /**
+     * Transport hook: arranges for handlePlaybackEnd to run when playback
+     * finishes (Discord: the voice connection's end/error events; both are
+     * disarmed by the next round's ensureVoiceConnection listener reset).
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param round - The round being played
+     * @param clipAction - The clip action the playback was started with
+     */
+    protected armPlaybackEnd(
+        messageContext: MessageContext,
+        round: Round,
+        clipAction: ClipAction | null,
+    ): void {
+        this.connection!.once("end", async () => {
             // replace listener with no-op to catch any exceptions thrown after this event
             if (this.connection) {
                 this.connection.removeAllListeners("end");
@@ -1033,51 +1168,10 @@ export default abstract class Session extends EventEmitter {
                 }
             }
 
-            this.stopGuessTimeout();
-
-            if (clipAction === ClipAction.END_ROUND) {
-                // The end round clip doesn't deal with round state, it just plays and ends
-                return;
-            }
-
-            if (this.isGameSession() && this.isClipMode()) {
-                const clipGameRound = round as ClipGameRound;
-                if (!round.finished) {
-                    if (
-                        clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT
-                    ) {
-                        clipGameRound.incrementReplays();
-                        await this.playSong(
-                            messageContext,
-                            round,
-                            this.clipPlayNewClip
-                                ? ClipAction.NEW_CLIP
-                                : ClipAction.REPLAY,
-                        );
-                        return;
-                    } else {
-                        // Give some time to guess the song after the last replay has happened
-                        // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
-                        await delay(CLIP_LAST_REPLAY_DELAY_MS);
-                        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                        if (round.finished) {
-                            // The round was ended by a guess while we were waiting, so don't try to end the round, as
-                            // the next round will be started by the guess
-                            return;
-                        }
-                    }
-                }
-            }
-
-            await this.endRound(
-                false,
-                new MessageContext(this.textChannelID, null, this.guildID),
-            );
-
-            await this.startRound(messageContext);
+            await this.handlePlaybackEnd(messageContext, round, clipAction);
         });
 
-        this.connection.once("error", async (err) => {
+        this.connection!.once("error", async (err) => {
             if (clipAction === ClipAction.END_ROUND) {
                 // Don't restart the round if the end round clip failed to play
                 return;
@@ -1099,8 +1193,60 @@ export default abstract class Session extends EventEmitter {
 
             await this.errorRestartRound();
         });
+    }
 
-        return true;
+    /**
+     * Shared end-of-playback lifecycle, identical across transports: replay
+     * clips while allowed, then end the round and start the next one.
+     * @param messageContext - An object containing relevant parts of Eris.Message
+     * @param round - The round whose playback ended
+     * @param clipAction - The clip action the playback was started with
+     */
+    protected async handlePlaybackEnd(
+        messageContext: MessageContext,
+        round: Round,
+        clipAction: ClipAction | null,
+    ): Promise<void> {
+        this.stopGuessTimeout();
+
+        if (clipAction === ClipAction.END_ROUND) {
+            // The end round clip doesn't deal with round state, it just plays and ends
+            return;
+        }
+
+        if (this.isGameSession() && this.isClipMode()) {
+            const clipGameRound = round as ClipGameRound;
+            if (!round.finished) {
+                if (clipGameRound.getReplayCount() < CLIP_MAX_REPLAY_COUNT) {
+                    clipGameRound.incrementReplays();
+                    await this.playSong(
+                        messageContext,
+                        round,
+                        this.clipPlayNewClip
+                            ? ClipAction.NEW_CLIP
+                            : ClipAction.REPLAY,
+                    );
+                    return;
+                } else {
+                    // Give some time to guess the song after the last replay has happened
+                    // In addition to the time to receive this "end" event defined by CLIP_VC_END_TIMEOUT_MS
+                    await delay(CLIP_LAST_REPLAY_DELAY_MS);
+                    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                    if (round.finished) {
+                        // The round was ended by a guess while we were waiting, so don't try to end the round, as
+                        // the next round will be started by the guess
+                        return;
+                    }
+                }
+            }
+        }
+
+        await this.endRound(
+            false,
+            new MessageContext(this.textChannelID, null, this.guildID),
+        );
+
+        await this.startRound(messageContext);
     }
 
     protected getSongCount(): {

@@ -13,6 +13,7 @@ type ActivityRequestOp =
     | "preset"
     | "profile"
     | "songInfo"
-    | "searchSongs";
+    | "searchSongs"
+    | "webRoomMembership";
 
 export default ActivityRequestOp;

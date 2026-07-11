@@ -142,7 +142,7 @@ export default class HintCommand implements BaseCommand {
     }
 
     static isHintMajority(
-        messageContext: MessageContext,
+        _messageContext: MessageContext,
         gameSession: GameSession,
     ): boolean {
         if (!gameSession.round) {
@@ -162,7 +162,7 @@ export default class HintCommand implements BaseCommand {
 
         return (
             gameSession.round.getHintRequests() >=
-            getMajorityCount(messageContext.guildID)
+            gameSession.getVoteMajorityCount()
         );
     }
 
