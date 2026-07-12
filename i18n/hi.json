@@ -318,6 +318,64 @@
         "themeToggleDark": "डार्क मोड में स्विच करें",
         "themeToggleLight": "लाइट मोड में स्विच करें",
         "waitingForNextRound": "अगले राउंड का इंतज़ार है…",
+        "web": {
+            "cancel": "रद्द करें",
+            "createRoom": "एक कमरा बनाएँ",
+            "error": {
+                "full": "वह कमरा भरा हुआ है।",
+                "generic": "कुछ गड़बड़ हो गई। कृपया पुनः प्रयास करें।",
+                "guestLimit": "यह कमरा अधिक अतिथि स्वीकार नहीं कर रहा है। शामिल होने के लिए Discord से लॉग इन करें।",
+                "guestUnavailable": "अतिथि खेल अभी उपलब्ध नहीं है।",
+                "loginFailed": "लॉग इन विफल रहा। कृपया पुनः प्रयास करें।",
+                "notFound": "वह कमरा मौजूद नहीं है (या सभी चले गए)।",
+                "removed": "आपको कमरे से हटा दिया गया।",
+                "unauthorized": "आपका लॉगिन समाप्त हो गया है। कृपया फिर से लॉग इन करें।",
+                "wrongPassword": "गलत पासवर्ड। कृपया पुनः प्रयास करें।"
+            },
+            "guestNote": "अतिथि आमंत्रण के साथ कमरों में शामिल हो सकते हैं। अपना खुद का कमरा बनाने और अपने आँकड़े रखने के लिए Discord से लॉग इन करें।",
+            "guestNoteLoggedIn": "आप अतिथि के रूप में खेल रहे हैं — नीचे कोई सार्वजनिक कमरा देखें या आमंत्रण कोड से शामिल हों। अपना खुद का कमरा बनाने और अपने आँकड़े रखने के लिए Discord से लॉग इन करें।",
+            "inviteCodePlaceholder": "आमंत्रण कोड या लिंक",
+            "join": "शामिल हों",
+            "joinAsGuest": "अतिथि के रूप में शामिल हों",
+            "loading": "लोड हो रहा है...",
+            "lobby": {
+                "empty": "अभी कोई सार्वजनिक कमरा नहीं — ऊपर एक बनाएँ!",
+                "roomName": "{{owner}} का कमरा",
+                "title": "सार्वजनिक कमरे"
+            },
+            "loggedInAs": "इस रूप में लॉग इन",
+            "loginDiscord": "Discord से लॉग इन करें",
+            "logout": "लॉग आउट",
+            "nicknameLabel": "अतिथि उपनाम",
+            "nicknamePlaceholder": "एक उपनाम चुनें",
+            "or": "या",
+            "passwordLabel": "कमरे का पासवर्ड",
+            "passwordOptionalLabel": "कमरे का पासवर्ड (वैकल्पिक)",
+            "passwordOptionalPlaceholder": "पासवर्ड (वैकल्पिक)",
+            "passwordPlaceholder": "पासवर्ड",
+            "passwordRequired": "इस कमरे के लिए पासवर्ड आवश्यक है।",
+            "playAsGuest": "अतिथि के रूप में खेलें",
+            "playingAsGuest": "अतिथि के रूप में खेल रहे हैं",
+            "room": {
+                "away": "{{username}} (अनुपस्थित)",
+                "copied": "कॉपी किया गया!",
+                "copyInvite": "आमंत्रण लिंक कॉपी करें",
+                "label": "कमरा",
+                "leave": "छोड़ें"
+            },
+            "sound": {
+                "enable": "ध्वनि सक्षम करें",
+                "mute": "म्यूट",
+                "unmute": "अनम्यूट",
+                "volume": "आवाज़"
+            },
+            "tagline": "के-पॉप संगीत अनुमान लगाने का खेल",
+            "visibilityLabel": "कमरे की दृश्यता",
+            "visibilityPrivate": "निजी",
+            "visibilityPrivateHint": "केवल आमंत्रण लिंक वाले लोग ही शामिल हो सकते हैं।",
+            "visibilityPublic": "सार्वजनिक",
+            "visibilityPublicHint": "कोई भी इस कमरे को लॉबी सूची में ढूँढ सकता है।"
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

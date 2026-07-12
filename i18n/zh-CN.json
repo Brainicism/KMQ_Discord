@@ -318,6 +318,64 @@
         "themeToggleDark": "切换到深色模式",
         "themeToggleLight": "切换到浅色模式",
         "waitingForNextRound": "等待下一回合…",
+        "web": {
+            "cancel": "取消",
+            "createRoom": "创建房间",
+            "error": {
+                "full": "该房间已满。",
+                "generic": "出了点问题。请重试。",
+                "guestLimit": "此房间不再接受更多访客。请使用 Discord 登录以加入。",
+                "guestUnavailable": "访客游玩当前不可用。",
+                "loginFailed": "登录失败。请重试。",
+                "notFound": "该房间不存在（或所有人都已离开）。",
+                "removed": "你已被移出房间。",
+                "unauthorized": "你的登录已过期。请重新登录。",
+                "wrongPassword": "密码错误。请重试。"
+            },
+            "guestNote": "访客可通过邀请加入房间。使用 Discord 登录即可创建自己的房间并保存统计数据。",
+            "guestNoteLoggedIn": "你正在以访客身份游玩 — 在下方浏览公开房间，或用邀请码加入。使用 Discord 登录即可创建自己的房间并保存统计数据。",
+            "inviteCodePlaceholder": "邀请码或链接",
+            "join": "加入",
+            "joinAsGuest": "以访客身份加入",
+            "loading": "加载中...",
+            "lobby": {
+                "empty": "目前没有公开房间 — 在上方创建一个吧！",
+                "roomName": "{{owner}} 的房间",
+                "title": "公开房间"
+            },
+            "loggedInAs": "已登录为",
+            "loginDiscord": "使用 Discord 登录",
+            "logout": "退出登录",
+            "nicknameLabel": "访客昵称",
+            "nicknamePlaceholder": "取个昵称",
+            "or": "或",
+            "passwordLabel": "房间密码",
+            "passwordOptionalLabel": "房间密码（可选）",
+            "passwordOptionalPlaceholder": "密码（可选）",
+            "passwordPlaceholder": "密码",
+            "passwordRequired": "此房间需要密码。",
+            "playAsGuest": "以访客身份游玩",
+            "playingAsGuest": "以访客身份游玩",
+            "room": {
+                "away": "{{username}}（离开）",
+                "copied": "已复制！",
+                "copyInvite": "复制邀请链接",
+                "label": "房间",
+                "leave": "离开"
+            },
+            "sound": {
+                "enable": "启用声音",
+                "mute": "静音",
+                "unmute": "取消静音",
+                "volume": "音量"
+            },
+            "tagline": "K-pop 音乐猜歌游戏",
+            "visibilityLabel": "房间可见性",
+            "visibilityPrivate": "私密",
+            "visibilityPrivateHint": "只有拥有邀请链接的人才能加入。",
+            "visibilityPublic": "公开",
+            "visibilityPublicHint": "任何人都能在大厅列表中找到此房间。"
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

@@ -318,6 +318,64 @@
         "themeToggleDark": "Beralih ke mode gelap",
         "themeToggleLight": "Beralih ke mode terang",
         "waitingForNextRound": "Menunggu ronde berikutnya…",
+        "web": {
+            "cancel": "Batal",
+            "createRoom": "Buat ruang",
+            "error": {
+                "full": "Ruang itu penuh.",
+                "generic": "Terjadi kesalahan. Silakan coba lagi.",
+                "guestLimit": "Ruang ini tidak menerima tamu lagi. Masuk dengan Discord untuk bergabung.",
+                "guestUnavailable": "Bermain sebagai tamu sedang tidak tersedia.",
+                "loginFailed": "Gagal masuk. Silakan coba lagi.",
+                "notFound": "Ruang itu tidak ada (atau semua sudah keluar).",
+                "removed": "Kamu dikeluarkan dari ruang.",
+                "unauthorized": "Sesi masukmu telah berakhir. Silakan masuk lagi.",
+                "wrongPassword": "Kata sandi salah. Silakan coba lagi."
+            },
+            "guestNote": "Tamu dapat bergabung ke ruang dengan undangan. Masuk dengan Discord untuk membuat ruang sendiri dan menyimpan statistikmu.",
+            "guestNoteLoggedIn": "Kamu bermain sebagai tamu — jelajahi ruang publik di bawah atau gabung dengan kode undangan. Masuk dengan Discord untuk membuat ruang sendiri dan menyimpan statistikmu.",
+            "inviteCodePlaceholder": "Kode atau tautan undangan",
+            "join": "Gabung",
+            "joinAsGuest": "Gabung sebagai tamu",
+            "loading": "Memuat...",
+            "lobby": {
+                "empty": "Belum ada ruang publik — buat satu di atas!",
+                "roomName": "Ruang {{owner}}",
+                "title": "Ruang publik"
+            },
+            "loggedInAs": "Masuk sebagai",
+            "loginDiscord": "Masuk dengan Discord",
+            "logout": "Keluar",
+            "nicknameLabel": "Nama panggilan tamu",
+            "nicknamePlaceholder": "Pilih nama panggilan",
+            "or": "atau",
+            "passwordLabel": "Kata sandi ruang",
+            "passwordOptionalLabel": "Kata sandi ruang (opsional)",
+            "passwordOptionalPlaceholder": "Kata sandi (opsional)",
+            "passwordPlaceholder": "Kata sandi",
+            "passwordRequired": "Ruang ini memerlukan kata sandi.",
+            "playAsGuest": "Main sebagai tamu",
+            "playingAsGuest": "Bermain sebagai tamu",
+            "room": {
+                "away": "{{username}} (tidak aktif)",
+                "copied": "Tersalin!",
+                "copyInvite": "Salin tautan undangan",
+                "label": "Ruang",
+                "leave": "Keluar"
+            },
+            "sound": {
+                "enable": "Aktifkan suara",
+                "mute": "Bisukan",
+                "unmute": "Bunyikan",
+                "volume": "Volume"
+            },
+            "tagline": "Permainan tebak lagu K-pop",
+            "visibilityLabel": "Visibilitas ruang",
+            "visibilityPrivate": "Privat",
+            "visibilityPrivateHint": "Hanya orang dengan tautan undangan yang dapat bergabung.",
+            "visibilityPublic": "Publik",
+            "visibilityPublicHint": "Siapa pun dapat menemukan ruang ini di daftar lobi."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

@@ -318,6 +318,64 @@
         "themeToggleDark": "Overschakelen naar de donkere modus",
         "themeToggleLight": "Overschakelen naar de lichte modus",
         "waitingForNextRound": "Wachten op volgende ronde…",
+        "web": {
+            "cancel": "Annuleren",
+            "createRoom": "Een kamer maken",
+            "error": {
+                "full": "Die kamer is vol.",
+                "generic": "Er is iets misgegaan. Probeer het opnieuw.",
+                "guestLimit": "Deze kamer accepteert geen gasten meer. Log in met Discord om deel te nemen.",
+                "guestUnavailable": "Spelen als gast is momenteel niet beschikbaar.",
+                "loginFailed": "Inloggen mislukt. Probeer het opnieuw.",
+                "notFound": "Die kamer bestaat niet (of iedereen is vertrokken).",
+                "removed": "Je bent uit de kamer verwijderd.",
+                "unauthorized": "Je aanmelding is verlopen. Log opnieuw in.",
+                "wrongPassword": "Verkeerd wachtwoord. Probeer het opnieuw."
+            },
+            "guestNote": "Gasten kunnen met een uitnodiging deelnemen aan kamers. Log in met Discord om je eigen kamers te hosten en je statistieken te behouden.",
+            "guestNoteLoggedIn": "Je speelt als gast — bekijk hieronder een openbare kamer of neem deel met een uitnodigingscode. Log in met Discord om je eigen kamers te hosten en je statistieken te behouden.",
+            "inviteCodePlaceholder": "Uitnodigingscode of link",
+            "join": "Deelnemen",
+            "joinAsGuest": "Deelnemen als gast",
+            "loading": "Laden...",
+            "lobby": {
+                "empty": "Nu geen openbare kamers — maak er hierboven een!",
+                "roomName": "Kamer van {{owner}}",
+                "title": "Openbare kamers"
+            },
+            "loggedInAs": "Ingelogd als",
+            "loginDiscord": "Inloggen met Discord",
+            "logout": "Uitloggen",
+            "nicknameLabel": "Gastbijnaam",
+            "nicknamePlaceholder": "Kies een bijnaam",
+            "or": "of",
+            "passwordLabel": "Kamerwachtwoord",
+            "passwordOptionalLabel": "Kamerwachtwoord (optioneel)",
+            "passwordOptionalPlaceholder": "Wachtwoord (optioneel)",
+            "passwordPlaceholder": "Wachtwoord",
+            "passwordRequired": "Deze kamer vereist een wachtwoord.",
+            "playAsGuest": "Spelen als gast",
+            "playingAsGuest": "Speelt als gast",
+            "room": {
+                "away": "{{username}} (afwezig)",
+                "copied": "Gekopieerd!",
+                "copyInvite": "Uitnodigingslink kopiëren",
+                "label": "Kamer",
+                "leave": "Verlaten"
+            },
+            "sound": {
+                "enable": "Geluid inschakelen",
+                "mute": "Dempen",
+                "unmute": "Dempen opheffen",
+                "volume": "Volume"
+            },
+            "tagline": "Het K-pop muziekraadspel",
+            "visibilityLabel": "Zichtbaarheid van de kamer",
+            "visibilityPrivate": "Privé",
+            "visibilityPrivateHint": "Alleen mensen met de uitnodigingslink kunnen deelnemen.",
+            "visibilityPublic": "Openbaar",
+            "visibilityPublicHint": "Iedereen kan deze kamer vinden in de lobbylijst."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

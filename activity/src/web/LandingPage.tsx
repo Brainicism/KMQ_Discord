@@ -10,13 +10,17 @@ import {
     leaveRoom,
     listPublicRooms,
     logout,
+    readLocale,
     roomCodeFromLocation,
     roomPath,
     validateSession,
 } from "../platform/webPlatform";
+import { fetchI18nBundle } from "../api";
+import { makeTranslator } from "../i18n/translator";
 import App from "../App";
 import RoomBar from "./RoomBar";
 import kmqLogoUrl from "../assets/kmq_logo.png";
+import type { Translator } from "../i18n/translator";
 import type {
     PublicRoomSummaryView,
     WebRoomView,
@@ -26,26 +30,35 @@ import type {
 
 type LandingState =
     | { phase: "loading" }
+    // `error` is an error *code* (see roomErrorText); translated at render so
+    // it survives the async i18n-bundle load without a stale-string race.
     | { phase: "loggedOut"; error: string | null }
     | { phase: "loggedIn"; session: WebSession; error: string | null }
     | { phase: "inRoom"; session: WebSession; room: WebRoomView };
 
 const PUBLIC_ROOMS_POLL_MS = 8_000;
 
-function roomErrorText(error: string): string {
+/** Maps an error code (room results + a few web-shell states) to a message. */
+function roomErrorText(t: Translator, error: string): string {
     switch (error) {
         case "not_found":
-            return "That room doesn't exist (or everyone left).";
+            return t("web.error.notFound");
         case "full":
-            return "That room is full.";
+            return t("web.error.full");
         case "guest_limit":
-            return "This room isn't accepting more guests. Log in with Discord to join.";
+            return t("web.error.guestLimit");
         case "wrong_password":
-            return "Wrong password. Please try again.";
+            return t("web.error.wrongPassword");
         case "unauthorized":
-            return "Your login expired. Please log in again.";
+            return t("web.error.unauthorized");
+        case "removed":
+            return t("web.error.removed");
+        case "login_failed":
+            return t("web.error.loginFailed");
+        case "guest_unavailable":
+            return t("web.error.guestUnavailable");
         default:
-            return "Something went wrong. Please try again.";
+            return t("web.error.generic");
     }
 }
 
@@ -54,10 +67,12 @@ function PublicRoomList({
     rooms,
     busy,
     onJoin,
+    t,
 }: {
     rooms: PublicRoomSummaryView[] | null;
     busy: boolean;
     onJoin: (room: PublicRoomSummaryView) => void;
+    t: Translator;
 }): JSX.Element | null {
     // null = not loaded yet / unavailable; render nothing so the lobby doesn't
     // flash an empty state on every poll blip.
@@ -65,11 +80,11 @@ function PublicRoomList({
 
     return (
         <div className="kmq-web-landing-lobby">
-            <p className="kmq-web-landing-lobby-title">Public rooms</p>
+            <p className="kmq-web-landing-lobby-title">
+                {t("web.lobby.title")}
+            </p>
             {rooms.length === 0 ? (
-                <p className="kmq-web-landing-note">
-                    No public rooms right now — create one above!
-                </p>
+                <p className="kmq-web-landing-note">{t("web.lobby.empty")}</p>
             ) : (
                 <ul className="kmq-web-landing-lobby-list">
                     {rooms.map((room) => (
@@ -78,7 +93,9 @@ function PublicRoomList({
                             className="kmq-web-landing-lobby-row"
                         >
                             <span className="kmq-web-landing-lobby-name">
-                                {room.ownerUsername}&apos;s room
+                                {t("web.lobby.roomName", {
+                                    owner: room.ownerUsername,
+                                })}
                                 {room.hasPassword ? " 🔒" : ""}
                             </span>
                             <span className="kmq-web-landing-lobby-count">
@@ -92,7 +109,7 @@ function PublicRoomList({
                                 }
                                 onClick={() => onJoin(room)}
                             >
-                                Join
+                                {t("web.join")}
                             </button>
                         </li>
                     ))}
@@ -121,12 +138,35 @@ export default function LandingPage(): JSX.Element {
     const [publicRooms, setPublicRooms] = useState<
         PublicRoomSummaryView[] | null
     >(null);
-    // A locked room awaiting a password entry (set when a join needs one).
+    // A locked room awaiting a password entry. `showError` is set once a wrong
+    // password has actually been tried (the first prompt is just a request).
     const [pendingJoin, setPendingJoin] = useState<{
         code: string;
-        error: string | null;
+        showError: boolean;
     } | null>(null);
     const [joinPassword, setJoinPassword] = useState("");
+    // Server-resolved i18n bundle → translator. Null until loaded; the shell
+    // renders a bare logo screen in the meantime.
+    const [translator, setTranslator] = useState<Translator | null>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        fetchI18nBundle(readLocale() ?? "en")
+            .then((bundle) => {
+                if (!cancelled) {
+                    setTranslator(() => makeTranslator(bundle.strings));
+                }
+            })
+            .catch(() => {
+                // Fall back to a key-returning translator so the UI still
+                // functions (buttons work; labels degrade to keys).
+                if (!cancelled) setTranslator(() => makeTranslator({}));
+            });
+
+        return () => {
+            cancelled = true;
+        };
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -166,7 +206,7 @@ export default function LandingPage(): JSX.Element {
                 // A locked invite room: keep the invite URL and prompt for the
                 // password rather than bouncing to the lobby.
                 if (inviteCode && result.error === "wrong_password") {
-                    setPendingJoin({ code: inviteCode, error: null });
+                    setPendingJoin({ code: inviteCode, showError: false });
                     setState({ phase: "loggedIn", session, error: null });
                     return;
                 }
@@ -180,15 +220,12 @@ export default function LandingPage(): JSX.Element {
                     session,
                     // Only surface an error when an invite link failed; not
                     // being in any room is the normal logged-in state.
-                    error: inviteCode ? roomErrorText(result.error) : null,
+                    error: inviteCode ? result.error : null,
                 });
             } catch (e) {
                 console.warn("Web bootstrap failed", e);
                 if (!cancelled) {
-                    setState({
-                        phase: "loggedOut",
-                        error: "Login failed. Please try again.",
-                    });
+                    setState({ phase: "loggedOut", error: "login_failed" });
                 }
             }
         })();
@@ -250,13 +287,7 @@ export default function LandingPage(): JSX.Element {
             }
 
             if (result.error === "wrong_password") {
-                setPendingJoin({
-                    code,
-                    // Only show "wrong password" once they've actually tried
-                    // one; the first prompt is just a request.
-                    error: password ? roomErrorText("wrong_password") : null,
-                });
-
+                setPendingJoin({ code, showError: !!password });
                 setState((prev) =>
                     prev.phase === "inRoom"
                         ? prev
@@ -266,11 +297,7 @@ export default function LandingPage(): JSX.Element {
             }
 
             setPendingJoin(null);
-            setState({
-                phase: "loggedIn",
-                session,
-                error: roomErrorText(result.error),
-            });
+            setState({ phase: "loggedIn", session, error: result.error });
         } finally {
             setBusy(false);
         }
@@ -291,7 +318,7 @@ export default function LandingPage(): JSX.Element {
                 setState({
                     phase: "loggedIn",
                     session,
-                    error: roomErrorText(result.error),
+                    error: result.error,
                 });
             }
         } finally {
@@ -315,7 +342,7 @@ export default function LandingPage(): JSX.Element {
             if (!session) {
                 setState({
                     phase: "loggedOut",
-                    error: "Guest play is unavailable right now.",
+                    error: "guest_unavailable",
                 });
                 return;
             }
@@ -344,6 +371,23 @@ export default function LandingPage(): JSX.Element {
         await logout(session);
     };
 
+    // Hold the interactive UI until the translation bundle is ready so labels
+    // never flash as raw keys. Brand name (KMQ) needs no translation.
+    if (!translator) {
+        return (
+            <div className="kmq-web-landing">
+                <img
+                    className="kmq-web-landing-logo"
+                    src={kmqLogoUrl}
+                    alt="KMQ"
+                />
+                <h1 className="kmq-web-landing-title">KMQ</h1>
+            </div>
+        );
+    }
+
+    const t = translator;
+
     if (state.phase === "inRoom") {
         return (
             <>
@@ -363,12 +407,8 @@ export default function LandingPage(): JSX.Element {
                         void leaveRoom(state.session);
                         exitRoom(state.session, null);
                     }}
-                    onEvicted={() =>
-                        exitRoom(
-                            state.session,
-                            "You were removed from the room.",
-                        )
-                    }
+                    onEvicted={() => exitRoom(state.session, "removed")}
+                    t={t}
                 />
             </>
         );
@@ -378,18 +418,18 @@ export default function LandingPage(): JSX.Element {
         <div className="kmq-web-landing">
             <img className="kmq-web-landing-logo" src={kmqLogoUrl} alt="KMQ" />
             <h1 className="kmq-web-landing-title">KMQ</h1>
-            <p className="kmq-web-landing-tagline">
-                The K-pop music guessing game
-            </p>
+            <p className="kmq-web-landing-tagline">{t("web.tagline")}</p>
 
             {state.phase === "loading" && (
-                <p className="kmq-web-landing-status">Loading...</p>
+                <p className="kmq-web-landing-status">{t("web.loading")}</p>
             )}
 
             {state.phase === "loggedOut" && (
                 <>
                     {state.error && (
-                        <p className="kmq-web-landing-error">{state.error}</p>
+                        <p className="kmq-web-landing-error">
+                            {roomErrorText(t, state.error)}
+                        </p>
                     )}
                     <button
                         type="button"
@@ -402,10 +442,10 @@ export default function LandingPage(): JSX.Element {
                             )
                         }
                     >
-                        Log in with Discord
+                        {t("web.loginDiscord")}
                     </button>
 
-                    <p className="kmq-web-landing-divider">or</p>
+                    <p className="kmq-web-landing-divider">{t("web.or")}</p>
 
                     <form
                         className="kmq-web-landing-join"
@@ -419,8 +459,8 @@ export default function LandingPage(): JSX.Element {
                             value={guestName}
                             onChange={(e) => setGuestName(e.target.value)}
                             maxLength={32}
-                            placeholder="Pick a nickname"
-                            aria-label="Guest nickname"
+                            placeholder={t("web.nicknamePlaceholder")}
+                            aria-label={t("web.nicknameLabel")}
                         />
                         <button
                             type="submit"
@@ -428,14 +468,11 @@ export default function LandingPage(): JSX.Element {
                             disabled={busy}
                         >
                             {roomCodeFromLocation()
-                                ? "Join as guest"
-                                : "Play as guest"}
+                                ? t("web.joinAsGuest")
+                                : t("web.playAsGuest")}
                         </button>
                     </form>
-                    <p className="kmq-web-landing-note">
-                        Guests can join rooms with an invite. Log in with
-                        Discord to host your own and keep your stats.
-                    </p>
+                    <p className="kmq-web-landing-note">{t("web.guestNote")}</p>
                 </>
             )}
 
@@ -450,13 +487,15 @@ export default function LandingPage(): JSX.Element {
                     )}
                     <p className="kmq-web-landing-status">
                         {state.session.user.guest
-                            ? "Playing as guest "
-                            : "Logged in as "}
+                            ? `${t("web.playingAsGuest")} `
+                            : `${t("web.loggedInAs")} `}
                         <strong>{state.session.user.username}</strong>
                     </p>
 
                     {state.error && (
-                        <p className="kmq-web-landing-error">{state.error}</p>
+                        <p className="kmq-web-landing-error">
+                            {roomErrorText(t, state.error)}
+                        </p>
                     )}
 
                     {pendingJoin ? (
@@ -472,11 +511,11 @@ export default function LandingPage(): JSX.Element {
                             }}
                         >
                             <p className="kmq-web-landing-note">
-                                This room requires a password.
+                                {t("web.passwordRequired")}
                             </p>
-                            {pendingJoin.error && (
+                            {pendingJoin.showError && (
                                 <p className="kmq-web-landing-error">
-                                    {pendingJoin.error}
+                                    {t("web.error.wrongPassword")}
                                 </p>
                             )}
                             <input
@@ -488,15 +527,15 @@ export default function LandingPage(): JSX.Element {
                                 onChange={(e) =>
                                     setJoinPassword(e.target.value)
                                 }
-                                placeholder="Password"
-                                aria-label="Room password"
+                                placeholder={t("web.passwordPlaceholder")}
+                                aria-label={t("web.passwordLabel")}
                             />
                             <button
                                 type="submit"
                                 className="kmq-web-landing-button"
                                 disabled={busy || !joinPassword}
                             >
-                                Join
+                                {t("web.join")}
                             </button>
                             <button
                                 type="button"
@@ -506,24 +545,21 @@ export default function LandingPage(): JSX.Element {
                                     setJoinPassword("");
                                 }}
                             >
-                                Cancel
+                                {t("web.cancel")}
                             </button>
                         </form>
                     ) : (
                         <>
                             {state.session.user.guest ? (
                                 <p className="kmq-web-landing-note">
-                                    You&apos;re playing as a guest — browse a
-                                    public room below or join with an invite
-                                    code. Log in with Discord to host your own
-                                    and keep your stats.
+                                    {t("web.guestNoteLoggedIn")}
                                 </p>
                             ) : (
                                 <div className="kmq-web-landing-create">
                                     <div
                                         className="kmq-web-landing-visibility"
                                         role="group"
-                                        aria-label="Room visibility"
+                                        aria-label={t("web.visibilityLabel")}
                                     >
                                         <button
                                             type="button"
@@ -535,7 +571,7 @@ export default function LandingPage(): JSX.Element {
                                                 setVisibility("public")
                                             }
                                         >
-                                            Public
+                                            {t("web.visibilityPublic")}
                                         </button>
                                         <button
                                             type="button"
@@ -547,13 +583,13 @@ export default function LandingPage(): JSX.Element {
                                                 setVisibility("private")
                                             }
                                         >
-                                            Private
+                                            {t("web.visibilityPrivate")}
                                         </button>
                                     </div>
                                     <p className="kmq-web-landing-hint">
                                         {visibility === "public"
-                                            ? "Anyone can find this room in the lobby list."
-                                            : "Only people with the invite link can join."}
+                                            ? t("web.visibilityPublicHint")
+                                            : t("web.visibilityPrivateHint")}
                                     </p>
                                     <input
                                         className="kmq-web-landing-input"
@@ -563,8 +599,12 @@ export default function LandingPage(): JSX.Element {
                                         onChange={(e) =>
                                             setCreatePassword(e.target.value)
                                         }
-                                        placeholder="Password (optional)"
-                                        aria-label="Room password (optional)"
+                                        placeholder={t(
+                                            "web.passwordOptionalPlaceholder",
+                                        )}
+                                        aria-label={t(
+                                            "web.passwordOptionalLabel",
+                                        )}
                                     />
                                     <button
                                         type="button"
@@ -574,7 +614,7 @@ export default function LandingPage(): JSX.Element {
                                             void handleCreate(state.session)
                                         }
                                     >
-                                        Create a room
+                                        {t("web.createRoom")}
                                     </button>
                                 </div>
                             )}
@@ -592,15 +632,15 @@ export default function LandingPage(): JSX.Element {
                                     onChange={(e) =>
                                         setJoinCode(e.target.value)
                                     }
-                                    placeholder="Invite code or link"
-                                    aria-label="Invite code or link"
+                                    placeholder={t("web.inviteCodePlaceholder")}
+                                    aria-label={t("web.inviteCodePlaceholder")}
                                 />
                                 <button
                                     type="submit"
                                     className="kmq-web-landing-button kmq-web-landing-button-secondary"
                                     disabled={busy || !joinCode.trim()}
                                 >
-                                    Join
+                                    {t("web.join")}
                                 </button>
                             </form>
 
@@ -611,7 +651,7 @@ export default function LandingPage(): JSX.Element {
                                     if (room.hasPassword) {
                                         setPendingJoin({
                                             code: room.code,
-                                            error: null,
+                                            showError: false,
                                         });
                                     } else {
                                         void attemptJoin(
@@ -620,6 +660,7 @@ export default function LandingPage(): JSX.Element {
                                         );
                                     }
                                 }}
+                                t={t}
                             />
                         </>
                     )}
@@ -629,7 +670,7 @@ export default function LandingPage(): JSX.Element {
                         className="kmq-web-landing-button kmq-web-landing-button-secondary"
                         onClick={() => void handleLogout()}
                     >
-                        Log out
+                        {t("web.logout")}
                     </button>
                 </div>
             )}

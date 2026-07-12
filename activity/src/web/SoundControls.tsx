@@ -1,4 +1,5 @@
 import type { RoundAudio } from "./useRoundAudio";
+import type { Translator } from "../i18n/translator";
 
 /**
  * Floating sound widget for the standalone website (the embedded Activity
@@ -9,8 +10,10 @@ import type { RoundAudio } from "./useRoundAudio";
  */
 export default function SoundControls({
     audio,
+    t,
 }: {
     audio: RoundAudio;
+    t: Translator;
 }): JSX.Element {
     if (audio.needsUnlock) {
         return (
@@ -20,7 +23,7 @@ export default function SoundControls({
                     className="kmq-sound-unlock"
                     onClick={audio.unlock}
                 >
-                    🔊 Enable sound
+                    🔊 {t("web.sound.enable")}
                 </button>
             </div>
         );
@@ -32,8 +35,12 @@ export default function SoundControls({
                 type="button"
                 className="kmq-sound-mute"
                 onClick={audio.toggleMuted}
-                aria-label={audio.muted ? "Unmute" : "Mute"}
-                title={audio.muted ? "Unmute" : "Mute"}
+                aria-label={
+                    audio.muted ? t("web.sound.unmute") : t("web.sound.mute")
+                }
+                title={
+                    audio.muted ? t("web.sound.unmute") : t("web.sound.mute")
+                }
             >
                 {audio.muted || audio.volume === 0 ? "🔇" : "🔊"}
             </button>
@@ -44,7 +51,7 @@ export default function SoundControls({
                 max={100}
                 value={audio.muted ? 0 : Math.round(audio.volume * 100)}
                 onChange={(e) => audio.setVolume(Number(e.target.value) / 100)}
-                aria-label="Volume"
+                aria-label={t("web.sound.volume")}
             />
         </div>
     );
