@@ -427,6 +427,9 @@ export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
 // user ID so a recreated room keeps its game options and presets.
 export const WEB_ROOM_ID_FLAG = 1n << 62n;
 export const WEB_ROOM_MAX_MEMBERS = 8;
+// Cap the optional join-password length; rooms are ephemeral, this is only
+// abuse defense against a huge payload.
+export const WEB_ROOM_PASSWORD_MAX_LENGTH = 128;
 // A member with no open websocket is dropped from the room after this grace
 // period (survives refreshes and brief network blips); a room with no members
 // left is closed.

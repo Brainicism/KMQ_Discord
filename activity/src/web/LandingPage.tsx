@@ -8,6 +8,7 @@ import {
     guestLogin,
     joinRoom,
     leaveRoom,
+    listPublicRooms,
     logout,
     roomCodeFromLocation,
     roomPath,
@@ -16,7 +17,12 @@ import {
 import App from "../App";
 import RoomBar from "./RoomBar";
 import kmqLogoUrl from "../assets/kmq_logo.png";
-import type { WebRoomView, WebSession } from "../platform/webPlatform";
+import type {
+    PublicRoomSummaryView,
+    WebRoomView,
+    WebRoomVisibility,
+    WebSession,
+} from "../platform/webPlatform";
 
 type LandingState =
     | { phase: "loading" }
@@ -24,17 +30,74 @@ type LandingState =
     | { phase: "loggedIn"; session: WebSession; error: string | null }
     | { phase: "inRoom"; session: WebSession; room: WebRoomView };
 
+const PUBLIC_ROOMS_POLL_MS = 8_000;
+
 function roomErrorText(error: string): string {
     switch (error) {
         case "not_found":
             return "That room doesn't exist (or everyone left).";
         case "full":
             return "That room is full.";
+        case "wrong_password":
+            return "Wrong password. Please try again.";
         case "unauthorized":
             return "Your login expired. Please log in again.";
         default:
             return "Something went wrong. Please try again.";
     }
+}
+
+/** The browse-a-public-lobby list shown to logged-in users not yet in a room. */
+function PublicRoomList({
+    rooms,
+    busy,
+    onJoin,
+}: {
+    rooms: PublicRoomSummaryView[] | null;
+    busy: boolean;
+    onJoin: (room: PublicRoomSummaryView) => void;
+}): JSX.Element | null {
+    // null = not loaded yet / unavailable; render nothing so the lobby doesn't
+    // flash an empty state on every poll blip.
+    if (rooms === null) return null;
+
+    return (
+        <div className="kmq-web-landing-lobby">
+            <p className="kmq-web-landing-lobby-title">Public rooms</p>
+            {rooms.length === 0 ? (
+                <p className="kmq-web-landing-note">
+                    No public rooms right now — create one above!
+                </p>
+            ) : (
+                <ul className="kmq-web-landing-lobby-list">
+                    {rooms.map((room) => (
+                        <li
+                            key={room.code}
+                            className="kmq-web-landing-lobby-row"
+                        >
+                            <span className="kmq-web-landing-lobby-name">
+                                {room.ownerUsername}&apos;s room
+                                {room.hasPassword ? " 🔒" : ""}
+                            </span>
+                            <span className="kmq-web-landing-lobby-count">
+                                {room.memberCount}/{room.maxMembers}
+                            </span>
+                            <button
+                                type="button"
+                                className="kmq-web-landing-button kmq-web-landing-button-secondary"
+                                disabled={
+                                    busy || room.memberCount >= room.maxMembers
+                                }
+                                onClick={() => onJoin(room)}
+                            >
+                                Join
+                            </button>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
 }
 
 /**
@@ -49,6 +112,19 @@ export default function LandingPage(): JSX.Element {
     const [joinCode, setJoinCode] = useState("");
     const [guestName, setGuestName] = useState("");
     const [busy, setBusy] = useState(false);
+    // Create-room form: visibility toggle + optional join password.
+    const [visibility, setVisibility] = useState<WebRoomVisibility>("public");
+    const [createPassword, setCreatePassword] = useState("");
+    // Public lobby list (null = not loaded / unavailable).
+    const [publicRooms, setPublicRooms] = useState<
+        PublicRoomSummaryView[] | null
+    >(null);
+    // A locked room awaiting a password entry (set when a join needs one).
+    const [pendingJoin, setPendingJoin] = useState<{
+        code: string;
+        error: string | null;
+    } | null>(null);
+    const [joinPassword, setJoinPassword] = useState("");
 
     useEffect(() => {
         let cancelled = false;
@@ -82,6 +158,14 @@ export default function LandingPage(): JSX.Element {
                     );
 
                     setState({ phase: "inRoom", session, room: result.room });
+                    return;
+                }
+
+                // A locked invite room: keep the invite URL and prompt for the
+                // password rather than bouncing to the lobby.
+                if (inviteCode && result.error === "wrong_password") {
+                    setPendingJoin({ code: inviteCode, error: null });
+                    setState({ phase: "loggedIn", session, error: null });
                     return;
                 }
 
@@ -122,11 +206,84 @@ export default function LandingPage(): JSX.Element {
         setState({ phase: "loggedIn", session, error });
     };
 
+    const refreshPublicRooms = async (session: WebSession): Promise<void> => {
+        const rooms = await listPublicRooms(session);
+        setPublicRooms(rooms);
+    };
+
+    // Load the public lobby list whenever the user is logged in but not yet in
+    // a room, and refresh it on an interval so it stays roughly live.
+    useEffect(() => {
+        if (state.phase !== "loggedIn") return undefined;
+        const { session } = state;
+        void refreshPublicRooms(session);
+        const id = window.setInterval(
+            () => void refreshPublicRooms(session),
+            PUBLIC_ROOMS_POLL_MS,
+        );
+
+        return () => window.clearInterval(id);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [state.phase]);
+
+    /**
+     * Joins a room, surfacing a password prompt when the room is locked. A
+     * `wrong_password` result (whether from a missing or incorrect password)
+     * parks on the pending-join prompt instead of the generic error line.
+     */
+    const attemptJoin = async (
+        session: WebSession,
+        code: string,
+        password?: string,
+    ): Promise<void> => {
+        setBusy(true);
+        try {
+            const result = await joinRoom(session, code, password);
+            if ("room" in result) {
+                setPendingJoin(null);
+                setJoinPassword("");
+                setJoinCode("");
+                enterRoom(session, result.room);
+                return;
+            }
+
+            if (result.error === "wrong_password") {
+                setPendingJoin({
+                    code,
+                    // Only show "wrong password" once they've actually tried
+                    // one; the first prompt is just a request.
+                    error: password ? roomErrorText("wrong_password") : null,
+                });
+
+                setState((prev) =>
+                    prev.phase === "inRoom"
+                        ? prev
+                        : { phase: "loggedIn", session, error: null },
+                );
+                return;
+            }
+
+            setPendingJoin(null);
+            setState({
+                phase: "loggedIn",
+                session,
+                error: roomErrorText(result.error),
+            });
+        } finally {
+            setBusy(false);
+        }
+    };
+
     const handleCreate = async (session: WebSession): Promise<void> => {
         setBusy(true);
         try {
-            const result = await createRoom(session);
+            const result = await createRoom(session, {
+                visibility,
+                password: createPassword.trim() || undefined,
+            });
+
             if ("room" in result) {
+                setCreatePassword("");
                 enterRoom(session, result.room);
             } else {
                 setState({
@@ -146,23 +303,7 @@ export default function LandingPage(): JSX.Element {
         const fromUrl = /\/play\/r\/([^/\s?#]+)/.exec(raw);
         const code = fromUrl ? decodeURIComponent(fromUrl[1]!) : raw;
         if (!code) return;
-
-        setBusy(true);
-        try {
-            const result = await joinRoom(session, code);
-            if ("room" in result) {
-                setJoinCode("");
-                enterRoom(session, result.room);
-            } else {
-                setState({
-                    phase: "loggedIn",
-                    session,
-                    error: roomErrorText(result.error),
-                });
-            }
-        } finally {
-            setBusy(false);
-        }
+        await attemptJoin(session, code);
     };
 
     const handleGuestLogin = async (): Promise<void> => {
@@ -177,26 +318,15 @@ export default function LandingPage(): JSX.Element {
                 return;
             }
 
-            // A guest arriving on an invite link goes straight into the room;
-            // otherwise they land on the join form (guests can't host).
+            setState({ phase: "loggedIn", session, error: null });
+
+            // A guest arriving on an invite link goes straight into the room
+            // (or a password prompt); otherwise they land on the lobby (guests
+            // can't host, but can browse + join public rooms).
             const inviteCode = roomCodeFromLocation();
             if (inviteCode) {
-                const result = await joinRoom(session, inviteCode);
-                if ("room" in result) {
-                    enterRoom(session, result.room);
-                    return;
-                }
-
-                window.history.replaceState(null, "", "/play");
-                setState({
-                    phase: "loggedIn",
-                    session,
-                    error: roomErrorText(result.error),
-                });
-                return;
+                await attemptJoin(session, inviteCode);
             }
-
-            setState({ phase: "loggedIn", session, error: null });
         } finally {
             setBusy(false);
         }
@@ -327,45 +457,170 @@ export default function LandingPage(): JSX.Element {
                         <p className="kmq-web-landing-error">{state.error}</p>
                     )}
 
-                    {state.session.user.guest ? (
-                        <p className="kmq-web-landing-note">
-                            You&apos;re playing as a guest — join a room with an
-                            invite code. Log in with Discord to host your own
-                            and keep your stats.
-                        </p>
+                    {pendingJoin ? (
+                        <form
+                            className="kmq-web-landing-join kmq-web-landing-password"
+                            onSubmit={(e) => {
+                                e.preventDefault();
+                                void attemptJoin(
+                                    state.session,
+                                    pendingJoin.code,
+                                    joinPassword,
+                                );
+                            }}
+                        >
+                            <p className="kmq-web-landing-note">
+                                This room requires a password.
+                            </p>
+                            {pendingJoin.error && (
+                                <p className="kmq-web-landing-error">
+                                    {pendingJoin.error}
+                                </p>
+                            )}
+                            <input
+                                className="kmq-web-landing-input"
+                                type="password"
+                                value={joinPassword}
+                                // eslint-disable-next-line jsx-a11y/no-autofocus
+                                autoFocus
+                                onChange={(e) =>
+                                    setJoinPassword(e.target.value)
+                                }
+                                placeholder="Password"
+                                aria-label="Room password"
+                            />
+                            <button
+                                type="submit"
+                                className="kmq-web-landing-button"
+                                disabled={busy || !joinPassword}
+                            >
+                                Join
+                            </button>
+                            <button
+                                type="button"
+                                className="kmq-web-landing-button kmq-web-landing-button-secondary"
+                                onClick={() => {
+                                    setPendingJoin(null);
+                                    setJoinPassword("");
+                                }}
+                            >
+                                Cancel
+                            </button>
+                        </form>
                     ) : (
-                        <button
-                            type="button"
-                            className="kmq-web-landing-button"
-                            disabled={busy}
-                            onClick={() => void handleCreate(state.session)}
-                        >
-                            Create a room
-                        </button>
-                    )}
+                        <>
+                            {state.session.user.guest ? (
+                                <p className="kmq-web-landing-note">
+                                    You&apos;re playing as a guest — browse a
+                                    public room below or join with an invite
+                                    code. Log in with Discord to host your own
+                                    and keep your stats.
+                                </p>
+                            ) : (
+                                <div className="kmq-web-landing-create">
+                                    <div
+                                        className="kmq-web-landing-visibility"
+                                        role="group"
+                                        aria-label="Room visibility"
+                                    >
+                                        <button
+                                            type="button"
+                                            className="kmq-web-landing-toggle"
+                                            data-active={
+                                                visibility === "public"
+                                            }
+                                            onClick={() =>
+                                                setVisibility("public")
+                                            }
+                                        >
+                                            Public
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="kmq-web-landing-toggle"
+                                            data-active={
+                                                visibility === "private"
+                                            }
+                                            onClick={() =>
+                                                setVisibility("private")
+                                            }
+                                        >
+                                            Private
+                                        </button>
+                                    </div>
+                                    <p className="kmq-web-landing-hint">
+                                        {visibility === "public"
+                                            ? "Anyone can find this room in the lobby list."
+                                            : "Only people with the invite link can join."}
+                                    </p>
+                                    <input
+                                        className="kmq-web-landing-input"
+                                        type="password"
+                                        value={createPassword}
+                                        maxLength={128}
+                                        onChange={(e) =>
+                                            setCreatePassword(e.target.value)
+                                        }
+                                        placeholder="Password (optional)"
+                                        aria-label="Room password (optional)"
+                                    />
+                                    <button
+                                        type="button"
+                                        className="kmq-web-landing-button"
+                                        disabled={busy}
+                                        onClick={() =>
+                                            void handleCreate(state.session)
+                                        }
+                                    >
+                                        Create a room
+                                    </button>
+                                </div>
+                            )}
 
-                    <form
-                        className="kmq-web-landing-join"
-                        onSubmit={(e) => {
-                            e.preventDefault();
-                            void handleJoin(state.session);
-                        }}
-                    >
-                        <input
-                            className="kmq-web-landing-input"
-                            value={joinCode}
-                            onChange={(e) => setJoinCode(e.target.value)}
-                            placeholder="Invite code or link"
-                            aria-label="Invite code or link"
-                        />
-                        <button
-                            type="submit"
-                            className="kmq-web-landing-button kmq-web-landing-button-secondary"
-                            disabled={busy || !joinCode.trim()}
-                        >
-                            Join
-                        </button>
-                    </form>
+                            <form
+                                className="kmq-web-landing-join"
+                                onSubmit={(e) => {
+                                    e.preventDefault();
+                                    void handleJoin(state.session);
+                                }}
+                            >
+                                <input
+                                    className="kmq-web-landing-input"
+                                    value={joinCode}
+                                    onChange={(e) =>
+                                        setJoinCode(e.target.value)
+                                    }
+                                    placeholder="Invite code or link"
+                                    aria-label="Invite code or link"
+                                />
+                                <button
+                                    type="submit"
+                                    className="kmq-web-landing-button kmq-web-landing-button-secondary"
+                                    disabled={busy || !joinCode.trim()}
+                                >
+                                    Join
+                                </button>
+                            </form>
+
+                            <PublicRoomList
+                                rooms={publicRooms}
+                                busy={busy}
+                                onJoin={(room) => {
+                                    if (room.hasPassword) {
+                                        setPendingJoin({
+                                            code: room.code,
+                                            error: null,
+                                        });
+                                    } else {
+                                        void attemptJoin(
+                                            state.session,
+                                            room.code,
+                                        );
+                                    }
+                                }}
+                            />
+                        </>
+                    )}
 
                     <button
                         type="button"

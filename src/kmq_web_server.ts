@@ -29,6 +29,7 @@ import {
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
+    WEB_ROOM_PASSWORD_MAX_LENGTH,
     WEB_ROOM_SWEEP_INTERVAL_MS,
     discordAvatarUrl,
 } from "./constants";
@@ -2801,11 +2802,31 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const result = this.webRoomManager!.createRoom({
-                    id: user.id,
-                    username: user.username,
-                    avatarUrl: user.avatarUrl,
-                });
+                const createBody = (request.body ?? {}) as {
+                    visibility?: unknown;
+                    password?: unknown;
+                };
+
+                // Default private (preserves the pre-lobbies behavior); only
+                // "public" opts into the browse list.
+                const visibility =
+                    createBody.visibility === "public" ? "public" : "private";
+
+                const password = this.parseRoomPassword(createBody.password);
+                if (password === undefined) {
+                    await reply.code(400).send({ error: "Invalid password" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.createRoom(
+                    {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                        isGuest: false,
+                    },
+                    { visibility, password },
+                );
 
                 if ("error" in result) {
                     // Only possible when rejoining one's own still-alive room
@@ -2827,21 +2848,44 @@ export default class KmqWebServer {
                 const user = await requireWebUser(request, reply);
                 if (!user) return;
 
-                const code = (request.body as { code?: string } | null)?.code;
+                const joinBody = (request.body ?? {}) as {
+                    code?: unknown;
+                    password?: unknown;
+                };
+
+                const code = joinBody.code;
                 if (!code || typeof code !== "string") {
                     await reply.code(400).send({ error: "Missing code" });
                     return;
                 }
 
-                const result = this.webRoomManager!.joinRoom(code, {
-                    id: user.id,
-                    username: user.username,
-                    avatarUrl: user.avatarUrl,
-                });
+                const password = this.parseRoomPassword(joinBody.password);
+                if (password === undefined) {
+                    await reply.code(400).send({ error: "Invalid password" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.joinRoom(
+                    code,
+                    {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                        isGuest: isGuestUserID(user.id),
+                    },
+                    password ?? undefined,
+                );
 
                 if ("error" in result) {
+                    // not_found → 404; wrong_password → 403; full → 409.
+                    const statusByError: Record<string, number> = {
+                        not_found: 404,
+                        wrong_password: 403,
+                        full: 409,
+                    };
+
                     await reply
-                        .code(result.error === "not_found" ? 404 : 409)
+                        .code(statusByError[result.error] ?? 409)
                         .send({ error: result.error });
                     return;
                 }
@@ -2895,6 +2939,44 @@ export default class KmqWebServer {
                 });
             },
         );
+
+        httpServer.get(
+            "/api/web/rooms",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                // Public lobby list — the "find a game" surface. Any web user
+                // (guest included) may browse it; it never leaks rosters or
+                // passwords (see WebRoomManager.listPublicRooms).
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                await reply.code(200).send({
+                    rooms: this.webRoomManager!.listPublicRooms(),
+                });
+            },
+        );
+    }
+
+    /**
+     * Validates a client-supplied room password. Returns the trimmed password,
+     * null when none was supplied (open room), or `undefined` when the value
+     * is the wrong type or too long (the caller should 400).
+     * @param raw - the raw `password` field from the request body
+     * @returns the password, null, or undefined (invalid)
+     */
+    private parseRoomPassword(raw: unknown): string | null | undefined {
+        if (raw === undefined || raw === null || raw === "") {
+            return null;
+        }
+
+        if (
+            typeof raw !== "string" ||
+            raw.length > WEB_ROOM_PASSWORD_MAX_LENGTH
+        ) {
+            return undefined;
+        }
+
+        return raw;
     }
 
     /**

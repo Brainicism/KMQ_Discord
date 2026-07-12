@@ -8,10 +8,11 @@ import WebRoomManager from "../../../web_room_manager";
 import assert from "assert";
 import type { WebRoomMemberIdentity } from "../../../web_room_manager";
 
-const user = (n: number): WebRoomMemberIdentity => ({
+const user = (n: number, isGuest = false): WebRoomMemberIdentity => ({
     id: (100000000000000000n + BigInt(n)).toString(),
     username: `user${n}`,
     avatarUrl: null,
+    isGuest,
 });
 
 describe("web room manager", () => {
@@ -253,6 +254,8 @@ describe("web room manager", () => {
             assert.deepStrictEqual(serialized, {
                 code: created.room.code,
                 ownerID: user(1).id,
+                visibility: "private",
+                hasPassword: false,
                 members: [
                     {
                         id: user(1).id,
@@ -262,6 +265,108 @@ describe("web room manager", () => {
                     },
                 ],
             });
+        });
+    });
+
+    describe("visibility and public listing", () => {
+        it("defaults to a private, unlisted room", () => {
+            const created = manager.createRoom(user(1));
+            assert.ok("room" in created);
+            assert.strictEqual(created.room.visibility, "private");
+            assert.deepStrictEqual(manager.listPublicRooms(), []);
+        });
+
+        it("lists public rooms with owner name and counts, newest first", () => {
+            const a = manager.createRoom(user(1), { visibility: "public" });
+            assert.ok("room" in a);
+            manager.joinRoom(a.room.code, user(2));
+
+            clock.now += 1000;
+            const b = manager.createRoom(user(3), { visibility: "public" });
+            assert.ok("room" in b);
+
+            // A private room stays out of the list.
+            manager.createRoom(user(4), { visibility: "private" });
+
+            const list = manager.listPublicRooms();
+            assert.strictEqual(list.length, 2);
+            // Newest (user3's) first.
+            assert.strictEqual(list[0]!.code, b.room.code);
+            assert.strictEqual(list[0]!.ownerUsername, "user3");
+            assert.strictEqual(list[0]!.memberCount, 1);
+            assert.strictEqual(list[0]!.hasPassword, false);
+            assert.strictEqual(list[1]!.code, a.room.code);
+            assert.strictEqual(list[1]!.memberCount, 2);
+        });
+    });
+
+    describe("password-protected rooms", () => {
+        it("rejects a join with a wrong/missing password and accepts the right one", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+                password: "hunter2",
+            });
+
+            assert.ok("room" in created);
+            const { code } = created.room;
+
+            assert.deepStrictEqual(manager.joinRoom(code, user(2)), {
+                error: "wrong_password",
+            });
+
+            assert.deepStrictEqual(manager.joinRoom(code, user(2), "nope"), {
+                error: "wrong_password",
+            });
+
+            assert.ok("room" in manager.joinRoom(code, user(2), "hunter2"));
+            assert.strictEqual(created.room.members.size, 2);
+        });
+
+        it("surfaces the password requirement without leaking the password", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+                password: "secret",
+            });
+
+            assert.ok("room" in created);
+
+            const serialized = manager.serializeRoom(created.room);
+            assert.strictEqual(serialized.hasPassword, true);
+            assert.ok(!("passwordHash" in serialized));
+
+            const summary = manager.listPublicRooms()[0]!;
+            assert.strictEqual(summary.hasPassword, true);
+        });
+
+        it("lets an existing member reconnect without re-supplying the password", () => {
+            const created = manager.createRoom(user(1), {
+                password: "pw",
+            });
+
+            assert.ok("room" in created);
+            // The owner is already a member; a bare join refreshes identity.
+            assert.ok("room" in manager.joinRoom(created.room.code, user(1)));
+        });
+
+        it("re-applies visibility and password when the owner recreates the room", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+            });
+
+            assert.ok("room" in created);
+            manager.joinRoom(created.room.code, user(2));
+            manager.leaveRoom(user(1).id);
+
+            // Owner recreates → same room, now private + locked.
+            const again = manager.createRoom(user(1), {
+                visibility: "private",
+                password: "locked",
+            });
+
+            assert.ok("room" in again);
+            assert.strictEqual(again.room, created.room);
+            assert.strictEqual(again.room.visibility, "private");
+            assert.strictEqual(again.room.passwordHash !== null, true);
         });
     });
 });
