@@ -13,10 +13,14 @@ import {
 import { IPCLogger } from "../logger";
 import {
     botHasVoicePermissions,
-    getMajorityCount,
     getUserVoiceChannelID,
     searchArtists,
 } from "../helpers/discord_utils";
+import {
+    clearWebRoomMembers,
+    getWebRoomMembers,
+    setWebRoomMembers,
+} from "./web_room_state";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import { parseKmqPlaylistIdentifier } from "../helpers/utils";
 import { songTagEmojisToUnicode } from "../helpers/game_utils";
@@ -46,6 +50,7 @@ import Session from "./session";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
+import WebGameSession from "./web_game_session";
 import type { ActivityMultipleChoiceOption } from "../interfaces/activity_round_meta";
 import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
@@ -75,6 +80,7 @@ import type ActivitySongInfoArgs from "../interfaces/activity_song_info_args";
 import type ActivitySongInfoResponse from "../interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "../interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "../interfaces/activity_user_action_args";
+import type ActivityWebRoomMembershipArgs from "../interfaces/activity_web_room_membership_args";
 import type GameSessionRecap from "../interfaces/game_session_recap";
 import type MatchedArtist from "../interfaces/matched_artist";
 import type Player from "./player";
@@ -316,6 +322,21 @@ function userInVoiceChannel(
     return getUserVoiceChannelID(guildID, userID) === voiceChannelID;
 }
 
+/**
+ * Transport-aware participation guard: web sessions check pushed room
+ * membership, Discord sessions check the session's voice channel.
+ * @param session - the session the user is acting on
+ * @param userID - the acting user
+ * @returns whether the user may act in the session
+ */
+function userCanActInSession(session: Session, userID: string): boolean {
+    if (session.isWebSession()) {
+        return getWebRoomMembers(session.guildID).some((m) => m.id === userID);
+    }
+
+    return userInVoiceChannel(session.guildID, userID, session.voiceChannelID);
+}
+
 // Per-user emote cooldown, keyed by `${guildID}:${userID}`. Module-scoped so it
 // persists across requests within the worker; bounded by natural churn (one
 // entry per recently-active emoter).
@@ -516,13 +537,7 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
-                    if (
-                        !userInVoiceChannel(
-                            guessArgs.guildID,
-                            guessArgs.userID,
-                            session.voiceChannelID,
-                        )
-                    ) {
+                    if (!userCanActInSession(session, guessArgs.userID)) {
                         reply({ ok: false, reason: "not_in_vc" });
                         return;
                     }
@@ -581,13 +596,7 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
-                    if (
-                        !userInVoiceChannel(
-                            mcArgs.guildID,
-                            mcArgs.userID,
-                            session.voiceChannelID,
-                        )
-                    ) {
+                    if (!userCanActInSession(session, mcArgs.userID)) {
                         reply({ ok: false, reason: "not_in_vc" });
                         return;
                     }
@@ -679,33 +688,57 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        // Start the game in the channel the caller is actually
-                        // connected to — NOT startArgs.voiceChannelID, which is
-                        // where the activity was launched (it can be a text
-                        // channel, or a VC the user later left/changed). The
-                        // activity can be opened without joining voice, so being
-                        // a Discord participant isn't enough.
-                        const startVoiceChannelID = getUserVoiceChannelID(
-                            startArgs.guildID,
-                            startArgs.userID,
-                        );
+                        const isWebStart = startArgs.mode === "web";
+                        let startVoiceChannelID = "";
+                        if (isWebStart) {
+                            // Web rooms have no VC; seed the membership
+                            // mirror from the args so the very first round
+                            // sees its participants.
+                            setWebRoomMembers(
+                                startArgs.guildID,
+                                startArgs.members ?? [],
+                            );
 
-                        if (!startVoiceChannelID) {
-                            reply({ ok: false, reason: "not_in_vc" });
-                            return;
-                        }
+                            if (
+                                !getWebRoomMembers(startArgs.guildID).some(
+                                    (m) => m.id === startArgs.userID,
+                                )
+                            ) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+                        } else {
+                            // Start the game in the channel the caller is
+                            // actually connected to — NOT
+                            // startArgs.voiceChannelID, which is where the
+                            // activity was launched (it can be a text channel,
+                            // or a VC the user later left/changed). The
+                            // activity can be opened without joining voice, so
+                            // being a Discord participant isn't enough.
+                            const userVoiceChannelID = getUserVoiceChannelID(
+                                startArgs.guildID,
+                                startArgs.userID,
+                            );
 
-                        // ...and the bot must be able to join that channel.
-                        if (!botHasVoicePermissions(startVoiceChannelID)) {
-                            reply({
-                                ok: false,
-                                reason: "bot_no_voice_perms",
-                            });
-                            return;
+                            if (!userVoiceChannelID) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+
+                            // ...and the bot must be able to join that channel.
+                            if (!botHasVoicePermissions(userVoiceChannelID)) {
+                                reply({
+                                    ok: false,
+                                    reason: "bot_no_voice_perms",
+                                });
+                                return;
+                            }
+
+                            startVoiceChannelID = userVoiceChannelID;
                         }
 
                         const messageContext = new MessageContext(
-                            startArgs.textChannelID,
+                            isWebStart ? "" : startArgs.textChannelID,
                             new KmqMember(startArgs.userID),
                             startArgs.guildID,
                         );
@@ -731,23 +764,41 @@ function ensureWorkerHandlerRegistered(): void {
                             // slash command's default `new_clip` is false, but
                             // for the lobby-less Activity a new song per round
                             // matches every other mode's behaviour).
-                            const gameSession = new GameSession(
-                                guildPreference,
-                                startArgs.textChannelID,
-                                startVoiceChannelID,
-                                startArgs.guildID,
-                                gameOwner,
-                                startArgs.gameType,
-                                startArgs.gameType === GameType.ELIMINATION
-                                    ? startArgs.eliminationLives
-                                    : undefined,
-                                startArgs.gameType === GameType.CLIP
-                                    ? startArgs.clipDuration
-                                    : undefined,
-                                startArgs.gameType === GameType.CLIP
-                                    ? true
-                                    : undefined,
-                            );
+                            const gameSession = isWebStart
+                                ? new WebGameSession(
+                                      guildPreference,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      startArgs.gameType,
+                                      startArgs.gameType ===
+                                          GameType.ELIMINATION
+                                          ? startArgs.eliminationLives
+                                          : undefined,
+                                      startArgs.gameType === GameType.CLIP
+                                          ? startArgs.clipDuration
+                                          : undefined,
+                                      startArgs.gameType === GameType.CLIP
+                                          ? true
+                                          : undefined,
+                                  )
+                                : new GameSession(
+                                      guildPreference,
+                                      startArgs.textChannelID,
+                                      startVoiceChannelID,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      startArgs.gameType,
+                                      startArgs.gameType ===
+                                          GameType.ELIMINATION
+                                          ? startArgs.eliminationLives
+                                          : undefined,
+                                      startArgs.gameType === GameType.CLIP
+                                          ? startArgs.clipDuration
+                                          : undefined,
+                                      startArgs.gameType === GameType.CLIP
+                                          ? true
+                                          : undefined,
+                                  );
 
                             // Swap out any stale non-initialized session
                             // (mirrors the slash-command path).
@@ -812,13 +863,7 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        if (
-                            !userInVoiceChannel(
-                                skipArgs.guildID,
-                                skipArgs.userID,
-                                session.voiceChannelID,
-                            )
-                        ) {
+                        if (!userCanActInSession(session, skipArgs.userID)) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -835,7 +880,7 @@ function ensureWorkerHandlerRegistered(): void {
                             // After the await, the round may have transitioned
                             // (skipped or naturally ended). Compare by identity.
                             const currentRound = session.round;
-                            const threshold = getMajorityCount(session.guildID);
+                            const threshold = session.getVoteMajorityCount();
 
                             if (currentRound === originalRound) {
                                 pushEvent(session.guildID, {
@@ -888,13 +933,7 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        if (
-                            !userInVoiceChannel(
-                                hintArgs.guildID,
-                                hintArgs.userID,
-                                session.voiceChannelID,
-                            )
-                        ) {
+                        if (!userCanActInSession(session, hintArgs.userID)) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -920,7 +959,7 @@ function ensureWorkerHandlerRegistered(): void {
                             }
 
                             const requesters = currentRound.getHintRequests();
-                            const threshold = getMajorityCount(session.guildID);
+                            const threshold = session.getVoteMajorityCount();
 
                             pushEvent(session.guildID, {
                                 type: "hintProgress",
@@ -983,13 +1022,7 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
-                    if (
-                        !userInVoiceChannel(
-                            emoteArgs.guildID,
-                            emoteArgs.userID,
-                            session.voiceChannelID,
-                        )
-                    ) {
+                    if (!userCanActInSession(session, emoteArgs.userID)) {
                         reply({ ok: false, reason: "not_in_vc" });
                         return;
                     }
@@ -1047,11 +1080,7 @@ function ensureWorkerHandlerRegistered(): void {
                         const session = Session.getSession(optionArgs.guildID);
                         if (
                             session &&
-                            !userInVoiceChannel(
-                                optionArgs.guildID,
-                                optionArgs.userID,
-                                session.voiceChannelID,
-                            )
+                            !userCanActInSession(session, optionArgs.userID)
                         ) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
@@ -1433,13 +1462,7 @@ function ensureWorkerHandlerRegistered(): void {
                         // Any member of the game's voice channel may end it
                         // (matches the relaxed /end command, which has no owner
                         // check) — but they must actually be in that channel.
-                        if (
-                            !userInVoiceChannel(
-                                endArgs.guildID,
-                                endArgs.userID,
-                                session.voiceChannelID,
-                            )
-                        ) {
+                        if (!userCanActInSession(session, endArgs.userID)) {
                             reply({ ok: false, reason: "not_in_vc" });
                             return;
                         }
@@ -1459,6 +1482,56 @@ function ensureWorkerHandlerRegistered(): void {
                             );
                             reply({ ok: false, reason: "internal" });
                         }
+                    });
+                    return;
+                }
+
+                case "webRoomMembership": {
+                    const memberArgs = args as ActivityWebRoomMembershipArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    runLocked(memberArgs.guildID, async () => {
+                        const session = Session.getSession(memberArgs.guildID);
+
+                        // Empty membership = the room closed (or its last
+                        // member timed out); tear the game down.
+                        if (memberArgs.members.length === 0) {
+                            clearWebRoomMembers(memberArgs.guildID);
+                            if (session && !session.finished) {
+                                await session.endSession(
+                                    "Web room closed",
+                                    false,
+                                );
+                            }
+
+                            reply({ ok: true });
+                            return;
+                        }
+
+                        setWebRoomMembers(
+                            memberArgs.guildID,
+                            memberArgs.members,
+                        );
+
+                        // The web analog of the voiceChannelJoin/Leave
+                        // handlers: keep the scoreboard's in/out flags and
+                        // the owner in step with the room.
+                        if (
+                            session &&
+                            !session.finished &&
+                            session.isWebSession() &&
+                            session.isGameSession()
+                        ) {
+                            await session.syncAllVoiceMembers();
+                            await session.updateOwner();
+                        }
+
+                        reply({ ok: true });
                     });
                     return;
                 }
@@ -1485,11 +1558,7 @@ function ensureWorkerHandlerRegistered(): void {
 
                     if (
                         presetSession &&
-                        !userInVoiceChannel(
-                            presetArgs.guildID,
-                            presetArgs.userID,
-                            presetSession.voiceChannelID,
-                        )
+                        !userCanActInSession(presetSession, presetArgs.userID)
                     ) {
                         reply({ ok: false, reason: "not_in_vc" });
                         return;
@@ -1893,6 +1962,20 @@ export function attachActivityBridge(session: GameSession): void {
             choices: payload.choices,
         });
     });
+
+    // Web sessions only: the playback spec for the round's audio. The hub
+    // intercepts this, mints an opaque streaming token, and fans out a
+    // client-safe audio URL — the spec itself (which names the song) must
+    // never reach clients before the reveal.
+    session.on(
+        "roundAudio",
+        (payload: Omit<ActivityEvent & { type: "roundAudio" }, "type">) => {
+            pushEvent(guildID, {
+                type: "roundAudio",
+                ...payload,
+            });
+        },
+    );
 
     // Shared identity lookup. KmqMember instances on round results are bare
     // (id only); names come from the scoreboard's Player objects (populated

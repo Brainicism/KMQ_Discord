@@ -262,6 +262,17 @@ export interface TopGgUserVotes {
     user_id: string;
 }
 
+export interface WebSessions {
+    avatar_url: string | null;
+    created_at: Generated<Date>;
+    expires_at: Date;
+    last_used_at: Generated<Date>;
+    locale: Generated<string>;
+    token_hash: string;
+    user_id: string;
+    username: string;
+}
+
 export interface KmqDB {
     "kpop_videos.app_kpop": AppKpop;
     "kpop_videos.app_kpop_agrelation": AppKpopAgrelation;
@@ -306,4 +317,5 @@ export interface KmqDB {
     song_metadata: SongMetadata;
     system_stats: SystemStats;
     top_gg_user_votes: TopGgUserVotes;
+    web_sessions: WebSessions;
 }

@@ -243,6 +243,8 @@
         "rejectRateLimit": "Lebih pelan — terlalu banyak permintaan.",
         "rejectSessionAlreadyRunning": "Permainan sudah berjalan.",
         "rejectUnauthorized": "Sesi kedaluwarsa — refresh.",
+        "restartCountdown": "KMQ akan dimulai ulang dalam {{countdown}} — permainanmu akan terjeda sebentar!",
+        "restartImminent": "KMQ sedang dimulai ulang — kembali sebentar lagi!",
         "revealAllGuessesSummary": "Semua tebakan ({{count}})",
         "revealWinners": "{{username}}: +{{points}} poin, +{{exp}} EXP",
         "roundLabel": "Ronde {{num}}",

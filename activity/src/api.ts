@@ -1,4 +1,4 @@
-import { ACTIVITY_PROXY_BASE, ACTIVITY_WS_PATH } from "./constants";
+import { getApiBase, getWsPath } from "./constants";
 import type {
     ActivityAnswerType,
     ActivityArtistType,
@@ -69,7 +69,7 @@ export async function fetchArtistAutocomplete(
     accessToken: string,
     q: string,
 ): Promise<AutocompleteArtist[]> {
-    const url = `${ACTIVITY_PROXY_BASE}/artist-autocomplete?q=${encodeURIComponent(q)}`;
+    const url = `${getApiBase()}/artist-autocomplete?q=${encodeURIComponent(q)}`;
     const resp = await fetch(url, {
         headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -91,7 +91,7 @@ export interface ActivityI18nBundle {
 export async function fetchI18nBundle(
     locale: string,
 ): Promise<ActivityI18nBundle> {
-    const url = `${ACTIVITY_PROXY_BASE}/i18n?locale=${encodeURIComponent(locale)}`;
+    const url = `${getApiBase()}/i18n?locale=${encodeURIComponent(locale)}`;
     const resp = await fetch(url);
     if (!resp.ok) {
         throw new Error(`i18n bundle failed: ${resp.status}`);
@@ -104,7 +104,7 @@ export async function fetchSnapshot(
     accessToken: string,
     instanceId: string,
 ): Promise<ActivitySessionResponse> {
-    const url = `${ACTIVITY_PROXY_BASE}/session?instance_id=${encodeURIComponent(
+    const url = `${getApiBase()}/session?instance_id=${encodeURIComponent(
         instanceId,
     )}`;
 
@@ -125,7 +125,7 @@ async function postAction(
     path: "start" | "skip" | "end" | "hint" | "emote",
     extra?: Record<string, unknown>,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/${path}`, {
+    const resp = await fetch(`${getApiBase()}/${path}`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -195,7 +195,7 @@ export async function setOption(
     instanceId: string,
     option: SetOptionRequest,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/option`, {
+    const resp = await fetch(`${getApiBase()}/option`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -236,7 +236,7 @@ export async function preset(
     action: PresetAction,
     name?: string,
 ): Promise<PresetResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/preset`, {
+    const resp = await fetch(`${getApiBase()}/preset`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -273,7 +273,7 @@ export async function bookmarkSong(
     instanceId: string,
     youtubeLink?: string,
 ): Promise<BookmarkResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/bookmark`, {
+    const resp = await fetch(`${getApiBase()}/bookmark`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -319,7 +319,7 @@ export async function fetchProfile(
     instanceId: string,
     targetUserID?: string,
 ): Promise<ActivityProfileResponse | null> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/profile`, {
+    const resp = await fetch(`${getApiBase()}/profile`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -346,7 +346,7 @@ export async function fetchSongInfo(
     instanceId: string,
     youtubeLink: string,
 ): Promise<ActivitySongInfoResponse | null> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/song`, {
+    const resp = await fetch(`${getApiBase()}/song`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -372,7 +372,7 @@ export async function searchSongs(
     q: string,
     locale: string,
 ): Promise<ActivitySongSearchResult[]> {
-    const url = `${ACTIVITY_PROXY_BASE}/song-search?q=${encodeURIComponent(
+    const url = `${getApiBase()}/song-search?q=${encodeURIComponent(
         q,
     )}&locale=${encodeURIComponent(locale)}`;
 
@@ -390,7 +390,7 @@ export async function submitGuess(
     instanceId: string,
     guess: string,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/guess`, {
+    const resp = await fetch(`${getApiBase()}/guess`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -427,7 +427,7 @@ export async function submitMcGuess(
     instanceId: string,
     choiceID: string,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/mc-guess`, {
+    const resp = await fetch(`${getApiBase()}/mc-guess`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -462,7 +462,7 @@ async function requestWsTicket(
     accessToken: string,
     instanceId: string,
 ): Promise<string> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/ws-ticket`, {
+    const resp = await fetch(`${getApiBase()}/ws-ticket`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -489,7 +489,7 @@ export async function openActivityStream(
 ): Promise<ActivityStreamHandle> {
     const ticket = await requestWsTicket(accessToken, instanceId);
     const proto = window.location.protocol === "https:" ? "wss:" : "ws:";
-    const url = `${proto}//${window.location.host}${ACTIVITY_WS_PATH}?ticket=${encodeURIComponent(ticket)}`;
+    const url = `${proto}//${window.location.host}${getWsPath()}?ticket=${encodeURIComponent(ticket)}`;
 
     const ws = new WebSocket(url);
     ws.addEventListener("message", (e) => {

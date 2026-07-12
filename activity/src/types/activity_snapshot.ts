@@ -8,5 +8,17 @@ export default interface ActivitySnapshot {
     session?: ActivitySessionMeta;
     scoreboard?: ActivityScoreboardSnapshot;
     currentRound?: ActivityRoundMeta;
+    /**
+     * Web rooms only: audio already playing when the snapshot was taken, so
+     * reconnects and late joiners hear the current song.
+     */
+    currentAudio?: {
+        audioUrl: string;
+        playbackDurationSec: number;
+    };
+    /** Present while a bot restart has been announced and not yet retracted. */
+    restartWarning?: {
+        restartsAtEpochMs: number;
+    };
     options: ActivityOptionsSnapshot;
 }

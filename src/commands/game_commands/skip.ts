@@ -84,7 +84,10 @@ export default class SkipCommand implements BaseCommand {
             return;
         }
 
+        // Web sessions have no voice channel; the activity bridge has
+        // already verified room membership before calling in.
         if (
+            !session.isWebSession() &&
             !areUserAndBotInSameVoiceChannel(
                 messageContext.author.id,
                 messageContext.guildID,
@@ -244,11 +247,11 @@ export default class SkipCommand implements BaseCommand {
 
     /**
      * Whether there are enough votes to skip the song
-     * @param guildID - The guild's ID
+     * @param _guildID - Unused (kept for call-site compatibility)
      * @param session - The current session
      * @returns whether the song has enough votes to be skipped
      */
-    static isSkipMajority(guildID: string, session: Session): boolean {
+    static isSkipMajority(_guildID: string, session: Session): boolean {
         if (!session.round) {
             return false;
         }
@@ -267,7 +270,7 @@ export default class SkipCommand implements BaseCommand {
             }
         }
 
-        return session.round.getSkipCount() >= getMajorityCount(guildID);
+        return session.round.getSkipCount() >= session.getVoteMajorityCount();
     }
 
     /**

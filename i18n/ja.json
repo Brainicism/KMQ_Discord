@@ -243,6 +243,8 @@
         "rejectRateLimit": "ゆっくり — リクエストが多すぎます。",
         "rejectSessionAlreadyRunning": "ゲームは既に実行中です。",
         "rejectUnauthorized": "セッションが期限切れ — 更新してください。",
+        "restartCountdown": "KMQは{{countdown}}後に再起動します — ゲームは少しの間中断されます！",
+        "restartImminent": "KMQは再起動中です — まもなく戻ります！",
         "revealAllGuessesSummary": "全回答 ({{count}})",
         "revealWinners": "{{username}}: +{{points}}pts, +{{exp}} EXP",
         "roundLabel": "ラウンド {{num}}",

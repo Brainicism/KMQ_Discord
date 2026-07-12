@@ -243,6 +243,8 @@
         "rejectRateLimit": "Slow down — too many requests.",
         "rejectSessionAlreadyRunning": "A game is already running.",
         "rejectUnauthorized": "Session expired — refresh.",
+        "restartCountdown": "KMQ is restarting in {{countdown}} — your game will pause for a moment!",
+        "restartImminent": "KMQ is restarting — back in a moment!",
         "revealAllGuessesSummary": "All guesses ({{count}})",
         "revealWinners": "{{username}}: +{{points}} pts, +{{exp}} EXP",
         "roundLabel": "Round {{num}}",

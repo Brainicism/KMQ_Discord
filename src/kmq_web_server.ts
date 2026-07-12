@@ -16,21 +16,41 @@ import {
     CLIP_MIN_DURATION_SEC,
     DEFAULT_LOCALE,
     DISCORD_ACTIVITY_INSTANCE_URL,
+    DISCORD_OAUTH_AUTHORIZE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
     EARLIEST_BEGINNING_SEARCH_YEAR,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
+    WEB_AUDIO_MAX_CONCURRENT_STREAMS,
+    WEB_AUDIO_URL_PREFIX,
+    WEB_LOGIN_CODE_TTL_MS,
+    WEB_OAUTH_STATE_COOKIE,
+    WEB_OAUTH_STATE_TTL_MS,
+    WEB_ROOM_SWEEP_INTERVAL_MS,
+    discordAvatarUrl,
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
+import { buildAudioStreamArgs } from "./web_audio_registry";
+import {
+    createWebSession,
+    deleteWebSession,
+    isGuestUserID,
+    isWebSessionToken,
+    mintGuestUserID,
+    resolveWebSession,
+    sanitizeGuestUsername,
+} from "./helpers/web_session_manager";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { spawn } from "child_process";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import GameType from "./enums/game_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
+import KmqConfiguration from "./kmq_configuration";
 import LanguageType from "./enums/option_types/language_type";
 import LocaleType from "./enums/locale_type";
 import MultiGuessType from "./enums/option_types/multiguess_type";
@@ -40,6 +60,7 @@ import SeekType from "./enums/option_types/seek_type";
 import ShuffleType from "./enums/option_types/shuffle_type";
 import SpecialType from "./enums/option_types/special_type";
 import SubunitsPreference from "./enums/option_types/subunit_preference";
+import WebRoomManager from "./web_room_manager";
 import _ from "lodash";
 import axios from "axios";
 import ejs from "ejs";
@@ -55,6 +76,7 @@ import path from "path";
 import type { ActivityPresetAction } from "./interfaces/activity_preset_args";
 import type { ActivitySubscriber } from "./activity_hub";
 import type { DatabaseContext } from "./database_context";
+import type { FastifyInstance } from "fastify";
 import type { Fleet, Stats } from "eris-fleet";
 import type { GenderModeOptions } from "./enums/option_types/gender";
 import type ActivityHub from "./activity_hub";
@@ -95,6 +117,7 @@ interface CachedDiscordUser {
     username: string;
     /** Discord user locale (e.g. "en-US"). Empty if Discord didn't return one. */
     locale: string;
+    avatarUrl: string | null;
     cachedAt: number;
 }
 
@@ -499,12 +522,77 @@ export default class KmqWebServer {
         }
     > = new Map();
 
+    // OAuth `state` nonces awaiting the web-login callback. `next` is the
+    // validated in-site path to land on after login (e.g. an invite link).
+    private webOauthStates: Map<string, { expiresAt: number; next: string }> =
+        new Map();
+
+    // One-time codes bridging the OAuth callback redirect to the SPA. Values
+    // hold the freshly minted session token until the SPA collects it.
+    private webLoginCodes: Map<
+        string,
+        {
+            token: string;
+            user: CachedDiscordUser;
+            expiresAt: number;
+        }
+    > = new Map();
+
+    private webRoomManager: WebRoomManager | null = null;
+
+    // Live ffmpeg transcodes serving /api/web/audio streams (one per
+    // listener), for the global concurrency cap.
+    private activeAudioStreams = 0;
+
     constructor(
         databaseContext: DatabaseContext,
         activityHub: ActivityHub | null = null,
     ) {
         this.dbContext = databaseContext;
         this.activityHub = activityHub;
+
+        if (activityHub) {
+            // Mirror membership to the worker owning the room's guild ID —
+            // it feeds WebGameSession participants; an empty push means the
+            // room closed and tears any running game down. Fire-and-forget:
+            // a lost push self-heals on the next membership change.
+            const pushMembership = (
+                roomID: string,
+                members: Array<{
+                    id: string;
+                    username: string;
+                    avatarUrl: string | null;
+                }>,
+            ): void => {
+                activityHub
+                    .webRoomMembership({ guildID: roomID, members })
+                    .catch((e) => {
+                        logger.warn(
+                            `Web room membership push failed for ${roomID}. err=${(e as Error).message}`,
+                        );
+                    });
+            };
+
+            this.webRoomManager = new WebRoomManager({
+                onRoomClosed: (roomID) => {
+                    pushMembership(roomID, []);
+                },
+                onRoomChanged: (room) => {
+                    pushMembership(
+                        room.roomID,
+                        [...room.members.values()].map((m) => ({
+                            id: m.id,
+                            username: m.username,
+                            avatarUrl: m.avatarUrl,
+                        })),
+                    );
+                },
+            });
+
+            setInterval(() => {
+                this.webRoomManager?.sweep();
+            }, WEB_ROOM_SWEEP_INTERVAL_MS).unref();
+        }
     }
 
     /**
@@ -571,26 +659,47 @@ export default class KmqWebServer {
             // there so the SPA can pick up the params from window.location.
             const activityIndexPath = path.join(activityDistRoot, "index.html");
 
+            const serveActivityIndex = async (
+                _request: unknown,
+                reply: any,
+            ): Promise<void> => {
+                try {
+                    const html = await fs.promises.readFile(
+                        activityIndexPath,
+                        "utf8",
+                    );
+
+                    await reply.type("text/html").send(html);
+                } catch (e) {
+                    logger.warn(
+                        `Failed to serve activity index. err=${
+                            (e as Error).message
+                        }`,
+                    );
+                    await reply.code(500).send();
+                }
+            };
+
             httpServer.get(
                 "/",
                 limit(ACTIVITY_RATE_LIMIT_READ),
-                async (request, reply) => {
-                    try {
-                        const html = await fs.promises.readFile(
-                            activityIndexPath,
-                            "utf8",
-                        );
+                serveActivityIndex,
+            );
 
-                        await reply.type("text/html").send(html);
-                    } catch (e) {
-                        logger.warn(
-                            `Failed to serve activity index. err=${
-                                (e as Error).message
-                            }`,
-                        );
-                        await reply.code(500).send();
-                    }
-                },
+            // The standalone website mounts the same SPA at /play; deep links
+            // like /play/r/<room-code> must also resolve to the index so the
+            // client can route from the path. Asset URLs are absolute
+            // (/activity/...), so serving the index at any depth is safe.
+            httpServer.get(
+                "/play",
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                serveActivityIndex,
+            );
+
+            httpServer.get(
+                "/play/*",
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                serveActivityIndex,
             );
         } else {
             logger.info(
@@ -622,6 +731,13 @@ export default class KmqWebServer {
             await fleet.ipc.allClustersCommand(
                 `announce_restart|${restartMinutes}`,
             );
+
+            // Activity/web subscribers get the warning as a live banner; the
+            // clusters only reach text channels.
+            this.activityHub?.setRestartNotice(
+                Date.now() + restartMinutes * 60 * 1000,
+            );
+
             await reply.code(200).send();
         });
 
@@ -633,6 +749,7 @@ export default class KmqWebServer {
             }
 
             await fleet.ipc.allClustersCommand("clear_restart");
+            this.activityHub?.setRestartNotice(null);
             await reply.code(200).send();
         });
 
@@ -643,6 +760,9 @@ export default class KmqWebServer {
                 return;
             }
 
+            // The admiral process reads feature switches too (web-mode
+            // gating), so reload locally in addition to the clusters.
+            KmqConfiguration.reload();
             await fleet.ipc.allClustersCommand("reload_config");
             await reply.code(200).send();
         });
@@ -992,6 +1112,10 @@ export default class KmqWebServer {
             },
         );
 
+        this.registerWebAuthRoutes(httpServer, limit);
+        this.registerWebRoomRoutes(httpServer, limit);
+        this.registerWebAudioRoutes(httpServer, limit);
+
         httpServer.get(
             "/api/activity/i18n",
             limit(ACTIVITY_RATE_LIMIT_READ),
@@ -1058,7 +1182,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance) {
                     await reply.code(404).send({ error: "Unknown instance" });
                     return;
@@ -1105,6 +1229,7 @@ export default class KmqWebServer {
                 guildID: string;
                 channelID: string | null;
                 participantIDs: Set<string>;
+                webRoom: boolean;
             };
         } | null> => {
             if (!this.activityHub) {
@@ -1125,7 +1250,7 @@ export default class KmqWebServer {
                 return null;
             }
 
-            const instance = await this.resolveActivityInstance(instanceId);
+            const instance = await this.resolveInstanceOrRoom(instanceId);
             if (!instance || !instance.participantIDs.has(user.id)) {
                 await reply.code(403).send({ error: "Forbidden" });
                 return null;
@@ -1141,7 +1266,7 @@ export default class KmqWebServer {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
 
-                if (!ctx.instance.channelID) {
+                if (!ctx.instance.webRoom && !ctx.instance.channelID) {
                     await reply.code(400).send({ error: "Missing channel" });
                     return;
                 }
@@ -1201,14 +1326,33 @@ export default class KmqWebServer {
                 }
 
                 try {
+                    // Web rooms have no channels; the worker gets the room's
+                    // membership inline so the first round can't race the
+                    // separate membership push.
+                    const room = ctx.instance.webRoom
+                        ? this.webRoomManager?.getRoomForUser(ctx.user.id)
+                        : undefined;
+
                     const result = await this.activityHub!.startGame({
                         guildID: ctx.instance.guildID,
                         userID: ctx.user.id,
-                        voiceChannelID: ctx.instance.channelID,
-                        textChannelID: ctx.instance.channelID,
+                        voiceChannelID: ctx.instance.channelID ?? "",
+                        textChannelID: ctx.instance.channelID ?? "",
                         gameType,
                         eliminationLives,
                         clipDuration,
+                        ...(ctx.instance.webRoom
+                            ? {
+                                  mode: "web" as const,
+                                  members: [
+                                      ...(room?.members.values() ?? []),
+                                  ].map((m) => ({
+                                      id: m.id,
+                                      username: m.username,
+                                      avatarUrl: m.avatarUrl,
+                                  })),
+                              }
+                            : {}),
                     });
 
                     if (!result.ok) {
@@ -1676,7 +1820,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance || !instance.participantIDs.has(user.id)) {
                     await reply.code(403).send({ error: "Forbidden" });
                     return;
@@ -1747,7 +1891,7 @@ export default class KmqWebServer {
                     return;
                 }
 
-                const instance = await this.resolveActivityInstance(instanceId);
+                const instance = await this.resolveInstanceOrRoom(instanceId);
                 if (!instance || !instance.participantIDs.has(user.id)) {
                     await reply.code(403).send({ error: "Forbidden" });
                     return;
@@ -1868,6 +2012,9 @@ export default class KmqWebServer {
                 };
 
                 this.activityHub.subscribe(guildID, subscriber);
+                // For web rooms the instance ID is the room code; an open
+                // socket is what marks the member present.
+                this.webRoomManager?.memberConnected(instanceId, userID);
 
                 let alive = true;
                 const heartbeat = setInterval(() => {
@@ -1898,6 +2045,8 @@ export default class KmqWebServer {
                     if (this.activityHub) {
                         this.activityHub.unsubscribe(guildID, subscriber);
                     }
+
+                    this.webRoomManager?.memberDisconnected(instanceId, userID);
                 });
 
                 try {
@@ -1941,6 +2090,38 @@ export default class KmqWebServer {
             return cached.user;
         }
 
+        // Web session tokens resolve against the local web_sessions store;
+        // everything else is a Discord OAuth access token from the embedded
+        // Activity and resolves via users/@me.
+        if (isWebSessionToken(token)) {
+            try {
+                const webUser = await resolveWebSession(token);
+                if (!webUser) return null;
+
+                const user: CachedDiscordUser = {
+                    id: webUser.id,
+                    username: webUser.username,
+                    locale: webUser.locale,
+                    avatarUrl: webUser.avatarUrl,
+                    cachedAt: now,
+                };
+
+                this.accessTokenCache.set(token, {
+                    user,
+                    expiresAt: now + ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+                });
+
+                return user;
+            } catch (e) {
+                logger.warn(
+                    `Failed to resolve web session token. err=${
+                        (e as Error).message
+                    }`,
+                );
+                return null;
+            }
+        }
+
         try {
             const response = await axios.get(DISCORD_USERS_ME_URL, {
                 headers: { Authorization: `Bearer ${token}` },
@@ -1954,6 +2135,10 @@ export default class KmqWebServer {
                     typeof response.data.locale === "string"
                         ? response.data.locale
                         : "",
+                avatarUrl: discordAvatarUrl(
+                    response.data.id,
+                    response.data.avatar,
+                ),
                 cachedAt: now,
             };
 
@@ -1971,6 +2156,34 @@ export default class KmqWebServer {
             );
             return null;
         }
+    }
+
+    /**
+     * Resolves a client-supplied instance ID to its guild/participants. Web
+     * room codes and Discord Activity instance IDs share the `instance_id`
+     * field on the wire; a room-code hit wins (codes are unguessable random
+     * strings, so a real Activity instance ID can't collide with a live one).
+     * @param instanceId - Activity instance ID or web room invite code
+     * @returns the instance context, or null if neither resolves
+     */
+    private async resolveInstanceOrRoom(instanceId: string): Promise<{
+        guildID: string;
+        channelID: string | null;
+        participantIDs: Set<string>;
+        webRoom: boolean;
+    } | null> {
+        const room = this.webRoomManager?.getRoomByCode(instanceId);
+        if (room) {
+            return {
+                guildID: room.roomID,
+                channelID: null,
+                participantIDs: new Set(room.members.keys()),
+                webRoom: true,
+            };
+        }
+
+        const instance = await this.resolveActivityInstance(instanceId);
+        return instance ? { ...instance, webRoom: false } : null;
     }
 
     private async resolveActivityInstance(instanceId: string): Promise<{
@@ -2051,5 +2264,695 @@ export default class KmqWebServer {
             );
             return null;
         }
+    }
+
+    /**
+     * Registers the standalone-website auth routes (/api/web/*): a standard
+     * Discord OAuth2 redirect flow that ends in an opaque `web_`-prefixed
+     * bearer token the SPA uses exactly like the Activity's access token.
+     * All routes 503 while the webModeEnabled feature switch is off.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebAuthRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        // WEB_PUBLIC_BASE_URL is the site origin used to build the OAuth
+        // redirect_uri; it falls back to the Activity tunnel URL so a dev
+        // setup configured for the Activity works for the website too.
+        const webPublicBaseUrl = (): string | null => {
+            const base =
+                process.env.WEB_PUBLIC_BASE_URL ||
+                process.env.ACTIVITY_PUBLIC_BASE_URL;
+
+            return base ? base.replace(/\/+$/, "") : null;
+        };
+
+        const requireWebMode = async (reply: any): Promise<boolean> => {
+            if (KmqConfiguration.Instance.webModeEnabled()) {
+                return true;
+            }
+
+            await reply.code(503).send({ error: "Web mode disabled" });
+            return false;
+        };
+
+        const parseCookie = (
+            header: string | undefined,
+            name: string,
+        ): string | null => {
+            if (!header) return null;
+            for (const part of header.split(";")) {
+                const eq = part.indexOf("=");
+                if (eq === -1) continue;
+                if (part.slice(0, eq).trim() === name) {
+                    return part.slice(eq + 1).trim();
+                }
+            }
+
+            return null;
+        };
+
+        const stateCookie = (value: string, maxAgeSec: number): string => {
+            const secure = webPublicBaseUrl()?.startsWith("https")
+                ? "; Secure"
+                : "";
+
+            // SameSite=Lax still sends the cookie on the top-level GET
+            // navigation back from Discord's consent screen.
+            return `${WEB_OAUTH_STATE_COOKIE}=${value}; Max-Age=${maxAgeSec}; Path=/api/web; HttpOnly; SameSite=Lax${secure}`;
+        };
+
+        const pruneExpired = (
+            map: Map<string, { expiresAt: number }>,
+        ): void => {
+            const now = Date.now();
+            for (const [key, value] of map) {
+                if (value.expiresAt <= now) {
+                    map.delete(key);
+                }
+            }
+        };
+
+        httpServer.get(
+            "/api/web/login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const baseUrl = webPublicBaseUrl();
+                if (
+                    !baseUrl ||
+                    !process.env.BOT_CLIENT_ID ||
+                    !process.env.DISCORD_CLIENT_SECRET
+                ) {
+                    logger.error(
+                        "Web login misconfigured: WEB_PUBLIC_BASE_URL, BOT_CLIENT_ID, or DISCORD_CLIENT_SECRET missing",
+                    );
+
+                    await reply
+                        .code(500)
+                        .send({ error: "OAuth not configured" });
+                    return;
+                }
+
+                const state = uuid.v4();
+                pruneExpired(this.webOauthStates);
+
+                // Where to land after login. Restricted to in-site /play
+                // paths so the callback can't be used as an open redirect —
+                // this is how invite links survive the OAuth round-trip.
+                const rawNext = (request.query as { next?: string }).next;
+                const next =
+                    rawNext &&
+                    rawNext.startsWith("/play") &&
+                    !rawNext.startsWith("//")
+                        ? rawNext
+                        : "/play";
+
+                this.webOauthStates.set(state, {
+                    expiresAt: Date.now() + WEB_OAUTH_STATE_TTL_MS,
+                    next,
+                });
+
+                const params = new URLSearchParams({
+                    client_id: process.env.BOT_CLIENT_ID,
+                    response_type: "code",
+                    redirect_uri: `${baseUrl}/api/web/callback`,
+                    scope: "identify",
+                    state,
+                });
+
+                await reply
+                    .header(
+                        "set-cookie",
+                        stateCookie(state, WEB_OAUTH_STATE_TTL_MS / 1000),
+                    )
+                    .redirect(
+                        `${DISCORD_OAUTH_AUTHORIZE_URL}?${params.toString()}`,
+                    );
+            },
+        );
+
+        httpServer.get(
+            "/api/web/callback",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const query = request.query as {
+                    code?: string;
+                    state?: string;
+                };
+
+                const cookieState = parseCookie(
+                    request.headers.cookie,
+                    WEB_OAUTH_STATE_COOKIE,
+                );
+
+                const state = query.state;
+                const stateEntry = state
+                    ? this.webOauthStates.get(state)
+                    : undefined;
+
+                const stateValid =
+                    !!state &&
+                    cookieState === state &&
+                    (stateEntry?.expiresAt ?? 0) > Date.now();
+
+                if (state) this.webOauthStates.delete(state);
+
+                // Expire the state cookie regardless of outcome.
+                const expireStateCookie = (): typeof reply =>
+                    reply.header("set-cookie", stateCookie("", 0));
+
+                if (!stateValid || !query.code) {
+                    await expireStateCookie()
+                        .code(400)
+                        .send({ error: "Invalid OAuth state or code" });
+                    return;
+                }
+
+                const baseUrl = webPublicBaseUrl();
+                if (
+                    !baseUrl ||
+                    !process.env.BOT_CLIENT_ID ||
+                    !process.env.DISCORD_CLIENT_SECRET
+                ) {
+                    await expireStateCookie()
+                        .code(500)
+                        .send({ error: "OAuth not configured" });
+                    return;
+                }
+
+                try {
+                    const params = new URLSearchParams();
+                    params.set("client_id", process.env.BOT_CLIENT_ID);
+                    params.set(
+                        "client_secret",
+                        process.env.DISCORD_CLIENT_SECRET,
+                    );
+                    params.set("grant_type", "authorization_code");
+                    params.set("code", query.code);
+                    params.set("redirect_uri", `${baseUrl}/api/web/callback`);
+
+                    const tokenResponse = await axios.post(
+                        DISCORD_OAUTH_TOKEN_URL,
+                        params.toString(),
+                        {
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded",
+                            },
+                            timeout: ACTIVITY_HTTP_TIMEOUT_MS,
+                        },
+                    );
+
+                    const meResponse = await axios.get(DISCORD_USERS_ME_URL, {
+                        headers: {
+                            Authorization: `Bearer ${tokenResponse.data.access_token}`,
+                        },
+                        timeout: ACTIVITY_HTTP_TIMEOUT_MS,
+                    });
+
+                    const user: CachedDiscordUser = {
+                        id: meResponse.data.id,
+                        username: meResponse.data.username,
+                        locale:
+                            typeof meResponse.data.locale === "string"
+                                ? meResponse.data.locale
+                                : "",
+                        avatarUrl: discordAvatarUrl(
+                            meResponse.data.id,
+                            meResponse.data.avatar,
+                        ),
+                        cachedAt: Date.now(),
+                    };
+
+                    const token = await createWebSession({
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                        locale: user.locale,
+                    });
+
+                    pruneExpired(this.webLoginCodes);
+                    const loginCode = uuid.v4();
+                    this.webLoginCodes.set(loginCode, {
+                        token,
+                        user,
+                        expiresAt: Date.now() + WEB_LOGIN_CODE_TTL_MS,
+                    });
+
+                    const next = stateEntry?.next ?? "/play";
+                    const joiner = next.includes("?") ? "&" : "?";
+                    await expireStateCookie().redirect(
+                        `${next}${joiner}login_code=${encodeURIComponent(loginCode)}`,
+                    );
+                } catch (e) {
+                    const err = e as {
+                        message: string;
+                        response?: { status?: number };
+                    };
+
+                    logger.warn(
+                        `Web OAuth callback failed. err=${err.message} status=${err.response?.status}`,
+                    );
+
+                    await expireStateCookie()
+                        .code(401)
+                        .send({ error: "Login failed" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/web/complete-login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const loginCode = (request.body as any)?.login_code as
+                    | string
+                    | undefined;
+
+                if (!loginCode) {
+                    await reply.code(400).send({ error: "Missing login_code" });
+                    return;
+                }
+
+                const entry = this.webLoginCodes.get(loginCode);
+                // Single-use: consumed on first attempt, valid or not.
+                this.webLoginCodes.delete(loginCode);
+
+                if (!entry || entry.expiresAt <= Date.now()) {
+                    await reply
+                        .code(401)
+                        .send({ error: "Invalid or expired login code" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    token: entry.token,
+                    user: {
+                        id: entry.user.id,
+                        username: entry.user.username,
+                        avatarUrl: entry.user.avatarUrl,
+                        guest: false,
+                    },
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/guest-login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                if (!KmqConfiguration.Instance.webGuestsEnabled()) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Guest mode disabled" });
+                    return;
+                }
+
+                const body = request.body as {
+                    username?: string;
+                    locale?: string;
+                } | null;
+
+                const username = sanitizeGuestUsername(body?.username);
+                const locale =
+                    typeof body?.locale === "string"
+                        ? body.locale.slice(0, 16)
+                        : "";
+
+                const id = mintGuestUserID();
+                const token = await createWebSession({
+                    id,
+                    username,
+                    avatarUrl: null,
+                    locale,
+                });
+
+                logger.info(
+                    `Guest web session created. id=${id}, username=${username}`,
+                );
+
+                await reply.code(200).send({
+                    token,
+                    user: {
+                        id,
+                        username,
+                        avatarUrl: null,
+                        guest: true,
+                    },
+                });
+            },
+        );
+
+        httpServer.get(
+            "/api/web/session",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const header = request.headers["authorization"];
+                const token = header?.startsWith("Bearer ")
+                    ? header.slice(7)
+                    : undefined;
+
+                const user = await this.resolveAccessToken(token);
+                if (!user) {
+                    await reply.code(401).send({ error: "Unauthorized" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                        guest: isGuestUserID(user.id),
+                    },
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/logout",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                const header = request.headers["authorization"];
+                const token = header?.startsWith("Bearer ")
+                    ? header.slice(7)
+                    : undefined;
+
+                if (token && isWebSessionToken(token)) {
+                    try {
+                        await deleteWebSession(token);
+                    } catch (e) {
+                        logger.warn(
+                            `Web logout failed to delete session. err=${
+                                (e as Error).message
+                            }`,
+                        );
+                    }
+
+                    // A logged-out user can't hold a room seat.
+                    const cached = this.accessTokenCache.get(token);
+                    if (cached) {
+                        this.webRoomManager?.leaveRoom(cached.user.id);
+                    }
+
+                    this.accessTokenCache.delete(token);
+                }
+
+                await reply.code(204).send();
+            },
+        );
+    }
+
+    /**
+     * Registers the standalone-website room routes (/api/web/room*): create/
+     * join/leave/read multiplayer rooms whose invite code doubles as the
+     * client's instance_id for every gameplay route. Gated behind the same
+     * webModeEnabled feature switch as the auth routes.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebRoomRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        // Resolves the requester or replies with the right error; returns
+        // null when a response has already been sent.
+        const requireWebUser = async (
+            request: any,
+            reply: any,
+        ): Promise<CachedDiscordUser | null> => {
+            if (!KmqConfiguration.Instance.webModeEnabled()) {
+                await reply.code(503).send({ error: "Web mode disabled" });
+                return null;
+            }
+
+            if (!this.webRoomManager) {
+                await reply.code(503).send({ error: "Rooms not enabled" });
+                return null;
+            }
+
+            const header = request.headers["authorization"] as
+                | string
+                | undefined;
+
+            const token = header?.startsWith("Bearer ")
+                ? header.slice(7)
+                : undefined;
+
+            const user = await this.resolveAccessToken(token);
+            if (!user) {
+                await reply.code(401).send({ error: "Unauthorized" });
+                return null;
+            }
+
+            return user;
+        };
+
+        httpServer.post(
+            "/api/web/room",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                // Guests can join rooms but never host: free identities
+                // shouldn't own persistent per-owner state (game options,
+                // presets), and a guest ID fed to roomIDForOwner would
+                // collide with the guest ID range (bit 62 already set).
+                if (isGuestUserID(user.id)) {
+                    await reply.code(403).send({ error: "guest_forbidden" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.createRoom({
+                    id: user.id,
+                    username: user.username,
+                    avatarUrl: user.avatarUrl,
+                });
+
+                if ("error" in result) {
+                    // Only possible when rejoining one's own still-alive room
+                    // that has since filled up.
+                    await reply.code(409).send({ error: result.error });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(result.room),
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/room/join",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                const code = (request.body as { code?: string } | null)?.code;
+                if (!code || typeof code !== "string") {
+                    await reply.code(400).send({ error: "Missing code" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.joinRoom(code, {
+                    id: user.id,
+                    username: user.username,
+                    avatarUrl: user.avatarUrl,
+                });
+
+                if ("error" in result) {
+                    await reply
+                        .code(result.error === "not_found" ? 404 : 409)
+                        .send({ error: result.error });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(result.room),
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/room/leave",
+            limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                this.webRoomManager!.leaveRoom(user.id);
+                await reply.code(204).send();
+            },
+        );
+
+        httpServer.get(
+            "/api/web/room",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                // With ?code=, read that room (members only — the code is
+                // the room's bearer capability, but presence/usernames still
+                // shouldn't leak to non-members probing codes). Without it,
+                // resolve the requester's current room for reconnects.
+                const code = (request.query as { code?: string }).code;
+                const room = code
+                    ? this.webRoomManager!.getRoomByCode(code)
+                    : this.webRoomManager!.getRoomForUser(user.id);
+
+                if (!room) {
+                    await reply.code(404).send({ error: "No room" });
+                    return;
+                }
+
+                if (!room.members.has(user.id)) {
+                    await reply.code(403).send({ error: "Not a member" });
+                    return;
+                }
+
+                await reply.code(200).send({
+                    room: this.webRoomManager!.serializeRoom(room),
+                });
+            },
+        );
+    }
+
+    /**
+     * Registers the web-room audio stream route. The token is the bearer
+     * capability (audio elements can't attach Authorization headers); it's
+     * an unguessable uuid distributed only to the room's subscribers, and it
+     * expires with the playback. Each GET spawns a dedicated ffmpeg seeked to
+     * the live position, so reloads and late joiners stay in sync.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebAudioRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        httpServer.get(
+            `${WEB_AUDIO_URL_PREFIX}/:token`,
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                if (!KmqConfiguration.Instance.webModeEnabled()) {
+                    await reply.code(503).send({ error: "Web mode disabled" });
+                    return;
+                }
+
+                if (!this.activityHub) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Activity hub not available" });
+                    return;
+                }
+
+                const token = (request.params as { token: string }).token;
+                const entry = this.activityHub.getAudioEntry(token);
+                if (!entry) {
+                    await reply.code(404).send({ error: "Unknown token" });
+                    return;
+                }
+
+                const args = buildAudioStreamArgs(entry, Date.now());
+                if (!args) {
+                    await reply.code(410).send({ error: "Playback ended" });
+                    return;
+                }
+
+                if (
+                    this.activeAudioStreams >= WEB_AUDIO_MAX_CONCURRENT_STREAMS
+                ) {
+                    logger.warn(
+                        `Audio stream cap hit (${this.activeAudioStreams} active)`,
+                    );
+
+                    await reply
+                        .code(503)
+                        .send({ error: "Too many active streams" });
+                    return;
+                }
+
+                this.activeAudioStreams++;
+                let released = false;
+                const release = (): void => {
+                    if (released) return;
+                    released = true;
+                    this.activeAudioStreams--;
+                };
+
+                const child = spawn("ffmpeg", args, {
+                    stdio: ["ignore", "pipe", "pipe"],
+                });
+
+                // -loglevel error: anything here is a real failure. Drain it
+                // regardless so ffmpeg can't block on a full stderr pipe.
+                let stderr = "";
+                child.stderr.on("data", (chunk: Buffer) => {
+                    if (stderr.length < 2048) {
+                        stderr += chunk.toString();
+                    }
+                });
+
+                child.on("close", (code) => {
+                    release();
+                    if (code !== 0 && code !== null && stderr) {
+                        logger.error(
+                            `Audio stream ffmpeg failed. gid=${entry.guildID}, code=${code}, err=${stderr.trim()}`,
+                        );
+                    }
+                });
+
+                child.on("error", (e) => {
+                    release();
+                    logger.error(`Audio stream ffmpeg spawn failed. err=${e}`);
+                    if (!reply.sent) {
+                        reply
+                            .code(500)
+                            .send({ error: "Stream unavailable" })
+                            .then(
+                                () => {},
+                                () => {},
+                            );
+                    }
+                });
+
+                // Tab closed / element released: kill the transcode instead
+                // of encoding to a dead socket for the rest of the song.
+                request.raw.on("close", () => {
+                    child.kill("SIGKILL");
+                    release();
+                });
+
+                await reply
+                    .code(200)
+                    .header("Content-Type", "audio/mpeg")
+                    .header("Cache-Control", "no-store")
+                    .header("Accept-Ranges", "none")
+                    .send(child.stdout);
+            },
+        );
     }
 }

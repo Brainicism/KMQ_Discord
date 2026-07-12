@@ -17,11 +17,8 @@ import {
 import {
     clickableSlashCommand,
     fetchUser,
-    getCurrentVoiceMembers,
     getDebugLogHeader,
     getGameInfoMessage,
-    getMajorityCount,
-    getNumParticipants,
     getUserVoiceChannel,
     sendInfoMessage,
     sendPaginationedEmbed,
@@ -34,6 +31,7 @@ import {
     isFirstGameOfDay,
     userBonusIsActive,
 } from "../helpers/game_utils";
+import { isGuestUserID } from "../helpers/web_session_manager";
 import State from "../state";
 import dbContext from "../database_context";
 
@@ -355,9 +353,8 @@ export default class GameSession extends Session {
         createdAt: number,
     ): Promise<void> {
         // Allow clip mode guesses in between clip replays
-        if (!this.isClipMode()) {
-            if (!this.connection) return;
-            if (this.connection.listenerCount("end") === 0) return;
+        if (!this.isClipMode() && !this.isPlaybackActive()) {
+            return;
         }
 
         if (!this.round) return;
@@ -437,13 +434,7 @@ export default class GameSession extends Session {
             // If hidden or multiple choice, everyone guessed and no one was right
             if (
                 setDifference(
-                    [
-                        ...new Set(
-                            getCurrentVoiceMembers(this.voiceChannelID).map(
-                                (x) => x.id,
-                            ),
-                        ),
-                    ],
+                    [...new Set(this.getParticipantIDs())],
                     [...incorrectGuessers],
                 ).size === 0
             ) {
@@ -495,11 +486,12 @@ export default class GameSession extends Session {
             return;
         }
 
-        const voiceMembers = getCurrentVoiceMembers(this.voiceChannelID).filter(
-            (x) => x.id !== process.env.BOT_CLIENT_ID,
+        const voiceMemberIDs = new Set(
+            this.getParticipantIDs().filter(
+                (x) => x !== process.env.BOT_CLIENT_ID,
+            ),
         );
 
-        const voiceMemberIDs = new Set(voiceMembers.map((x) => x.id));
         if (voiceMemberIDs.has(this.owner.id) || voiceMemberIDs.size === 0) {
             return;
         }
@@ -557,9 +549,7 @@ export default class GameSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                                guildID,
-                            )}`,
+                            skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
                         },
                     ),
                 );
@@ -571,9 +561,7 @@ export default class GameSession extends Session {
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
-                        skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                            guildID,
-                        )}`,
+                        skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
                     }),
                 );
 
@@ -721,29 +709,39 @@ export default class GameSession extends Session {
      * @param inVC - Whether the player is currently in the voice channel
      */
     async setPlayerInVC(userID: string, inVC: boolean): Promise<void> {
-        const user = await fetchUser(userID);
         if (
             inVC &&
             !this.scoreboard.getPlayerIDs().includes(userID) &&
             this.gameType !== GameType.TEAMS
         ) {
-            this.scoreboard.addPlayer(
-                this.gameType === GameType.ELIMINATION
-                    ? EliminationPlayer.fromUser(
-                          user as Eris.User,
-                          this.guildID,
-                          (
-                              this.scoreboard as EliminationScoreboard
-                          ).getLivesOfWeakestPlayer(),
-                          await isFirstGameOfDay(userID),
-                      )
-                    : Player.fromUser(
-                          user as Eris.User,
-                          this.guildID,
-                          0,
-                          await isFirstGameOfDay(userID),
-                      ),
-            );
+            const profile = await this.resolveParticipantProfile(userID);
+            if (!profile) {
+                logger.warn(
+                    `gid: ${this.guildID} | Couldn't resolve participant ${userID} for scoreboard, skipping`,
+                );
+            } else {
+                this.scoreboard.addPlayer(
+                    this.gameType === GameType.ELIMINATION
+                        ? new EliminationPlayer(
+                              userID,
+                              this.guildID,
+                              profile.avatarUrl,
+                              (
+                                  this.scoreboard as EliminationScoreboard
+                              ).getLivesOfWeakestPlayer(),
+                              profile.username,
+                              await isFirstGameOfDay(userID),
+                          )
+                        : new Player(
+                              userID,
+                              this.guildID,
+                              profile.avatarUrl,
+                              0,
+                              profile.username,
+                              await isFirstGameOfDay(userID),
+                          ),
+                );
+            }
         }
 
         this.scoreboard.setInVC(userID, inVC);
@@ -754,9 +752,7 @@ export default class GameSession extends Session {
      * Sequential iteration prevents concurrent addPlayer/setPlayerInVC interleaving.
      */
     async syncAllVoiceMembers(): Promise<void> {
-        const currentVoiceMemberIds = getCurrentVoiceMembers(
-            this.voiceChannelID,
-        ).map((x) => x.id);
+        const currentVoiceMemberIds = this.getParticipantIDs();
 
         const departedPlayers = this.scoreboard
             .getPlayerIDs()
@@ -779,17 +775,33 @@ export default class GameSession extends Session {
             // eslint-disable-next-line no-await-in-loop
             const firstGameOfDay = await isFirstGameOfDay(playerId);
             // eslint-disable-next-line no-await-in-loop
-            const player = (await fetchUser(playerId)) as Eris.User;
+            const profile = await this.resolveParticipantProfile(playerId);
+            if (!profile) {
+                logger.warn(
+                    `gid: ${this.guildID} | Couldn't resolve participant ${playerId} for scoreboard, skipping`,
+                );
+                continue;
+            }
+
             this.scoreboard.addPlayer(
                 this.gameType === GameType.ELIMINATION
-                    ? EliminationPlayer.fromUser(
-                          player,
+                    ? new EliminationPlayer(
+                          playerId,
                           this.guildID,
+                          profile.avatarUrl,
                           (this.scoreboard as EliminationScoreboard)
                               .startingLives,
+                          profile.username,
                           firstGameOfDay,
                       )
-                    : Player.fromUser(player, this.guildID, 0, firstGameOfDay),
+                    : new Player(
+                          playerId,
+                          this.guildID,
+                          profile.avatarUrl,
+                          0,
+                          profile.username,
+                          firstGameOfDay,
+                      ),
             );
         }
     }
@@ -1068,6 +1080,23 @@ export default class GameSession extends Session {
     /** @returns if clip mode is active */
     isClipMode(): boolean {
         return this.gameType === GameType.CLIP;
+    }
+
+    /**
+     * Transport hook: resolves a participant's display identity for the
+     * scoreboard. Discord fetches the user; web sessions read the pushed
+     * room membership instead (whose guest members carry synthetic IDs that
+     * don't exist on Discord at all).
+     * @param userID - the participant to resolve
+     * @returns the identity, or null when unresolvable (player is skipped)
+     */
+    protected async resolveParticipantProfile(
+        userID: string,
+    ): Promise<{ username: string; avatarUrl: string | null } | null> {
+        const user = await fetchUser(userID);
+        return user
+            ? { username: user.username, avatarUrl: user.avatarURL }
+            : null;
     }
 
     /**
@@ -1778,14 +1807,7 @@ export default class GameSession extends Session {
         messageContext: MessageContext,
         createdAt: number,
     ): boolean {
-        const userVoiceChannel = getUserVoiceChannel(messageContext);
-        // if user isn't in the same voice channel
-        if (!userVoiceChannel || userVoiceChannel.id !== this.voiceChannelID) {
-            return false;
-        }
-
-        // if message isn't in the active game session's text channel
-        if (messageContext.textChannelID !== this.textChannelID) {
+        if (!this.guesserInSessionChannels(messageContext)) {
             return false;
         }
 
@@ -2108,56 +2130,63 @@ export default class GameSession extends Session {
             return [];
         }
 
-        // commit player stats
+        // commit player stats — except for website guests, whose synthetic
+        // IDs are orphaned on logout: persisting them would only pollute the
+        // per-player tables (player_stats, player_servers, per-session
+        // leaderboards) with rows no one can ever log back into. Their score
+        // and EXP live in the in-memory scoreboard for the session only.
         await Promise.allSettled(
-            this.scoreboard.getPlayerIDs().map(async (participant) => {
-                const isFirstGame = await isFirstGameOfDay(participant);
-                await this.ensurePlayerStat(participant);
-                await this.incrementPlayerGamesPlayed(participant);
-                const playerCorrectGuessCount =
-                    this.scoreboard.getPlayerCorrectGuessCount(participant);
+            this.scoreboard
+                .getPlayerIDs()
+                .filter((participant) => !isGuestUserID(participant))
+                .map(async (participant) => {
+                    const isFirstGame = await isFirstGameOfDay(participant);
+                    await this.ensurePlayerStat(participant);
+                    await this.incrementPlayerGamesPlayed(participant);
+                    const playerCorrectGuessCount =
+                        this.scoreboard.getPlayerCorrectGuessCount(participant);
 
-                if (playerCorrectGuessCount > 0) {
-                    await this.incrementPlayerSongsGuessed(
+                    if (playerCorrectGuessCount > 0) {
+                        await this.incrementPlayerSongsGuessed(
+                            participant,
+                            playerCorrectGuessCount,
+                        );
+                    }
+
+                    const playerExpGain =
+                        this.scoreboard.getPlayerExpGain(participant);
+
+                    let levelUpResult: LevelUpResult | null = null;
+                    if (playerExpGain > 0) {
+                        levelUpResult = await this.incrementPlayerExp(
+                            participant,
+                            playerExpGain,
+                        );
+                        if (levelUpResult) {
+                            leveledUpPlayers.push(levelUpResult);
+                        }
+                    }
+
+                    await this.insertPerSessionStats(
                         participant,
                         playerCorrectGuessCount,
-                    );
-                }
-
-                const playerExpGain =
-                    this.scoreboard.getPlayerExpGain(participant);
-
-                let levelUpResult: LevelUpResult | null = null;
-                if (playerExpGain > 0) {
-                    levelUpResult = await this.incrementPlayerExp(
-                        participant,
                         playerExpGain,
+                        levelUpResult
+                            ? levelUpResult.endLevel - levelUpResult.startLevel
+                            : 0,
                     );
-                    if (levelUpResult) {
-                        leveledUpPlayers.push(levelUpResult);
-                    }
-                }
 
-                await this.insertPerSessionStats(
-                    participant,
-                    playerCorrectGuessCount,
-                    playerExpGain,
-                    levelUpResult
-                        ? levelUpResult.endLevel - levelUpResult.startLevel
-                        : 0,
-                );
-
-                // if game ended erroneously during player's FGOTD, mark it as errored to allow
-                // for bonus to continue next game
-                await dbContext.kmq
-                    .updateTable("player_stats")
-                    .where("player_id", "=", participant)
-                    .set({
-                        last_game_played_errored:
-                            isFirstGame && endedDueToError ? 1 : 0,
-                    })
-                    .execute();
-            }),
+                    // if game ended erroneously during player's FGOTD, mark it as errored to allow
+                    // for bonus to continue next game
+                    await dbContext.kmq
+                        .updateTable("player_stats")
+                        .where("player_id", "=", participant)
+                        .set({
+                            last_game_played_errored:
+                                isFirstGame && endedDueToError ? 1 : 0,
+                        })
+                        .execute();
+                }),
         );
 
         return leveledUpPlayers;
@@ -2198,8 +2227,32 @@ export default class GameSession extends Session {
         return expBase + expJitter;
     }
 
+    /**
+     * Transport hook: whether the guesser is in the session's channels
+     * (Discord: same voice + text channel; web: a room member).
+     * @param messageContext - The context of the guess
+     * @returns whether the guess comes from inside the session
+     */
+    // eslint-disable-next-line @typescript-eslint/member-ordering
+    protected guesserInSessionChannels(
+        messageContext: MessageContext,
+    ): boolean {
+        const userVoiceChannel = getUserVoiceChannel(messageContext);
+        // if user isn't in the same voice channel
+        if (!userVoiceChannel || userVoiceChannel.id !== this.voiceChannelID) {
+            return false;
+        }
+
+        // if message isn't in the active game session's text channel
+        if (messageContext.textChannelID !== this.textChannelID) {
+            return false;
+        }
+
+        return true;
+    }
+
     private multiguessDelayIsActive(guildPreference: GuildPreference): boolean {
-        const playerIsAlone = getNumParticipants(this.voiceChannelID) === 1;
+        const playerIsAlone = this.getParticipantCount() === 1;
         return (
             guildPreference.gameOptions.multiGuessType === MultiGuessType.ON &&
             !playerIsAlone &&
@@ -2224,7 +2277,7 @@ export default class GameSession extends Session {
                 const expGain = await ExpCommand.calculateTotalRoundExp(
                     guildPreference,
                     round,
-                    getNumParticipants(this.voiceChannelID),
+                    this.getParticipantCount(),
                     idx === 0 ? lastGuesserStreak : 0,
                     round.getTimeToGuessMs(correctGuesser.id, isHidden),
                     guessPosition,

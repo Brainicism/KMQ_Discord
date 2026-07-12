@@ -1,8 +1,14 @@
+import { isEmbedded } from "./platform";
+
 // Discord Activity sandboxes the iframe; only registered URL Mappings can be
 // reached. The reverse proxy at `/.proxy/*` is rewritten by the Embedded App
-// SDK runtime to the developer-portal-mapped origin.
-export const ACTIVITY_PROXY_BASE = "/.proxy/api/activity";
-export const ACTIVITY_WS_PATH = "/.proxy/ws/activity";
+// SDK runtime to the developer-portal-mapped origin. The standalone website
+// talks to the same server directly, without the proxy prefix.
+export const getApiBase = (): string =>
+    isEmbedded() ? "/.proxy/api/activity" : "/api/activity";
+
+export const getWsPath = (): string =>
+    isEmbedded() ? "/.proxy/ws/activity" : "/ws/activity";
 
 // Dev portal URL Mapping forwards `/external/yt/*` → `i.ytimg.com` so YouTube
 // thumbnails can render inside the iframe.

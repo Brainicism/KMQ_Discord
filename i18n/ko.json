@@ -243,6 +243,8 @@
         "rejectRateLimit": "천천히 — 요청이 너무 많습니다.",
         "rejectSessionAlreadyRunning": "이미 게임이 진행 중입니다.",
         "rejectUnauthorized": "세션 만료 — 새로고침하세요.",
+        "restartCountdown": "KMQ가 {{countdown}} 후 재시작됩니다 — 게임이 잠시 중단됩니다!",
+        "restartImminent": "KMQ가 재시작 중입니다 — 곧 돌아올게요!",
         "revealAllGuessesSummary": "모든 정답 ({{count}})",
         "revealWinners": "{{username}}: +{{points}}점, +{{exp}} EXP",
         "roundLabel": "{{num}}라운드",

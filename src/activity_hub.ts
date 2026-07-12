@@ -4,9 +4,13 @@ import {
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
     ACTIVITY_REQUEST_TIMEOUT_MS,
+    WEB_AUDIO_SWEEP_INTERVAL_MS,
+    WEB_AUDIO_URL_PREFIX,
 } from "./constants";
 import { IPCLogger } from "./logger";
+import { WebAudioRegistry } from "./web_audio_registry";
 import type { Fleet } from "eris-fleet";
+import type { WebAudioEntry } from "./web_audio_registry";
 import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
@@ -29,9 +33,13 @@ import type ActivitySongInfoArgs from "./interfaces/activity_song_info_args";
 import type ActivitySongInfoResponse from "./interfaces/activity_song_info_response";
 import type ActivityStartGameArgs from "./interfaces/activity_start_game_args";
 import type ActivityUserActionArgs from "./interfaces/activity_user_action_args";
+import type ActivityWebRoomMembershipArgs from "./interfaces/activity_web_room_membership_args";
 import type ActivityWorkerEventMessage from "./interfaces/activity_worker_event_message";
 
 const logger = new IPCLogger("activity_hub");
+
+const audioUrlForToken = (token: string): string =>
+    `${WEB_AUDIO_URL_PREFIX}/${token}`;
 
 export interface ActivitySubscriber {
     id: string;
@@ -62,6 +70,16 @@ export default class ActivityHub {
 
     private wired: boolean = false;
 
+    /** Opaque-token registry for web-room audio streams. */
+    private audioRegistry: WebAudioRegistry = new WebAudioRegistry();
+
+    /**
+     * Epoch ms of the announced bot restart, or null when none is pending.
+     * Set from the admiral's /announce-restart endpoint — the same signal
+     * that warns Discord text channels — and broadcast to every subscriber.
+     */
+    private restartsAtEpochMs: number | null = null;
+
     constructor(fleet: Fleet) {
         this.fleet = fleet;
     }
@@ -79,6 +97,10 @@ export default class ActivityHub {
         this.fleet.on(ACTIVITY_IPC_REPLY, (msg: ActivityReplyMessage) => {
             this.handleWorkerReply(msg);
         });
+
+        setInterval(() => {
+            this.audioRegistry.sweep(Date.now());
+        }, WEB_AUDIO_SWEEP_INTERVAL_MS).unref();
 
         logger.info(
             `ActivityHub started. shardCount=${this.shardCount}, clusters=${this.clusterRanges.length}`,
@@ -112,24 +134,35 @@ export default class ActivityHub {
      * @returns the snapshot; `hasSession` is false if no GameSession is active
      */
     async requestSnapshot(guildID: string): Promise<ActivitySnapshot> {
-        const clusterID = this.clusterIdForGuild(guildID);
-        if (clusterID === null) {
-            await this.refreshClusterMap();
-            const retry = this.clusterIdForGuild(guildID);
-            if (retry === null) {
-                throw new Error(
-                    `No cluster found for guild ${guildID} (cluster map unavailable)`,
-                );
-            }
+        const clusterID = await this.resolveCluster(guildID);
+        const snapshot = await this.sendRequest<ActivitySnapshot>(
+            clusterID,
+            "snapshot",
+            { guildID },
+        );
 
-            return this.sendRequest<ActivitySnapshot>(retry, "snapshot", {
-                guildID,
-            });
+        // Web rooms: point late joiners/reconnects at the audio already
+        // playing (the registry only ever has entries for web guilds).
+        const audio = this.audioRegistry.currentForGuild(guildID, Date.now());
+        if (audio && snapshot.hasSession) {
+            snapshot.currentAudio = {
+                audioUrl: audioUrlForToken(audio.token),
+                playbackDurationSec: audio.playbackDurationSec,
+            };
         }
 
-        return this.sendRequest<ActivitySnapshot>(clusterID, "snapshot", {
-            guildID,
-        });
+        // Late joiners/reconnects learn about a pending restart from the
+        // snapshot; everyone already connected got the broadcast.
+        if (
+            this.restartsAtEpochMs !== null &&
+            this.restartsAtEpochMs > Date.now()
+        ) {
+            snapshot.restartWarning = {
+                restartsAtEpochMs: this.restartsAtEpochMs,
+            };
+        }
+
+        return snapshot;
     }
 
     /**
@@ -212,6 +245,23 @@ export default class ActivityHub {
     ): Promise<ActivityGuessResponse> {
         const target = await this.resolveCluster(args.guildID);
         return this.sendRequest<ActivityGuessResponse>(target, "endGame", args);
+    }
+
+    /**
+     * Pushes a web room's membership snapshot to the worker owning its
+     * synthetic guild ID (empty members = room closed, ends any game).
+     * @param args - guildID/members
+     * @returns the worker's ack
+     */
+    async webRoomMembership(
+        args: ActivityWebRoomMembershipArgs,
+    ): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(
+            target,
+            "webRoomMembership",
+            args,
+        );
     }
 
     /**
@@ -398,6 +448,41 @@ export default class ActivityHub {
         }
     }
 
+    /**
+     * Redeems an audio-stream token minted from a roundAudio event.
+     * @param token - the opaque token from the audio URL
+     * @returns the playback entry, or null if unknown/expired
+     */
+    getAudioEntry(token: string): WebAudioEntry | null {
+        return this.audioRegistry.get(token, Date.now());
+    }
+
+    /**
+     * Announces (or retracts, with null) an impending bot restart to every
+     * connected subscriber — embedded Activities and web rooms alike, whether
+     * or not a game is running.
+     * @param restartsAtEpochMs - when the restart happens, or null to retract
+     */
+    setRestartNotice(restartsAtEpochMs: number | null): void {
+        this.restartsAtEpochMs = restartsAtEpochMs;
+        const wireData = JSON.stringify({
+            type: "restartWarning",
+            restartsAtEpochMs,
+        });
+
+        for (const guildID of this.guildSubscribers.keys()) {
+            this.fanOut(guildID, wireData);
+        }
+
+        logger.info(
+            `Restart notice ${
+                restartsAtEpochMs === null
+                    ? "cleared"
+                    : `set for ${new Date(restartsAtEpochMs).toISOString()}`
+            }; ${this.getSubscriberCount()} subscribers notified.`,
+        );
+    }
+
     /** @returns total number of active subscribers across all guilds */
     getSubscriberCount(): number {
         let total = 0;
@@ -444,12 +529,45 @@ export default class ActivityHub {
     }
 
     private handleWorkerEvent(msg: ActivityWorkerEventMessage): void {
-        const subscribers = this.guildSubscribers.get(msg.guildID);
+        // roundAudio carries the raw playback spec, which names the song —
+        // it must never reach clients pre-reveal. Mint an opaque streaming
+        // token and fan out only the URL.
+        if (msg.event.type === "roundAudio") {
+            const entry = this.audioRegistry.mint(
+                msg.guildID,
+                {
+                    songLocation: msg.event.songLocation,
+                    inputArgs: msg.event.inputArgs,
+                    encoderArgs: msg.event.encoderArgs,
+                    playbackDurationSec: msg.event.playbackDurationSec,
+                },
+                Date.now(),
+            );
+
+            this.fanOut(
+                msg.guildID,
+                JSON.stringify({
+                    type: "roundAudio",
+                    audioUrl: audioUrlForToken(entry.token),
+                    playbackDurationSec: entry.playbackDurationSec,
+                }),
+            );
+            return;
+        }
+
+        if (msg.event.type === "sessionEnd") {
+            this.audioRegistry.clearGuild(msg.guildID);
+        }
+
+        this.fanOut(msg.guildID, JSON.stringify(msg.event));
+    }
+
+    private fanOut(guildID: string, wireData: string): void {
+        const subscribers = this.guildSubscribers.get(guildID);
         if (!subscribers || subscribers.size === 0) {
             return;
         }
 
-        const wireData = JSON.stringify(msg.event);
         for (const sub of subscribers) {
             try {
                 sub.send(wireData);
@@ -489,7 +607,8 @@ export default class ActivityHub {
             | ActivityBookmarkArgs
             | ActivitySetOptionArgs
             | ActivityAutocompleteArtistsArgs
-            | ActivityPresetArgs,
+            | ActivityPresetArgs
+            | ActivityWebRoomMembershipArgs,
     ): Promise<T> {
         const cid = uuid.v4();
         return new Promise<T>((resolve, reject) => {

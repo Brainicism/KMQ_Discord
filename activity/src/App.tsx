@@ -36,8 +36,17 @@ import {
     submitGuess,
     submitMcGuess,
 } from "./api";
-import { authenticate, openExternalUrl, readSdkLocale } from "./discordSdk";
+import {
+    authenticate,
+    openExternalUrl,
+    readSdkLocale,
+} from "./platform/discordPlatform";
+import { isEmbedded } from "./platform";
+import { THEME_STORAGE_KEY, applyTheme, readInitialTheme } from "./theme";
+import type { Theme } from "./theme";
 import { makeTranslator } from "./i18n/translator";
+import SoundControls from "./web/SoundControls";
+import useRoundAudio from "./web/useRoundAudio";
 import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { ActivityArtist } from "./types/activity_options_snapshot";
@@ -106,9 +115,6 @@ const PRE_HYDRATE_STRINGS: Record<string, string> = {
     statusConnecting: "Connecting...",
 };
 
-type Theme = "light" | "dark";
-
-const THEME_STORAGE_KEY = "kmq:theme";
 // Mirrors the bot's QUICK_GUESS_MS (src/constants.ts) — guesses at or under
 // this get a ⚡ in the round-end reveal, matching the legacy text-chat look.
 const QUICK_GUESS_MS = 3500;
@@ -164,28 +170,6 @@ function isNearMiss(guess: string, targets: string[]): boolean {
     });
 }
 
-function readInitialTheme(): Theme {
-    // localStorage can throw in sandboxed contexts (rare inside Discord's
-    // iframe but not impossible). Fall back to the OS preference.
-    try {
-        const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-        if (stored === "dark" || stored === "light") return stored;
-    } catch {
-        // ignore
-    }
-
-    // Discord's client defaults to dark; matching it is the better first
-    // impression for most users.
-    if (
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-        return "dark";
-    }
-
-    return "dark";
-}
-
 const initialUi: UiState = {
     session: null,
     scoreboard: null,
@@ -220,7 +204,13 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
 // Discord Activities sandbox the iframe — only hosts registered as URL
 // Mappings in the developer portal can be reached. Rewrite YouTube image
 // hosts to a /external/yt/ prefix that the dev portal maps to i.ytimg.com.
+// The standalone website has no such mapping (and no sandbox): the original
+// i.ytimg.com URL is used directly.
 function proxyImageUrl(url: string): string {
+    if (!isEmbedded()) {
+        return url;
+    }
+
     return url.replace(
         YOUTUBE_IMAGE_HOST_PATTERN,
         EXTERNAL_YOUTUBE_PROXY_PREFIX,
@@ -4330,6 +4320,16 @@ type StreamEvent =
     | ActivityEvent
     | { type: "snapshot"; snapshot: ActivitySnapshot };
 
+// Web-only auto-reconnect after a dropped websocket. The embedded Activity
+// leaves this to the user (Discord itself reloads the iframe on real
+// trouble); on the open web transient drops are routine, so a few silent
+// retries with backoff come first, and the manual Reconnect screen is the
+// fallback. A connection that survived this long is considered healthy and
+// resets the attempt budget.
+const WEB_RECONNECT_MAX_ATTEMPTS = 3;
+const WEB_RECONNECT_BASE_DELAY_MS = 1500;
+const WEB_RECONNECT_HEALTHY_MS = 30_000;
+
 // Minimum time the round-end reveal stays on screen before the next round (or
 // the game-over screen) is allowed to replace it. The reveal naturally shows
 // for the gap between rounds, which is the guild's `song_start_delay`; when
@@ -4338,7 +4338,54 @@ type StreamEvent =
 // down. A longer song_start_delay already exceeds this, so it's a no-op there.
 const MIN_REVEAL_HOLD_MS = 1500;
 
-export default function App() {
+/**
+ * Credentials injected by the standalone-website shell: the web session token
+ * plus room code stand in for the Discord SDK's OAuth handshake and instance
+ * ID. When present, the connect flow skips every SDK call, so the Discord
+ * SDK chunk is never loaded on the web.
+ */
+export interface WebAuth {
+    accessToken: string;
+    instanceId: string;
+    userID: string;
+    /** Website guest (no Discord account) — bookmarks (delivered by DM at
+     *  session end) can never reach them, so bookmarking UI is hidden. */
+    guest?: boolean;
+}
+
+// Fixed warning banner shown while a bot restart is announced (the Activity
+// counterpart of the text-channel restart embeds). Counts down locally from
+// the server-provided deadline; past it, holds an "any moment now" line until
+// the post-restart reconnect delivers a snapshot without the warning.
+function RestartBanner({
+    restartsAtEpochMs,
+    t,
+}: {
+    restartsAtEpochMs: number;
+    t: Translator;
+}) {
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+        const timer = window.setInterval(() => setNow(Date.now()), 1000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    const remainingSec = Math.ceil((restartsAtEpochMs - now) / 1000);
+    return (
+        <div className="restart-banner" role="status">
+            <span aria-hidden="true">⚠️</span>
+            <span>
+                {remainingSec > 0
+                    ? t("restartCountdown", {
+                          countdown: formatDuration(remainingSec),
+                      })
+                    : t("restartImminent")}
+            </span>
+        </div>
+    );
+}
+
+export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
@@ -4366,6 +4413,11 @@ export default function App() {
     // without reloading the iframe — drives the Reconnect button.
     const [connectNonce, setConnectNonce] = useState(0);
     const [reconnecting, setReconnecting] = useState(false);
+    // Epoch ms of an announced bot restart (null = none). Set from the
+    // snapshot on connect and updated by live restartWarning events.
+    const [restartsAtEpochMs, setRestartsAtEpochMs] = useState<number | null>(
+        null,
+    );
     // Profile cards. The cache is shared across every card for the session so
     // re-opening a player is free; the nonce is bumped on round/session end to
     // invalidate open cards (newly-earned EXP, level-ups).
@@ -4402,7 +4454,7 @@ export default function App() {
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
+        applyTheme(theme);
         try {
             window.localStorage.setItem(THEME_STORAGE_KEY, theme);
         } catch {
@@ -4439,6 +4491,11 @@ export default function App() {
     }, []);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
+
+    // Web auto-reconnect bookkeeping (see WEB_RECONNECT_*).
+    const reconnectAttemptsRef = useRef(0);
+    const reconnectTimerRef = useRef<number | null>(null);
+    const streamOpenedAtRef = useRef(0);
 
     // Reveal-hold bookkeeping (see MIN_REVEAL_HOLD_MS). `revealShownAt` marks
     // when the current reveal appeared (set on roundEnd); while a tear-down
@@ -4492,6 +4549,12 @@ export default function App() {
         apply(event);
     }, []);
 
+    // Web-only browser audio (on the embedded Activity the bot plays into
+    // the voice channel; the hook stays inert there). Destructured so the
+    // connect effect captures the stable callbacks, not the stateful object.
+    const roundAudio = useRoundAudio(!!webAuth);
+    const { handleRoundAudio, stop: stopRoundAudio } = roundAudio;
+
     // Translator is stable for a given bundle. Seed with an English stub for
     // the two strings rendered before the /api/activity/i18n fetch resolves,
     // so the splash isn't "appTitle" / "statusConnecting".
@@ -4518,6 +4581,10 @@ export default function App() {
                     accessToken = existingAuth.accessToken;
                     instanceId = existingAuth.instanceId;
                     userID = existingAuth.userID;
+                } else if (webAuth) {
+                    accessToken = webAuth.accessToken;
+                    instanceId = webAuth.instanceId;
+                    userID = webAuth.userID;
                 } else {
                     const auth = await authenticate();
                     if (cancelled) return;
@@ -4543,10 +4610,25 @@ export default function App() {
                 setAuthState({ accessToken, instanceId, userID });
                 setReady(true);
 
+                // Web rooms: a song may already be playing (late join /
+                // reconnect); each GET streams from the live position.
+                if (snapshot.currentAudio) {
+                    handleRoundAudio(snapshot.currentAudio.audioUrl);
+                }
+
+                // A restart may have been announced before we connected (or
+                // retracted while we were disconnected).
+                setRestartsAtEpochMs(
+                    snapshot.restartWarning?.restartsAtEpochMs ?? null,
+                );
+
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
-                // matching bundle and swap if it's different.
-                const sdkLocale = await readSdkLocale();
+                // matching bundle and swap if it's different. On the web
+                // there's no SDK (and calling in would load its chunk); the
+                // snapshot's viewerLocale — the login-time Discord locale —
+                // already won.
+                const sdkLocale = webAuth ? null : await readSdkLocale();
                 if (
                     !cancelled &&
                     sdkLocale &&
@@ -4567,6 +4649,42 @@ export default function App() {
                     accessToken,
                     instanceId,
                     (event) => {
+                        // roundAudio bypasses the reveal-hold queue: the
+                        // next round's audio must start on time even while
+                        // the previous reveal is held on screen.
+                        if (event.type === "roundAudio") {
+                            handleRoundAudio(event.audioUrl);
+                            return;
+                        }
+
+                        // Restart warnings bypass the reveal-hold queue too:
+                        // a system-level banner, not round flow.
+                        if (event.type === "restartWarning") {
+                            setRestartsAtEpochMs(event.restartsAtEpochMs);
+                            return;
+                        }
+
+                        if (event.type === "sessionEnd") {
+                            // Discord parity: playback runs through the
+                            // reveal and only stops with the session.
+                            stopRoundAudio();
+                        }
+
+                        // Re-sync snapshots carry the live audio too (the
+                        // same-URL guard in the hook makes repeats free).
+                        if (event.type === "snapshot") {
+                            if (event.snapshot.currentAudio) {
+                                handleRoundAudio(
+                                    event.snapshot.currentAudio.audioUrl,
+                                );
+                            }
+
+                            setRestartsAtEpochMs(
+                                event.snapshot.restartWarning
+                                    ?.restartsAtEpochMs ?? null,
+                            );
+                        }
+
                         handleStreamEvent(event);
                     },
                     () => {
@@ -4575,10 +4693,40 @@ export default function App() {
                         // from when the effect ran); the render translates it
                         // with the current bundle. The error screen offers
                         // Reconnect, which re-runs this flow.
-                        if (!cancelled) {
-                            setReconnecting(false);
-                            setError({ kind: "disconnected" });
+                        if (cancelled) return;
+
+                        // Web: retry silently first. A long-lived connection
+                        // dropping restarts the budget; a crash loop (drops
+                        // right after connecting) burns through it and lands
+                        // on the manual Reconnect screen.
+                        if (webAuth) {
+                            if (
+                                Date.now() - streamOpenedAtRef.current >
+                                WEB_RECONNECT_HEALTHY_MS
+                            ) {
+                                reconnectAttemptsRef.current = 0;
+                            }
+
+                            if (
+                                reconnectAttemptsRef.current <
+                                WEB_RECONNECT_MAX_ATTEMPTS
+                            ) {
+                                const attempt = reconnectAttemptsRef.current;
+                                reconnectAttemptsRef.current += 1;
+                                setReconnecting(true);
+                                reconnectTimerRef.current = window.setTimeout(
+                                    () => {
+                                        reconnectTimerRef.current = null;
+                                        setConnectNonce((n) => n + 1);
+                                    },
+                                    WEB_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
+                                );
+                                return;
+                            }
                         }
+
+                        setReconnecting(false);
+                        setError({ kind: "disconnected" });
                     },
                 );
 
@@ -4588,6 +4736,7 @@ export default function App() {
                 }
 
                 streamRef.current = stream;
+                streamOpenedAtRef.current = Date.now();
                 setReconnecting(false);
             } catch (e) {
                 // Log the real error/status for debugging; show the user a
@@ -4604,6 +4753,11 @@ export default function App() {
             cancelled = true;
             streamRef.current?.close();
             streamRef.current = null;
+            if (reconnectTimerRef.current !== null) {
+                window.clearTimeout(reconnectTimerRef.current);
+                reconnectTimerRef.current = null;
+            }
+
             // Drop any pending reveal-hold so a reconnect's fresh snapshot
             // isn't clobbered by stale queued events from the old stream.
             if (holdTimerRef.current !== null) {
@@ -4621,6 +4775,8 @@ export default function App() {
     }, [connectNonce]);
 
     const reconnect = (): void => {
+        // A human clicking Reconnect restores the auto-retry budget.
+        reconnectAttemptsRef.current = 0;
         setReconnecting(true);
         setError(null);
         setReady(false);
@@ -4791,7 +4947,11 @@ export default function App() {
                         <SongHistory
                             history={ui.roundHistory}
                             bookmarkedLinks={ui.bookmarkedLinks}
-                            active={ui.session !== null && !ui.sessionEnded}
+                            active={
+                                ui.session !== null &&
+                                !ui.sessionEnded &&
+                                !webAuth?.guest
+                            }
                             auth={
                                 authState
                                     ? {
@@ -5007,6 +5167,7 @@ export default function App() {
                             }
                             bookmarkSlot={
                                 authState &&
+                                !webAuth?.guest &&
                                 (ui.currentRound || ui.lastReveal) ? (
                                     <BookmarkStar
                                         // Force a fresh component (and its optimistic
@@ -5261,6 +5422,12 @@ export default function App() {
                 emotes={ui.floatingEmotes}
                 onDismiss={dismissFloatingEmote}
             />
+
+            {webAuth && <SoundControls audio={roundAudio} />}
+
+            {restartsAtEpochMs !== null && (
+                <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />
+            )}
         </>
     );
 }

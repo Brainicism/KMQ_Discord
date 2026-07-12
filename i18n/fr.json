@@ -243,6 +243,8 @@
         "rejectRateLimit": "Doucement — trop de requêtes.",
         "rejectSessionAlreadyRunning": "Une partie est déjà en cours.",
         "rejectUnauthorized": "Session expirée — actualisez.",
+        "restartCountdown": "KMQ redémarre dans {{countdown}} — votre partie sera mise en pause un instant !",
+        "restartImminent": "KMQ redémarre — de retour dans un instant !",
         "revealAllGuessesSummary": "Toutes les réponses ({{count}})",
         "revealWinners": "{{username}} : +{{points}} pts, +{{exp}} EXP",
         "roundLabel": "Manche {{num}}",

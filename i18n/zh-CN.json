@@ -243,6 +243,8 @@
         "rejectRateLimit": "慢一点 — 请求过多。",
         "rejectSessionAlreadyRunning": "已有游戏在进行。",
         "rejectUnauthorized": "会话过期 — 请刷新。",
+        "restartCountdown": "KMQ 将在 {{countdown}} 后重启 — 游戏将暂停片刻！",
+        "restartImminent": "KMQ 正在重启 — 马上回来！",
         "revealAllGuessesSummary": "全部答案 ({{count}})",
         "revealWinners": "{{username}}: +{{points}} 分, +{{exp}} EXP",
         "roundLabel": "第 {{num}} 回合",

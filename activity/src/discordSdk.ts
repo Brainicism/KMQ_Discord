@@ -1,4 +1,4 @@
-import { ACTIVITY_PROXY_BASE } from "./constants";
+import { getApiBase } from "./constants";
 import { DiscordSDK } from "@discord/embedded-app-sdk";
 
 let sdkPromise: Promise<DiscordSDK> | null = null;
@@ -60,7 +60,7 @@ export async function authenticate(): Promise<AuthedSession> {
         scope: ["identify", "guilds.members.read"],
     });
 
-    const tokenResp = await fetch(`${ACTIVITY_PROXY_BASE}/token`, {
+    const tokenResp = await fetch(`${getApiBase()}/token`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ code }),

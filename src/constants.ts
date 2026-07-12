@@ -390,6 +390,56 @@ export const ACTIVITY_RATE_LIMIT_READ = 60;
 export const ACTIVITY_RATE_LIMIT_ACTION = 60;
 export const ACTIVITY_RATE_LIMIT_GUESS = 120;
 
+// Standalone-website ("web mode") auth. Web session tokens are opaque bearer
+// strings prefixed so resolveAccessToken can route them to the local
+// web_sessions store instead of Discord's users/@me.
+export const WEB_SESSION_TOKEN_PREFIX = "web_";
+export const WEB_SESSION_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+// Sliding-expiry writes are throttled: only touch the row when the last use
+// is older than this, so hot sessions don't write on every request.
+export const WEB_SESSION_TOUCH_INTERVAL_MS = 60 * 60 * 1000;
+// One-time codes bridging the OAuth callback redirect to the SPA (keeps the
+// real session token out of URLs, logs, and browser history).
+export const WEB_LOGIN_CODE_TTL_MS = 60_000;
+// OAuth `state` nonces pending callback (mirrored in a short-lived cookie).
+export const WEB_OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
+export const WEB_OAUTH_STATE_COOKIE = "kmq_oauth_state";
+
+// Guests (no Discord account) get synthetic numeric user IDs with bits 62+61
+// set plus 60 random bits: disjoint from real snowflakes (below 2^61 until
+// ~2032) and from room guild IDs (bit 62 | owner snowflake, so bit 61 stays
+// clear for decades). Guests can join rooms but never host, so a guest ID is
+// never fed to roomIDForOwner (which would collide, as bit 62 is already
+// set).
+export const WEB_GUEST_ID_FLAG = (1n << 62n) | (1n << 61n);
+export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
+
+// Standalone-website multiplayer rooms. A room's synthetic guild ID sets bit
+// 62, which real Discord snowflakes won't reach until ~2049, so rooms flow
+// through every guild-keyed code path (game options, sessions, IPC shard
+// routing) without colliding with real guilds. Derived from the creator's
+// user ID so a recreated room keeps its game options and presets.
+export const WEB_ROOM_ID_FLAG = 1n << 62n;
+export const WEB_ROOM_MAX_MEMBERS = 8;
+// A member with no open websocket is dropped from the room after this grace
+// period (survives refreshes and brief network blips); a room with no members
+// left is closed.
+export const WEB_ROOM_DISCONNECT_GRACE_MS = 60_000;
+export const WEB_ROOM_SWEEP_INTERVAL_MS = 30_000;
+
+// Browser audio streaming for web rooms. A minted token stays redeemable for
+// the playback's remaining duration plus this buffer (reconnects/reloads can
+// re-hit the same URL; the server recomputes the live seek per request).
+export const WEB_AUDIO_TOKEN_TTL_BUFFER_MS = 5 * 60 * 1000;
+export const WEB_AUDIO_SWEEP_INTERVAL_MS = 60_000;
+// Each listener gets their own ffmpeg; cap the concurrent transcodes so a
+// burst of tabs can't exhaust the host (~1 process per active listener).
+export const WEB_AUDIO_MAX_CONCURRENT_STREAMS = 64;
+// Route prefix shared by the hub (minting URLs) and the web server (serving
+// them). Server-relative on purpose: only web-room subscribers receive it,
+// and their page is same-origin with the API.
+export const WEB_AUDIO_URL_PREFIX = "/api/web/audio";
+
 // Fixed set of emotes a player can fling during an Activity round. Server-side
 // allow-list so the broadcast can't be used to inject arbitrary content.
 export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
@@ -400,7 +450,18 @@ export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";
 export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;
+export const DISCORD_OAUTH_AUTHORIZE_URL = `${DISCORD_API_BASE}/oauth2/authorize`;
 export const DISCORD_USERS_ME_URL = `${DISCORD_API_BASE}/users/@me`;
+export const discordAvatarUrl = (
+    userID: string,
+    avatarHash: string | null | undefined,
+): string | null =>
+    avatarHash
+        ? `https://cdn.discordapp.com/avatars/${encodeURIComponent(
+              userID,
+          )}/${encodeURIComponent(avatarHash)}.png`
+        : null;
+
 export const DISCORD_ACTIVITY_INSTANCE_URL = (
     appId: string,
     instanceId: string,

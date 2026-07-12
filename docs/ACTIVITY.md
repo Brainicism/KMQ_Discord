@@ -6,6 +6,9 @@ input, song history, game controls, and game options in-client. The bot keeps
 owning audio playback and Discord command entry points; the iframe is a
 richer view on the same session.
 
+The same server and SPA also power a standalone website with multiplayer
+rooms and browser audio — see [WEB.md](WEB.md).
+
 This document covers:
 
 1. [Discord developer portal configuration](#1-discord-developer-portal-configuration)
