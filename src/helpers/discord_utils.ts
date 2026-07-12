@@ -184,6 +184,10 @@ export async function fetchUser(
 export async function fetchChannel(
     textChannelID: string,
 ): Promise<Eris.TextChannel | null> {
+    // Headless (web) sessions have no text channel; Eris getChannel throws
+    // on falsy IDs.
+    if (!textChannelID) return null;
+
     let channel: Eris.TextChannel | undefined;
     const { client } = State;
 
@@ -521,6 +525,12 @@ export async function sendMessage(
             interactionRejectionHandler(interaction, err);
         }
 
+        return null;
+    }
+
+    if (textChannelID === "") {
+        // Headless (web) sessions are constructed with an empty text channel;
+        // every Discord-bound embed is deliberately suppressed here.
         return null;
     }
 
