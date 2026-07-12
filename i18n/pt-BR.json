@@ -243,6 +243,8 @@
         "rejectRateLimit": "Mais devagar — muitas solicitações.",
         "rejectSessionAlreadyRunning": "Já existe um jogo em andamento.",
         "rejectUnauthorized": "Sessão expirada — atualize.",
+        "restartCountdown": "O KMQ vai reiniciar em {{countdown}} — seu jogo vai pausar por um momento!",
+        "restartImminent": "O KMQ está reiniciando — voltamos em instantes!",
         "revealAllGuessesSummary": "Todos os palpites ({{count}})",
         "revealWinners": "{{username}}: +{{points}} pts, +{{exp}} EXP",
         "roundLabel": "Rodada {{num}}",

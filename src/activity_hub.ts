@@ -73,6 +73,13 @@ export default class ActivityHub {
     /** Opaque-token registry for web-room audio streams. */
     private audioRegistry: WebAudioRegistry = new WebAudioRegistry();
 
+    /**
+     * Epoch ms of the announced bot restart, or null when none is pending.
+     * Set from the admiral's /announce-restart endpoint — the same signal
+     * that warns Discord text channels — and broadcast to every subscriber.
+     */
+    private restartsAtEpochMs: number | null = null;
+
     constructor(fleet: Fleet) {
         this.fleet = fleet;
     }
@@ -141,6 +148,17 @@ export default class ActivityHub {
             snapshot.currentAudio = {
                 audioUrl: audioUrlForToken(audio.token),
                 playbackDurationSec: audio.playbackDurationSec,
+            };
+        }
+
+        // Late joiners/reconnects learn about a pending restart from the
+        // snapshot; everyone already connected got the broadcast.
+        if (
+            this.restartsAtEpochMs !== null &&
+            this.restartsAtEpochMs > Date.now()
+        ) {
+            snapshot.restartWarning = {
+                restartsAtEpochMs: this.restartsAtEpochMs,
             };
         }
 
@@ -437,6 +455,32 @@ export default class ActivityHub {
      */
     getAudioEntry(token: string): WebAudioEntry | null {
         return this.audioRegistry.get(token, Date.now());
+    }
+
+    /**
+     * Announces (or retracts, with null) an impending bot restart to every
+     * connected subscriber — embedded Activities and web rooms alike, whether
+     * or not a game is running.
+     * @param restartsAtEpochMs - when the restart happens, or null to retract
+     */
+    setRestartNotice(restartsAtEpochMs: number | null): void {
+        this.restartsAtEpochMs = restartsAtEpochMs;
+        const wireData = JSON.stringify({
+            type: "restartWarning",
+            restartsAtEpochMs,
+        });
+
+        for (const guildID of this.guildSubscribers.keys()) {
+            this.fanOut(guildID, wireData);
+        }
+
+        logger.info(
+            `Restart notice ${
+                restartsAtEpochMs === null
+                    ? "cleared"
+                    : `set for ${new Date(restartsAtEpochMs).toISOString()}`
+            }; ${this.getSubscriberCount()} subscribers notified.`,
+        );
     }
 
     /** @returns total number of active subscribers across all guilds */

@@ -3759,6 +3759,28 @@ fieldset.options-override:disabled .options-group {
     accent-color: var(--red-primary);
 }
 
+/* Impending-restart warning (both platforms): fixed top-center so it stays
+   visible through lobby, game, and open overlays. */
+.restart-banner {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 400;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: min(92vw, 560px);
+    padding: 8px 16px;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius-pill);
+    background: var(--gold-light);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: var(--shadow-md);
+}
+
 /* Respect users who opt out of motion at the OS level: drop the decorative
    loops (confetti, floating notes, etc.) and collapse entrance animations /
    transitions to a near-instant change. */

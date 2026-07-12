@@ -243,6 +243,8 @@
         "rejectRateLimit": "धीरे — बहुत ज़्यादा अनुरोध।",
         "rejectSessionAlreadyRunning": "एक खेल पहले से चल रहा है।",
         "rejectUnauthorized": "सत्र समाप्त — रीफ्रेश करें।",
+        "restartCountdown": "KMQ {{countdown}} में रीस्टार्ट होगा — आपका गेम थोड़ी देर के लिए रुक जाएगा!",
+        "restartImminent": "KMQ रीस्टार्ट हो रहा है — बस एक पल में वापस!",
         "revealAllGuessesSummary": "सारे अनुमान ({{count}})",
         "revealWinners": "{{username}}: +{{points}} अंक, +{{exp}} EXP",
         "roundLabel": "राउंड {{num}}",

@@ -243,6 +243,8 @@
         "rejectRateLimit": "Rustig — te veel verzoeken.",
         "rejectSessionAlreadyRunning": "Er loopt al een spel.",
         "rejectUnauthorized": "Sessie verlopen — ververs.",
+        "restartCountdown": "KMQ herstart over {{countdown}} — je spel wordt even gepauzeerd!",
+        "restartImminent": "KMQ wordt herstart — zo terug!",
         "revealAllGuessesSummary": "Alle antwoorden ({{count}})",
         "revealWinners": "{{username}}: +{{points}} pnt, +{{exp}} EXP",
         "roundLabel": "Ronde {{num}}",

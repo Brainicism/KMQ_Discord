@@ -728,6 +728,13 @@ export default class KmqWebServer {
             await fleet.ipc.allClustersCommand(
                 `announce_restart|${restartMinutes}`,
             );
+
+            // Activity/web subscribers get the warning as a live banner; the
+            // clusters only reach text channels.
+            this.activityHub?.setRestartNotice(
+                Date.now() + restartMinutes * 60 * 1000,
+            );
+
             await reply.code(200).send();
         });
 
@@ -739,6 +746,7 @@ export default class KmqWebServer {
             }
 
             await fleet.ipc.allClustersCommand("clear_restart");
+            this.activityHub?.setRestartNotice(null);
             await reply.code(200).send();
         });
 

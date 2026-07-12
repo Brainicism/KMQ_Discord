@@ -99,6 +99,13 @@ type ActivityEvent =
           encoderArgs: string[];
           playbackDurationSec: number;
           songStartedAt: number | null;
+      }
+    | {
+          // Admiral-minted (never emitted by workers): an impending bot
+          // restart, announced to every subscriber regardless of guild.
+          // null retracts a previously announced restart.
+          type: "restartWarning";
+          restartsAtEpochMs: number | null;
       };
 
 export default ActivityEvent;

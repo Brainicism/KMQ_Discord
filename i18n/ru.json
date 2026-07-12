@@ -243,6 +243,8 @@
         "rejectRateLimit": "Помедленнее — слишком много запросов.",
         "rejectSessionAlreadyRunning": "Игра уже идёт.",
         "rejectUnauthorized": "Сессия истекла — обновите страницу.",
+        "restartCountdown": "KMQ перезапустится через {{countdown}} — игра ненадолго приостановится!",
+        "restartImminent": "KMQ перезапускается — скоро вернёмся!",
         "revealAllGuessesSummary": "Все ответы ({{count}})",
         "revealWinners": "{{username}}: +{{points}} очк., +{{exp}} EXP",
         "roundLabel": "Раунд {{num}}",

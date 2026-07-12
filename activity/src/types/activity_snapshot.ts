@@ -16,5 +16,9 @@ export default interface ActivitySnapshot {
         audioUrl: string;
         playbackDurationSec: number;
     };
+    /** Present while a bot restart has been announced and not yet retracted. */
+    restartWarning?: {
+        restartsAtEpochMs: number;
+    };
     options: ActivityOptionsSnapshot;
 }

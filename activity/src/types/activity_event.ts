@@ -77,6 +77,12 @@ type ActivityEvent =
           type: "roundAudio";
           audioUrl: string;
           playbackDurationSec: number;
+      }
+    | {
+          // The bot announced (or, with null, retracted) an impending
+          // restart. Broadcast to every subscriber regardless of guild.
+          type: "restartWarning";
+          restartsAtEpochMs: number | null;
       };
 
 export default ActivityEvent;

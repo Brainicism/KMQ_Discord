@@ -281,6 +281,87 @@ describe("ActivityHub", () => {
         });
     });
 
+    describe("restart notice", () => {
+        it("broadcasts the warning (and its retraction) to subscribers in every guild", async () => {
+            const { hub } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+
+            const g1: string[] = [];
+            const g2: string[] = [];
+            hub.subscribe("g1", {
+                id: "1",
+                send: (d) => g1.push(d),
+                close: () => undefined,
+            });
+
+            hub.subscribe("g2", {
+                id: "2",
+                send: (d) => g2.push(d),
+                close: () => undefined,
+            });
+
+            const restartsAt = Date.now() + 5 * 60 * 1000;
+            hub.setRestartNotice(restartsAt);
+
+            const warning = JSON.stringify({
+                type: "restartWarning",
+                restartsAtEpochMs: restartsAt,
+            });
+
+            assert.deepStrictEqual(g1, [warning]);
+            assert.deepStrictEqual(g2, [warning]);
+
+            hub.setRestartNotice(null);
+            const retraction = JSON.stringify({
+                type: "restartWarning",
+                restartsAtEpochMs: null,
+            });
+
+            assert.deepStrictEqual(g1, [warning, retraction]);
+            assert.deepStrictEqual(g2, [warning, retraction]);
+        });
+
+        it("decorates snapshots while a future restart is pending", async () => {
+            const { hub, fleet } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+
+            fleet.autoReply = (payload) => {
+                fleet.emit(ACTIVITY_IPC_REPLY, {
+                    cid: payload.cid,
+                    payload: { ...emptySnapshot },
+                });
+            };
+
+            const restartsAt = Date.now() + 5 * 60 * 1000;
+            hub.setRestartNotice(restartsAt);
+
+            const withNotice = await hub.requestSnapshot("0");
+            assert.deepStrictEqual(withNotice.restartWarning, {
+                restartsAtEpochMs: restartsAt,
+            });
+
+            hub.setRestartNotice(null);
+            const cleared = await hub.requestSnapshot("0");
+            assert.strictEqual(cleared.restartWarning, undefined);
+        });
+
+        it("stops decorating snapshots once the deadline has passed", async () => {
+            const { hub, fleet } = makeHub(TWO_CLUSTERS);
+            await hub.start();
+
+            fleet.autoReply = (payload) => {
+                fleet.emit(ACTIVITY_IPC_REPLY, {
+                    cid: payload.cid,
+                    payload: { ...emptySnapshot },
+                });
+            };
+
+            hub.setRestartNotice(Date.now() - 1000);
+            const snapshot = await hub.requestSnapshot("0");
+            assert.strictEqual(snapshot.restartWarning, undefined);
+        });
+    });
+
     describe("request / reply correlation", () => {
         it("sends a correlated request to the owning cluster and resolves on reply", async () => {
             const { hub, fleet } = makeHub(TWO_CLUSTERS);

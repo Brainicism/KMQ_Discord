@@ -42,6 +42,8 @@ import {
     readSdkLocale,
 } from "./platform/discordPlatform";
 import { isEmbedded } from "./platform";
+import { THEME_STORAGE_KEY, applyTheme, readInitialTheme } from "./theme";
+import type { Theme } from "./theme";
 import { makeTranslator } from "./i18n/translator";
 import SoundControls from "./web/SoundControls";
 import useRoundAudio from "./web/useRoundAudio";
@@ -113,9 +115,6 @@ const PRE_HYDRATE_STRINGS: Record<string, string> = {
     statusConnecting: "Connecting...",
 };
 
-type Theme = "light" | "dark";
-
-const THEME_STORAGE_KEY = "kmq:theme";
 // Mirrors the bot's QUICK_GUESS_MS (src/constants.ts) — guesses at or under
 // this get a ⚡ in the round-end reveal, matching the legacy text-chat look.
 const QUICK_GUESS_MS = 3500;
@@ -169,28 +168,6 @@ function isNearMiss(guess: string, targets: string[]): boolean {
 
         return editDistance(g, t) <= tol;
     });
-}
-
-function readInitialTheme(): Theme {
-    // localStorage can throw in sandboxed contexts (rare inside Discord's
-    // iframe but not impossible). Fall back to the OS preference.
-    try {
-        const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
-        if (stored === "dark" || stored === "light") return stored;
-    } catch {
-        // ignore
-    }
-
-    // Discord's client defaults to dark; matching it is the better first
-    // impression for most users.
-    if (
-        typeof window.matchMedia === "function" &&
-        window.matchMedia("(prefers-color-scheme: dark)").matches
-    ) {
-        return "dark";
-    }
-
-    return "dark";
 }
 
 const initialUi: UiState = {
@@ -4373,6 +4350,38 @@ export interface WebAuth {
     userID: string;
 }
 
+// Fixed warning banner shown while a bot restart is announced (the Activity
+// counterpart of the text-channel restart embeds). Counts down locally from
+// the server-provided deadline; past it, holds an "any moment now" line until
+// the post-restart reconnect delivers a snapshot without the warning.
+function RestartBanner({
+    restartsAtEpochMs,
+    t,
+}: {
+    restartsAtEpochMs: number;
+    t: Translator;
+}) {
+    const [now, setNow] = useState(() => Date.now());
+    useEffect(() => {
+        const timer = window.setInterval(() => setNow(Date.now()), 1000);
+        return () => window.clearInterval(timer);
+    }, []);
+
+    const remainingSec = Math.ceil((restartsAtEpochMs - now) / 1000);
+    return (
+        <div className="restart-banner" role="status">
+            <span aria-hidden="true">⚠️</span>
+            <span>
+                {remainingSec > 0
+                    ? t("restartCountdown", {
+                          countdown: formatDuration(remainingSec),
+                      })
+                    : t("restartImminent")}
+            </span>
+        </div>
+    );
+}
+
 export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
@@ -4401,6 +4410,11 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     // without reloading the iframe — drives the Reconnect button.
     const [connectNonce, setConnectNonce] = useState(0);
     const [reconnecting, setReconnecting] = useState(false);
+    // Epoch ms of an announced bot restart (null = none). Set from the
+    // snapshot on connect and updated by live restartWarning events.
+    const [restartsAtEpochMs, setRestartsAtEpochMs] = useState<number | null>(
+        null,
+    );
     // Profile cards. The cache is shared across every card for the session so
     // re-opening a player is free; the nonce is bumped on round/session end to
     // invalidate open cards (newly-earned EXP, level-ups).
@@ -4437,7 +4451,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     // Mirror theme → <html data-theme>. Persist to localStorage so the
     // next iframe load doesn't flash the other theme while React boots.
     useEffect(() => {
-        document.documentElement.setAttribute("data-theme", theme);
+        applyTheme(theme);
         try {
             window.localStorage.setItem(THEME_STORAGE_KEY, theme);
         } catch {
@@ -4599,6 +4613,12 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                     handleRoundAudio(snapshot.currentAudio.audioUrl);
                 }
 
+                // A restart may have been announced before we connected (or
+                // retracted while we were disconnected).
+                setRestartsAtEpochMs(
+                    snapshot.restartWarning?.restartsAtEpochMs ?? null,
+                );
+
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
                 // matching bundle and swap if it's different. On the web
@@ -4634,6 +4654,13 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             return;
                         }
 
+                        // Restart warnings bypass the reveal-hold queue too:
+                        // a system-level banner, not round flow.
+                        if (event.type === "restartWarning") {
+                            setRestartsAtEpochMs(event.restartsAtEpochMs);
+                            return;
+                        }
+
                         if (event.type === "sessionEnd") {
                             // Discord parity: playback runs through the
                             // reveal and only stops with the session.
@@ -4642,12 +4669,16 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
 
                         // Re-sync snapshots carry the live audio too (the
                         // same-URL guard in the hook makes repeats free).
-                        if (
-                            event.type === "snapshot" &&
-                            event.snapshot.currentAudio
-                        ) {
-                            handleRoundAudio(
-                                event.snapshot.currentAudio.audioUrl,
+                        if (event.type === "snapshot") {
+                            if (event.snapshot.currentAudio) {
+                                handleRoundAudio(
+                                    event.snapshot.currentAudio.audioUrl,
+                                );
+                            }
+
+                            setRestartsAtEpochMs(
+                                event.snapshot.restartWarning
+                                    ?.restartsAtEpochMs ?? null,
                             );
                         }
 
@@ -5385,6 +5416,10 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
             />
 
             {webAuth && <SoundControls audio={roundAudio} />}
+
+            {restartsAtEpochMs !== null && (
+                <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />
+            )}
         </>
     );
 }

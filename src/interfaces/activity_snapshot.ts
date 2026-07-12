@@ -17,6 +17,14 @@ export default interface ActivitySnapshot {
         audioUrl: string;
         playbackDurationSec: number;
     };
+    /**
+     * Present while a bot restart has been announced and not yet retracted.
+     * Injected by the admiral (workers never set it) so late joiners and
+     * reconnects see the warning between broadcast intervals.
+     */
+    restartWarning?: {
+        restartsAtEpochMs: number;
+    };
     /** Current GuildPreference values the Activity panel needs. */
     options: ActivityOptionsSnapshot;
 }

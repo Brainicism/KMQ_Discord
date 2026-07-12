@@ -243,6 +243,8 @@
         "rejectRateLimit": "Langsamer — zu viele Anfragen.",
         "rejectSessionAlreadyRunning": "Ein Spiel läuft bereits.",
         "rejectUnauthorized": "Sitzung abgelaufen — neu laden.",
+        "restartCountdown": "KMQ startet in {{countdown}} neu — dein Spiel wird kurz pausiert!",
+        "restartImminent": "KMQ startet neu — gleich geht's weiter!",
         "revealAllGuessesSummary": "Alle Tipps ({{count}})",
         "revealWinners": "{{username}}: +{{points}} Pkt., +{{exp}} EXP",
         "roundLabel": "Runde {{num}}",
