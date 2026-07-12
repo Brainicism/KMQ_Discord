@@ -113,4 +113,15 @@ export default class KmqConfiguration {
     webModeEnabled(): boolean {
         return this.config["webModeEnabled"] ?? false;
     }
+
+    /**
+     * Gates guest (no Discord account) logins on the standalone website.
+     * Guests can join rooms via invite but never host; gated separately from
+     * webModeEnabled so the free-identity surface can be killed without
+     * taking down the site.
+     * @returns whether guest logins are enabled
+     */
+    webGuestsEnabled(): boolean {
+        return this.config["webGuestsEnabled"] ?? false;
+    }
 }

@@ -1,4 +1,6 @@
 import {
+    WEB_GUEST_ID_FLAG,
+    WEB_GUEST_USERNAME_MAX_LENGTH,
     WEB_SESSION_TOKEN_PREFIX,
     WEB_SESSION_TOUCH_INTERVAL_MS,
     WEB_SESSION_TTL_MS,
@@ -35,6 +37,50 @@ export function isWebSessionToken(token: string): boolean {
  */
 export function hashWebSessionToken(token: string): string {
     return crypto.createHash("sha256").update(token).digest("hex");
+}
+
+/**
+ * Mints a synthetic numeric user ID for a guest login. Bits 62+61 set plus
+ * 60 random bits — see WEB_GUEST_ID_FLAG for the disjointness argument. The
+ * ID flows through every user-keyed code path (EXP, stats, scoreboards) as a
+ * plain numeric string, just like a snowflake.
+ * @returns a fresh guest user ID
+ */
+export function mintGuestUserID(): string {
+    const random = crypto.randomBytes(8).readBigUInt64BE() >> 4n;
+    return (WEB_GUEST_ID_FLAG | random).toString();
+}
+
+/**
+ * @param userID - a user ID from any transport
+ * @returns whether it's a synthetic guest ID (both flag bits set — real
+ * snowflakes and room-owner IDs can't reach this range for decades)
+ */
+export function isGuestUserID(userID: string): boolean {
+    try {
+        return (BigInt(userID) & WEB_GUEST_ID_FLAG) === WEB_GUEST_ID_FLAG;
+    } catch {
+        return false;
+    }
+}
+
+/**
+ * Normalizes a guest's self-chosen display name: collapses whitespace,
+ * strips control characters, and caps the length.
+ * @param raw - the name as submitted
+ * @returns a display-safe name, "Guest" if nothing usable remains
+ */
+export function sanitizeGuestUsername(raw: unknown): string {
+    if (typeof raw !== "string") return "Guest";
+    const cleaned = raw
+        // eslint-disable-next-line no-control-regex
+        .replace(/[\u0000-\u001f\u007f]/g, "")
+        .replace(/\s+/g, " ")
+        .trim()
+        .slice(0, WEB_GUEST_USERNAME_MAX_LENGTH)
+        .trim();
+
+    return cleaned || "Guest";
 }
 
 /**

@@ -92,6 +92,25 @@ Activity and the bot untouched.
   (players just create/join again — options and presets survive via the
   deterministic ID).
 
+### Guests
+
+- With the `webGuestsEnabled` feature switch on (in addition to
+  `webModeEnabled`), visitors without a Discord account can pick a nickname
+  and play. It hot-reloads like every other switch, so the free-identity
+  surface can be shed instantly without taking down the site.
+- Guests can **join** rooms (via invite link or code) but never host: room
+  creation returns `403 {"error": "guest_forbidden"}` and the UI doesn't
+  offer it. Hosting stays tied to Discord accounts, which keeps persistent
+  per-owner state (options, presets) and the room-ID scheme meaningful, and
+  caps the abuse value of free identities.
+- A guest is a synthetic numeric user ID with bits 62+61 set (disjoint from
+  real snowflakes and from room guild IDs) on a normal `web_sessions` row —
+  everything downstream (guessing, EXP, scoreboards) treats it like any
+  player. The identity is ephemeral by design: logging out (or the 30-day
+  session TTL) orphans it, and any stats it accrued stay behind under an ID
+  that can never be logged into again. `user_id >= 6917529027641081856`
+  (2^62 + 2^61) identifies guest rows when querying.
+
 ## 6. Audio streaming
 
 - The worker never tells clients what song is playing pre-reveal. The

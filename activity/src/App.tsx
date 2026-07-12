@@ -4348,6 +4348,9 @@ export interface WebAuth {
     accessToken: string;
     instanceId: string;
     userID: string;
+    /** Website guest (no Discord account) — bookmarks (delivered by DM at
+     *  session end) can never reach them, so bookmarking UI is hidden. */
+    guest?: boolean;
 }
 
 // Fixed warning banner shown while a bot restart is announced (the Activity
@@ -4944,7 +4947,11 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                         <SongHistory
                             history={ui.roundHistory}
                             bookmarkedLinks={ui.bookmarkedLinks}
-                            active={ui.session !== null && !ui.sessionEnded}
+                            active={
+                                ui.session !== null &&
+                                !ui.sessionEnded &&
+                                !webAuth?.guest
+                            }
                             auth={
                                 authState
                                     ? {
@@ -5160,6 +5167,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             }
                             bookmarkSlot={
                                 authState &&
+                                !webAuth?.guest &&
                                 (ui.currentRound || ui.lastReveal) ? (
                                     <BookmarkStar
                                         // Force a fresh component (and its optimistic

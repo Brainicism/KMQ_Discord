@@ -5,6 +5,7 @@ import {
     createRoom,
     fetchRoom,
     getStoredSession,
+    guestLogin,
     joinRoom,
     leaveRoom,
     logout,
@@ -46,6 +47,7 @@ function roomErrorText(error: string): string {
 export default function LandingPage(): JSX.Element {
     const [state, setState] = useState<LandingState>({ phase: "loading" });
     const [joinCode, setJoinCode] = useState("");
+    const [guestName, setGuestName] = useState("");
     const [busy, setBusy] = useState(false);
 
     useEffect(() => {
@@ -163,6 +165,43 @@ export default function LandingPage(): JSX.Element {
         }
     };
 
+    const handleGuestLogin = async (): Promise<void> => {
+        setBusy(true);
+        try {
+            const session = await guestLogin(guestName);
+            if (!session) {
+                setState({
+                    phase: "loggedOut",
+                    error: "Guest play is unavailable right now.",
+                });
+                return;
+            }
+
+            // A guest arriving on an invite link goes straight into the room;
+            // otherwise they land on the join form (guests can't host).
+            const inviteCode = roomCodeFromLocation();
+            if (inviteCode) {
+                const result = await joinRoom(session, inviteCode);
+                if ("room" in result) {
+                    enterRoom(session, result.room);
+                    return;
+                }
+
+                window.history.replaceState(null, "", "/play");
+                setState({
+                    phase: "loggedIn",
+                    session,
+                    error: roomErrorText(result.error),
+                });
+                return;
+            }
+
+            setState({ phase: "loggedIn", session, error: null });
+        } finally {
+            setBusy(false);
+        }
+    };
+
     const handleLogout = async (): Promise<void> => {
         const session =
             state.phase === "loggedIn" || state.phase === "inRoom"
@@ -182,6 +221,7 @@ export default function LandingPage(): JSX.Element {
                         accessToken: state.session.token,
                         instanceId: state.room.code,
                         userID: state.session.user.id,
+                        guest: state.session.user.guest === true,
                     }}
                 />
                 <RoomBar
@@ -232,6 +272,38 @@ export default function LandingPage(): JSX.Element {
                     >
                         Log in with Discord
                     </button>
+
+                    <p className="kmq-web-landing-divider">or</p>
+
+                    <form
+                        className="kmq-web-landing-join"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void handleGuestLogin();
+                        }}
+                    >
+                        <input
+                            className="kmq-web-landing-input"
+                            value={guestName}
+                            onChange={(e) => setGuestName(e.target.value)}
+                            maxLength={32}
+                            placeholder="Pick a nickname"
+                            aria-label="Guest nickname"
+                        />
+                        <button
+                            type="submit"
+                            className="kmq-web-landing-button kmq-web-landing-button-secondary"
+                            disabled={busy}
+                        >
+                            {roomCodeFromLocation()
+                                ? "Join as guest"
+                                : "Play as guest"}
+                        </button>
+                    </form>
+                    <p className="kmq-web-landing-note">
+                        Guests can join rooms with an invite. Log in with
+                        Discord to host your own and keep your stats.
+                    </p>
                 </>
             )}
 
@@ -245,7 +317,9 @@ export default function LandingPage(): JSX.Element {
                         />
                     )}
                     <p className="kmq-web-landing-status">
-                        Logged in as{" "}
+                        {state.session.user.guest
+                            ? "Playing as guest "
+                            : "Logged in as "}
                         <strong>{state.session.user.username}</strong>
                     </p>
 
@@ -253,14 +327,22 @@ export default function LandingPage(): JSX.Element {
                         <p className="kmq-web-landing-error">{state.error}</p>
                     )}
 
-                    <button
-                        type="button"
-                        className="kmq-web-landing-button"
-                        disabled={busy}
-                        onClick={() => void handleCreate(state.session)}
-                    >
-                        Create a room
-                    </button>
+                    {state.session.user.guest ? (
+                        <p className="kmq-web-landing-note">
+                            You&apos;re playing as a guest — join a room with an
+                            invite code. Log in with Discord to host your own
+                            and keep your stats.
+                        </p>
+                    ) : (
+                        <button
+                            type="button"
+                            className="kmq-web-landing-button"
+                            disabled={busy}
+                            onClick={() => void handleCreate(state.session)}
+                        >
+                            Create a room
+                        </button>
+                    )}
 
                     <form
                         className="kmq-web-landing-join"

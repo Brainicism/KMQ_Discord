@@ -89,6 +89,37 @@ export async function completeLoginFromUrl(): Promise<WebSession | null> {
 }
 
 /**
+ * Creates a guest session (no Discord account) under a self-chosen display
+ * name. Guests can join rooms via invite code/link but cannot host.
+ * @param username - the display name the guest picked
+ * @returns the new session, or null when guest mode is unavailable
+ */
+export async function guestLogin(username: string): Promise<WebSession | null> {
+    let resp: Response;
+    try {
+        resp = await fetch("/api/web/guest-login", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                username,
+                locale: navigator.language || "",
+            }),
+        });
+    } catch {
+        return null;
+    }
+
+    if (!resp.ok) return null;
+
+    const body = (await resp.json()) as WebSession;
+    if (!body?.token || !body?.user?.id) return null;
+
+    const session: WebSession = { token: body.token, user: body.user };
+    storeSession(session);
+    return session;
+}
+
+/**
  * Validates a stored token against the server (it may have expired or been
  * revoked since the last visit). Clears storage when the server rejects it.
  * @param session - the stored session to validate

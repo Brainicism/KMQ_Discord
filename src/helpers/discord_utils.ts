@@ -1564,6 +1564,10 @@ export function botHasVoicePermissions(voiceChannelID: string): boolean {
 export function getVoiceChannel(
     voiceChannelID: string,
 ): Eris.VoiceChannel | null {
+    // Web sessions have no voice channel (empty ID) — Eris's getChannel
+    // throws on falsy IDs instead of returning undefined.
+    if (!voiceChannelID) return null;
+
     const voiceChannel = State.client.getChannel(
         voiceChannelID,
     ) as Eris.VoiceChannel;
@@ -1578,6 +1582,9 @@ export function getVoiceChannel(
 export function getCurrentVoiceMembers(
     voiceChannelID: string,
 ): Array<Eris.Member> {
+    // No channel to inspect (web session) — not a cache miss, so no warn.
+    if (!voiceChannelID) return [];
+
     const voiceChannel = getVoiceChannel(voiceChannelID);
     // getVoiceChannel casts whatever getChannel returns to VoiceChannel, so a
     // missing/uncached channel (null) OR a channel that isn't actually a voice

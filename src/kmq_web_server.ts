@@ -36,8 +36,11 @@ import { buildAudioStreamArgs } from "./web_audio_registry";
 import {
     createWebSession,
     deleteWebSession,
+    isGuestUserID,
     isWebSessionToken,
+    mintGuestUserID,
     resolveWebSession,
+    sanitizeGuestUsername,
 } from "./helpers/web_session_manager";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { spawn } from "child_process";
@@ -2558,6 +2561,55 @@ export default class KmqWebServer {
                         id: entry.user.id,
                         username: entry.user.username,
                         avatarUrl: entry.user.avatarUrl,
+                        guest: false,
+                    },
+                });
+            },
+        );
+
+        httpServer.post(
+            "/api/web/guest-login",
+            limit(ACTIVITY_RATE_LIMIT_TOKEN),
+            async (request, reply) => {
+                if (!(await requireWebMode(reply))) return;
+
+                if (!KmqConfiguration.Instance.webGuestsEnabled()) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Guest mode disabled" });
+                    return;
+                }
+
+                const body = request.body as {
+                    username?: string;
+                    locale?: string;
+                } | null;
+
+                const username = sanitizeGuestUsername(body?.username);
+                const locale =
+                    typeof body?.locale === "string"
+                        ? body.locale.slice(0, 16)
+                        : "";
+
+                const id = mintGuestUserID();
+                const token = await createWebSession({
+                    id,
+                    username,
+                    avatarUrl: null,
+                    locale,
+                });
+
+                logger.info(
+                    `Guest web session created. id=${id}, username=${username}`,
+                );
+
+                await reply.code(200).send({
+                    token,
+                    user: {
+                        id,
+                        username,
+                        avatarUrl: null,
+                        guest: true,
                     },
                 });
             },
@@ -2585,6 +2637,7 @@ export default class KmqWebServer {
                         id: user.id,
                         username: user.username,
                         avatarUrl: user.avatarUrl,
+                        guest: isGuestUserID(user.id),
                     },
                 });
             },
@@ -2679,6 +2732,15 @@ export default class KmqWebServer {
             async (request, reply) => {
                 const user = await requireWebUser(request, reply);
                 if (!user) return;
+
+                // Guests can join rooms but never host: free identities
+                // shouldn't own persistent per-owner state (game options,
+                // presets), and a guest ID fed to roomIDForOwner would
+                // collide with the guest ID range (bit 62 already set).
+                if (isGuestUserID(user.id)) {
+                    await reply.code(403).send({ error: "guest_forbidden" });
+                    return;
+                }
 
                 const result = this.webRoomManager!.createRoom({
                     id: user.id,

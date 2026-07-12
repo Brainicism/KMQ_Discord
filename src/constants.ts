@@ -405,6 +405,15 @@ export const WEB_LOGIN_CODE_TTL_MS = 60_000;
 export const WEB_OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
 export const WEB_OAUTH_STATE_COOKIE = "kmq_oauth_state";
 
+// Guests (no Discord account) get synthetic numeric user IDs with bits 62+61
+// set plus 60 random bits: disjoint from real snowflakes (below 2^61 until
+// ~2032) and from room guild IDs (bit 62 | owner snowflake, so bit 61 stays
+// clear for decades). Guests can join rooms but never host, so a guest ID is
+// never fed to roomIDForOwner (which would collide, as bit 62 is already
+// set).
+export const WEB_GUEST_ID_FLAG = (1n << 62n) | (1n << 61n);
+export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
+
 // Standalone-website multiplayer rooms. A room's synthetic guild ID sets bit
 // 62, which real Discord snowflakes won't reach until ~2049, so rooms flow
 // through every guild-keyed code path (game options, sessions, IPC shard

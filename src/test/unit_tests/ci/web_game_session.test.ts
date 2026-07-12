@@ -17,12 +17,15 @@ import SubunitsPreference from "../../../enums/option_types/subunit_preference";
 import WebGameSession from "../../../structures/web_game_session";
 import WebRoomManager from "../../../web_room_manager";
 import assert from "assert";
+import dbContext from "../../../database_context";
 import sinon from "sinon";
 import type { PlaybackSpec } from "../../../structures/session";
 import type Round from "../../../structures/round";
 
 const OWNER_ID = "111111111111111111";
 const MEMBER_ID = "222222222222222222";
+// A website guest: synthetic ID (bits 62+61) that doesn't exist on Discord.
+const GUEST_ID = ((1n << 62n) | (1n << 61n) | 42n).toString();
 const ROOM_ID = WebRoomManager.roomIDForOwner(OWNER_ID);
 
 async function getMockGuildPreference(): Promise<GuildPreference> {
@@ -170,6 +173,78 @@ describe("web game session", () => {
             );
 
             assert.strictEqual(endStub.calledOnce, true);
+        });
+
+        it("builds scoreboard players from room membership, guests included", async () => {
+            // Regression: player identities used to come from Discord's API
+            // (fetchUser), which 404s for guests' synthetic IDs — the guest
+            // never made it onto the scoreboard, showing as a raw numeric ID
+            // in the client and blowing up the correct-guess round-end flow.
+            setWebRoomMembers(ROOM_ID, [
+                { id: OWNER_ID, username: "alice", avatarUrl: null },
+                { id: GUEST_ID, username: "Guesty", avatarUrl: null },
+            ]);
+
+            // getName consults the guild nickname cache before falling back
+            // to the stored username; web rooms have no guild entry.
+            sandbox.stub(State, "client").value({ guilds: new Map() });
+
+            await session.syncAllVoiceMembers();
+
+            const players = (session as any).scoreboard.getPlayers();
+            assert.deepStrictEqual(
+                players.map((p: any) => [p.id, p.getName()]).sort(),
+                [
+                    [OWNER_ID, "alice"],
+                    [GUEST_ID, "Guesty"],
+                ],
+            );
+        });
+
+        it("scoreboard.update tolerates a guesser missing from the scoreboard", () => {
+            // Regression: the missing-player warn log resolved the session's
+            // voice channel — empty for web sessions, which made Eris throw
+            // ("Invalid channel ID:") and abort the round-end mid-flight.
+            (session as any).scoreboard.update([
+                { userID: "333333333333333333", pointsEarned: 1, expGain: 10 },
+            ]);
+        });
+
+        it("does not persist stats rows for guests", async () => {
+            setWebRoomMembers(ROOM_ID, [
+                { id: OWNER_ID, username: "alice", avatarUrl: null },
+                { id: GUEST_ID, username: "Guesty", avatarUrl: null },
+            ]);
+
+            await session.syncAllVoiceMembers();
+            await (session as any).updatePlayerStats(false);
+
+            const rows = await dbContext.kmq
+                .selectFrom("player_stats")
+                .select("player_id")
+                .where("player_id", "in", [OWNER_ID, GUEST_ID])
+                .execute();
+
+            // The Discord-account member persists; the guest never does.
+            assert.deepStrictEqual(
+                rows.map((r) => r.player_id),
+                [OWNER_ID],
+            );
+
+            await Promise.all(
+                (
+                    [
+                        "player_stats",
+                        "player_servers",
+                        "player_game_session_stats",
+                    ] as const
+                ).map((table) =>
+                    dbContext.kmq
+                        .deleteFrom(table)
+                        .where("player_id", "=", OWNER_ID)
+                        .execute(),
+                ),
+            );
         });
 
         it("counts skip votes without a voice-channel check", async () => {

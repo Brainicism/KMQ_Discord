@@ -75,6 +75,25 @@ export default class WebGameSession extends GameSession {
         return getWebRoomMembers(this.guildID).map((m) => m.id);
     }
 
+    /**
+     * Scoreboard identities come from the pushed room membership — never
+     * from Discord, whose API can't resolve guest members' synthetic IDs.
+     * @param userID - the participant to resolve
+     * @returns the identity, or null if they already left the room
+     */
+    // eslint-disable-next-line @typescript-eslint/require-await
+    protected async resolveParticipantProfile(
+        userID: string,
+    ): Promise<{ username: string; avatarUrl: string | null } | null> {
+        const member = getWebRoomMembers(this.guildID).find(
+            (m) => m.id === userID,
+        );
+
+        return member
+            ? { username: member.username, avatarUrl: member.avatarUrl }
+            : null;
+    }
+
     // eslint-disable-next-line @typescript-eslint/member-ordering
     getVoteMajorityCount(): number {
         return Math.floor(this.getParticipantCount() * 0.5) + 1;

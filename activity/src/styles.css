@@ -3594,6 +3594,23 @@ fieldset.options-override:disabled .options-group {
     outline-offset: -1px;
 }
 
+.kmq-web-landing-divider {
+    margin: 18px 0 10px;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.kmq-web-landing-note {
+    margin: 10px 0 0;
+    max-width: 340px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    line-height: 1.45;
+}
+
 /* Floating room widget (standalone website): invite link, presence, leave.
    Fixed overlay so it never disturbs the game layout underneath. */
 .kmq-room-bar {

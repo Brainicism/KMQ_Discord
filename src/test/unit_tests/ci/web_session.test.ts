@@ -1,4 +1,5 @@
 import {
+    WEB_GUEST_ID_FLAG,
     WEB_SESSION_TOKEN_PREFIX,
     WEB_SESSION_TTL_MS,
 } from "../../../constants";
@@ -6,10 +7,14 @@ import {
     createWebSession,
     deleteWebSession,
     hashWebSessionToken,
+    isGuestUserID,
     isWebSessionToken,
+    mintGuestUserID,
     resolveWebSession,
+    sanitizeGuestUsername,
 } from "../../../helpers/web_session_manager";
 import { describe } from "mocha";
+import WebRoomManager from "../../../web_room_manager";
 import assert from "assert";
 import dbContext from "../../../database_context";
 
@@ -157,6 +162,63 @@ describe("web session manager", () => {
 
         it("is a no-op for unknown tokens", async () => {
             await deleteWebSession(`${WEB_SESSION_TOKEN_PREFIX}unknown`);
+        });
+    });
+
+    describe("guest identities", () => {
+        it("mints numeric IDs carrying both guest flag bits", () => {
+            const id = mintGuestUserID();
+            assert.match(id, /^\d+$/);
+            assert.strictEqual(
+                BigInt(id) & WEB_GUEST_ID_FLAG,
+                WEB_GUEST_ID_FLAG,
+            );
+
+            // Effectively unique: 60 random bits.
+            assert.notStrictEqual(id, mintGuestUserID());
+        });
+
+        it("classifies guest IDs apart from snowflakes and room IDs", () => {
+            assert.strictEqual(isGuestUserID(mintGuestUserID()), true);
+
+            // Real Discord snowflake.
+            assert.strictEqual(isGuestUserID("123456789012345678"), false);
+            // Room guild ID (bit 62 only).
+            assert.strictEqual(
+                isGuestUserID(WebRoomManager.roomIDForOwner("123456789")),
+                false,
+            );
+            assert.strictEqual(isGuestUserID("not-a-number"), false);
+        });
+
+        it("round-trips a guest session like any other", async () => {
+            const guest = {
+                id: mintGuestUserID(),
+                username: "guesty",
+                avatarUrl: null,
+                locale: "en-US",
+            };
+
+            const token = await createWebSession(guest);
+            assert.deepStrictEqual(await resolveWebSession(token), guest);
+        });
+
+        it("sanitizes self-chosen guest names", () => {
+            assert.strictEqual(sanitizeGuestUsername("  bob  "), "bob");
+            // Control characters stripped, whitespace collapsed.
+            assert.strictEqual(
+                sanitizeGuestUsername("a\u0000b\u001fc  d"),
+                "abc d",
+            );
+
+            assert.strictEqual(
+                sanitizeGuestUsername("x".repeat(100)).length,
+                32,
+            );
+
+            assert.strictEqual(sanitizeGuestUsername("   "), "Guest");
+            assert.strictEqual(sanitizeGuestUsername(undefined), "Guest");
+            assert.strictEqual(sanitizeGuestUsername(42), "Guest");
         });
     });
 });
