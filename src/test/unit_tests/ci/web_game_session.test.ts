@@ -1,3 +1,4 @@
+import { IPCLogger } from "../../../logger";
 import {
     clearWebRoomMembers,
     getWebRoomMembers,
@@ -5,6 +6,7 @@ import {
     setWebRoomMembers,
 } from "../../../structures/web_room_state";
 import { describe } from "mocha";
+import { sendMessage } from "../../../helpers/discord_utils";
 import GameType from "../../../enums/game_type";
 import GuildPreference from "../../../structures/guild_preference";
 import KmqMember from "../../../structures/kmq_member";
@@ -208,6 +210,16 @@ describe("web game session", () => {
             (session as any).scoreboard.update([
                 { userID: "333333333333333333", pointsEarned: 1, expGain: 10 },
             ]);
+        });
+
+        it("silently suppresses Discord sends for the empty text channel", async () => {
+            // Regression: end-of-game embeds funnel through sendMessage with
+            // the web session's textChannelID of "", which logged an ERROR
+            // per suppressed embed instead of dropping them quietly.
+            const errorSpy = sandbox.spy(IPCLogger.prototype, "error");
+            const result = await sendMessage("", { content: "gg" });
+            assert.strictEqual(result, null);
+            assert.strictEqual(errorSpy.called, false);
         });
 
         it("does not persist stats rows for guests", async () => {
