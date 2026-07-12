@@ -7,7 +7,11 @@
  * not touch the Embedded App SDK — the web target never loads it.
  */
 export function isEmbedded(): boolean {
-    if (window.location.hostname.endsWith("discordsays.com")) {
+    const { hostname } = window.location;
+    if (
+        hostname === "discordsays.com" ||
+        hostname.endsWith(".discordsays.com")
+    ) {
         return true;
     }
 
