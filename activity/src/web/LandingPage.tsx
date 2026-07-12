@@ -38,6 +38,8 @@ function roomErrorText(error: string): string {
             return "That room doesn't exist (or everyone left).";
         case "full":
             return "That room is full.";
+        case "guest_limit":
+            return "This room isn't accepting more guests. Log in with Discord to join.";
         case "wrong_password":
             return "Wrong password. Please try again.";
         case "unauthorized":

@@ -1,6 +1,7 @@
 import {
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
+    WEB_ROOM_MAX_GUESTS,
     WEB_ROOM_MAX_MEMBERS,
 } from "../../../constants";
 import { describe } from "mocha";
@@ -367,6 +368,32 @@ describe("web room manager", () => {
             assert.strictEqual(again.room, created.room);
             assert.strictEqual(again.room.visibility, "private");
             assert.strictEqual(again.room.passwordHash !== null, true);
+        });
+    });
+
+    describe("guest cap", () => {
+        it("caps anonymous guests once a room has no non-guest members", () => {
+            // Owner is a non-guest; fill the rest with guests up to the cap.
+            const created = manager.createRoom(user(1));
+            assert.ok("room" in created);
+            const { code } = created.room;
+
+            for (let i = 0; i < WEB_ROOM_MAX_GUESTS; i++) {
+                assert.ok("room" in manager.joinRoom(code, user(10 + i, true)));
+            }
+
+            // The only non-guest (owner) leaves; ownership passes to a guest,
+            // leaving the room at the guest cap with a free member slot.
+            manager.leaveRoom(user(1).id);
+            assert.strictEqual(created.room.members.size, WEB_ROOM_MAX_GUESTS);
+
+            // A further guest is refused by the guest cap...
+            assert.deepStrictEqual(manager.joinRoom(code, user(99, true)), {
+                error: "guest_limit",
+            });
+
+            // ...but a Discord (non-guest) user can still take the free slot.
+            assert.ok("room" in manager.joinRoom(code, user(99, false)));
         });
     });
 });

@@ -1,6 +1,7 @@
 import {
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
+    WEB_ROOM_MAX_GUESTS,
     WEB_ROOM_MAX_MEMBERS,
 } from "./constants";
 import crypto from "crypto";
@@ -91,7 +92,7 @@ export interface PublicRoomSummary {
 // eslint-disable-next-line import/no-unused-modules
 export type WebRoomJoinResult =
     | { room: WebRoom }
-    | { error: "not_found" | "full" | "wrong_password" };
+    | { error: "not_found" | "full" | "wrong_password" | "guest_limit" };
 
 /** Options for creating a room. */
 // eslint-disable-next-line import/no-unused-modules
@@ -247,6 +248,19 @@ export default class WebRoomManager {
 
         if (room.members.size >= WEB_ROOM_MAX_MEMBERS) {
             return { error: "full" };
+        }
+
+        // Cap anonymous guests per room; the owner (always a non-guest) plus
+        // WEB_ROOM_MAX_GUESTS is the ceiling, so a room can't be filled purely
+        // with unaccountable identities.
+        if (user.isGuest) {
+            const guestCount = [...room.members.values()].filter(
+                (m) => m.isGuest,
+            ).length;
+
+            if (guestCount >= WEB_ROOM_MAX_GUESTS) {
+                return { error: "guest_limit" };
+            }
         }
 
         this.leaveRoom(user.id);
