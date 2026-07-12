@@ -68,6 +68,15 @@ type ActivityEvent =
           type: "roundTimerChanged";
           guessTimeoutSec: number | null;
           timerStartedAt: number;
+      }
+    | {
+          // Web rooms only: a new audio playback started (round start, clip
+          // replay, answer clip). The URL is an opaque server-relative token;
+          // fetching it always streams from the *live* position, so it can be
+          // re-fetched to resync.
+          type: "roundAudio";
+          audioUrl: string;
+          playbackDurationSec: number;
       };
 
 export default ActivityEvent;

@@ -418,6 +418,19 @@ export const WEB_ROOM_MAX_MEMBERS = 8;
 export const WEB_ROOM_DISCONNECT_GRACE_MS = 60_000;
 export const WEB_ROOM_SWEEP_INTERVAL_MS = 30_000;
 
+// Browser audio streaming for web rooms. A minted token stays redeemable for
+// the playback's remaining duration plus this buffer (reconnects/reloads can
+// re-hit the same URL; the server recomputes the live seek per request).
+export const WEB_AUDIO_TOKEN_TTL_BUFFER_MS = 5 * 60 * 1000;
+export const WEB_AUDIO_SWEEP_INTERVAL_MS = 60_000;
+// Each listener gets their own ffmpeg; cap the concurrent transcodes so a
+// burst of tabs can't exhaust the host (~1 process per active listener).
+export const WEB_AUDIO_MAX_CONCURRENT_STREAMS = 64;
+// Route prefix shared by the hub (minting URLs) and the web server (serving
+// them). Server-relative on purpose: only web-room subscribers receive it,
+// and their page is same-origin with the API.
+export const WEB_AUDIO_URL_PREFIX = "/api/web/audio";
+
 // Fixed set of emotes a player can fling during an Activity round. Server-side
 // allow-list so the broadcast can't be used to inject arbitrary content.
 export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;

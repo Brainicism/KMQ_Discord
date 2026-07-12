@@ -22,6 +22,8 @@ import {
     EARLIEST_BEGINNING_SEARCH_YEAR,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
+    WEB_AUDIO_MAX_CONCURRENT_STREAMS,
+    WEB_AUDIO_URL_PREFIX,
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
@@ -30,6 +32,7 @@ import {
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
+import { buildAudioStreamArgs } from "./web_audio_registry";
 import {
     createWebSession,
     deleteWebSession,
@@ -37,6 +40,7 @@ import {
     resolveWebSession,
 } from "./helpers/web_session_manager";
 import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
+import { spawn } from "child_process";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import AnswerType from "./enums/option_types/answer_type";
@@ -532,6 +536,10 @@ export default class KmqWebServer {
     > = new Map();
 
     private webRoomManager: WebRoomManager | null = null;
+
+    // Live ffmpeg transcodes serving /api/web/audio streams (one per
+    // listener), for the global concurrency cap.
+    private activeAudioStreams = 0;
 
     constructor(
         databaseContext: DatabaseContext,
@@ -1095,6 +1103,7 @@ export default class KmqWebServer {
 
         this.registerWebAuthRoutes(httpServer, limit);
         this.registerWebRoomRoutes(httpServer, limit);
+        this.registerWebAudioRoutes(httpServer, limit);
 
         httpServer.get(
             "/api/activity/i18n",
@@ -2755,6 +2764,124 @@ export default class KmqWebServer {
                 await reply.code(200).send({
                     room: this.webRoomManager!.serializeRoom(room),
                 });
+            },
+        );
+    }
+
+    /**
+     * Registers the web-room audio stream route. The token is the bearer
+     * capability (audio elements can't attach Authorization headers); it's
+     * an unguessable uuid distributed only to the room's subscribers, and it
+     * expires with the playback. Each GET spawns a dedicated ffmpeg seeked to
+     * the live position, so reloads and late joiners stay in sync.
+     * @param httpServer - the fastify instance
+     * @param limit - per-route rate-limit config builder
+     */
+    private registerWebAudioRoutes(
+        httpServer: FastifyInstance,
+        limit: (max: number) => {
+            config: { rateLimit: { max: number; timeWindow: string } };
+        },
+    ): void {
+        httpServer.get(
+            `${WEB_AUDIO_URL_PREFIX}/:token`,
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                if (!KmqConfiguration.Instance.webModeEnabled()) {
+                    await reply.code(503).send({ error: "Web mode disabled" });
+                    return;
+                }
+
+                if (!this.activityHub) {
+                    await reply
+                        .code(503)
+                        .send({ error: "Activity hub not available" });
+                    return;
+                }
+
+                const token = (request.params as { token: string }).token;
+                const entry = this.activityHub.getAudioEntry(token);
+                if (!entry) {
+                    await reply.code(404).send({ error: "Unknown token" });
+                    return;
+                }
+
+                const args = buildAudioStreamArgs(entry, Date.now());
+                if (!args) {
+                    await reply.code(410).send({ error: "Playback ended" });
+                    return;
+                }
+
+                if (
+                    this.activeAudioStreams >= WEB_AUDIO_MAX_CONCURRENT_STREAMS
+                ) {
+                    logger.warn(
+                        `Audio stream cap hit (${this.activeAudioStreams} active)`,
+                    );
+
+                    await reply
+                        .code(503)
+                        .send({ error: "Too many active streams" });
+                    return;
+                }
+
+                this.activeAudioStreams++;
+                let released = false;
+                const release = (): void => {
+                    if (released) return;
+                    released = true;
+                    this.activeAudioStreams--;
+                };
+
+                const child = spawn("ffmpeg", args, {
+                    stdio: ["ignore", "pipe", "pipe"],
+                });
+
+                // -loglevel error: anything here is a real failure. Drain it
+                // regardless so ffmpeg can't block on a full stderr pipe.
+                let stderr = "";
+                child.stderr.on("data", (chunk: Buffer) => {
+                    if (stderr.length < 2048) {
+                        stderr += chunk.toString();
+                    }
+                });
+
+                child.on("close", (code) => {
+                    release();
+                    if (code !== 0 && code !== null && stderr) {
+                        logger.error(
+                            `Audio stream ffmpeg failed. gid=${entry.guildID}, code=${code}, err=${stderr.trim()}`,
+                        );
+                    }
+                });
+
+                child.on("error", (e) => {
+                    release();
+                    logger.error(`Audio stream ffmpeg spawn failed. err=${e}`);
+                    if (!reply.sent) {
+                        reply
+                            .code(500)
+                            .send({ error: "Stream unavailable" })
+                            .then(
+                                () => {},
+                                () => {},
+                            );
+                    }
+                });
+
+                // Tab closed / element released: kill the transcode instead
+                // of encoding to a dead socket for the rest of the song.
+                request.raw.on("close", () => {
+                    child.kill("SIGKILL");
+                    release();
+                });
+
+                await reply
+                    .code(200)
+                    .header("Content-Type", "audio/mpeg")
+                    .header("Cache-Control", "no-store")
+                    .header("Accept-Ranges", "none")
+                    .send(child.stdout);
             },
         );
     }

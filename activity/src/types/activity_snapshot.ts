@@ -8,5 +8,13 @@ export default interface ActivitySnapshot {
     session?: ActivitySessionMeta;
     scoreboard?: ActivityScoreboardSnapshot;
     currentRound?: ActivityRoundMeta;
+    /**
+     * Web rooms only: audio already playing when the snapshot was taken, so
+     * reconnects and late joiners hear the current song.
+     */
+    currentAudio?: {
+        audioUrl: string;
+        playbackDurationSec: number;
+    };
     options: ActivityOptionsSnapshot;
 }

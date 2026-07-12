@@ -4,9 +4,13 @@ import {
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
     ACTIVITY_REQUEST_TIMEOUT_MS,
+    WEB_AUDIO_SWEEP_INTERVAL_MS,
+    WEB_AUDIO_URL_PREFIX,
 } from "./constants";
 import { IPCLogger } from "./logger";
+import { WebAudioRegistry } from "./web_audio_registry";
 import type { Fleet } from "eris-fleet";
+import type { WebAudioEntry } from "./web_audio_registry";
 import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
@@ -33,6 +37,9 @@ import type ActivityWebRoomMembershipArgs from "./interfaces/activity_web_room_m
 import type ActivityWorkerEventMessage from "./interfaces/activity_worker_event_message";
 
 const logger = new IPCLogger("activity_hub");
+
+const audioUrlForToken = (token: string): string =>
+    `${WEB_AUDIO_URL_PREFIX}/${token}`;
 
 export interface ActivitySubscriber {
     id: string;
@@ -63,6 +70,9 @@ export default class ActivityHub {
 
     private wired: boolean = false;
 
+    /** Opaque-token registry for web-room audio streams. */
+    private audioRegistry: WebAudioRegistry = new WebAudioRegistry();
+
     constructor(fleet: Fleet) {
         this.fleet = fleet;
     }
@@ -80,6 +90,10 @@ export default class ActivityHub {
         this.fleet.on(ACTIVITY_IPC_REPLY, (msg: ActivityReplyMessage) => {
             this.handleWorkerReply(msg);
         });
+
+        setInterval(() => {
+            this.audioRegistry.sweep(Date.now());
+        }, WEB_AUDIO_SWEEP_INTERVAL_MS).unref();
 
         logger.info(
             `ActivityHub started. shardCount=${this.shardCount}, clusters=${this.clusterRanges.length}`,
@@ -113,24 +127,24 @@ export default class ActivityHub {
      * @returns the snapshot; `hasSession` is false if no GameSession is active
      */
     async requestSnapshot(guildID: string): Promise<ActivitySnapshot> {
-        const clusterID = this.clusterIdForGuild(guildID);
-        if (clusterID === null) {
-            await this.refreshClusterMap();
-            const retry = this.clusterIdForGuild(guildID);
-            if (retry === null) {
-                throw new Error(
-                    `No cluster found for guild ${guildID} (cluster map unavailable)`,
-                );
-            }
+        const clusterID = await this.resolveCluster(guildID);
+        const snapshot = await this.sendRequest<ActivitySnapshot>(
+            clusterID,
+            "snapshot",
+            { guildID },
+        );
 
-            return this.sendRequest<ActivitySnapshot>(retry, "snapshot", {
-                guildID,
-            });
+        // Web rooms: point late joiners/reconnects at the audio already
+        // playing (the registry only ever has entries for web guilds).
+        const audio = this.audioRegistry.currentForGuild(guildID, Date.now());
+        if (audio && snapshot.hasSession) {
+            snapshot.currentAudio = {
+                audioUrl: audioUrlForToken(audio.token),
+                playbackDurationSec: audio.playbackDurationSec,
+            };
         }
 
-        return this.sendRequest<ActivitySnapshot>(clusterID, "snapshot", {
-            guildID,
-        });
+        return snapshot;
     }
 
     /**
@@ -416,6 +430,15 @@ export default class ActivityHub {
         }
     }
 
+    /**
+     * Redeems an audio-stream token minted from a roundAudio event.
+     * @param token - the opaque token from the audio URL
+     * @returns the playback entry, or null if unknown/expired
+     */
+    getAudioEntry(token: string): WebAudioEntry | null {
+        return this.audioRegistry.get(token, Date.now());
+    }
+
     /** @returns total number of active subscribers across all guilds */
     getSubscriberCount(): number {
         let total = 0;
@@ -463,18 +486,44 @@ export default class ActivityHub {
 
     private handleWorkerEvent(msg: ActivityWorkerEventMessage): void {
         // roundAudio carries the raw playback spec, which names the song —
-        // it must never reach clients pre-reveal. Phase 4 turns it into an
-        // opaque audio-stream token; until then it stops here.
+        // it must never reach clients pre-reveal. Mint an opaque streaming
+        // token and fan out only the URL.
         if (msg.event.type === "roundAudio") {
+            const entry = this.audioRegistry.mint(
+                msg.guildID,
+                {
+                    songLocation: msg.event.songLocation,
+                    inputArgs: msg.event.inputArgs,
+                    encoderArgs: msg.event.encoderArgs,
+                    playbackDurationSec: msg.event.playbackDurationSec,
+                },
+                Date.now(),
+            );
+
+            this.fanOut(
+                msg.guildID,
+                JSON.stringify({
+                    type: "roundAudio",
+                    audioUrl: audioUrlForToken(entry.token),
+                    playbackDurationSec: entry.playbackDurationSec,
+                }),
+            );
             return;
         }
 
-        const subscribers = this.guildSubscribers.get(msg.guildID);
+        if (msg.event.type === "sessionEnd") {
+            this.audioRegistry.clearGuild(msg.guildID);
+        }
+
+        this.fanOut(msg.guildID, JSON.stringify(msg.event));
+    }
+
+    private fanOut(guildID: string, wireData: string): void {
+        const subscribers = this.guildSubscribers.get(guildID);
         if (!subscribers || subscribers.size === 0) {
             return;
         }
 
-        const wireData = JSON.stringify(msg.event);
         for (const sub of subscribers) {
             try {
                 sub.send(wireData);

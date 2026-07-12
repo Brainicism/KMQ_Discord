@@ -42,6 +42,8 @@ import {
     readSdkLocale,
 } from "./platform/discordPlatform";
 import { makeTranslator } from "./i18n/translator";
+import SoundControls from "./web/SoundControls";
+import useRoundAudio from "./web/useRoundAudio";
 import kmqLogoUrl from "./assets/kmq_logo.png";
 import thumbsUpUrl from "./assets/thumbs_up.png";
 import type { ActivityArtist } from "./types/activity_options_snapshot";
@@ -4508,6 +4510,12 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
         apply(event);
     }, []);
 
+    // Web-only browser audio (on the embedded Activity the bot plays into
+    // the voice channel; the hook stays inert there). Destructured so the
+    // connect effect captures the stable callbacks, not the stateful object.
+    const roundAudio = useRoundAudio(!!webAuth);
+    const { handleRoundAudio, stop: stopRoundAudio } = roundAudio;
+
     // Translator is stable for a given bundle. Seed with an English stub for
     // the two strings rendered before the /api/activity/i18n fetch resolves,
     // so the splash isn't "appTitle" / "statusConnecting".
@@ -4563,6 +4571,12 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 setAuthState({ accessToken, instanceId, userID });
                 setReady(true);
 
+                // Web rooms: a song may already be playing (late join /
+                // reconnect); each GET streams from the live position.
+                if (snapshot.currentAudio) {
+                    handleRoundAudio(snapshot.currentAudio.audioUrl);
+                }
+
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
                 // matching bundle and swap if it's different. On the web
@@ -4590,6 +4604,31 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                     accessToken,
                     instanceId,
                     (event) => {
+                        // roundAudio bypasses the reveal-hold queue: the
+                        // next round's audio must start on time even while
+                        // the previous reveal is held on screen.
+                        if (event.type === "roundAudio") {
+                            handleRoundAudio(event.audioUrl);
+                            return;
+                        }
+
+                        if (event.type === "sessionEnd") {
+                            // Discord parity: playback runs through the
+                            // reveal and only stops with the session.
+                            stopRoundAudio();
+                        }
+
+                        // Re-sync snapshots carry the live audio too (the
+                        // same-URL guard in the hook makes repeats free).
+                        if (
+                            event.type === "snapshot" &&
+                            event.snapshot.currentAudio
+                        ) {
+                            handleRoundAudio(
+                                event.snapshot.currentAudio.audioUrl,
+                            );
+                        }
+
                         handleStreamEvent(event);
                     },
                     () => {
@@ -5284,6 +5323,8 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 emotes={ui.floatingEmotes}
                 onDismiss={dismissFloatingEmote}
             />
+
+            {webAuth && <SoundControls audio={roundAudio} />}
         </>
     );
 }

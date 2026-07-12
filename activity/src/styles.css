@@ -3705,6 +3705,60 @@ fieldset.options-override:disabled .options-group {
     border: 1px solid var(--border);
 }
 
+/* Floating sound widget (standalone website): autoplay unlock, mute, volume.
+   Bottom-left, mirroring the room bar bottom-right. */
+.kmq-sound-controls {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 60;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-md);
+}
+
+.kmq-sound-unlock {
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 6px 14px;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    animation: kmq-sound-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes kmq-sound-pulse {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.06);
+    }
+}
+
+.kmq-sound-mute {
+    border: none;
+    background: none;
+    font-size: 1rem;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
+.kmq-sound-volume {
+    width: 90px;
+    accent-color: var(--red-primary);
+}
+
 /* Respect users who opt out of motion at the OS level: drop the decorative
    loops (confetti, floating notes, etc.) and collapse entrance animations /
    transitions to a near-instant change. */

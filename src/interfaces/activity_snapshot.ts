@@ -8,6 +8,15 @@ export default interface ActivitySnapshot {
     session?: ActivitySessionMeta;
     scoreboard?: ActivityScoreboardSnapshot;
     currentRound?: ActivityRoundMeta;
+    /**
+     * Web rooms only. The stream URL for audio already playing, injected by
+     * the admiral (never the worker) so reconnects and late joiners hear the
+     * current song; each GET re-seeks to the live position.
+     */
+    currentAudio?: {
+        audioUrl: string;
+        playbackDurationSec: number;
+    };
     /** Current GuildPreference values the Activity panel needs. */
     options: ActivityOptionsSnapshot;
 }
