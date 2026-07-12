@@ -41,6 +41,7 @@ import {
     openExternalUrl,
     readSdkLocale,
 } from "./platform/discordPlatform";
+import { isEmbedded } from "./platform";
 import { makeTranslator } from "./i18n/translator";
 import SoundControls from "./web/SoundControls";
 import useRoundAudio from "./web/useRoundAudio";
@@ -226,7 +227,13 @@ function applySnapshot(prev: UiState, snapshot: ActivitySnapshot): UiState {
 // Discord Activities sandbox the iframe — only hosts registered as URL
 // Mappings in the developer portal can be reached. Rewrite YouTube image
 // hosts to a /external/yt/ prefix that the dev portal maps to i.ytimg.com.
+// The standalone website has no such mapping (and no sandbox): the original
+// i.ytimg.com URL is used directly.
 function proxyImageUrl(url: string): string {
+    if (!isEmbedded()) {
+        return url;
+    }
+
     return url.replace(
         YOUTUBE_IMAGE_HOST_PATTERN,
         EXTERNAL_YOUTUBE_PROXY_PREFIX,
@@ -4336,6 +4343,16 @@ type StreamEvent =
     | ActivityEvent
     | { type: "snapshot"; snapshot: ActivitySnapshot };
 
+// Web-only auto-reconnect after a dropped websocket. The embedded Activity
+// leaves this to the user (Discord itself reloads the iframe on real
+// trouble); on the open web transient drops are routine, so a few silent
+// retries with backoff come first, and the manual Reconnect screen is the
+// fallback. A connection that survived this long is considered healthy and
+// resets the attempt budget.
+const WEB_RECONNECT_MAX_ATTEMPTS = 3;
+const WEB_RECONNECT_BASE_DELAY_MS = 1500;
+const WEB_RECONNECT_HEALTHY_MS = 30_000;
+
 // Minimum time the round-end reveal stays on screen before the next round (or
 // the game-over screen) is allowed to replace it. The reveal naturally shows
 // for the gap between rounds, which is the guild's `song_start_delay`; when
@@ -4457,6 +4474,11 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     }, []);
 
     const streamRef = useRef<{ close: () => void } | null>(null);
+
+    // Web auto-reconnect bookkeeping (see WEB_RECONNECT_*).
+    const reconnectAttemptsRef = useRef(0);
+    const reconnectTimerRef = useRef<number | null>(null);
+    const streamOpenedAtRef = useRef(0);
 
     // Reveal-hold bookkeeping (see MIN_REVEAL_HOLD_MS). `revealShownAt` marks
     // when the current reveal appeared (set on roundEnd); while a tear-down
@@ -4637,10 +4659,40 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                         // from when the effect ran); the render translates it
                         // with the current bundle. The error screen offers
                         // Reconnect, which re-runs this flow.
-                        if (!cancelled) {
-                            setReconnecting(false);
-                            setError({ kind: "disconnected" });
+                        if (cancelled) return;
+
+                        // Web: retry silently first. A long-lived connection
+                        // dropping restarts the budget; a crash loop (drops
+                        // right after connecting) burns through it and lands
+                        // on the manual Reconnect screen.
+                        if (webAuth) {
+                            if (
+                                Date.now() - streamOpenedAtRef.current >
+                                WEB_RECONNECT_HEALTHY_MS
+                            ) {
+                                reconnectAttemptsRef.current = 0;
+                            }
+
+                            if (
+                                reconnectAttemptsRef.current <
+                                WEB_RECONNECT_MAX_ATTEMPTS
+                            ) {
+                                const attempt = reconnectAttemptsRef.current;
+                                reconnectAttemptsRef.current += 1;
+                                setReconnecting(true);
+                                reconnectTimerRef.current = window.setTimeout(
+                                    () => {
+                                        reconnectTimerRef.current = null;
+                                        setConnectNonce((n) => n + 1);
+                                    },
+                                    WEB_RECONNECT_BASE_DELAY_MS * 2 ** attempt,
+                                );
+                                return;
+                            }
                         }
+
+                        setReconnecting(false);
+                        setError({ kind: "disconnected" });
                     },
                 );
 
@@ -4650,6 +4702,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 }
 
                 streamRef.current = stream;
+                streamOpenedAtRef.current = Date.now();
                 setReconnecting(false);
             } catch (e) {
                 // Log the real error/status for debugging; show the user a
@@ -4666,6 +4719,11 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
             cancelled = true;
             streamRef.current?.close();
             streamRef.current = null;
+            if (reconnectTimerRef.current !== null) {
+                window.clearTimeout(reconnectTimerRef.current);
+                reconnectTimerRef.current = null;
+            }
+
             // Drop any pending reveal-hold so a reconnect's fresh snapshot
             // isn't clobbered by stale queued events from the old stream.
             if (holdTimerRef.current !== null) {
@@ -4683,6 +4741,8 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     }, [connectNonce]);
 
     const reconnect = (): void => {
+        // A human clicking Reconnect restores the auto-retry budget.
+        reconnectAttemptsRef.current = 0;
         setReconnecting(true);
         setError(null);
         setReady(false);

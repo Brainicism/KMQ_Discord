@@ -165,6 +165,20 @@ export default function useRoundAudio(enabled: boolean): RoundAudio {
         }
     }, []);
 
+    // While blocked, any interaction with the page (clicking anything,
+    // typing a guess) doubles as the unlock gesture — the pill is only
+    // needed by someone who watches without touching anything.
+    useEffect(() => {
+        if (!needsUnlock) return undefined;
+        const handler = (): void => unlock();
+        window.addEventListener("pointerdown", handler, { once: true });
+        window.addEventListener("keydown", handler, { once: true });
+        return () => {
+            window.removeEventListener("pointerdown", handler);
+            window.removeEventListener("keydown", handler);
+        };
+    }, [needsUnlock, unlock]);
+
     // Unmount: silence and release the element.
     useEffect(
         () => () => {
