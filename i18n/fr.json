@@ -32,6 +32,20 @@
         "emoteBarLabel": "Envoyez une réaction",
         "endGameBusy": "Fin en cours…",
         "endGameButton": "Terminer la partie",
+        "feedback": {
+            "cancel": "Annuler",
+            "close": "Fermer",
+            "error": "Impossible d'envoyer votre commentaire. Veuillez réessayer.",
+            "improveLabel": "Que peut-on améliorer à propos de KMQ ?",
+            "improvePlaceholder": "KMQ est TROP addictif. Ma famille et mes amis me manquent.",
+            "likeLabel": "Qu'aimez-vous à propos de KMQ ?",
+            "likePlaceholder": "KMQ m'aide à découvrir de nouvelles musiques et genres.",
+            "open": "Envoyer un commentaire",
+            "sending": "Envoi...",
+            "submit": "Envoyer un commentaire",
+            "success": "Merci pour votre commentaire !",
+            "title": "Commentaires KMQ"
+        },
         "gameType": {
             "classic": "Classique",
             "clip": "Clip",

@@ -32,6 +32,20 @@
         "emoteBarLabel": "Envie uma reação",
         "endGameBusy": "Encerrando…",
         "endGameButton": "Encerrar jogo",
+        "feedback": {
+            "cancel": "Cancelar",
+            "close": "Fechar",
+            "error": "Não foi possível enviar seu feedback. Tente novamente.",
+            "improveLabel": "O que pode ser melhorado no KMQ?",
+            "improvePlaceholder": "KMQ é MUITO viciante. Minha família e amigos sentem minha falta.",
+            "likeLabel": "O que você gosta no KMQ?",
+            "likePlaceholder": "O KMQ me ajuda a descobrir novas músicas e gêneros.",
+            "open": "Enviar feedback",
+            "sending": "Enviando...",
+            "submit": "Enviar feedback",
+            "success": "Obrigado pelo seu feedback!",
+            "title": "Feedback do KMQ"
+        },
         "gameType": {
             "classic": "Clássico",
             "clip": "Clipe",

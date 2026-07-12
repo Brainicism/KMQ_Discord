@@ -109,37 +109,41 @@ export default class FeedbackCommand implements BaseCommand {
     }
 
     /**
-     * Handles showing suggested artists as the user types for the include slash command
-     * @param interaction - The interaction with intermediate typing state
+     * Formats and delivers a feedback submission to the alert webhook. Shared
+     * by the Discord modal handler and the web/Activity feedback endpoint so
+     * the two produce identical webhook messages.
+     * @param guildID - guild (or web room) ID used to localize the questions
+     * @param userTag - display name of the submitter (Discord tag or web/guest
+     * username)
+     * @param userID - the submitter's user ID
+     * @param answers - responses parallel-indexed to FEEDBACK_QUESTIONS;
+     * undefined/empty entries are omitted
      */
-    static async processModalSubmitInteraction(
-        interaction: Eris.ModalSubmitInteraction,
-    ): Promise<void> {
-        const user = interaction.user as Eris.User;
-        let feedbackResponse = `${new Date().toISOString()}\n${await getUserTag(
-            user.id,
-        )} | ${user.id}\n`;
+    static submitFeedback = async (
+        guildID: string,
+        userTag: string,
+        userID: string,
+        answers: Array<string | undefined>,
+    ): Promise<void> => {
+        let feedbackResponse = `${new Date().toISOString()}\n${userTag} | ${userID}\n`;
 
-        for (const [idx, modalComponent] of Object.entries(
-            interaction.data.components,
-        )) {
-            const questionIndex = parseInt(idx, 10);
+        for (
+            let questionIndex = 0;
+            questionIndex < FeedbackCommand.FEEDBACK_QUESTIONS.length;
+            questionIndex++
+        ) {
+            const answer = answers[questionIndex];
+            if (answer === undefined || answer === "") {
+                continue;
+            }
+
             feedbackResponse += "--------------------------------\n";
             feedbackResponse += `Q${questionIndex + 1}. ${i18n.translate(
-                interaction.guild?.id as string,
+                guildID,
                 FeedbackCommand.FEEDBACK_QUESTIONS[questionIndex]!.question,
             )}\n`;
 
-            if (
-                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
-                modalComponent.type === Eris.Constants.ComponentTypes.ACTION_ROW
-            ) {
-                feedbackResponse += `${modalComponent.components[0]!.value}\n`;
-            } else {
-                logger.error(
-                    `Unexpected modal component type in feedback: ${modalComponent.type}`,
-                );
-            }
+            feedbackResponse += `${answer}\n`;
         }
 
         if (!process.env.ALERT_WEBHOOK_URL) {
@@ -157,7 +161,44 @@ export default class FeedbackCommand implements BaseCommand {
             "Kimiqo",
         );
 
-        logger.info(`Feedback logged by ${user.id}`);
+        logger.info(`Feedback logged by ${userID}`);
+    };
+
+    /**
+     * Handles showing suggested artists as the user types for the include slash command
+     * @param interaction - The interaction with intermediate typing state
+     */
+    static async processModalSubmitInteraction(
+        interaction: Eris.ModalSubmitInteraction,
+    ): Promise<void> {
+        const user = interaction.user as Eris.User;
+
+        const answers = FeedbackCommand.FEEDBACK_QUESTIONS.map((_q, idx) => {
+            const modalComponent = interaction.data.components[idx];
+            if (
+                modalComponent &&
+                // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+                modalComponent.type === Eris.Constants.ComponentTypes.ACTION_ROW
+            ) {
+                return modalComponent.components[0]!.value;
+            }
+
+            if (modalComponent) {
+                logger.error(
+                    `Unexpected modal component type in feedback: ${modalComponent.type}`,
+                );
+            }
+
+            return undefined;
+        });
+
+        await FeedbackCommand.submitFeedback(
+            interaction.guild?.id as string,
+            await getUserTag(user.id),
+            user.id,
+            answers,
+        );
+
         await interaction.acknowledge();
     }
 }

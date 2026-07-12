@@ -32,6 +32,20 @@
         "emoteBarLabel": "Stuur een reactie",
         "endGameBusy": "Beëindigen…",
         "endGameButton": "Spel beëindigen",
+        "feedback": {
+            "cancel": "Annuleren",
+            "close": "Sluiten",
+            "error": "Kan je feedback niet verzenden. Probeer het opnieuw.",
+            "improveLabel": "Wat kan er verbeterd worden aan KMQ?",
+            "improvePlaceholder": "KMQ is TE verslavend. Mijn familie en vrienden missen me.",
+            "likeLabel": "Wat vind je leuk aan KMQ?",
+            "likePlaceholder": "KMQ helpt me nieuwe muziek en genres te ontdekken.",
+            "open": "Feedback verzenden",
+            "sending": "Verzenden...",
+            "submit": "Feedback verzenden",
+            "success": "Bedankt voor je feedback!",
+            "title": "KMQ-feedback"
+        },
         "gameType": {
             "classic": "Klassiek",
             "clip": "Clip",

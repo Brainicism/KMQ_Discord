@@ -32,6 +32,20 @@
         "emoteBarLabel": "Kirim reaksi",
         "endGameBusy": "Mengakhiri…",
         "endGameButton": "Akhiri permainan",
+        "feedback": {
+            "cancel": "Batal",
+            "close": "Tutup",
+            "error": "Tidak dapat mengirim masukan Anda. Silakan coba lagi.",
+            "improveLabel": "Apa yang bisa ditingkatkan tentang KMQ?",
+            "improvePlaceholder": "KMQ TERLALU adiktif. Keluarga dan teman-teman saya merindukan saya.",
+            "likeLabel": "Apa yang Anda suka tentang KMQ?",
+            "likePlaceholder": "KMQ membantu saya menemukan musik dan genre baru.",
+            "open": "Kirim masukan",
+            "sending": "Mengirim...",
+            "submit": "Kirim masukan",
+            "success": "Terima kasih atas masukan Anda!",
+            "title": "Umpan Balik KMQ"
+        },
         "gameType": {
             "classic": "Klasik",
             "clip": "Klip",

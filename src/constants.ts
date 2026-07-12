@@ -389,6 +389,12 @@ export const ACTIVITY_RATE_LIMIT_LIFECYCLE = 30;
 export const ACTIVITY_RATE_LIMIT_READ = 60;
 export const ACTIVITY_RATE_LIMIT_ACTION = 60;
 export const ACTIVITY_RATE_LIMIT_GUESS = 120;
+// Feedback is submitted rarely; a tight per-IP limit keeps the alert webhook
+// from being spammed.
+export const ACTIVITY_RATE_LIMIT_FEEDBACK = 5;
+// Cap each feedback answer so a malicious client can't ship a huge webhook
+// payload.
+export const ACTIVITY_FEEDBACK_MAX_LENGTH = 2000;
 
 // Standalone-website ("web mode") auth. Web session tokens are opaque bearer
 // strings prefixed so resolveAccessToken can route them to the local

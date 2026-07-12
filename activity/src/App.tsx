@@ -33,6 +33,7 @@ import {
     setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
+    submitFeedback,
     submitGuess,
     submitMcGuess,
 } from "./api";
@@ -4205,6 +4206,143 @@ function SongSearchModal({
     );
 }
 
+/**
+ * Feedback modal — the web/Activity surface for the /feedback slash command.
+ * Two questions mirroring FeedbackCommand.FEEDBACK_QUESTIONS: an optional
+ * "what do you like" and a required "what can be improved". Posts to
+ * /api/activity/feedback, which forwards to the alert webhook.
+ */
+function FeedbackModal({
+    accessToken,
+    instanceId,
+    visible,
+    onClose,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    visible: boolean;
+    onClose: () => void;
+    t: Translator;
+}): React.JSX.Element {
+    const [likeKMQ, setLikeKMQ] = useState("");
+    const [improveKMQ, setImproveKMQ] = useState("");
+    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+        "idle",
+    );
+
+    const canSubmit = improveKMQ.trim().length > 0 && status !== "sending";
+
+    const submit = async (): Promise<void> => {
+        if (!canSubmit) return;
+        setStatus("sending");
+        const result = await submitFeedback(accessToken, instanceId, {
+            likeKMQ: likeKMQ.trim(),
+            improveKMQ: improveKMQ.trim(),
+        });
+
+        if (result.ok) {
+            setStatus("sent");
+            setLikeKMQ("");
+            setImproveKMQ("");
+        } else {
+            setStatus("error");
+        }
+    };
+
+    return (
+        <div
+            className={`song-search-overlay${visible ? " visible" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            onClick={onClose}
+        >
+            <div
+                className={`song-search-modal feedback-modal${
+                    visible ? " visible" : ""
+                }`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="song-search-head">
+                    <span className="song-search-title">
+                        {t("feedback.title")}
+                    </span>
+                    <button
+                        type="button"
+                        className="song-search-close"
+                        aria-label={t("feedback.close")}
+                        onClick={onClose}
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {status === "sent" ? (
+                    <p className="feedback-success">{t("feedback.success")}</p>
+                ) : (
+                    <form
+                        className="feedback-form"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void submit();
+                        }}
+                    >
+                        <label className="feedback-label">
+                            {t("feedback.likeLabel")}
+                            <textarea
+                                className="feedback-input"
+                                value={likeKMQ}
+                                maxLength={2000}
+                                rows={3}
+                                placeholder={t("feedback.likePlaceholder")}
+                                onChange={(e) => setLikeKMQ(e.target.value)}
+                            />
+                        </label>
+
+                        <label className="feedback-label">
+                            {t("feedback.improveLabel")}
+                            <textarea
+                                className="feedback-input"
+                                value={improveKMQ}
+                                maxLength={2000}
+                                rows={3}
+                                required
+                                placeholder={t("feedback.improvePlaceholder")}
+                                onChange={(e) => setImproveKMQ(e.target.value)}
+                            />
+                        </label>
+
+                        {status === "error" && (
+                            <p className="feedback-error">
+                                {t("feedback.error")}
+                            </p>
+                        )}
+
+                        <div className="feedback-actions">
+                            <button
+                                type="button"
+                                className="feedback-button secondary"
+                                onClick={onClose}
+                            >
+                                {t("feedback.cancel")}
+                            </button>
+                            <button
+                                type="submit"
+                                className="feedback-button"
+                                disabled={!canSubmit}
+                            >
+                                {status === "sending"
+                                    ? t("feedback.sending")
+                                    : t("feedback.submit")}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function SongHistory({
     history,
     bookmarkedLinks,
@@ -4430,6 +4568,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const [songInfoRefreshNonce, setSongInfoRefreshNonce] = useState(0);
     const [myProfileOpen, setMyProfileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
     // Resolved bundle locale (KMQ LocaleType tag) — passed to song search so
     // returned names match the UI language.
     const [localeTag, setLocaleTag] = useState("en");
@@ -4438,6 +4577,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const myProfile = usePresence(myProfileOpen, 200);
     const optionsPanel = usePresence(optionsOpen, 220);
     const searchModal = usePresence(searchOpen, 200);
+    const feedbackModal = usePresence(feedbackOpen, 200);
 
     // A finished round (roundHistory grows) or a session end can change EXP /
     // level, so invalidate open profile cards by bumping the nonce.
@@ -4921,6 +5061,21 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 </button>
             )}
 
+            {/* Feedback toggle — left cluster, below lookup. */}
+            {authState && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle left feedback ${
+                        feedbackOpen ? "active" : ""
+                    }`}
+                    onClick={() => setFeedbackOpen(true)}
+                    aria-label={t("feedback.open")}
+                    title={t("feedback.open")}
+                >
+                    <span>💬</span>
+                </button>
+            )}
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -5082,6 +5237,16 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                                 refreshNonce={songInfoRefreshNonce}
                                 visible={searchModal.visible}
                                 onClose={() => setSearchOpen(false)}
+                                t={t}
+                            />
+                        )}
+
+                        {authState && feedbackModal.mounted && (
+                            <FeedbackModal
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                visible={feedbackModal.visible}
+                                onClose={() => setFeedbackOpen(false)}
                                 t={t}
                             />
                         )}

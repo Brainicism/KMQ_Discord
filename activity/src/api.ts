@@ -186,6 +186,37 @@ export const sendEmote = (
     emote: string,
 ) => postAction(accessToken, instanceId, "emote", { emote });
 
+export type FeedbackResult = { ok: true } | { ok: false };
+
+/**
+ * Submits player feedback to the alert webhook (the web/Activity equivalent of
+ * the /feedback slash command). `improveKMQ` is required; `likeKMQ` optional.
+ */
+export async function submitFeedback(
+    accessToken: string,
+    instanceId: string,
+    answers: { likeKMQ: string; improveKMQ: string },
+): Promise<FeedbackResult> {
+    try {
+        const resp = await fetch(`${getApiBase()}/feedback`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                instance_id: instanceId,
+                likeKMQ: answers.likeKMQ,
+                improveKMQ: answers.improveKMQ,
+            }),
+        });
+
+        return resp.ok ? { ok: true } : { ok: false };
+    } catch {
+        return { ok: false };
+    }
+}
+
 /**
  * Submit a GuildPreference change. Server validates the shape and accepts
  * only the typed value matching the kind; other fields are ignored.
