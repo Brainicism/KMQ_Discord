@@ -182,15 +182,35 @@ export interface WebRoomMemberView {
     connected: boolean;
 }
 
+export type WebRoomVisibility = "public" | "private";
+
 export interface WebRoomView {
     code: string;
     ownerID: string;
+    visibility: WebRoomVisibility;
+    hasPassword: boolean;
     members: WebRoomMemberView[];
+}
+
+/** A public-lobby list entry (never includes the roster or password). */
+export interface PublicRoomSummaryView {
+    code: string;
+    ownerUsername: string;
+    memberCount: number;
+    maxMembers: number;
+    hasPassword: boolean;
 }
 
 export type WebRoomResult =
     | { room: WebRoomView }
-    | { error: "not_found" | "full" | "unauthorized" | "unavailable" };
+    | {
+          error:
+              | "not_found"
+              | "full"
+              | "wrong_password"
+              | "unauthorized"
+              | "unavailable";
+      };
 
 async function roomRequest(
     session: WebSession,
@@ -210,10 +230,17 @@ async function roomRequest(
         return { error: "unavailable" };
     }
 
-    if (resp.status === 401 || resp.status === 403) {
-        return { error: "unauthorized" };
+    // A locked room answers 403 with error:"wrong_password"; a real auth
+    // failure is a bare 403/401.
+    if (resp.status === 403) {
+        const reason = await readErrorReason(resp);
+        return {
+            error:
+                reason === "wrong_password" ? "wrong_password" : "unauthorized",
+        };
     }
 
+    if (resp.status === 401) return { error: "unauthorized" };
     if (resp.status === 404) return { error: "not_found" };
     if (resp.status === 409) return { error: "full" };
     if (!resp.ok) return { error: "unavailable" };
@@ -223,18 +250,59 @@ async function roomRequest(
     return { room: body.room };
 }
 
-export async function createRoom(session: WebSession): Promise<WebRoomResult> {
-    return roomRequest(session, "/api/web/room", { method: "POST" });
+async function readErrorReason(resp: Response): Promise<string | null> {
+    try {
+        const body = (await resp.json()) as { error?: string };
+        return body?.error ?? null;
+    } catch {
+        return null;
+    }
+}
+
+export async function createRoom(
+    session: WebSession,
+    options: { visibility: WebRoomVisibility; password?: string } = {
+        visibility: "private",
+    },
+): Promise<WebRoomResult> {
+    return roomRequest(session, "/api/web/room", {
+        method: "POST",
+        body: JSON.stringify({
+            visibility: options.visibility,
+            password: options.password || null,
+        }),
+    });
 }
 
 export async function joinRoom(
     session: WebSession,
     code: string,
+    password?: string,
 ): Promise<WebRoomResult> {
     return roomRequest(session, "/api/web/room/join", {
         method: "POST",
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, password: password || null }),
     });
+}
+
+/**
+ * @param session - the web session
+ * @returns the public lobby list, or null on any error (caller shows empty)
+ */
+export async function listPublicRooms(
+    session: WebSession,
+): Promise<PublicRoomSummaryView[] | null> {
+    try {
+        const resp = await fetch("/api/web/rooms", {
+            headers: { Authorization: `Bearer ${session.token}` },
+        });
+
+        if (!resp.ok) return null;
+        const body = (await resp.json()) as { rooms?: PublicRoomSummaryView[] };
+        return body?.rooms ?? [];
+    } catch {
+        return null;
+    }
 }
 
 /**

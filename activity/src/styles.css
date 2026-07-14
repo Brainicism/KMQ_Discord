@@ -3694,6 +3694,119 @@ fieldset.options-override:disabled .options-group {
     line-height: 1.45;
 }
 
+/* Create-room controls: visibility toggle + optional password. */
+.kmq-web-landing-create {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.kmq-web-landing-visibility {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.kmq-web-landing-toggle {
+    padding: 8px 20px;
+    border: none;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kmq-web-landing-toggle[data-active="true"] {
+    background: var(--red-primary);
+    color: #ffffff;
+}
+
+.kmq-web-landing-hint {
+    margin: 0;
+    max-width: 300px;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.kmq-web-landing-password {
+    flex-direction: column;
+    align-items: stretch;
+    width: min(90vw, 300px);
+}
+
+/* Stretch the password field to the form width so it lines up with the
+   full-width Join button below it (overrides the fixed input width). */
+.kmq-web-landing-password .kmq-web-landing-input {
+    width: auto;
+}
+
+/* Public lobby list. */
+.kmq-web-landing-lobby {
+    width: min(92vw, 360px);
+    margin-top: 20px;
+}
+
+.kmq-web-landing-lobby-title {
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.kmq-web-landing-lobby-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    /* Cap the visible height so a large lobby scrolls within a fixed box
+       instead of stretching the whole page. ~6 rooms show before scrolling.
+       padding-right keeps rows clear of the scrollbar when it appears. */
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.kmq-web-landing-lobby-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+}
+
+.kmq-web-landing-lobby-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.kmq-web-landing-lobby-count {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.kmq-web-landing-lobby-row .kmq-web-landing-button {
+    margin-top: 0;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+}
+
 /* Floating room widget (standalone website): invite link, presence, leave.
    Fixed overlay so it never disturbs the game layout underneath. */
 .kmq-room-bar {

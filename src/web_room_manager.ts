@@ -10,6 +10,8 @@ export interface WebRoomMemberIdentity {
     id: string;
     username: string;
     avatarUrl: string | null;
+    /** Whether this is a website guest (no Discord account). */
+    isGuest: boolean;
 }
 
 interface WebRoomMember extends WebRoomMemberIdentity {
@@ -27,6 +29,10 @@ interface WebRoomMember extends WebRoomMemberIdentity {
     disconnectedAt: number | null;
 }
 
+/** Room visibility: public rooms appear in the browse list, private don't. */
+// eslint-disable-next-line import/no-unused-modules
+export type WebRoomVisibility = "public" | "private";
+
 // eslint-disable-next-line import/no-unused-modules
 export interface WebRoom {
     /** Shareable, unguessable invite code; doubles as the instance_id. */
@@ -39,6 +45,20 @@ export interface WebRoom {
 
     createdAt: number;
 
+    /**
+     * Public rooms are listed in the browse lobby; private rooms are reachable
+     * by invite code/link only. Independent of the optional password.
+     */
+    visibility: WebRoomVisibility;
+
+    /**
+     * Optional join password (sha256 of salt+password) — enforced on join
+     * regardless of visibility, so an invite link to a locked room still
+     * prompts. Null when the room is open.
+     */
+    passwordHash: string | null;
+    passwordSalt: string | null;
+
     /** Keyed by user ID; insertion order determines owner succession. */
     members: Map<string, WebRoomMember>;
 }
@@ -48,6 +68,8 @@ export interface WebRoom {
 export interface SerializedWebRoom {
     code: string;
     ownerID: string;
+    visibility: WebRoomVisibility;
+    hasPassword: boolean;
     members: Array<{
         id: string;
         username: string;
@@ -56,10 +78,27 @@ export interface SerializedWebRoom {
     }>;
 }
 
+/** Public-lobby list entry (never leaks the member roster or the password). */
+// eslint-disable-next-line import/no-unused-modules
+export interface PublicRoomSummary {
+    code: string;
+    ownerUsername: string;
+    memberCount: number;
+    maxMembers: number;
+    hasPassword: boolean;
+}
+
 // eslint-disable-next-line import/no-unused-modules
 export type WebRoomJoinResult =
     | { room: WebRoom }
-    | { error: "not_found" | "full" };
+    | { error: "not_found" | "full" | "wrong_password" };
+
+/** Options for creating a room. */
+// eslint-disable-next-line import/no-unused-modules
+export interface CreateRoomOptions {
+    visibility?: WebRoomVisibility;
+    password?: string | null;
+}
 
 interface WebRoomManagerOptions {
     /**
@@ -118,22 +157,53 @@ export default class WebRoomManager {
      * room IDs are deterministic per creator, so two live rooms can never
      * share one.
      * @param user - the creating user
+     * @param options - visibility + optional join password
      * @returns the created (or rejoined) room
      */
-    createRoom(user: WebRoomMemberIdentity): WebRoomJoinResult {
+    createRoom(
+        user: WebRoomMemberIdentity,
+        options: CreateRoomOptions = {},
+    ): WebRoomJoinResult {
+        const visibility: WebRoomVisibility =
+            options.visibility === "public" ? "public" : "private";
+
         const roomID = WebRoomManager.roomIDForOwner(user.id);
         const existingCode = this.roomCodeByRoomID.get(roomID);
         if (existingCode) {
-            return this.joinRoom(existingCode, user);
+            // Recreating one's own still-alive room re-applies the new
+            // visibility/password (the owner reconfiguring it) and rejoins
+            // without a password prompt — it's their own room.
+            const existingRoom = this.roomsByCode.get(existingCode)!;
+            const { hash, salt } = WebRoomManager.hashPassword(
+                options.password,
+            );
+
+            existingRoom.visibility = visibility;
+            existingRoom.passwordHash = hash;
+            existingRoom.passwordSalt = salt;
+
+            if (existingRoom.members.size >= WEB_ROOM_MAX_MEMBERS) {
+                return { error: "full" };
+            }
+
+            this.leaveRoom(user.id);
+            existingRoom.members.set(user.id, this.newMember(user));
+            this.roomCodeByUserID.set(user.id, existingCode);
+            this.onRoomChanged(existingRoom);
+            return { room: existingRoom };
         }
 
         this.leaveRoom(user.id);
 
+        const { hash, salt } = WebRoomManager.hashPassword(options.password);
         const room: WebRoom = {
             code: crypto.randomBytes(9).toString("base64url"),
             roomID,
             ownerID: user.id,
             createdAt: this.now(),
+            visibility,
+            passwordHash: hash,
+            passwordSalt: salt,
             members: new Map(),
         };
 
@@ -150,9 +220,14 @@ export default class WebRoomManager {
      * room the user is already in just refreshes their identity fields.
      * @param code - the invite code
      * @param user - the joining user
+     * @param password - the supplied join password, if the room requires one
      * @returns the room, or why the join failed
      */
-    joinRoom(code: string, user: WebRoomMemberIdentity): WebRoomJoinResult {
+    joinRoom(
+        code: string,
+        user: WebRoomMemberIdentity,
+        password?: string,
+    ): WebRoomJoinResult {
         const room = this.roomsByCode.get(code);
         if (!room) {
             return { error: "not_found" };
@@ -160,9 +235,14 @@ export default class WebRoomManager {
 
         const existing = room.members.get(user.id);
         if (existing) {
+            // Already a member (reconnect/refresh): no password re-prompt.
             existing.username = user.username;
             existing.avatarUrl = user.avatarUrl;
             return { room };
+        }
+
+        if (!WebRoomManager.passwordMatches(room, password)) {
+            return { error: "wrong_password" };
         }
 
         if (room.members.size >= WEB_ROOM_MAX_MEMBERS) {
@@ -174,6 +254,25 @@ export default class WebRoomManager {
         this.roomCodeByUserID.set(user.id, code);
         this.onRoomChanged(room);
         return { room };
+    }
+
+    /**
+     * @returns browse-list summaries of every public room, newest first. The
+     * roster and password are never exposed — only the owner's name, the live
+     * member count, and whether a password is required.
+     */
+    listPublicRooms(): PublicRoomSummary[] {
+        return [...this.roomsByCode.values()]
+            .filter((room) => room.visibility === "public")
+            .sort((a, b) => b.createdAt - a.createdAt)
+            .map((room) => ({
+                code: room.code,
+                ownerUsername:
+                    room.members.get(room.ownerID)?.username ?? "KMQ player",
+                memberCount: room.members.size,
+                maxMembers: WEB_ROOM_MAX_MEMBERS,
+                hasPassword: room.passwordHash !== null,
+            }));
     }
 
     /**
@@ -280,6 +379,8 @@ export default class WebRoomManager {
         return {
             code: room.code,
             ownerID: room.ownerID,
+            visibility: room.visibility,
+            hasPassword: room.passwordHash !== null,
             members: [...room.members.values()].map((m) => ({
                 id: m.id,
                 username: m.username,
@@ -289,11 +390,62 @@ export default class WebRoomManager {
         };
     }
 
+    /**
+     * @param password - the raw join password (or null/empty for no password)
+     * @returns the salt + sha256(salt+password) to store, or nulls when open.
+     * Rooms are ephemeral in-memory, so a fast salted hash is sufficient — it
+     * just keeps the plaintext out of memory dumps and the serialized shape.
+     */
+    private static hashPassword(password: string | null | undefined): {
+        hash: string | null;
+        salt: string | null;
+    } {
+        if (!password) {
+            return { hash: null, salt: null };
+        }
+
+        const salt = crypto.randomBytes(16).toString("hex");
+        const hash = crypto
+            .createHash("sha256")
+            .update(salt + password)
+            .digest("hex");
+
+        return { hash, salt };
+    }
+
+    /**
+     * @param room - the room whose password to check
+     * @param password - the supplied password (may be undefined)
+     * @returns whether the room is open or the password matches (timing-safe)
+     */
+    private static passwordMatches(
+        room: WebRoom,
+        password: string | undefined,
+    ): boolean {
+        if (!room.passwordHash || !room.passwordSalt) {
+            return true;
+        }
+
+        if (typeof password !== "string" || password.length === 0) {
+            return false;
+        }
+
+        const candidate = crypto
+            .createHash("sha256")
+            .update(room.passwordSalt + password)
+            .digest("hex");
+
+        const a = Buffer.from(candidate, "hex");
+        const b = Buffer.from(room.passwordHash, "hex");
+        return a.length === b.length && crypto.timingSafeEqual(a, b);
+    }
+
     private newMember(user: WebRoomMemberIdentity): WebRoomMember {
         return {
             id: user.id,
             username: user.username,
             avatarUrl: user.avatarUrl,
+            isGuest: user.isGuest,
             connections: 0,
             disconnectedAt: this.now(),
         };
