@@ -1,10 +1,12 @@
 import * as uuid from "uuid";
 import {
     ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+    ACTIVITY_FEEDBACK_MAX_LENGTH,
     ACTIVITY_GUESS_MAX_LENGTH,
     ACTIVITY_HTTP_TIMEOUT_MS,
     ACTIVITY_INSTANCE_CACHE_TTL_MS,
     ACTIVITY_RATE_LIMIT_ACTION,
+    ACTIVITY_RATE_LIMIT_FEEDBACK,
     ACTIVITY_RATE_LIMIT_GUESS,
     ACTIVITY_RATE_LIMIT_LIFECYCLE,
     ACTIVITY_RATE_LIMIT_READ,
@@ -48,6 +50,7 @@ import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
+import FeedbackCommand from "./commands/misc_commands/feedback";
 import GameType from "./enums/game_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import KmqConfiguration from "./kmq_configuration";
@@ -1455,6 +1458,62 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity emote failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/feedback",
+            limit(ACTIVITY_RATE_LIMIT_FEEDBACK),
+            async (request, reply) => {
+                // Gated on being an authed instance/room participant so only
+                // real players can reach the alert webhook. Mirrors the
+                // /feedback slash command's two questions (see FeedbackCommand
+                // .FEEDBACK_QUESTIONS): "like" is optional, "improve" required.
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as {
+                    likeKMQ?: unknown;
+                    improveKMQ?: unknown;
+                };
+
+                const readAnswer = (v: unknown): string | undefined =>
+                    typeof v === "string" ? v.trim() : undefined;
+
+                const likeKMQ = readAnswer(body.likeKMQ);
+                const improveKMQ = readAnswer(body.improveKMQ);
+
+                if (!improveKMQ) {
+                    await reply.code(400).send({ error: "Missing improveKMQ" });
+                    return;
+                }
+
+                if (
+                    (likeKMQ?.length ?? 0) > ACTIVITY_FEEDBACK_MAX_LENGTH ||
+                    improveKMQ.length > ACTIVITY_FEEDBACK_MAX_LENGTH
+                ) {
+                    await reply.code(400).send({ error: "Feedback too long" });
+                    return;
+                }
+
+                try {
+                    // The submitter's chosen/display username is the tag —
+                    // getUserTag would 404 for web guests, who have no Discord
+                    // account.
+                    await FeedbackCommand.submitFeedback(
+                        ctx.instance.guildID,
+                        ctx.user.username,
+                        ctx.user.id,
+                        [likeKMQ, improveKMQ],
+                    );
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity feedback failed. uid=${ctx.user.id}, err=${(e as Error).message}`,
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }

@@ -32,6 +32,20 @@
         "emoteBarLabel": "发送反应",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
+        "feedback": {
+            "cancel": "取消",
+            "close": "关闭",
+            "error": "无法发送您的反馈。请重试。",
+            "improveLabel": "KMQ有哪些可以改进的地方？",
+            "improvePlaceholder": "KMQ 太上瘾了。我的家人和朋友们都想念我。",
+            "likeLabel": "你喜欢KMQ的哪些方面？",
+            "likePlaceholder": "KMQ帮助我发现新的音乐和流派。",
+            "open": "发送反馈",
+            "sending": "发送中...",
+            "submit": "发送反馈",
+            "success": "感谢您的反馈！",
+            "title": "KMQ反馈"
+        },
         "gameType": {
             "classic": "经典",
             "clip": "剪辑",

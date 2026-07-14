@@ -341,6 +341,13 @@ body::before {
     top: 160px;
 }
 
+/* Left cluster, below lookup. */
+.sidebar-toggle.feedback {
+    right: auto;
+    left: 16px;
+    top: 208px;
+}
+
 .sidebar-toggle:hover {
     background: var(--red-light);
     border-color: var(--red-primary);
@@ -3416,6 +3423,82 @@ fieldset.options-override:disabled .options-group {
 .song-search-input:focus {
     outline: none;
     border-color: var(--border-red);
+}
+
+/* Feedback modal — reuses the song-search overlay/modal shell. */
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.feedback-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.feedback-input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 400;
+    resize: vertical;
+}
+
+.feedback-input:focus {
+    outline: none;
+    border-color: var(--border-red);
+}
+
+.feedback-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.feedback-button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--red-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.feedback-button.secondary {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+}
+
+.feedback-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedback-success {
+    margin: 20px 16px;
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.feedback-error {
+    margin: 0;
+    color: var(--red-primary);
+    font-size: 0.8rem;
 }
 
 .song-search-status {

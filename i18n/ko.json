@@ -32,6 +32,20 @@
         "emoteBarLabel": "반응 표시 보내기",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
+        "feedback": {
+            "cancel": "취소",
+            "close": "닫기",
+            "error": "피드백을 보내지 못했습니다. 다시 시도해 주세요.",
+            "improveLabel": "KMQ에서 개선할 수 있는 점은 무엇입니까?",
+            "improvePlaceholder": "KMQ는 너무 중독성이 있어요. 제 가족과 친구들이 저를 그리워해요.",
+            "likeLabel": "KMQ의 어떤 점이 마음에 드나요?",
+            "likePlaceholder": "KMQ는 새로운 음악과 장르를 발견하도록 도와줍니다.",
+            "open": "피드백 보내기",
+            "sending": "보내는 중...",
+            "submit": "피드백 보내기",
+            "success": "피드백을 보내주셔서 감사합니다!",
+            "title": "KMQ의 피드백"
+        },
         "gameType": {
             "classic": "클래식",
             "clip": "클립",
