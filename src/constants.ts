@@ -430,6 +430,18 @@ export const WEB_ROOM_MAX_MEMBERS = 8;
 // Cap the optional join-password length; rooms are ephemeral, this is only
 // abuse defense against a huge payload.
 export const WEB_ROOM_PASSWORD_MAX_LENGTH = 128;
+// Cap guests (no Discord account) per room. The owner is always a non-guest,
+// so this only blocks a fully-anonymous room; a legit group can still bring 7
+// guest friends. Tunable — the real anti-abuse lever is the per-IP guest-login
+// limit below.
+export const WEB_ROOM_MAX_GUESTS = 7;
+
+// Guest-login abuse hardening: on top of the fastify token-bucket limit, a
+// single IP can mint at most this many guest sessions per rolling window. Stops
+// a script from farming thousands of ephemeral identities while still leaving
+// plenty of headroom for a shared/NAT'd IP.
+export const WEB_GUEST_LOGIN_PER_IP_MAX = 30;
+export const WEB_GUEST_LOGIN_IP_WINDOW_MS = 60 * 60 * 1000;
 // A member with no open websocket is dropped from the room after this grace
 // period (survives refreshes and brief network blips); a room with no members
 // left is closed.

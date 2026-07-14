@@ -207,6 +207,7 @@ export type WebRoomResult =
           error:
               | "not_found"
               | "full"
+              | "guest_limit"
               | "wrong_password"
               | "unauthorized"
               | "unavailable";
@@ -242,7 +243,12 @@ async function roomRequest(
 
     if (resp.status === 401) return { error: "unauthorized" };
     if (resp.status === 404) return { error: "not_found" };
-    if (resp.status === 409) return { error: "full" };
+    // 409 is "full" or a guest-cap rejection; disambiguate via the body.
+    if (resp.status === 409) {
+        const reason = await readErrorReason(resp);
+        return { error: reason === "guest_limit" ? "guest_limit" : "full" };
+    }
+
     if (!resp.ok) return { error: "unavailable" };
 
     const body = (await resp.json()) as { room?: WebRoomView };

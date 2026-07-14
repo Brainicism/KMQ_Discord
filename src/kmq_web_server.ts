@@ -26,6 +26,8 @@ import {
     ELIMINATION_MAX_LIVES,
     WEB_AUDIO_MAX_CONCURRENT_STREAMS,
     WEB_AUDIO_URL_PREFIX,
+    WEB_GUEST_LOGIN_IP_WINDOW_MS,
+    WEB_GUEST_LOGIN_PER_IP_MAX,
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
@@ -544,6 +546,10 @@ export default class KmqWebServer {
 
     private webRoomManager: WebRoomManager | null = null;
 
+    // Per-IP guest-login timestamps (rolling window), for the abuse cap on
+    // top of the fastify token-bucket limit. Pruned lazily on each attempt.
+    private guestLoginsByIP: Map<string, number[]> = new Map();
+
     // Live ffmpeg transcodes serving /api/web/audio streams (one per
     // listener), for the global concurrency cap.
     private activeAudioStreams = 0;
@@ -604,7 +610,14 @@ export default class KmqWebServer {
      * Starts web server
      * */
     async startWebServer(fleet: Fleet): Promise<void> {
-        const httpServer = fastify({});
+        // Trust only the loopback proxy (nginx on 127.0.0.1) so `request.ip`
+        // and @fastify/rate-limit resolve the real client IP from the
+        // X-Forwarded-For nginx appends, rather than seeing every external
+        // request as 127.0.0.1. This makes the per-IP rate limits (including
+        // the guest-login cap) effective and keeps the `request.ip ===
+        // "127.0.0.1"` internal-route gates from being bypassed via the proxy.
+        // Loopback-only trust prevents clients spoofing X-Forwarded-For.
+        const httpServer = fastify({ trustProxy: "loopback" });
         await httpServer.register(fastifyView, {
             engine: {
                 ejs,
@@ -2640,6 +2653,19 @@ export default class KmqWebServer {
                     return;
                 }
 
+                // Per-IP rolling-window cap on top of the token-bucket limit:
+                // stops a script farming ephemeral guest identities.
+                if (!this.recordGuestLogin(request.ip)) {
+                    logger.warn(
+                        `Guest-login rate limit hit for IP ${request.ip}`,
+                    );
+
+                    await reply
+                        .code(429)
+                        .send({ error: "Too many guest logins" });
+                    return;
+                }
+
                 const body = request.body as {
                     username?: string;
                     locale?: string;
@@ -2882,6 +2908,7 @@ export default class KmqWebServer {
                         not_found: 404,
                         wrong_password: 403,
                         full: 409,
+                        guest_limit: 409,
                     };
 
                     await reply
@@ -2977,6 +3004,29 @@ export default class KmqWebServer {
         }
 
         return raw;
+    }
+
+    /**
+     * Records a guest-login attempt from an IP and reports whether it's within
+     * the rolling-window cap. Prunes expired timestamps as it goes.
+     * @param ip - the requesting IP
+     * @returns true if allowed (and recorded); false if the IP is over the cap
+     */
+    private recordGuestLogin(ip: string): boolean {
+        const now = Date.now();
+        const cutoff = now - WEB_GUEST_LOGIN_IP_WINDOW_MS;
+        const recent = (this.guestLoginsByIP.get(ip) ?? []).filter(
+            (t) => t > cutoff,
+        );
+
+        if (recent.length >= WEB_GUEST_LOGIN_PER_IP_MAX) {
+            this.guestLoginsByIP.set(ip, recent);
+            return false;
+        }
+
+        recent.push(now);
+        this.guestLoginsByIP.set(ip, recent);
+        return true;
     }
 
     /**
