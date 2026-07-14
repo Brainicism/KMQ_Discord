@@ -327,10 +327,13 @@ export default function LandingPage(): JSX.Element {
     };
 
     const handleJoin = async (session: WebSession): Promise<void> => {
-        // Accept a pasted invite URL or a bare code.
+        // Accept a pasted invite URL or a bare code. Codes are uppercase-only,
+        // so normalize typed input — a hand-entered lowercase code still joins.
         const raw = joinCode.trim();
         const fromUrl = /\/play\/r\/([^/\s?#]+)/.exec(raw);
-        const code = fromUrl ? decodeURIComponent(fromUrl[1]!) : raw;
+        const code = (
+            fromUrl ? decodeURIComponent(fromUrl[1]!) : raw
+        ).toUpperCase();
         if (!code) return;
         await attemptJoin(session, code);
     };

@@ -427,6 +427,13 @@ export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
 // user ID so a recreated room keeps its game options and presets.
 export const WEB_ROOM_ID_FLAG = 1n << 62n;
 export const WEB_ROOM_MAX_MEMBERS = 8;
+// Invite codes are shared in chat, typed by hand, and read aloud, so draw them
+// from an alphabet with no look-alike characters: the digits 0/1 and letters
+// O/I are excluded (L stays — nothing resembles it once 1 and I are gone), and
+// it's uppercase-only to avoid case confusion. 32 chars ^ 12 ≈ 60 bits, ample
+// for ephemeral, rate-limited rooms.
+export const WEB_ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const WEB_ROOM_CODE_LENGTH = 12;
 // Cap the optional join-password length; rooms are ephemeral, this is only
 // abuse defense against a huge payload.
 export const WEB_ROOM_PASSWORD_MAX_LENGTH = 128;
