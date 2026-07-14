@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchRoom, roomPath } from "../platform/webPlatform";
+import type { Translator } from "../i18n/translator";
 import type { WebRoomView } from "../platform/webPlatform";
 import type { WebSession } from "../platform/webPlatform";
 
@@ -18,12 +19,14 @@ export default function RoomBar({
     room: initialRoom,
     onLeave,
     onEvicted,
+    t,
 }: {
     session: WebSession;
     room: WebRoomView;
     onLeave: () => void;
     /** Called when the server no longer recognizes us as a member. */
     onEvicted: () => void;
+    t: Translator;
 }): JSX.Element {
     const [room, setRoom] = useState<WebRoomView>(initialRoom);
     const [expanded, setExpanded] = useState(true);
@@ -103,7 +106,7 @@ export default function RoomBar({
                 aria-expanded={expanded}
             >
                 <span className="kmq-room-bar-dot" aria-hidden />
-                Room · {connectedCount}/{room.members.length}
+                {t("web.room.label")} · {connectedCount}/{room.members.length}
             </button>
 
             {expanded && (
@@ -117,7 +120,9 @@ export default function RoomBar({
                                 title={
                                     member.connected
                                         ? member.username
-                                        : `${member.username} (away)`
+                                        : t("web.room.away", {
+                                              username: member.username,
+                                          })
                                 }
                             >
                                 {member.avatarUrl ? (
@@ -147,14 +152,16 @@ export default function RoomBar({
                             className="kmq-room-bar-button"
                             onClick={() => void copyInvite()}
                         >
-                            {copied ? "Copied!" : "Copy invite link"}
+                            {copied
+                                ? t("web.room.copied")
+                                : t("web.room.copyInvite")}
                         </button>
                         <button
                             type="button"
                             className="kmq-room-bar-button kmq-room-bar-button-danger"
                             onClick={onLeave}
                         >
-                            Leave
+                            {t("web.room.leave")}
                         </button>
                     </div>
                 </div>

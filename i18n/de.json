@@ -318,6 +318,64 @@
         "themeToggleDark": "Wechseln Sie in den Dunkelmodus",
         "themeToggleLight": "Wechseln Sie in den Lichtmodus",
         "waitingForNextRound": "Warten auf die nächste Runde…",
+        "web": {
+            "cancel": "Abbrechen",
+            "createRoom": "Raum erstellen",
+            "error": {
+                "full": "Dieser Raum ist voll.",
+                "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
+                "guestLimit": "Dieser Raum nimmt keine weiteren Gäste auf. Melde dich mit Discord an, um beizutreten.",
+                "guestUnavailable": "Gast-Spiel ist derzeit nicht verfügbar.",
+                "loginFailed": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
+                "notFound": "Dieser Raum existiert nicht (oder alle haben ihn verlassen).",
+                "removed": "Du wurdest aus dem Raum entfernt.",
+                "unauthorized": "Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.",
+                "wrongPassword": "Falsches Passwort. Bitte versuche es erneut."
+            },
+            "guestNote": "Gäste können Räumen per Einladung beitreten. Melde dich mit Discord an, um eigene Räume zu hosten und deine Statistiken zu behalten.",
+            "guestNoteLoggedIn": "Du spielst als Gast — durchsuche unten einen öffentlichen Raum oder tritt mit einem Einladungscode bei. Melde dich mit Discord an, um eigene Räume zu hosten und deine Statistiken zu behalten.",
+            "inviteCodePlaceholder": "Einladungscode oder Link",
+            "join": "Beitreten",
+            "joinAsGuest": "Als Gast beitreten",
+            "loading": "Wird geladen...",
+            "lobby": {
+                "empty": "Gerade keine öffentlichen Räume — erstelle oben einen!",
+                "roomName": "{{owner}}s Raum",
+                "title": "Öffentliche Räume"
+            },
+            "loggedInAs": "Angemeldet als",
+            "loginDiscord": "Mit Discord anmelden",
+            "logout": "Abmelden",
+            "nicknameLabel": "Gast-Spitzname",
+            "nicknamePlaceholder": "Spitznamen wählen",
+            "or": "oder",
+            "passwordLabel": "Raum-Passwort",
+            "passwordOptionalLabel": "Raum-Passwort (optional)",
+            "passwordOptionalPlaceholder": "Passwort (optional)",
+            "passwordPlaceholder": "Passwort",
+            "passwordRequired": "Dieser Raum erfordert ein Passwort.",
+            "playAsGuest": "Als Gast spielen",
+            "playingAsGuest": "Als Gast",
+            "room": {
+                "away": "{{username}} (abwesend)",
+                "copied": "Kopiert!",
+                "copyInvite": "Einladungslink kopieren",
+                "label": "Raum",
+                "leave": "Verlassen"
+            },
+            "sound": {
+                "enable": "Ton aktivieren",
+                "mute": "Stumm",
+                "unmute": "Ton an",
+                "volume": "Lautstärke"
+            },
+            "tagline": "Das K-Pop-Musikratespiel",
+            "visibilityLabel": "Raum-Sichtbarkeit",
+            "visibilityPrivate": "Privat",
+            "visibilityPrivateHint": "Nur Personen mit dem Einladungslink können beitreten.",
+            "visibilityPublic": "Öffentlich",
+            "visibilityPublicHint": "Jeder kann diesen Raum in der Lobby-Liste finden."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

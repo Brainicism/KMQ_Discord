@@ -4739,8 +4739,14 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 const snapshot = await fetchSnapshot(accessToken, instanceId);
 
                 if (cancelled) return;
+                // On the web the browser language is the source of truth for a
+                // visitor — the web shell localizes from it too — so prefer it
+                // over the login-time account locale to keep the game and the
+                // surrounding shell in the same language. Embedded Activity has
+                // no webAuth and keeps using the account/SDK locale below.
+                const webLocale = webAuth ? navigator.language : null;
                 const initialBundle = await fetchI18nBundle(
-                    snapshot.viewerLocale || "en",
+                    webLocale || snapshot.viewerLocale || "en",
                 );
 
                 if (cancelled) return;
@@ -4766,8 +4772,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 // differ from the OAuth-embedded user.locale. Fetch the
                 // matching bundle and swap if it's different. On the web
                 // there's no SDK (and calling in would load its chunk); the
-                // snapshot's viewerLocale — the login-time Discord locale —
-                // already won.
+                // browser locale already won above.
                 const sdkLocale = webAuth ? null : await readSdkLocale();
                 if (
                     !cancelled &&
@@ -5588,7 +5593,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 onDismiss={dismissFloatingEmote}
             />
 
-            {webAuth && <SoundControls audio={roundAudio} />}
+            {webAuth && <SoundControls audio={roundAudio} t={t} />}
 
             {restartsAtEpochMs !== null && (
                 <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />

@@ -318,6 +318,64 @@
         "themeToggleDark": "Passer en mode sombre",
         "themeToggleLight": "Passer en mode clair",
         "waitingForNextRound": "En attente de la prochaine manche…",
+        "web": {
+            "cancel": "Annuler",
+            "createRoom": "Créer un salon",
+            "error": {
+                "full": "Ce salon est plein.",
+                "generic": "Une erreur s'est produite. Veuillez réessayer.",
+                "guestLimit": "Ce salon n'accepte plus d'invités. Connecte-toi avec Discord pour rejoindre.",
+                "guestUnavailable": "Le jeu en invité n'est pas disponible pour le moment.",
+                "loginFailed": "Échec de la connexion. Veuillez réessayer.",
+                "notFound": "Ce salon n'existe pas (ou tout le monde est parti).",
+                "removed": "Tu as été retiré du salon.",
+                "unauthorized": "Ta session a expiré. Veuillez te reconnecter.",
+                "wrongPassword": "Mot de passe incorrect. Veuillez réessayer."
+            },
+            "guestNote": "Les invités peuvent rejoindre des salons avec une invitation. Connecte-toi avec Discord pour héberger les tiens et conserver tes statistiques.",
+            "guestNoteLoggedIn": "Tu joues en invité — parcours un salon public ci-dessous ou rejoins avec un code d'invitation. Connecte-toi avec Discord pour héberger les tiens et conserver tes statistiques.",
+            "inviteCodePlaceholder": "Code ou lien d'invitation",
+            "join": "Rejoindre",
+            "joinAsGuest": "Rejoindre en invité",
+            "loading": "Chargement...",
+            "lobby": {
+                "empty": "Aucun salon public pour le moment — créez-en un ci-dessus !",
+                "roomName": "Salon de {{owner}}",
+                "title": "Salons publics"
+            },
+            "loggedInAs": "Connecté en tant que",
+            "loginDiscord": "Se connecter avec Discord",
+            "logout": "Se déconnecter",
+            "nicknameLabel": "Pseudo d'invité",
+            "nicknamePlaceholder": "Choisis un pseudo",
+            "or": "ou",
+            "passwordLabel": "Mot de passe du salon",
+            "passwordOptionalLabel": "Mot de passe du salon (facultatif)",
+            "passwordOptionalPlaceholder": "Mot de passe (facultatif)",
+            "passwordPlaceholder": "Mot de passe",
+            "passwordRequired": "Ce salon nécessite un mot de passe.",
+            "playAsGuest": "Jouer en invité",
+            "playingAsGuest": "En invité",
+            "room": {
+                "away": "{{username}} (absent)",
+                "copied": "Copié !",
+                "copyInvite": "Copier le lien d'invitation",
+                "label": "Salon",
+                "leave": "Quitter"
+            },
+            "sound": {
+                "enable": "Activer le son",
+                "mute": "Couper le son",
+                "unmute": "Activer le son",
+                "volume": "Volume"
+            },
+            "tagline": "Le jeu où l'on devine les chansons K-pop",
+            "visibilityLabel": "Visibilité du salon",
+            "visibilityPrivate": "Privé",
+            "visibilityPrivateHint": "Seules les personnes disposant du lien d'invitation peuvent rejoindre.",
+            "visibilityPublic": "Public",
+            "visibilityPublicHint": "Tout le monde peut trouver ce salon dans la liste des salons."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

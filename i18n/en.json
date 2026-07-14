@@ -318,6 +318,64 @@
         "themeToggleDark": "Switch to dark mode",
         "themeToggleLight": "Switch to light mode",
         "waitingForNextRound": "Waiting for the next round...",
+        "web": {
+            "cancel": "Cancel",
+            "createRoom": "Create a room",
+            "error": {
+                "full": "That room is full.",
+                "generic": "Something went wrong. Please try again.",
+                "guestLimit": "This room isn't accepting more guests. Log in with Discord to join.",
+                "guestUnavailable": "Guest play is unavailable right now.",
+                "loginFailed": "Login failed. Please try again.",
+                "notFound": "That room doesn't exist (or everyone left).",
+                "removed": "You were removed from the room.",
+                "unauthorized": "Your login expired. Please log in again.",
+                "wrongPassword": "Wrong password. Please try again."
+            },
+            "guestNote": "Guests can join rooms with an invite. Log in with Discord to host your own and keep your stats.",
+            "guestNoteLoggedIn": "You're playing as a guest — browse a public room below or join with an invite code. Log in with Discord to host your own and keep your stats.",
+            "inviteCodePlaceholder": "Invite code or link",
+            "join": "Join",
+            "joinAsGuest": "Join as guest",
+            "loading": "Loading...",
+            "lobby": {
+                "empty": "No public rooms right now — create one above!",
+                "roomName": "{{owner}}'s room",
+                "title": "Public rooms"
+            },
+            "loggedInAs": "Logged in as",
+            "loginDiscord": "Log in with Discord",
+            "logout": "Log out",
+            "nicknameLabel": "Guest nickname",
+            "nicknamePlaceholder": "Pick a nickname",
+            "or": "or",
+            "passwordLabel": "Room password",
+            "passwordOptionalLabel": "Room password (optional)",
+            "passwordOptionalPlaceholder": "Password (optional)",
+            "passwordPlaceholder": "Password",
+            "passwordRequired": "This room requires a password.",
+            "playAsGuest": "Play as guest",
+            "playingAsGuest": "Playing as guest",
+            "room": {
+                "away": "{{username}} (away)",
+                "copied": "Copied!",
+                "copyInvite": "Copy invite link",
+                "label": "Room",
+                "leave": "Leave"
+            },
+            "sound": {
+                "enable": "Enable sound",
+                "mute": "Mute",
+                "unmute": "Unmute",
+                "volume": "Volume"
+            },
+            "tagline": "The K-pop music guessing game",
+            "visibilityLabel": "Room visibility",
+            "visibilityPrivate": "Private",
+            "visibilityPrivateHint": "Only people with the invite link can join.",
+            "visibilityPublic": "Public",
+            "visibilityPublicHint": "Anyone can find this room in the lobby list."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

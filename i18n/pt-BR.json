@@ -318,6 +318,64 @@
         "themeToggleDark": "Alternar para o modo escuro",
         "themeToggleLight": "Alternar para o modo claro",
         "waitingForNextRound": "Aguardando a próxima rodada…",
+        "web": {
+            "cancel": "Cancelar",
+            "createRoom": "Criar uma sala",
+            "error": {
+                "full": "Essa sala está cheia.",
+                "generic": "Algo deu errado. Tente novamente.",
+                "guestLimit": "Esta sala não está aceitando mais convidados. Entre com o Discord para participar.",
+                "guestUnavailable": "O jogo como convidado não está disponível no momento.",
+                "loginFailed": "Falha ao entrar. Tente novamente.",
+                "notFound": "Essa sala não existe (ou todos saíram).",
+                "removed": "Você foi removido da sala.",
+                "unauthorized": "Seu login expirou. Entre novamente.",
+                "wrongPassword": "Senha incorreta. Tente novamente."
+            },
+            "guestNote": "Convidados podem entrar em salas com um convite. Entre com o Discord para criar as suas e manter suas estatísticas.",
+            "guestNoteLoggedIn": "Você está jogando como convidado — explore uma sala pública abaixo ou entre com um código de convite. Entre com o Discord para criar as suas e manter suas estatísticas.",
+            "inviteCodePlaceholder": "Código ou link de convite",
+            "join": "Entrar",
+            "joinAsGuest": "Entrar como convidado",
+            "loading": "Carregando...",
+            "lobby": {
+                "empty": "Nenhuma sala pública no momento — crie uma acima!",
+                "roomName": "Sala de {{owner}}",
+                "title": "Salas públicas"
+            },
+            "loggedInAs": "Conectado como",
+            "loginDiscord": "Entrar com o Discord",
+            "logout": "Sair",
+            "nicknameLabel": "Apelido de convidado",
+            "nicknamePlaceholder": "Escolha um apelido",
+            "or": "ou",
+            "passwordLabel": "Senha da sala",
+            "passwordOptionalLabel": "Senha da sala (opcional)",
+            "passwordOptionalPlaceholder": "Senha (opcional)",
+            "passwordPlaceholder": "Senha",
+            "passwordRequired": "Esta sala exige uma senha.",
+            "playAsGuest": "Jogar como convidado",
+            "playingAsGuest": "Jogando como convidado",
+            "room": {
+                "away": "{{username}} (ausente)",
+                "copied": "Copiado!",
+                "copyInvite": "Copiar link de convite",
+                "label": "Sala",
+                "leave": "Sair"
+            },
+            "sound": {
+                "enable": "Ativar som",
+                "mute": "Silenciar",
+                "unmute": "Ativar som",
+                "volume": "Volume"
+            },
+            "tagline": "O jogo de adivinhar músicas de K-pop",
+            "visibilityLabel": "Visibilidade da sala",
+            "visibilityPrivate": "Privada",
+            "visibilityPrivateHint": "Apenas quem tem o link de convite pode entrar.",
+            "visibilityPublic": "Pública",
+            "visibilityPublicHint": "Qualquer pessoa pode encontrar esta sala na lista de salas."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

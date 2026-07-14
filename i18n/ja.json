@@ -318,6 +318,64 @@
         "themeToggleDark": "ダークモードに切り替え",
         "themeToggleLight": "ライトモードに切り替え",
         "waitingForNextRound": "次のラウンドを待機中…",
+        "web": {
+            "cancel": "キャンセル",
+            "createRoom": "ルームを作成",
+            "error": {
+                "full": "そのルームは満員です。",
+                "generic": "問題が発生しました。もう一度お試しください。",
+                "guestLimit": "このルームはこれ以上ゲストを受け入れていません。参加するにはDiscordでログインしてください。",
+                "guestUnavailable": "現在、ゲストプレイは利用できません。",
+                "loginFailed": "ログインに失敗しました。もう一度お試しください。",
+                "notFound": "そのルームは存在しません（または全員退出しました）。",
+                "removed": "ルームから退出させられました。",
+                "unauthorized": "ログインの有効期限が切れました。もう一度ログインしてください。",
+                "wrongPassword": "パスワードが違います。もう一度お試しください。"
+            },
+            "guestNote": "ゲストは招待でルームに参加できます。自分のルームを作成して統計を保存するには、Discordでログインしてください。",
+            "guestNoteLoggedIn": "ゲストとしてプレイ中です — 下の公開ルームを見るか、招待コードで参加してください。自分のルームを作成して統計を保存するには、Discordでログインしてください。",
+            "inviteCodePlaceholder": "招待コードまたはリンク",
+            "join": "参加",
+            "joinAsGuest": "ゲストとして参加",
+            "loading": "読み込み中...",
+            "lobby": {
+                "empty": "現在、公開ルームはありません — 上で作成しましょう！",
+                "roomName": "{{owner}}のルーム",
+                "title": "公開ルーム"
+            },
+            "loggedInAs": "ログイン中",
+            "loginDiscord": "Discordでログイン",
+            "logout": "ログアウト",
+            "nicknameLabel": "ゲストのニックネーム",
+            "nicknamePlaceholder": "ニックネームを入力",
+            "or": "または",
+            "passwordLabel": "ルームのパスワード",
+            "passwordOptionalLabel": "ルームのパスワード（任意）",
+            "passwordOptionalPlaceholder": "パスワード（任意）",
+            "passwordPlaceholder": "パスワード",
+            "passwordRequired": "このルームにはパスワードが必要です。",
+            "playAsGuest": "ゲストとしてプレイ",
+            "playingAsGuest": "ゲストとしてプレイ中",
+            "room": {
+                "away": "{{username}}（離席中）",
+                "copied": "コピーしました！",
+                "copyInvite": "招待リンクをコピー",
+                "label": "ルーム",
+                "leave": "退出"
+            },
+            "sound": {
+                "enable": "サウンドを有効にする",
+                "mute": "ミュート",
+                "unmute": "ミュート解除",
+                "volume": "音量"
+            },
+            "tagline": "K-POP音楽当てゲーム",
+            "visibilityLabel": "ルームの公開設定",
+            "visibilityPrivate": "非公開",
+            "visibilityPrivateHint": "招待リンクを持つ人だけが参加できます。",
+            "visibilityPublic": "公開",
+            "visibilityPublicHint": "誰でもロビー一覧でこのルームを見つけられます。"
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {
