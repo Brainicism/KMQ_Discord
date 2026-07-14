@@ -1,4 +1,6 @@
 import {
+    WEB_ROOM_CODE_ALPHABET,
+    WEB_ROOM_CODE_LENGTH,
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
     WEB_ROOM_MAX_GUESTS,
@@ -394,6 +396,27 @@ describe("web room manager", () => {
 
             // ...but a Discord (non-guest) user can still take the free slot.
             assert.ok("room" in manager.joinRoom(code, user(99, false)));
+        });
+    });
+
+    describe("invite codes", () => {
+        it("draws codes only from the look-alike-free alphabet", () => {
+            const allowed = new RegExp(
+                `^[${WEB_ROOM_CODE_ALPHABET}]{${WEB_ROOM_CODE_LENGTH}}$`,
+            );
+
+            const seen = new Set<string>();
+            for (let i = 0; i < 200; i++) {
+                const created = manager.createRoom(user(i));
+                assert.ok("room" in created);
+                const { code } = created.room;
+
+                assert.match(code, allowed);
+                // No 0/O or 1/I look-alikes ever appear.
+                assert.doesNotMatch(code, /[0O1I]/);
+                assert.strictEqual(seen.has(code), false);
+                seen.add(code);
+            }
         });
     });
 });

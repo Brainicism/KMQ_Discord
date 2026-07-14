@@ -1,4 +1,6 @@
 import {
+    WEB_ROOM_CODE_ALPHABET,
+    WEB_ROOM_CODE_LENGTH,
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
     WEB_ROOM_MAX_GUESTS,
@@ -198,7 +200,7 @@ export default class WebRoomManager {
 
         const { hash, salt } = WebRoomManager.hashPassword(options.password);
         const room: WebRoom = {
-            code: crypto.randomBytes(9).toString("base64url"),
+            code: this.generateRoomCode(),
             roomID,
             ownerID: user.id,
             createdAt: this.now(),
@@ -463,6 +465,27 @@ export default class WebRoomManager {
             connections: 0,
             disconnectedAt: this.now(),
         };
+    }
+
+    /**
+     * Generates an unguessable, human-readable invite code drawn from the
+     * look-alike-free alphabet (see WEB_ROOM_CODE_ALPHABET), retrying on the
+     * astronomically unlikely collision with a live room.
+     * @returns a fresh room code not currently in use
+     */
+    private generateRoomCode(): string {
+        for (;;) {
+            let code = "";
+            for (let i = 0; i < WEB_ROOM_CODE_LENGTH; i++) {
+                code += WEB_ROOM_CODE_ALPHABET.charAt(
+                    crypto.randomInt(WEB_ROOM_CODE_ALPHABET.length),
+                );
+            }
+
+            if (!this.roomsByCode.has(code)) {
+                return code;
+            }
+        }
     }
 
     private closeRoom(room: WebRoom, lastMemberID: string): void {
