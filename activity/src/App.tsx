@@ -5761,7 +5761,10 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
 
             {webAuth && <SoundControls audio={roundAudio} t={t} />}
 
-            {webAuth && authState && (
+            {/* Player chat — web rooms and the embedded Activity alike. (In
+                Discord the channel has its own text chat, but this keeps the
+                conversation next to the game without tabbing away.) */}
+            {authState && (
                 <ChatPanel
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}

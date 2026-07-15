@@ -1068,17 +1068,30 @@ function ensureWorkerHandlerRegistered(): void {
                         });
                     };
 
-                    // Chat is a web-room feature, gated on room membership
-                    // rather than an active game, so players can talk in the
-                    // lobby between games too. Embedded Activity guilds never
-                    // register web-room members, so this naturally no-ops there.
-                    const member = getWebRoomMembers(chatArgs.guildID).find(
+                    // Authorization is handled at the HTTP edge
+                    // (requireAuthedInstance verifies the sender is a
+                    // participant of this instance/room), so here we only
+                    // resolve the display identity. The web-room roster carries
+                    // guest names/avatars; embedded Activity users (no web room)
+                    // resolve from the Discord user cache instead. This makes
+                    // chat work in both surfaces, and in the lobby between games
+                    // (no active session required).
+                    const webMember = getWebRoomMembers(chatArgs.guildID).find(
                         (m) => m.id === chatArgs.userID,
                     );
 
-                    if (!member) {
-                        reply({ ok: false, reason: "not_in_vc" });
-                        return;
+                    let username: string;
+                    let avatarUrl: string | null;
+                    if (webMember) {
+                        username = webMember.username;
+                        avatarUrl = webMember.avatarUrl;
+                    } else {
+                        const cachedUser = State.client.users.get(
+                            chatArgs.userID,
+                        );
+
+                        username = cachedUser?.username || chatArgs.userID;
+                        avatarUrl = cachedUser?.avatarURL || null;
                     }
 
                     const text = chatArgs.text.trim();
@@ -1106,8 +1119,8 @@ function ensureWorkerHandlerRegistered(): void {
                         type: "chat",
                         id: `${now}-${chatArgs.userID}`,
                         userID: chatArgs.userID,
-                        username: member.username,
-                        avatarUrl: member.avatarUrl,
+                        username,
+                        avatarUrl,
                         text: maskProfanity(text),
                         ts: now,
                     });
