@@ -475,6 +475,11 @@ export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"
 // Per-user cooldown between accepted emotes, to curb spam (ms).
 export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
 
+// Web room chat: cap message length and rate-limit per user to curb spam and
+// oversized broadcast payloads.
+export const ACTIVITY_CHAT_MAX_LENGTH = 300;
+export const ACTIVITY_CHAT_COOLDOWN_MS = 750;
+
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";
 export const DISCORD_OAUTH_TOKEN_URL = `${DISCORD_API_BASE}/oauth2/token`;

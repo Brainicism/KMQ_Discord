@@ -320,6 +320,13 @@
         "waitingForNextRound": "En attente de la prochaine manche…",
         "web": {
             "cancel": "Annuler",
+            "chat": {
+                "collapse": "Réduire le chat",
+                "empty": "Aucun message pour l'instant. Dis bonjour !",
+                "placeholder": "Écris un message…",
+                "send": "Envoyer",
+                "title": "Chat"
+            },
             "createRoom": "Créer un salon",
             "error": {
                 "full": "Ce salon est plein.",

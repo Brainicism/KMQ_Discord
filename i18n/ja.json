@@ -320,6 +320,13 @@
         "waitingForNextRound": "次のラウンドを待機中…",
         "web": {
             "cancel": "キャンセル",
+            "chat": {
+                "collapse": "チャットを閉じる",
+                "empty": "まだメッセージがありません。挨拶してみましょう!",
+                "placeholder": "メッセージを入力…",
+                "send": "送信",
+                "title": "チャット"
+            },
             "createRoom": "ルームを作成",
             "error": {
                 "full": "そのルームは満員です。",

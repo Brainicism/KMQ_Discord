@@ -320,6 +320,13 @@
         "waitingForNextRound": "Waiting for the next round...",
         "web": {
             "cancel": "Cancel",
+            "chat": {
+                "collapse": "Collapse chat",
+                "empty": "No messages yet. Say hi!",
+                "placeholder": "Type a message…",
+                "send": "Send",
+                "title": "Chat"
+            },
             "createRoom": "Create a room",
             "error": {
                 "full": "That room is full.",

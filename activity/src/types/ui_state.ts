@@ -5,6 +5,7 @@ import type ActivityRoundMeta from "./activity_round_meta";
 import type ActivityRoundReveal from "./activity_round_reveal";
 import type ActivityScoreboardSnapshot from "./activity_scoreboard_snapshot";
 import type ActivitySessionMeta from "./activity_session_meta";
+import type ChatMessage from "./chat_message";
 import type FloatingEmote from "./floating_emote";
 import type HintState from "./hint_state";
 import type LevelUp from "./level_up";
@@ -41,6 +42,9 @@ export default interface UiState {
     roundHistory: ActivityRoundReveal[];
     /** In-flight floating emotes, removed on a timer once their animation ends. */
     floatingEmotes: FloatingEmote[];
+    /** Web rooms only: recent chat messages, oldest-first, capped to a rolling
+     *  buffer. Ephemeral — reset on nothing, but never backfilled on join. */
+    chatMessages: ChatMessage[];
     /** End-of-session recap, shown on the game-over screen. Null until received. */
     recap: SessionRecap | null;
     /** Per-player level-ups from the just-ended session, shown as a game-over

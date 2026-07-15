@@ -320,6 +320,13 @@
         "waitingForNextRound": "Wachten op volgende ronde…",
         "web": {
             "cancel": "Annuleren",
+            "chat": {
+                "collapse": "Chat inklappen",
+                "empty": "Nog geen berichten. Zeg hallo!",
+                "placeholder": "Typ een bericht…",
+                "send": "Versturen",
+                "title": "Chat"
+            },
             "createRoom": "Een kamer maken",
             "error": {
                 "full": "Die kamer is vol.",

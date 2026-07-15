@@ -320,6 +320,13 @@
         "waitingForNextRound": "Menunggu ronde berikutnya…",
         "web": {
             "cancel": "Batal",
+            "chat": {
+                "collapse": "Ciutkan obrolan",
+                "empty": "Belum ada pesan. Sapa dulu!",
+                "placeholder": "Ketik pesan…",
+                "send": "Kirim",
+                "title": "Obrolan"
+            },
             "createRoom": "Buat ruang",
             "error": {
                 "full": "Ruang itu penuh.",

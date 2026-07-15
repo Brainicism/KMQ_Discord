@@ -320,6 +320,13 @@
         "waitingForNextRound": "等待下一回合…",
         "web": {
             "cancel": "取消",
+            "chat": {
+                "collapse": "收起聊天",
+                "empty": "还没有消息。打个招呼吧!",
+                "placeholder": "输入消息…",
+                "send": "发送",
+                "title": "聊天"
+            },
             "createRoom": "创建房间",
             "error": {
                 "full": "该房间已满。",

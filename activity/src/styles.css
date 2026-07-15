@@ -3972,6 +3972,183 @@ fieldset.options-override:disabled .options-group {
     accent-color: var(--red-primary);
 }
 
+/* Web room chat: collapsible floating panel, bottom-left above the sound
+   widget. Left corner is shared with sound controls (bottom:12), so the chat
+   sits just above them. */
+.kmq-chat {
+    position: fixed;
+    left: 12px;
+    bottom: 64px;
+    z-index: 60;
+    max-width: calc(100vw - 24px);
+}
+
+.kmq-chat-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+.kmq-chat-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.kmq-chat-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(320px, calc(100vw - 24px));
+    height: min(60vh, 380px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+}
+
+.kmq-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.kmq-chat-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.kmq-chat-collapse {
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+}
+
+.kmq-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+}
+
+.kmq-chat-empty {
+    margin: auto;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.kmq-chat-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.kmq-chat-avatar {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.kmq-chat-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.kmq-chat-bubble {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.kmq-chat-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.kmq-chat-message[data-self="true"] .kmq-chat-name {
+    color: var(--red-primary);
+}
+
+.kmq-chat-text {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.kmq-chat-input-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.kmq-chat-input {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+.kmq-chat-input:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 1px;
+}
+
+.kmq-chat-send {
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kmq-chat-send:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
 /* Impending-restart warning (both platforms): fixed top-center so it stays
    visible through lobby, game, and open overlays. */
 .restart-banner {

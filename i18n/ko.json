@@ -320,6 +320,13 @@
         "waitingForNextRound": "다음 라운드를 기다리는 중…",
         "web": {
             "cancel": "취소",
+            "chat": {
+                "collapse": "채팅 접기",
+                "empty": "아직 메시지가 없습니다. 인사해 보세요!",
+                "placeholder": "메시지 입력…",
+                "send": "보내기",
+                "title": "채팅"
+            },
             "createRoom": "방 만들기",
             "error": {
                 "full": "그 방은 가득 찼습니다.",

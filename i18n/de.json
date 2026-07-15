@@ -320,6 +320,13 @@
         "waitingForNextRound": "Warten auf die nächste Runde…",
         "web": {
             "cancel": "Abbrechen",
+            "chat": {
+                "collapse": "Chat einklappen",
+                "empty": "Noch keine Nachrichten. Sag Hallo!",
+                "placeholder": "Nachricht schreiben…",
+                "send": "Senden",
+                "title": "Chat"
+            },
             "createRoom": "Raum erstellen",
             "error": {
                 "full": "Dieser Raum ist voll.",

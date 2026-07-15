@@ -1479,6 +1479,41 @@ export default class KmqWebServer {
         );
 
         httpServer.post(
+            "/api/activity/chat",
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as { text?: string };
+                if (typeof body.text !== "string") {
+                    await reply.code(400).send({ error: "Missing text" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.chat({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        text: body.text,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity chat failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
             "/api/activity/feedback",
             limit(ACTIVITY_RATE_LIMIT_FEEDBACK),
             async (request, reply) => {

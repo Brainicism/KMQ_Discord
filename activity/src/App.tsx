@@ -29,6 +29,7 @@ import {
     openActivityStream,
     preset as apiPreset,
     searchSongs,
+    sendChat as apiSendChat,
     sendEmote as apiSendEmote,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
@@ -82,6 +83,7 @@ import type {
     ActivitySongSearchResult,
 } from "./types/activity_song_info";
 import type ActivityEvent from "./types/activity_event";
+import type ChatMessage from "./types/chat_message";
 import type FloatingEmote from "./types/floating_emote";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
@@ -186,6 +188,7 @@ const initialUi: UiState = {
     options: null,
     roundHistory: [],
     floatingEmotes: [],
+    chatMessages: [],
     recap: null,
     levelUps: [],
 };
@@ -2296,6 +2299,10 @@ function Confetti() {
 const EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
 const FLOATING_EMOTE_LIMIT = 30;
 const EMOTE_FLOAT_MS = 2600;
+// Rolling cap on retained chat messages (chat is ephemeral, so old lines just
+// scroll out of the buffer).
+const CHAT_BUFFER_LIMIT = 100;
+const CHAT_MAX_LENGTH = 300;
 const EMOTE_CLIENT_COOLDOWN_MS = 500;
 
 function EmoteBar({
@@ -2383,6 +2390,165 @@ function FloatingEmotes({
                     onDismiss={onDismiss}
                 />
             ))}
+        </div>
+    );
+}
+
+// Minimum client-side gap between sent chat messages; the server enforces its
+// own cooldown too, this just avoids obviously wasted round-trips.
+const CHAT_CLIENT_COOLDOWN_MS = 600;
+
+/**
+ * Web-room chat: a collapsible floating panel where players in the room can
+ * talk. Messages arrive over the game websocket (profanity-masked server-side)
+ * and are ephemeral — no backlog on join. Web only; the embedded Discord
+ * Activity uses the channel's own text chat instead.
+ */
+function ChatPanel({
+    accessToken,
+    instanceId,
+    messages,
+    selfID,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    messages: ChatMessage[];
+    selfID: string | null;
+    t: Translator;
+}): JSX.Element {
+    const [open, setOpen] = useState(false);
+    const [draft, setDraft] = useState("");
+    // Count messages seen while collapsed, for the unread badge.
+    const [unread, setUnread] = useState(0);
+    const lastSentRef = useRef(0);
+    const listRef = useRef<HTMLDivElement | null>(null);
+    const seenCountRef = useRef(messages.length);
+
+    // Track unread while collapsed; clear on open. Pin the scroll to the newest
+    // message whenever the list grows and the panel is open.
+    useEffect(() => {
+        const delta = messages.length - seenCountRef.current;
+        seenCountRef.current = messages.length;
+        if (delta <= 0) return;
+
+        if (open) {
+            const el = listRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        } else {
+            setUnread((n) => Math.min(99, n + delta));
+        }
+    }, [messages.length, open]);
+
+    useEffect(() => {
+        if (!open) return;
+        setUnread(0);
+        const el = listRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+    }, [open]);
+
+    const send = (): void => {
+        const text = draft.trim();
+        if (!text) return;
+        const now = Date.now();
+        if (now - lastSentRef.current < CHAT_CLIENT_COOLDOWN_MS) return;
+        lastSentRef.current = now;
+        setDraft("");
+        // Fire-and-forget: the broadcast echoes our own message back, so the
+        // list is driven entirely by inbound events (no optimistic append).
+        void apiSendChat(accessToken, instanceId, text);
+    };
+
+    return (
+        <div className="kmq-chat" data-open={open}>
+            {open ? (
+                <div className="kmq-chat-panel">
+                    <div className="kmq-chat-header">
+                        <span className="kmq-chat-title">
+                            💬 {t("web.chat.title")}
+                        </span>
+                        <button
+                            type="button"
+                            className="kmq-chat-collapse"
+                            onClick={() => setOpen(false)}
+                            aria-label={t("web.chat.collapse")}
+                        >
+                            ▾
+                        </button>
+                    </div>
+                    <div className="kmq-chat-messages" ref={listRef}>
+                        {messages.length === 0 ? (
+                            <p className="kmq-chat-empty">
+                                {t("web.chat.empty")}
+                            </p>
+                        ) : (
+                            messages.map((msg) => (
+                                <div
+                                    key={msg.id}
+                                    className="kmq-chat-message"
+                                    data-self={msg.userID === selfID}
+                                >
+                                    {msg.avatarUrl ? (
+                                        <img
+                                            className="kmq-chat-avatar"
+                                            src={msg.avatarUrl}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <span className="kmq-chat-avatar kmq-chat-avatar-fallback">
+                                            {msg.username
+                                                .slice(0, 1)
+                                                .toUpperCase()}
+                                        </span>
+                                    )}
+                                    <div className="kmq-chat-bubble">
+                                        <span className="kmq-chat-name">
+                                            {msg.username}
+                                        </span>
+                                        <span className="kmq-chat-text">
+                                            {msg.text}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <form
+                        className="kmq-chat-input-row"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            send();
+                        }}
+                    >
+                        <input
+                            className="kmq-chat-input"
+                            value={draft}
+                            maxLength={CHAT_MAX_LENGTH}
+                            onChange={(e) => setDraft(e.target.value)}
+                            placeholder={t("web.chat.placeholder")}
+                            aria-label={t("web.chat.placeholder")}
+                        />
+                        <button
+                            type="submit"
+                            className="kmq-chat-send"
+                            disabled={!draft.trim()}
+                        >
+                            {t("web.chat.send")}
+                        </button>
+                    </form>
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    className="kmq-chat-toggle"
+                    onClick={() => setOpen(true)}
+                >
+                    💬 {t("web.chat.title")}
+                    {unread > 0 && (
+                        <span className="kmq-chat-badge">{unread}</span>
+                    )}
+                </button>
+            )}
         </div>
     );
 }
@@ -5595,6 +5761,16 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
 
             {webAuth && <SoundControls audio={roundAudio} t={t} />}
 
+            {webAuth && authState && (
+                <ChatPanel
+                    accessToken={authState.accessToken}
+                    instanceId={authState.instanceId}
+                    messages={ui.chatMessages}
+                    selfID={authState.userID}
+                    t={t}
+                />
+            )}
+
             {restartsAtEpochMs !== null && (
                 <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />
             )}
@@ -5765,6 +5941,21 @@ function reduce(
                         id: `${msg.userID}-${Date.now()}-${Math.random()}`,
                         emote: msg.emote,
                         left: 8 + Math.random() * 84,
+                    },
+                ],
+            };
+        case "chat":
+            return {
+                ...prev,
+                chatMessages: [
+                    ...prev.chatMessages.slice(-(CHAT_BUFFER_LIMIT - 1)),
+                    {
+                        id: msg.id,
+                        userID: msg.userID,
+                        username: msg.username,
+                        avatarUrl: msg.avatarUrl,
+                        text: msg.text,
+                        ts: msg.ts,
                     },
                 ],
             };

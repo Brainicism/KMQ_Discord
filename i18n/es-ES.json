@@ -320,6 +320,13 @@
         "waitingForNextRound": "Esperando la próxima ronda…",
         "web": {
             "cancel": "Cancelar",
+            "chat": {
+                "collapse": "Contraer chat",
+                "empty": "Aún no hay mensajes. ¡Saluda!",
+                "placeholder": "Escribe un mensaje…",
+                "send": "Enviar",
+                "title": "Chat"
+            },
             "createRoom": "Crear una sala",
             "error": {
                 "full": "Esa sala está llena.",

@@ -1,5 +1,7 @@
 import {
     ACTIVITY_AUTOCOMPLETE_LIMIT,
+    ACTIVITY_CHAT_COOLDOWN_MS,
+    ACTIVITY_CHAT_MAX_LENGTH,
     ACTIVITY_EMOTES,
     ACTIVITY_EMOTE_COOLDOWN_MS,
     ACTIVITY_IPC_EVENT,
@@ -27,6 +29,7 @@ import { songTagEmojisToUnicode } from "../helpers/game_utils";
 import EndCommand from "../commands/game_commands/end";
 import GameOption from "../enums/game_option_name";
 import applyPlaylistFromURL from "../helpers/playlist_utils";
+import maskProfanity from "../helpers/chat_profanity_filter";
 // Not a cycle: game_session.ts no longer imports this module — the
 // attachActivityBridge call was moved to PlayCommand alongside the
 // State.gameSessions write, so this import is a one-way edge.
@@ -56,6 +59,7 @@ import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocom
 import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
+import type ActivityChatArgs from "../interfaces/activity_chat_args";
 import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
 import type ActivityEmoteArgs from "../interfaces/activity_emote_args";
 import type ActivityEvent from "../interfaces/activity_event";
@@ -341,6 +345,10 @@ function userCanActInSession(session: Session, userID: string): boolean {
 // persists across requests within the worker; bounded by natural churn (one
 // entry per recently-active emoter).
 const emoteCooldowns = new Map<string, number>();
+
+// Per-user web-chat cooldown, keyed by `${guildID}:${userID}`. Same rationale
+// as emoteCooldowns above.
+const chatCooldowns = new Map<string, number>();
 
 function pushEvent(guildID: string, event: ActivityEvent): void {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
@@ -1045,6 +1053,63 @@ function ensureWorkerHandlerRegistered(): void {
                         username: cachedUser?.username || emoteArgs.userID,
                         avatarUrl: cachedUser?.avatarURL || null,
                         emote: emoteArgs.emote,
+                    });
+
+                    reply({ ok: true });
+                    return;
+                }
+
+                case "chat": {
+                    const chatArgs = args as ActivityChatArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    // Chat is a web-room feature, gated on room membership
+                    // rather than an active game, so players can talk in the
+                    // lobby between games too. Embedded Activity guilds never
+                    // register web-room members, so this naturally no-ops there.
+                    const member = getWebRoomMembers(chatArgs.guildID).find(
+                        (m) => m.id === chatArgs.userID,
+                    );
+
+                    if (!member) {
+                        reply({ ok: false, reason: "not_in_vc" });
+                        return;
+                    }
+
+                    const text = chatArgs.text.trim();
+                    if (!text) {
+                        reply({ ok: false, reason: "empty_message" });
+                        return;
+                    }
+
+                    if (text.length > ACTIVITY_CHAT_MAX_LENGTH) {
+                        reply({ ok: false, reason: "message_too_long" });
+                        return;
+                    }
+
+                    const cooldownKey = `${chatArgs.guildID}:${chatArgs.userID}`;
+                    const now = Date.now();
+                    const last = chatCooldowns.get(cooldownKey) ?? 0;
+                    if (now - last < ACTIVITY_CHAT_COOLDOWN_MS) {
+                        reply({ ok: false, reason: "rate_limit" });
+                        return;
+                    }
+
+                    chatCooldowns.set(cooldownKey, now);
+
+                    pushEvent(chatArgs.guildID, {
+                        type: "chat",
+                        id: `${now}-${chatArgs.userID}`,
+                        userID: chatArgs.userID,
+                        username: member.username,
+                        avatarUrl: member.avatarUrl,
+                        text: maskProfanity(text),
+                        ts: now,
                     });
 
                     reply({ ok: true });
