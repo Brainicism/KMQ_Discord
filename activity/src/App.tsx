@@ -43,9 +43,14 @@ import {
     readSdkLocale,
 } from "./platform/discordPlatform";
 import { isEmbedded } from "./platform";
+import {
+    readStoredLocaleOverride,
+    storeLocaleOverride,
+} from "./localePreference";
 import { THEME_STORAGE_KEY, applyTheme, readInitialTheme } from "./theme";
 import type { Theme } from "./theme";
 import { makeTranslator } from "./i18n/translator";
+import LanguageSelect from "./web/LanguageSelect";
 import SoundControls from "./web/SoundControls";
 import useRoundAudio from "./web/useRoundAudio";
 import kmqLogoUrl from "./assets/kmq_logo.png";
@@ -4580,6 +4585,26 @@ export default function App({
     // Resolved bundle locale (KMQ LocaleType tag) — passed to song search so
     // returned names match the UI language.
     const [localeTag, setLocaleTag] = useState("en");
+    // Embedded Activity language override (persisted to localStorage). On the
+    // web the shell owns the override and passes it in via `localeOverride`, so
+    // this stays null there; in the Activity there is no shell, so App manages
+    // its own override and renders its own picker.
+    const [activityLocaleOverride, setActivityLocaleOverride] = useState<
+        string | null
+    >(() => (webAuth ? null : readStoredLocaleOverride()));
+
+    // The active override regardless of surface: the shell's on web, App's own
+    // in the Activity. Drives the initial bundle fetch and the live swap below.
+    const effectiveLocaleOverride = webAuth
+        ? (localeOverride ?? null)
+        : activityLocaleOverride;
+
+    // Persists and applies an Activity language choice; the live-swap effect
+    // re-fetches the bundle in response.
+    const changeActivityLocale = (tag: string): void => {
+        storeLocaleOverride(tag);
+        setActivityLocaleOverride(tag);
+    };
     // Mount-through-close presence for the overlays so they animate out, not
     // just in. (The `&& authState/ui.options` guards live at the render site.)
     const myProfile = usePresence(myProfileOpen, 200);
@@ -4711,23 +4736,25 @@ export default function App({
         [bundle],
     );
 
-    // Web only: when the visitor changes language via the shell picker, re-fetch
-    // the bundle and swap it live (no reload, so the game session is preserved).
-    // The connect effect already fetched the initial bundle for this override,
-    // so the ref skips the redundant fetch on mount and only fires on a change.
-    const localeOverrideRef = useRef(localeOverride);
+    // When the viewer changes language via a picker (the shell's on web, App's
+    // own in the Activity), re-fetch the bundle and swap it live — no reload, so
+    // the game session is preserved. The connect effect already fetched the
+    // initial bundle for this override, so the ref skips the redundant fetch on
+    // mount and only fires on an actual change. The picker always sets a concrete
+    // locale, so the override is never cleared back to null here.
+    const localeOverrideRef = useRef(effectiveLocaleOverride);
     useEffect(() => {
-        if (!webAuth) return undefined;
-        if (localeOverrideRef.current === localeOverride) return undefined;
-        localeOverrideRef.current = localeOverride;
+        if (localeOverrideRef.current === effectiveLocaleOverride) {
+            return undefined;
+        }
+
+        localeOverrideRef.current = effectiveLocaleOverride;
+        if (!effectiveLocaleOverride) return undefined;
 
         let cancelled = false;
         (async () => {
             try {
-                const next = await fetchI18nBundle(
-                    localeOverride || navigator.language,
-                );
-
+                const next = await fetchI18nBundle(effectiveLocaleOverride);
                 if (!cancelled) {
                     setBundle(next.strings);
                     setLocaleTag(next.locale);
@@ -4740,7 +4767,7 @@ export default function App({
         return () => {
             cancelled = true;
         };
-    }, [localeOverride, webAuth]);
+    }, [effectiveLocaleOverride]);
 
     useEffect(() => {
         let cancelled = false;
@@ -4778,17 +4805,18 @@ export default function App({
                 const snapshot = await fetchSnapshot(accessToken, instanceId);
 
                 if (cancelled) return;
-                // On the web the visitor's language is the source of truth —
-                // their explicit picker choice (localeOverride) first, then the
-                // browser's own preference. The web shell localizes from the
-                // same source, keeping the game and the surrounding shell in one
-                // language. Embedded Activity has no webAuth and keeps using the
-                // account/SDK locale below.
-                const webLocale = webAuth
-                    ? localeOverride || navigator.language
-                    : null;
+                // An explicit language override always wins. On the web the
+                // shell owns it (and localizes itself from the same source,
+                // keeping game + shell in one language); in the Activity it's
+                // App's own persisted choice. Absent an override, the web falls
+                // back to the browser language and the Activity to the account
+                // locale (then the SDK locale below).
+                const baseLocale = webAuth
+                    ? navigator.language
+                    : snapshot.viewerLocale;
+
                 const initialBundle = await fetchI18nBundle(
-                    webLocale || snapshot.viewerLocale || "en",
+                    effectiveLocaleOverride || baseLocale || "en",
                 );
 
                 if (cancelled) return;
@@ -4812,10 +4840,14 @@ export default function App({
 
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
-                // matching bundle and swap if it's different. On the web
-                // there's no SDK (and calling in would load its chunk); the
-                // browser locale already won above.
-                const sdkLocale = webAuth ? null : await readSdkLocale();
+                // matching bundle and swap if it's different. Skipped when the
+                // viewer set an explicit override (their choice wins) and on the
+                // web (no SDK; the browser locale/override already won above).
+                const sdkLocale =
+                    webAuth || effectiveLocaleOverride
+                        ? null
+                        : await readSdkLocale();
+
                 if (
                     !cancelled &&
                     sdkLocale &&
@@ -5636,6 +5668,17 @@ export default function App({
             />
 
             {webAuth && <SoundControls audio={roundAudio} t={t} />}
+
+            {/* Embedded Activity language picker. On the web the shell/room bar
+                own the picker instead, so this only renders inside Discord. */}
+            {!webAuth && authState && (
+                <LanguageSelect
+                    value={localeTag}
+                    onChange={changeActivityLocale}
+                    t={t}
+                    className="kmq-activity-lang"
+                />
+            )}
 
             {restartsAtEpochMs !== null && (
                 <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />

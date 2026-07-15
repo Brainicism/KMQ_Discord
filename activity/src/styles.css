@@ -3972,6 +3972,16 @@ fieldset.options-override:disabled .options-group {
     justify-content: center;
 }
 
+/* Embedded Activity: float the picker in the bottom-left corner (the web-only
+   sound/room widgets that live there never render inside Discord). */
+.kmq-activity-lang {
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 99;
+    box-shadow: var(--shadow-md);
+}
+
 /* Floating sound widget (standalone website): autoplay unlock, mute, volume.
    Bottom-left, mirroring the room bar bottom-right. */
 .kmq-sound-controls {
