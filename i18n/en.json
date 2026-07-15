@@ -278,6 +278,7 @@
             "title": "Look up a song"
         },
         "sessionEndedBanner": "No active game — start one with the button above (or {{playSlash}} in this channel).",
+        "sessionEndedBannerWeb": "No active game — start one with the button above.",
         "sessionWinnerNone": "Game over — no points scored.",
         "sessionWinnerSoloMany": "🏆 {{username}} wins with {{score}} points!",
         "sessionWinnerSoloOne": "🏆 {{username}} wins with 1 point!",

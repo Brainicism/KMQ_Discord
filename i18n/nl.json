@@ -278,6 +278,7 @@
             "title": "Zoek een lied op"
         },
         "sessionEndedBanner": "Geen actief spel — start er een met de knop hierboven (of {{playSlash}} in dit kanaal).",
+        "sessionEndedBannerWeb": "Geen actief spel — start er een met de knop hierboven.",
         "sessionWinnerNone": "Spel afgelopen — geen punten gescoord.",
         "sessionWinnerSoloMany": "🏆 {{username}} wint met {{score}} punten!",
         "sessionWinnerSoloOne": "🏆 {{username}} wint met 1 punt!",

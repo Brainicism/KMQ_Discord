@@ -278,6 +278,7 @@
             "title": "查找歌曲"
         },
         "sessionEndedBanner": "没有进行中的游戏 — 使用上方按钮开始(或在此频道使用 {{playSlash}})。",
+        "sessionEndedBannerWeb": "没有进行中的游戏 — 使用上方按钮开始。",
         "sessionWinnerNone": "游戏结束 — 未得分。",
         "sessionWinnerSoloMany": "🏆 {{username}} 以 {{score}} 分获胜!",
         "sessionWinnerSoloOne": "🏆 {{username}} 以 1 分获胜!",

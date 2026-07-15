@@ -278,6 +278,7 @@
             "title": "Ein Lied suchen"
         },
         "sessionEndedBanner": "Kein aktives Spiel — starte eines mit dem Button oben (oder {{playSlash}} in diesem Kanal).",
+        "sessionEndedBannerWeb": "Kein aktives Spiel — starte eines mit dem Button oben.",
         "sessionWinnerNone": "Spiel vorbei — keine Punkte erzielt.",
         "sessionWinnerSoloMany": "🏆 {{username}} gewinnt mit {{score}} Punkten!",
         "sessionWinnerSoloOne": "🏆 {{username}} gewinnt mit 1 Punkt!",

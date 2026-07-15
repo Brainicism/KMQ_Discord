@@ -278,6 +278,7 @@
             "title": "Buscar uma música"
         },
         "sessionEndedBanner": "Nenhum jogo ativo — inicie um com o botão acima (ou {{playSlash}} neste canal).",
+        "sessionEndedBannerWeb": "Nenhum jogo ativo — inicie um com o botão acima.",
         "sessionWinnerNone": "Fim de jogo — nenhum ponto marcado.",
         "sessionWinnerSoloMany": "🏆 {{username}} vence com {{score}} pontos!",
         "sessionWinnerSoloOne": "🏆 {{username}} vence com 1 ponto!",

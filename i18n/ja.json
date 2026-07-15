@@ -278,6 +278,7 @@
             "title": "曲を検索する"
         },
         "sessionEndedBanner": "進行中のゲームがありません — 上のボタンから開始してください(またはこのチャンネルで {{playSlash}})。",
+        "sessionEndedBannerWeb": "進行中のゲームがありません — 上のボタンから開始してください。",
         "sessionWinnerNone": "ゲーム終了 — 得点なし。",
         "sessionWinnerSoloMany": "🏆 {{username}}が{{score}}点で優勝!",
         "sessionWinnerSoloOne": "🏆 {{username}}が1点で優勝!",

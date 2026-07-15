@@ -278,6 +278,7 @@
             "title": "एक गाना खोजें"
         },
         "sessionEndedBanner": "कोई सक्रिय खेल नहीं — ऊपर वाले बटन से शुरू करें (या इस चैनल में {{playSlash}} टाइप करें)।",
+        "sessionEndedBannerWeb": "कोई सक्रिय खेल नहीं — ऊपर वाले बटन से शुरू करें।",
         "sessionWinnerNone": "खेल समाप्त — कोई अंक नहीं मिले।",
         "sessionWinnerSoloMany": "🏆 {{username}} {{score}} अंकों के साथ जीते!",
         "sessionWinnerSoloOne": "🏆 {{username}} 1 अंक के साथ जीते!",
