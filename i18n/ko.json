@@ -337,6 +337,7 @@
             "inviteCodePlaceholder": "초대 코드 또는 링크",
             "join": "참여",
             "joinAsGuest": "게스트로 참여",
+            "language": "언어",
             "loading": "불러오는 중...",
             "lobby": {
                 "empty": "지금은 공개 방이 없습니다 — 위에서 하나 만들어 보세요!",

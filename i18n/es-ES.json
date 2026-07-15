@@ -337,6 +337,7 @@
             "inviteCodePlaceholder": "Código o enlace de invitación",
             "join": "Unirse",
             "joinAsGuest": "Unirse como invitado",
+            "language": "Idioma",
             "loading": "Cargando...",
             "lobby": {
                 "empty": "No hay salas públicas ahora mismo, ¡crea una arriba!",

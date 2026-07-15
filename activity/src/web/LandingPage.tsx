@@ -4,6 +4,7 @@ import {
     completeLoginFromUrl,
     createRoom,
     fetchRoom,
+    getStoredLocaleOverride,
     getStoredSession,
     guestLogin,
     joinRoom,
@@ -13,11 +14,13 @@ import {
     readLocale,
     roomCodeFromLocation,
     roomPath,
+    setStoredLocaleOverride,
     validateSession,
 } from "../platform/webPlatform";
 import { fetchI18nBundle } from "../api";
 import { makeTranslator } from "../i18n/translator";
 import App from "../App";
+import LanguageSelect from "./LanguageSelect";
 import RoomBar from "./RoomBar";
 import kmqLogoUrl from "../assets/kmq_logo.png";
 import type { Translator } from "../i18n/translator";
@@ -148,12 +151,25 @@ export default function LandingPage(): JSX.Element {
     // Server-resolved i18n bundle → translator. Null until loaded; the shell
     // renders a bare logo screen in the meantime.
     const [translator, setTranslator] = useState<Translator | null>(null);
+    // Explicit language choice (null = follow the browser). Passed to <App> so
+    // the game re-fetches its bundle to match, and used to reload the shell's
+    // own translator below.
+    const [localeOverride, setLocaleOverride] = useState<string | null>(
+        getStoredLocaleOverride(),
+    );
+
+    // The locale the server actually resolved (a picked tag can fall back to
+    // English), so the picker reflects what's really rendering.
+    const [resolvedLocale, setResolvedLocale] = useState("en");
 
     useEffect(() => {
         let cancelled = false;
+        // readLocale() folds in the override cookie; depending on localeOverride
+        // re-runs this whenever the picker changes the language.
         fetchI18nBundle(readLocale() ?? "en")
             .then((bundle) => {
                 if (!cancelled) {
+                    setResolvedLocale(bundle.locale);
                     setTranslator(() => makeTranslator(bundle.strings));
                 }
             })
@@ -166,7 +182,15 @@ export default function LandingPage(): JSX.Element {
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [localeOverride]);
+
+    // Persist the picked language and re-render everything in it. Writing the
+    // cookie means readLocale() picks it up on the next bundle fetch (shell)
+    // and inside <App> on its own re-fetch.
+    const changeLocale = (tag: string): void => {
+        setStoredLocaleOverride(tag);
+        setLocaleOverride(tag);
+    };
 
     useEffect(() => {
         let cancelled = false;
@@ -402,6 +426,7 @@ export default function LandingPage(): JSX.Element {
                         userID: state.session.user.id,
                         guest: state.session.user.guest === true,
                     }}
+                    localeOverride={localeOverride}
                 />
                 <RoomBar
                     session={state.session}
@@ -411,6 +436,8 @@ export default function LandingPage(): JSX.Element {
                         exitRoom(state.session, null);
                     }}
                     onEvicted={() => exitRoom(state.session, "removed")}
+                    currentLocale={resolvedLocale}
+                    onChangeLocale={changeLocale}
                     t={t}
                 />
             </>
@@ -419,6 +446,12 @@ export default function LandingPage(): JSX.Element {
 
     return (
         <div className="kmq-web-landing">
+            <LanguageSelect
+                value={resolvedLocale}
+                onChange={changeLocale}
+                t={t}
+                className="kmq-web-landing-lang"
+            />
             <img className="kmq-web-landing-logo" src={kmqLogoUrl} alt="KMQ" />
             <h1 className="kmq-web-landing-title">KMQ</h1>
             <p className="kmq-web-landing-tagline">{t("web.tagline")}</p>

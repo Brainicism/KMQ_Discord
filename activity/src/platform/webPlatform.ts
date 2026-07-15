@@ -9,6 +9,31 @@ import type { PlatformUser } from "./index";
  */
 
 const WEB_SESSION_STORAGE_KEY = "kmq:webSession";
+// A visitor's explicit language choice, persisted so it sticks across visits
+// and survives a page reload (it also outlives localStorage-clears on logout,
+// which is intentional — language is a device preference, not account state).
+const LOCALE_COOKIE = "kmq_locale";
+const LOCALE_COOKIE_MAX_AGE_S = 60 * 60 * 24 * 365; // 1 year
+
+/**
+ * The languages a visitor can pick from, in display order. Tags mirror the
+ * server's LocaleType; labels are endonyms (a language name is conventionally
+ * shown in its own language, so these are intentionally not translated).
+ */
+export const WEB_LOCALES: ReadonlyArray<{ tag: string; label: string }> = [
+    { tag: "en", label: "English" },
+    { tag: "es-ES", label: "Español" },
+    { tag: "fr", label: "Français" },
+    { tag: "de", label: "Deutsch" },
+    { tag: "nl", label: "Nederlands" },
+    { tag: "pt-BR", label: "Português" },
+    { tag: "ru", label: "Русский" },
+    { tag: "id", label: "Bahasa Indonesia" },
+    { tag: "hi", label: "हिन्दी" },
+    { tag: "ko", label: "한국어" },
+    { tag: "ja", label: "日本語" },
+    { tag: "zh-CN", label: "中文" },
+];
 
 export interface WebSession {
     token: string;
@@ -102,7 +127,7 @@ export async function guestLogin(username: string): Promise<WebSession | null> {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username,
-                locale: navigator.language || "",
+                locale: readLocale() || "",
             }),
         });
     } catch {
@@ -166,9 +191,30 @@ export async function logout(session: WebSession | null): Promise<void> {
     }
 }
 
-/** Web equivalent of the SDK's live-locale lookup. */
+/** Reads the visitor's saved language override (the `kmq_locale` cookie). */
+export function getStoredLocaleOverride(): string | null {
+    const match = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${LOCALE_COOKIE}=`));
+
+    if (!match) return null;
+    const value = decodeURIComponent(match.slice(LOCALE_COOKIE.length + 1));
+    return value || null;
+}
+
+/** Persists an explicit language choice so it survives reloads and revisits. */
+export function setStoredLocaleOverride(locale: string): void {
+    document.cookie =
+        `${LOCALE_COOKIE}=${encodeURIComponent(locale)}; ` +
+        `path=/; max-age=${LOCALE_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+}
+
+/**
+ * Web equivalent of the SDK's live-locale lookup: an explicit language override
+ * (set via the language picker) wins over the browser's own preference.
+ */
 export function readLocale(): string | null {
-    return navigator.language || null;
+    return getStoredLocaleOverride() ?? navigator.language ?? null;
 }
 
 // ---------------------------------------------------------------------------

@@ -4523,7 +4523,15 @@ function RestartBanner({
     );
 }
 
-export default function App({ webAuth }: { webAuth?: WebAuth }) {
+export default function App({
+    webAuth,
+    localeOverride,
+}: {
+    webAuth?: WebAuth;
+    /** Web only: the visitor's explicit language choice from the shell picker
+     *  (null = follow the browser). Changing it live-swaps the game's bundle. */
+    localeOverride?: string | null;
+}) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
@@ -4703,6 +4711,37 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
         [bundle],
     );
 
+    // Web only: when the visitor changes language via the shell picker, re-fetch
+    // the bundle and swap it live (no reload, so the game session is preserved).
+    // The connect effect already fetched the initial bundle for this override,
+    // so the ref skips the redundant fetch on mount and only fires on a change.
+    const localeOverrideRef = useRef(localeOverride);
+    useEffect(() => {
+        if (!webAuth) return undefined;
+        if (localeOverrideRef.current === localeOverride) return undefined;
+        localeOverrideRef.current = localeOverride;
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const next = await fetchI18nBundle(
+                    localeOverride || navigator.language,
+                );
+
+                if (!cancelled) {
+                    setBundle(next.strings);
+                    setLocaleTag(next.locale);
+                }
+            } catch (e) {
+                console.warn("locale override swap failed", e);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [localeOverride, webAuth]);
+
     useEffect(() => {
         let cancelled = false;
         // Captured per run: present on a reconnect, null on the first connect.
@@ -4739,12 +4778,15 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 const snapshot = await fetchSnapshot(accessToken, instanceId);
 
                 if (cancelled) return;
-                // On the web the browser language is the source of truth for a
-                // visitor — the web shell localizes from it too — so prefer it
-                // over the login-time account locale to keep the game and the
-                // surrounding shell in the same language. Embedded Activity has
-                // no webAuth and keeps using the account/SDK locale below.
-                const webLocale = webAuth ? navigator.language : null;
+                // On the web the visitor's language is the source of truth —
+                // their explicit picker choice (localeOverride) first, then the
+                // browser's own preference. The web shell localizes from the
+                // same source, keeping the game and the surrounding shell in one
+                // language. Embedded Activity has no webAuth and keeps using the
+                // account/SDK locale below.
+                const webLocale = webAuth
+                    ? localeOverride || navigator.language
+                    : null;
                 const initialBundle = await fetchI18nBundle(
                     webLocale || snapshot.viewerLocale || "en",
                 );

@@ -3568,6 +3568,7 @@ fieldset.options-override:disabled .options-group {
    ============================================================ */
 
 .kmq-web-landing {
+    position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -3916,6 +3917,59 @@ fieldset.options-override:disabled .options-group {
     background: var(--bg-base);
     color: var(--text-secondary);
     border: 1px solid var(--border);
+}
+
+/* Language picker: a compact pill wrapping the native <select>. Used both as a
+   corner control on the landing shell and inline in the room bar. */
+.kmq-language-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.kmq-language-select-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.kmq-language-select-input {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0 2px;
+    /* Native option lists inherit the OS palette; hint the current scheme so
+       they stay legible in dark mode. */
+    color-scheme: light dark;
+}
+
+.kmq-language-select-input:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Landing shell: float the picker in the top-right corner. */
+.kmq-web-landing-lang {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+/* Room bar: drop the picker onto its own row under the action buttons. */
+.kmq-room-bar-lang {
+    flex-basis: 100%;
+    justify-content: center;
 }
 
 /* Floating sound widget (standalone website): autoplay unlock, mute, volume.
