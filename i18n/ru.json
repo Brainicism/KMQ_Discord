@@ -278,6 +278,7 @@
             "title": "Найти песню"
         },
         "sessionEndedBanner": "Активной игры нет — запустите кнопкой сверху (или {{playSlash}} в этом канале).",
+        "sessionEndedBannerWeb": "Активной игры нет — запустите кнопкой сверху.",
         "sessionWinnerNone": "Игра окончена — очков не набрано.",
         "sessionWinnerSoloMany": "🏆 {{username}} побеждает с {{score}} очками!",
         "sessionWinnerSoloOne": "🏆 {{username}} побеждает с 1 очком!",

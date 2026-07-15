@@ -278,6 +278,7 @@
             "title": "Buscar una canción"
         },
         "sessionEndedBanner": "No hay partida activa — inicia una con el botón de arriba (o {{playSlash}} en este canal).",
+        "sessionEndedBannerWeb": "No hay partida activa — inicia una con el botón de arriba.",
         "sessionWinnerNone": "Fin de la partida — no se anotaron puntos.",
         "sessionWinnerSoloMany": "🏆 ¡{{username}} gana con {{score}} puntos!",
         "sessionWinnerSoloOne": "🏆 ¡{{username}} gana con 1 punto!",

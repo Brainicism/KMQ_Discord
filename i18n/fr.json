@@ -278,6 +278,7 @@
             "title": "Rechercher une chanson"
         },
         "sessionEndedBanner": "Aucune partie active — démarrez-en une avec le bouton ci-dessus (ou {{playSlash}} dans ce salon).",
+        "sessionEndedBannerWeb": "Aucune partie active — démarrez-en une avec le bouton ci-dessus.",
         "sessionWinnerNone": "Partie terminée — aucun point marqué.",
         "sessionWinnerSoloMany": "🏆 {{username}} gagne avec {{score}} points !",
         "sessionWinnerSoloOne": "🏆 {{username}} gagne avec 1 point !",

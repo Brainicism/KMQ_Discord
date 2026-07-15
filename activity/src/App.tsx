@@ -1324,6 +1324,7 @@ function CurrentRound({
     noActiveGame,
     levelUps,
     viewerID,
+    isWeb,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -1349,6 +1350,9 @@ function CurrentRound({
     levelUps: UiState["levelUps"];
     /** The viewer's Discord ID, to highlight their own level-up. */
     viewerID: string | null;
+    /** True on the standalone website, where there is no `/play` slash command
+     *  to point idle players at (the empty-state banner drops that clause). */
+    isWeb: boolean;
     t: Translator;
 }) {
     return (
@@ -1566,9 +1570,11 @@ function CurrentRound({
                                 </p>
                             ) : noActiveGame ? (
                                 <p className="empty">
-                                    {t("sessionEndedBanner", {
-                                        playSlash: "/play",
-                                    })}
+                                    {isWeb
+                                        ? t("sessionEndedBannerWeb")
+                                        : t("sessionEndedBanner", {
+                                              playSlash: "/play",
+                                          })}
                                 </p>
                             ) : (
                                 <p className="empty">
@@ -5314,6 +5320,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             noActiveGame={ui.sessionEnded}
                             levelUps={ui.levelUps}
                             viewerID={authState?.userID ?? null}
+                            isWeb={!!webAuth}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&

@@ -278,6 +278,7 @@
             "title": "Cari lagu"
         },
         "sessionEndedBanner": "Tidak ada permainan aktif — mulai satu dengan tombol di atas (atau {{playSlash}} di channel ini).",
+        "sessionEndedBannerWeb": "Tidak ada permainan aktif — mulai satu dengan tombol di atas.",
         "sessionWinnerNone": "Permainan selesai — tidak ada poin.",
         "sessionWinnerSoloMany": "🏆 {{username}} menang dengan {{score}} poin!",
         "sessionWinnerSoloOne": "🏆 {{username}} menang dengan 1 poin!",
