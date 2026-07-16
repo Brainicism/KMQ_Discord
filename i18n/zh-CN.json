@@ -338,6 +338,7 @@
             "inviteCodePlaceholder": "邀请码或链接",
             "join": "加入",
             "joinAsGuest": "以访客身份加入",
+            "language": "语言",
             "loading": "加载中...",
             "lobby": {
                 "empty": "目前没有公开房间 — 在上方创建一个吧！",

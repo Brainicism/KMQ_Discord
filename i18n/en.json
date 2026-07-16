@@ -338,6 +338,7 @@
             "inviteCodePlaceholder": "Invite code or link",
             "join": "Join",
             "joinAsGuest": "Join as guest",
+            "language": "Language",
             "loading": "Loading...",
             "lobby": {
                 "empty": "No public rooms right now — create one above!",

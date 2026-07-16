@@ -338,6 +338,7 @@
             "inviteCodePlaceholder": "招待コードまたはリンク",
             "join": "参加",
             "joinAsGuest": "ゲストとして参加",
+            "language": "言語",
             "loading": "読み込み中...",
             "lobby": {
                 "empty": "現在、公開ルームはありません — 上で作成しましょう！",
