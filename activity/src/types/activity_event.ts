@@ -58,6 +58,17 @@ type ActivityEvent =
           avatarUrl: string | null;
           emote: string;
       }
+    | {
+          // Web rooms only: a player's chat message, relayed to the room.
+          // Profanity-masked server-side; not persisted (no backlog on join).
+          type: "chat";
+          id: string;
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          text: string;
+          ts: number;
+      }
     | { type: "levelUp"; levelUps: LevelUp[] }
     | { type: "hintProgress"; requesters: number; threshold: number }
     | { type: "hintRevealed"; text: string }
