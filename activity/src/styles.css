@@ -4038,7 +4038,9 @@ fieldset.options-override:disabled .options-group {
 
 /* Web room chat: collapsible floating panel, bottom-left above the sound
    widget. Left corner is shared with sound controls (bottom:12), so the chat
-   sits just above them. */
+   sits just above them. Panel and toggle swap on open/close, so each plays an
+   entrance on mount; all of it is neutralised by the global
+   prefers-reduced-motion guard. */
 .kmq-chat {
     position: fixed;
     left: 12px;
@@ -4060,6 +4062,25 @@ fieldset.options-override:disabled .options-group {
     font-weight: 600;
     cursor: pointer;
     box-shadow: var(--shadow-md);
+    transition: all 0.15s;
+    /* Mounts when the panel closes (and on first render); fade + slide up like
+       the other floating controls. No fill mode, so the animation's transform
+       doesn't outrank the hover/active ones once it finishes. */
+    animation: control-enter 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.kmq-chat-toggle:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.kmq-chat-toggle:active {
+    transform: scale(0.96);
+}
+
+.kmq-chat-toggle:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
 }
 
 .kmq-chat-badge {
@@ -4074,6 +4095,9 @@ fieldset.options-override:disabled .options-group {
     color: #ffffff;
     font-size: 0.7rem;
     font-weight: 700;
+    /* Same pop the bookmark star uses; replays whenever the count re-mounts
+       from zero unread. */
+    animation: bookmark-pop 0.4s ease;
 }
 
 .kmq-chat-panel {
@@ -4086,6 +4110,21 @@ fieldset.options-override:disabled .options-group {
     background: var(--bg-elevated);
     box-shadow: var(--shadow-md);
     overflow: hidden;
+    /* Grows out of the toggle it replaces (bottom-left corner), mirroring the
+       profile modal's pop-in. */
+    transform-origin: bottom left;
+    animation: kmq-chat-panel-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes kmq-chat-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
 }
 
 .kmq-chat-header {
@@ -4110,6 +4149,17 @@ fieldset.options-override:disabled .options-group {
     line-height: 1;
     cursor: pointer;
     padding: 0 4px;
+    transition:
+        color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.kmq-chat-collapse:hover {
+    color: var(--text-primary);
+}
+
+.kmq-chat-collapse:active {
+    transform: scale(0.9);
 }
 
 .kmq-chat-messages {
@@ -4132,6 +4182,20 @@ fieldset.options-override:disabled .options-group {
     display: flex;
     align-items: flex-start;
     gap: 8px;
+    /* Messages append to the bottom of the list and carry stable keys, so only
+       the freshly-mounted row rises into place, not the whole history. */
+    animation: kmq-chat-message-in 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes kmq-chat-message-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .kmq-chat-avatar {
@@ -4190,6 +4254,11 @@ fieldset.options-override:disabled .options-group {
     background: var(--bg-base);
     color: var(--text-primary);
     font-size: 0.85rem;
+    transition: border-color 0.15s;
+}
+
+.kmq-chat-input:focus {
+    border-color: var(--red-primary);
 }
 
 .kmq-chat-input:focus-visible {
@@ -4206,6 +4275,17 @@ fieldset.options-override:disabled .options-group {
     font-size: 0.8rem;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.15s;
+}
+
+.kmq-chat-send:hover:not(:disabled) {
+    background: #d32f3e;
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
+.kmq-chat-send:active:not(:disabled) {
+    transform: scale(0.96);
 }
 
 .kmq-chat-send:disabled {
