@@ -332,7 +332,7 @@
             "error": {
                 "full": "该房间已满。",
                 "generic": "出了点问题。请重试。",
-                "guestLimit": "此房间不再接受更多访客。请使用 Discord 登录以加入。",
+                "guestForbidden": "访客目前无法创建房间。请用邀请码加入房间，或使用 Discord 登录。",
                 "guestUnavailable": "访客游玩当前不可用。",
                 "loginFailed": "登录失败。请重试。",
                 "notFound": "该房间不存在（或所有人都已离开）。",
@@ -340,8 +340,8 @@
                 "unauthorized": "你的登录已过期。请重新登录。",
                 "wrongPassword": "密码错误。请重试。"
             },
-            "guestNote": "访客可通过邀请加入房间。使用 Discord 登录即可创建自己的房间并保存统计数据。",
-            "guestNoteLoggedIn": "你正在以访客身份游玩 — 在下方浏览公开房间，或用邀请码加入。使用 Discord 登录即可创建自己的房间并保存统计数据。",
+            "guestNote": "访客可以立即创建和加入房间。使用 Discord 登录即可保存统计数据。",
+            "guestNoteLoggedIn": "你正在以访客身份游玩 — 在下方创建房间、浏览公开列表，或用邀请码加入。使用 Discord 登录即可保存统计数据。",
             "inviteCodePlaceholder": "邀请码或链接",
             "join": "加入",
             "joinAsGuest": "以访客身份加入",

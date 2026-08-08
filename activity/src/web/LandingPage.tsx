@@ -48,8 +48,8 @@ function roomErrorText(t: Translator, error: string): string {
             return t("web.error.notFound");
         case "full":
             return t("web.error.full");
-        case "guest_limit":
-            return t("web.error.guestLimit");
+        case "guest_forbidden":
+            return t("web.error.guestForbidden");
         case "wrong_password":
             return t("web.error.wrongPassword");
         case "unauthorized":
@@ -377,8 +377,8 @@ export default function LandingPage(): JSX.Element {
             setState({ phase: "loggedIn", session, error: null });
 
             // A guest arriving on an invite link goes straight into the room
-            // (or a password prompt); otherwise they land on the lobby (guests
-            // can't host, but can browse + join public rooms).
+            // (or a password prompt); otherwise they land on the lobby, where
+            // they can create a room or browse + join public ones.
             const inviteCode = roomCodeFromLocation();
             if (inviteCode) {
                 await attemptJoin(session, inviteCode);
@@ -586,74 +586,65 @@ export default function LandingPage(): JSX.Element {
                         </form>
                     ) : (
                         <>
-                            {state.session.user.guest ? (
+                            {/* Guests host too; the only thing they give up
+                                is persisted stats, which the note explains. */}
+                            {state.session.user.guest && (
                                 <p className="kmq-web-landing-note">
                                     {t("web.guestNoteLoggedIn")}
                                 </p>
-                            ) : (
-                                <div className="kmq-web-landing-create">
-                                    <div
-                                        className="kmq-web-landing-visibility"
-                                        role="group"
-                                        aria-label={t("web.visibilityLabel")}
-                                    >
-                                        <button
-                                            type="button"
-                                            className="kmq-web-landing-toggle"
-                                            data-active={
-                                                visibility === "public"
-                                            }
-                                            onClick={() =>
-                                                setVisibility("public")
-                                            }
-                                        >
-                                            {t("web.visibilityPublic")}
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="kmq-web-landing-toggle"
-                                            data-active={
-                                                visibility === "private"
-                                            }
-                                            onClick={() =>
-                                                setVisibility("private")
-                                            }
-                                        >
-                                            {t("web.visibilityPrivate")}
-                                        </button>
-                                    </div>
-                                    <p className="kmq-web-landing-hint">
-                                        {visibility === "public"
-                                            ? t("web.visibilityPublicHint")
-                                            : t("web.visibilityPrivateHint")}
-                                    </p>
-                                    <input
-                                        className="kmq-web-landing-input"
-                                        type="password"
-                                        value={createPassword}
-                                        maxLength={128}
-                                        onChange={(e) =>
-                                            setCreatePassword(e.target.value)
-                                        }
-                                        placeholder={t(
-                                            "web.passwordOptionalPlaceholder",
-                                        )}
-                                        aria-label={t(
-                                            "web.passwordOptionalLabel",
-                                        )}
-                                    />
+                            )}
+                            <div className="kmq-web-landing-create">
+                                <div
+                                    className="kmq-web-landing-visibility"
+                                    role="group"
+                                    aria-label={t("web.visibilityLabel")}
+                                >
                                     <button
                                         type="button"
-                                        className="kmq-web-landing-button"
-                                        disabled={busy}
-                                        onClick={() =>
-                                            void handleCreate(state.session)
-                                        }
+                                        className="kmq-web-landing-toggle"
+                                        data-active={visibility === "public"}
+                                        onClick={() => setVisibility("public")}
                                     >
-                                        {t("web.createRoom")}
+                                        {t("web.visibilityPublic")}
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="kmq-web-landing-toggle"
+                                        data-active={visibility === "private"}
+                                        onClick={() => setVisibility("private")}
+                                    >
+                                        {t("web.visibilityPrivate")}
                                     </button>
                                 </div>
-                            )}
+                                <p className="kmq-web-landing-hint">
+                                    {visibility === "public"
+                                        ? t("web.visibilityPublicHint")
+                                        : t("web.visibilityPrivateHint")}
+                                </p>
+                                <input
+                                    className="kmq-web-landing-input"
+                                    type="password"
+                                    value={createPassword}
+                                    maxLength={128}
+                                    onChange={(e) =>
+                                        setCreatePassword(e.target.value)
+                                    }
+                                    placeholder={t(
+                                        "web.passwordOptionalPlaceholder",
+                                    )}
+                                    aria-label={t("web.passwordOptionalLabel")}
+                                />
+                                <button
+                                    type="button"
+                                    className="kmq-web-landing-button"
+                                    disabled={busy}
+                                    onClick={() =>
+                                        void handleCreate(state.session)
+                                    }
+                                >
+                                    {t("web.createRoom")}
+                                </button>
+                            </div>
 
                             <form
                                 className="kmq-web-landing-join"

@@ -1,21 +1,32 @@
 import {
+    WEB_GUEST_ID_FLAG,
+    WEB_GUEST_ROOM_ID_FLAG,
     WEB_ROOM_CODE_ALPHABET,
     WEB_ROOM_CODE_LENGTH,
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
-    WEB_ROOM_MAX_GUESTS,
     WEB_ROOM_MAX_MEMBERS,
 } from "../../../constants";
 import { describe } from "mocha";
+import { isGuestUserID } from "../../../helpers/web_session_manager";
 import WebRoomManager from "../../../web_room_manager";
 import assert from "assert";
 import type { WebRoomMemberIdentity } from "../../../web_room_manager";
 
-const user = (n: number, isGuest = false): WebRoomMemberIdentity => ({
+const user = (n: number): WebRoomMemberIdentity => ({
     id: (100000000000000000n + BigInt(n)).toString(),
     username: `user${n}`,
     avatarUrl: null,
-    isGuest,
+});
+
+/**
+ * @param n - a seed for the guest's random bits
+ * @returns a guest identity, shaped exactly like mintGuestUserID's output
+ */
+const guest = (n: number): WebRoomMemberIdentity => ({
+    id: (WEB_GUEST_ID_FLAG | BigInt(n)).toString(),
+    username: `guest${n}`,
+    avatarUrl: null,
 });
 
 describe("web room manager", () => {
@@ -373,29 +384,115 @@ describe("web room manager", () => {
         });
     });
 
-    describe("guest cap", () => {
-        it("caps anonymous guests once a room has no non-guest members", () => {
-            // Owner is a non-guest; fill the rest with guests up to the cap.
-            const created = manager.createRoom(user(1));
+    describe("guest hosting", () => {
+        it("gives a guest-hosted room its own guild-ID space", () => {
+            const roomID = WebRoomManager.roomIDForOwner(guest(7).id);
+
+            // Still a web room (bit 62), but distinct from the owner's user
+            // ID — `bit 62 | guestID` would have been the guest ID itself.
+            assert.strictEqual(BigInt(roomID) & WEB_ROOM_ID_FLAG, 1n << 62n);
+            assert.notStrictEqual(roomID, guest(7).id);
+            assert.strictEqual(
+                BigInt(roomID) & WEB_GUEST_ROOM_ID_FLAG,
+                WEB_GUEST_ROOM_ID_FLAG,
+            );
+
+            // ...and it must never read back as a guest *user* ID.
+            assert.strictEqual(isGuestUserID(roomID), false);
+            assert.strictEqual(isGuestUserID(guest(7).id), true);
+        });
+
+        it("keeps guest room IDs disjoint from Discord-hosted room IDs", () => {
+            const guestRoomIDs = new Set<string>();
+            for (let i = 1; i <= 50; i++) {
+                guestRoomIDs.add(WebRoomManager.roomIDForOwner(guest(i).id));
+                // A Discord-derived room ID can never land in the guest room
+                // space: it leaves bits 61 and 60 clear.
+                const discordRoomID = WebRoomManager.roomIDForOwner(user(i).id);
+                assert.notStrictEqual(
+                    BigInt(discordRoomID) & WEB_GUEST_ROOM_ID_FLAG,
+                    WEB_GUEST_ROOM_ID_FLAG,
+                );
+            }
+
+            // Distinct guests get distinct rooms.
+            assert.strictEqual(guestRoomIDs.size, 50);
+        });
+
+        it("lets a guest create a room and is deterministic per guest", () => {
+            const created = manager.createRoom(guest(1), {
+                visibility: "public",
+            });
+
+            assert.ok("room" in created);
+            assert.strictEqual(created.room.ownerID, guest(1).id);
+            assert.strictEqual(
+                created.room.roomID,
+                WebRoomManager.roomIDForOwner(guest(1).id),
+            );
+
+            // Listed in the public lobby like any other room.
+            assert.deepStrictEqual(
+                manager.listPublicRooms().map((r) => r.code),
+                [created.room.code],
+            );
+
+            manager.leaveRoom(guest(1).id);
+            const again = manager.createRoom(guest(1));
+            assert.ok("room" in again);
+            assert.strictEqual(again.room.roomID, created.room.roomID);
+        });
+
+        it("fills a guest-hosted room entirely with guests", () => {
+            const created = manager.createRoom(guest(1));
             assert.ok("room" in created);
             const { code } = created.room;
 
-            for (let i = 0; i < WEB_ROOM_MAX_GUESTS; i++) {
-                assert.ok("room" in manager.joinRoom(code, user(10 + i, true)));
+            for (let i = 2; i <= WEB_ROOM_MAX_MEMBERS; i++) {
+                assert.ok("room" in manager.joinRoom(code, guest(i)));
             }
 
-            // The only non-guest (owner) leaves; ownership passes to a guest,
-            // leaving the room at the guest cap with a free member slot.
-            manager.leaveRoom(user(1).id);
-            assert.strictEqual(created.room.members.size, WEB_ROOM_MAX_GUESTS);
-
-            // A further guest is refused by the guest cap...
-            assert.deepStrictEqual(manager.joinRoom(code, user(99, true)), {
-                error: "guest_limit",
+            assert.strictEqual(created.room.members.size, WEB_ROOM_MAX_MEMBERS);
+            // Only the member cap applies — there is no separate guest cap.
+            assert.deepStrictEqual(manager.joinRoom(code, guest(99)), {
+                error: "full",
             });
+        });
 
-            // ...but a Discord (non-guest) user can still take the free slot.
-            assert.ok("room" in manager.joinRoom(code, user(99, false)));
+        it("lets guests and Discord users share a room in either direction", () => {
+            const guestHosted = manager.createRoom(guest(1));
+            assert.ok("room" in guestHosted);
+            assert.ok(
+                "room" in manager.joinRoom(guestHosted.room.code, user(2)),
+            );
+
+            const discordHosted = manager.createRoom(user(3));
+            assert.ok("room" in discordHosted);
+            for (let i = 10; i < 10 + WEB_ROOM_MAX_MEMBERS - 1; i++) {
+                assert.ok(
+                    "room" in
+                        manager.joinRoom(discordHosted.room.code, guest(i)),
+                );
+            }
+
+            assert.strictEqual(
+                discordHosted.room.members.size,
+                WEB_ROOM_MAX_MEMBERS,
+            );
+        });
+
+        it("hands a guest-hosted room over to a Discord member on leave", () => {
+            const created = manager.createRoom(guest(1));
+            assert.ok("room" in created);
+            manager.joinRoom(created.room.code, user(2));
+
+            manager.leaveRoom(guest(1).id);
+            assert.strictEqual(created.room.ownerID, user(2).id);
+            // The room ID stays the creator-derived one for its lifetime.
+            assert.strictEqual(
+                created.room.roomID,
+                WebRoomManager.roomIDForOwner(guest(1).id),
+            );
         });
     });
 

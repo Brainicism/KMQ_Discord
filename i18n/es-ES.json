@@ -332,7 +332,7 @@
             "error": {
                 "full": "Esa sala está llena.",
                 "generic": "Algo salió mal. Inténtalo de nuevo.",
-                "guestLimit": "Esta sala no admite más invitados. Inicia sesión con Discord para unirte.",
+                "guestForbidden": "Los invitados no pueden crear salas ahora mismo. Únete a una con un código de invitación o inicia sesión con Discord.",
                 "guestUnavailable": "El juego como invitado no está disponible ahora mismo.",
                 "loginFailed": "Error al iniciar sesión. Inténtalo de nuevo.",
                 "notFound": "Esa sala no existe (o todos se han ido).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Tu sesión ha caducado. Inicia sesión de nuevo.",
                 "wrongPassword": "Contraseña incorrecta. Inténtalo de nuevo."
             },
-            "guestNote": "Los invitados pueden unirse a salas con una invitación. Inicia sesión con Discord para crear las tuyas y conservar tus estadísticas.",
-            "guestNoteLoggedIn": "Estás jugando como invitado: explora una sala pública abajo o únete con un código de invitación. Inicia sesión con Discord para crear las tuyas y conservar tus estadísticas.",
+            "guestNote": "Los invitados pueden crear salas y unirse a ellas al instante. Inicia sesión con Discord para conservar tus estadísticas.",
+            "guestNoteLoggedIn": "Estás jugando como invitado: crea una sala abajo, explora la lista pública o únete con un código de invitación. Inicia sesión con Discord para conservar tus estadísticas.",
             "inviteCodePlaceholder": "Código o enlace de invitación",
             "join": "Unirse",
             "joinAsGuest": "Unirse como invitado",

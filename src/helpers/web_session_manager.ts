@@ -53,12 +53,18 @@ export function mintGuestUserID(): string {
 
 /**
  * @param userID - a user ID from any transport
- * @returns whether it's a synthetic guest ID (both flag bits set — real
- * snowflakes and room-owner IDs can't reach this range for decades)
+ * @returns whether it's a synthetic guest ID (both flag bits set and bit 60
+ * clear — real snowflakes and room-owner IDs can't reach this range for
+ * decades, and the bit-60 test excludes guest-hosted room guild IDs, which
+ * share the two flag bits; see WEB_GUEST_ROOM_ID_FLAG)
  */
 export function isGuestUserID(userID: string): boolean {
     try {
-        return (BigInt(userID) & WEB_GUEST_ID_FLAG) === WEB_GUEST_ID_FLAG;
+        const id = BigInt(userID);
+        return (
+            (id & WEB_GUEST_ID_FLAG) === WEB_GUEST_ID_FLAG &&
+            (id & (1n << 60n)) === 0n
+        );
     } catch {
         return false;
     }

@@ -2854,11 +2854,15 @@ export default class KmqWebServer {
                 const user = await requireWebUser(request, reply);
                 if (!user) return;
 
-                // Guests can join rooms but never host: free identities
-                // shouldn't own persistent per-owner state (game options,
-                // presets), and a guest ID fed to roomIDForOwner would
-                // collide with the guest ID range (bit 62 already set).
-                if (isGuestUserID(user.id)) {
+                // Guests host like anyone else (their rooms get their own
+                // guild-ID space, see WebRoomManager.roomIDForOwner), unless
+                // hosting has been shed via the feature switch — joining an
+                // invite still works in that case.
+                const isGuest = isGuestUserID(user.id);
+                if (
+                    isGuest &&
+                    !KmqConfiguration.Instance.webGuestHostingEnabled()
+                ) {
                     await reply.code(403).send({ error: "guest_forbidden" });
                     return;
                 }
@@ -2884,7 +2888,6 @@ export default class KmqWebServer {
                         id: user.id,
                         username: user.username,
                         avatarUrl: user.avatarUrl,
-                        isGuest: false,
                     },
                     { visibility, password },
                 );
@@ -2932,7 +2935,6 @@ export default class KmqWebServer {
                         id: user.id,
                         username: user.username,
                         avatarUrl: user.avatarUrl,
-                        isGuest: isGuestUserID(user.id),
                     },
                     password ?? undefined,
                 );
@@ -2943,7 +2945,6 @@ export default class KmqWebServer {
                         not_found: 404,
                         wrong_password: 403,
                         full: 409,
-                        guest_limit: 409,
                     };
 
                     await reply

@@ -115,7 +115,8 @@ export async function completeLoginFromUrl(): Promise<WebSession | null> {
 
 /**
  * Creates a guest session (no Discord account) under a self-chosen display
- * name. Guests can join rooms via invite code/link but cannot host.
+ * name. Guests host and join rooms like anyone else; what they give up is
+ * persisted stats (their synthetic ID is orphaned on logout).
  * @param username - the display name the guest picked
  * @returns the new session, or null when guest mode is unavailable
  */
@@ -253,7 +254,7 @@ export type WebRoomResult =
           error:
               | "not_found"
               | "full"
-              | "guest_limit"
+              | "guest_forbidden"
               | "wrong_password"
               | "unauthorized"
               | "unavailable";
@@ -277,23 +278,19 @@ async function roomRequest(
         return { error: "unavailable" };
     }
 
-    // A locked room answers 403 with error:"wrong_password"; a real auth
-    // failure is a bare 403/401.
+    // A locked room answers 403 with error:"wrong_password", and a guest
+    // creating a room while guest hosting is switched off answers
+    // "guest_forbidden"; a real auth failure is a bare 403/401.
     if (resp.status === 403) {
         const reason = await readErrorReason(resp);
-        return {
-            error:
-                reason === "wrong_password" ? "wrong_password" : "unauthorized",
-        };
+        if (reason === "wrong_password") return { error: "wrong_password" };
+        if (reason === "guest_forbidden") return { error: "guest_forbidden" };
+        return { error: "unauthorized" };
     }
 
     if (resp.status === 401) return { error: "unauthorized" };
     if (resp.status === 404) return { error: "not_found" };
-    // 409 is "full" or a guest-cap rejection; disambiguate via the body.
-    if (resp.status === 409) {
-        const reason = await readErrorReason(resp);
-        return { error: reason === "guest_limit" ? "guest_limit" : "full" };
-    }
+    if (resp.status === 409) return { error: "full" };
 
     if (!resp.ok) return { error: "unavailable" };
 

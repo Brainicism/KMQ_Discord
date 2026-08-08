@@ -23,6 +23,6 @@ export interface PlatformUser {
     id: string;
     username: string;
     avatarUrl?: string | null;
-    /** Website guest (no Discord account) — can join rooms but not host. */
+    /** Website guest (no Discord account) — hosts and joins like anyone else. */
     guest?: boolean;
 }
