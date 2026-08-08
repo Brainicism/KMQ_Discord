@@ -332,7 +332,7 @@
             "error": {
                 "full": "Ce salon est plein.",
                 "generic": "Une erreur s'est produite. Veuillez réessayer.",
-                "guestLimit": "Ce salon n'accepte plus d'invités. Connecte-toi avec Discord pour rejoindre.",
+                "guestForbidden": "Les invités ne peuvent pas créer de salons pour le moment. Rejoins-en un avec un code d'invitation ou connecte-toi avec Discord.",
                 "guestUnavailable": "Le jeu en invité n'est pas disponible pour le moment.",
                 "loginFailed": "Échec de la connexion. Veuillez réessayer.",
                 "notFound": "Ce salon n'existe pas (ou tout le monde est parti).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Ta session a expiré. Veuillez te reconnecter.",
                 "wrongPassword": "Mot de passe incorrect. Veuillez réessayer."
             },
-            "guestNote": "Les invités peuvent rejoindre des salons avec une invitation. Connecte-toi avec Discord pour héberger les tiens et conserver tes statistiques.",
-            "guestNoteLoggedIn": "Tu joues en invité — parcours un salon public ci-dessous ou rejoins avec un code d'invitation. Connecte-toi avec Discord pour héberger les tiens et conserver tes statistiques.",
+            "guestNote": "Les invités peuvent créer des salons et les rejoindre immédiatement. Connecte-toi avec Discord pour conserver tes statistiques.",
+            "guestNoteLoggedIn": "Tu joues en invité — crée un salon ci-dessous, parcours la liste publique ou rejoins avec un code d'invitation. Connecte-toi avec Discord pour conserver tes statistiques.",
             "inviteCodePlaceholder": "Code ou lien d'invitation",
             "join": "Rejoindre",
             "joinAsGuest": "Rejoindre en invité",

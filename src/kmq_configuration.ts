@@ -116,12 +116,23 @@ export default class KmqConfiguration {
 
     /**
      * Gates guest (no Discord account) logins on the standalone website.
-     * Guests can join rooms via invite but never host; gated separately from
-     * webModeEnabled so the free-identity surface can be killed without
-     * taking down the site.
+     * Gated separately from webModeEnabled so the free-identity surface can be
+     * killed without taking down the site.
      * @returns whether guest logins are enabled
      */
     webGuestsEnabled(): boolean {
         return this.config["webGuestsEnabled"] ?? false;
+    }
+
+    /**
+     * Gates room *hosting* by guests (they can always join). Rides along with
+     * webGuestsEnabled by default — a guest who can play should be able to
+     * open a room — but flipping this off alone sheds the surface where free
+     * identities create rooms (and public-lobby listings) while still letting
+     * guests join a room they were invited to.
+     * @returns whether guests may create rooms
+     */
+    webGuestHostingEnabled(): boolean {
+        return this.config["webGuestHostingEnabled"] ?? true;
     }
 }

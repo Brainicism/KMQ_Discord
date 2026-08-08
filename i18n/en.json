@@ -332,7 +332,7 @@
             "error": {
                 "full": "That room is full.",
                 "generic": "Something went wrong. Please try again.",
-                "guestLimit": "This room isn't accepting more guests. Log in with Discord to join.",
+                "guestForbidden": "Guests can't create rooms right now. Join one with an invite code, or log in with Discord.",
                 "guestUnavailable": "Guest play is unavailable right now.",
                 "loginFailed": "Login failed. Please try again.",
                 "notFound": "That room doesn't exist (or everyone left).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Your login expired. Please log in again.",
                 "wrongPassword": "Wrong password. Please try again."
             },
-            "guestNote": "Guests can join rooms with an invite. Log in with Discord to host your own and keep your stats.",
-            "guestNoteLoggedIn": "You're playing as a guest — browse a public room below or join with an invite code. Log in with Discord to host your own and keep your stats.",
+            "guestNote": "Guests can create and join rooms right away. Log in with Discord to keep your stats.",
+            "guestNoteLoggedIn": "You're playing as a guest — create a room below, browse the public list, or join with an invite code. Log in with Discord to keep your stats.",
             "inviteCodePlaceholder": "Invite code or link",
             "join": "Join",
             "joinAsGuest": "Join as guest",

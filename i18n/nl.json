@@ -332,7 +332,7 @@
             "error": {
                 "full": "Die kamer is vol.",
                 "generic": "Er is iets misgegaan. Probeer het opnieuw.",
-                "guestLimit": "Deze kamer accepteert geen gasten meer. Log in met Discord om deel te nemen.",
+                "guestForbidden": "Gasten kunnen op dit moment geen kamers maken. Neem deel aan een kamer met een uitnodigingscode of log in met Discord.",
                 "guestUnavailable": "Spelen als gast is momenteel niet beschikbaar.",
                 "loginFailed": "Inloggen mislukt. Probeer het opnieuw.",
                 "notFound": "Die kamer bestaat niet (of iedereen is vertrokken).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Je aanmelding is verlopen. Log opnieuw in.",
                 "wrongPassword": "Verkeerd wachtwoord. Probeer het opnieuw."
             },
-            "guestNote": "Gasten kunnen met een uitnodiging deelnemen aan kamers. Log in met Discord om je eigen kamers te hosten en je statistieken te behouden.",
-            "guestNoteLoggedIn": "Je speelt als gast — bekijk hieronder een openbare kamer of neem deel met een uitnodigingscode. Log in met Discord om je eigen kamers te hosten en je statistieken te behouden.",
+            "guestNote": "Gasten kunnen meteen kamers maken en eraan deelnemen. Log in met Discord om je statistieken te behouden.",
+            "guestNoteLoggedIn": "Je speelt als gast — maak hieronder een kamer, bekijk de openbare lijst of neem deel met een uitnodigingscode. Log in met Discord om je statistieken te behouden.",
             "inviteCodePlaceholder": "Uitnodigingscode of link",
             "join": "Deelnemen",
             "joinAsGuest": "Deelnemen als gast",

@@ -332,7 +332,7 @@
             "error": {
                 "full": "Dieser Raum ist voll.",
                 "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut.",
-                "guestLimit": "Dieser Raum nimmt keine weiteren Gäste auf. Melde dich mit Discord an, um beizutreten.",
+                "guestForbidden": "Gäste können derzeit keine Räume erstellen. Tritt einem Raum mit einem Einladungscode bei oder melde dich mit Discord an.",
                 "guestUnavailable": "Gast-Spiel ist derzeit nicht verfügbar.",
                 "loginFailed": "Anmeldung fehlgeschlagen. Bitte versuche es erneut.",
                 "notFound": "Dieser Raum existiert nicht (oder alle haben ihn verlassen).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Deine Anmeldung ist abgelaufen. Bitte melde dich erneut an.",
                 "wrongPassword": "Falsches Passwort. Bitte versuche es erneut."
             },
-            "guestNote": "Gäste können Räumen per Einladung beitreten. Melde dich mit Discord an, um eigene Räume zu hosten und deine Statistiken zu behalten.",
-            "guestNoteLoggedIn": "Du spielst als Gast — durchsuche unten einen öffentlichen Raum oder tritt mit einem Einladungscode bei. Melde dich mit Discord an, um eigene Räume zu hosten und deine Statistiken zu behalten.",
+            "guestNote": "Gäste können sofort Räume erstellen und ihnen beitreten. Melde dich mit Discord an, um deine Statistiken zu behalten.",
+            "guestNoteLoggedIn": "Du spielst als Gast — erstelle unten einen Raum, durchsuche die öffentliche Liste oder tritt mit einem Einladungscode bei. Melde dich mit Discord an, um deine Statistiken zu behalten.",
             "inviteCodePlaceholder": "Einladungscode oder Link",
             "join": "Beitreten",
             "joinAsGuest": "Als Gast beitreten",

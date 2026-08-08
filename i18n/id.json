@@ -332,7 +332,7 @@
             "error": {
                 "full": "Ruang itu penuh.",
                 "generic": "Terjadi kesalahan. Silakan coba lagi.",
-                "guestLimit": "Ruang ini tidak menerima tamu lagi. Masuk dengan Discord untuk bergabung.",
+                "guestForbidden": "Tamu belum bisa membuat ruang saat ini. Gabung ke ruang dengan kode undangan, atau masuk dengan Discord.",
                 "guestUnavailable": "Bermain sebagai tamu sedang tidak tersedia.",
                 "loginFailed": "Gagal masuk. Silakan coba lagi.",
                 "notFound": "Ruang itu tidak ada (atau semua sudah keluar).",
@@ -340,8 +340,8 @@
                 "unauthorized": "Sesi masukmu telah berakhir. Silakan masuk lagi.",
                 "wrongPassword": "Kata sandi salah. Silakan coba lagi."
             },
-            "guestNote": "Tamu dapat bergabung ke ruang dengan undangan. Masuk dengan Discord untuk membuat ruang sendiri dan menyimpan statistikmu.",
-            "guestNoteLoggedIn": "Kamu bermain sebagai tamu — jelajahi ruang publik di bawah atau gabung dengan kode undangan. Masuk dengan Discord untuk membuat ruang sendiri dan menyimpan statistikmu.",
+            "guestNote": "Tamu bisa langsung membuat dan bergabung ke ruang. Masuk dengan Discord untuk menyimpan statistikmu.",
+            "guestNoteLoggedIn": "Kamu bermain sebagai tamu — buat ruang di bawah, jelajahi daftar publik, atau gabung dengan kode undangan. Masuk dengan Discord untuk menyimpan statistikmu.",
             "inviteCodePlaceholder": "Kode atau tautan undangan",
             "join": "Gabung",
             "joinAsGuest": "Gabung sebagai tamu",

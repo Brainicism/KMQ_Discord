@@ -1,20 +1,25 @@
 import {
+    WEB_GUEST_ID_RANDOM_MASK,
+    WEB_GUEST_ROOM_ID_FLAG,
     WEB_ROOM_CODE_ALPHABET,
     WEB_ROOM_CODE_LENGTH,
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
-    WEB_ROOM_MAX_GUESTS,
     WEB_ROOM_MAX_MEMBERS,
 } from "./constants";
+import { isGuestUserID } from "./helpers/web_session_manager";
 import crypto from "crypto";
 
-/** Identity of a room member, as resolved from their bearer token. */
+/**
+ * Identity of a room member, as resolved from their bearer token. Guests and
+ * Discord users are the same shape here: a guest hosts, joins, and is counted
+ * exactly like anyone else (their ID is self-describing — see isGuestUserID —
+ * for the few places that do care, like stats persistence).
+ */
 export interface WebRoomMemberIdentity {
     id: string;
     username: string;
     avatarUrl: string | null;
-    /** Whether this is a website guest (no Discord account). */
-    isGuest: boolean;
 }
 
 interface WebRoomMember extends WebRoomMemberIdentity {
@@ -94,7 +99,7 @@ export interface PublicRoomSummary {
 // eslint-disable-next-line import/no-unused-modules
 export type WebRoomJoinResult =
     | { room: WebRoom }
-    | { error: "not_found" | "full" | "wrong_password" | "guest_limit" };
+    | { error: "not_found" | "full" | "wrong_password" };
 
 /** Options for creating a room. */
 // eslint-disable-next-line import/no-unused-modules
@@ -146,10 +151,20 @@ export default class WebRoomManager {
     }
 
     /**
-     * @param ownerID - the creating user's Discord ID
-     * @returns the synthetic guild ID for that user's room
+     * @param ownerID - the creating user's Discord snowflake or guest ID
+     * @returns the synthetic guild ID for that user's room. Guest owners get
+     * their own ID space (WEB_GUEST_ROOM_ID_FLAG | the guest ID's random 60
+     * bits) because `bit 62 | guestID` is just the guest ID again; both spaces
+     * keep bit 62 set, so a room ID is still recognizable as one.
      */
     static roomIDForOwner(ownerID: string): string {
+        if (isGuestUserID(ownerID)) {
+            return (
+                WEB_GUEST_ROOM_ID_FLAG |
+                (BigInt(ownerID) & WEB_GUEST_ID_RANDOM_MASK)
+            ).toString();
+        }
+
         return (WEB_ROOM_ID_FLAG | BigInt(ownerID)).toString();
     }
 
@@ -250,19 +265,6 @@ export default class WebRoomManager {
 
         if (room.members.size >= WEB_ROOM_MAX_MEMBERS) {
             return { error: "full" };
-        }
-
-        // Cap anonymous guests per room; the owner (always a non-guest) plus
-        // WEB_ROOM_MAX_GUESTS is the ceiling, so a room can't be filled purely
-        // with unaccountable identities.
-        if (user.isGuest) {
-            const guestCount = [...room.members.values()].filter(
-                (m) => m.isGuest,
-            ).length;
-
-            if (guestCount >= WEB_ROOM_MAX_GUESTS) {
-                return { error: "guest_limit" };
-            }
         }
 
         this.leaveRoom(user.id);
@@ -461,7 +463,6 @@ export default class WebRoomManager {
             id: user.id,
             username: user.username,
             avatarUrl: user.avatarUrl,
-            isGuest: user.isGuest,
             connections: 0,
             disconnectedAt: this.now(),
         };
