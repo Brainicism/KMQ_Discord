@@ -47,6 +47,7 @@
     "dependencies": {
         "@commander-js/extra-typings": "^14.0.0",
         "@discordjs/opus": "^0.10.0",
+        "@dsojevic/profanity-list": "^1.0.0",
         "@fastify/rate-limit": "^10.3.0",
         "@fastify/static": "^9.1.1",
         "@fastify/view": "^11.1.1",
@@ -90,6 +91,7 @@
         "moment-timezone": "^0.6.2",
         "mysql2": "^3.22.3",
         "node-schedule": "^2.1.1",
+        "obscenity": "^0.4.6",
         "pako": "^2.1.0",
         "sinon": "^21.1.2",
         "sodium-native": "^5.1.0",

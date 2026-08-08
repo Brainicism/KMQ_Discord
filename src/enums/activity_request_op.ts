@@ -7,6 +7,7 @@ type ActivityRequestOp =
     | "endGame"
     | "hint"
     | "emote"
+    | "chat"
     | "bookmark"
     | "setOption"
     | "autocompleteArtists"

@@ -122,7 +122,7 @@ export async function fetchSnapshot(
 async function postAction(
     accessToken: string,
     instanceId: string,
-    path: "start" | "skip" | "end" | "hint" | "emote",
+    path: "start" | "skip" | "end" | "hint" | "emote" | "chat",
     extra?: Record<string, unknown>,
 ): Promise<GuessResult> {
     const resp = await fetch(`${getApiBase()}/${path}`, {
@@ -185,6 +185,13 @@ export const sendEmote = (
     instanceId: string,
     emote: string,
 ) => postAction(accessToken, instanceId, "emote", { emote });
+
+/** Sends a web room chat message (server masks profanity, then broadcasts). */
+export const sendChat = (
+    accessToken: string,
+    instanceId: string,
+    text: string,
+) => postAction(accessToken, instanceId, "chat", { text });
 
 export type FeedbackResult = { ok: true } | { ok: false };
 
