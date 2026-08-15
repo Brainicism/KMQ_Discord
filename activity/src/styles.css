@@ -3978,20 +3978,61 @@ fieldset.options-override:disabled .options-group {
     right: 16px;
 }
 
-/* Room bar: drop the picker onto its own row under the action buttons. */
-.kmq-room-bar-lang {
-    flex-basis: 100%;
-    justify-content: center;
-}
-
-/* Embedded Activity: float the picker in the bottom-left corner (the web-only
-   sound/room widgets that live there never render inside Discord). */
-.kmq-activity-lang {
+/* In-game: the last button of the left toggle rail (history → theme → profile
+   → lookup → feedback → language), on both the website and the Activity. Same
+   40px circle as its neighbours; the native <select> is stretched invisibly
+   over the whole circle so the entire target opens the list, and the emoji
+   underneath is what's actually seen. */
+.kmq-language-select.kmq-lang-toggle {
     position: fixed;
     left: 16px;
-    bottom: 16px;
+    top: 256px;
     z-index: 99;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-red);
+    background: var(--bg-surface);
     box-shadow: var(--shadow-md);
+    transition: all 0.2s;
+}
+
+.kmq-language-select.kmq-lang-toggle:hover {
+    background: var(--red-light);
+    border-color: var(--red-primary);
+    box-shadow: var(--shadow-glow);
+    transform: scale(1.05);
+}
+
+.kmq-language-select.kmq-lang-toggle .kmq-language-select-icon {
+    font-size: 1.1rem;
+}
+
+.kmq-language-select.kmq-lang-toggle .kmq-language-select-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    opacity: 0;
+}
+
+/* The <select> itself is invisible, so ring the circle instead. */
+.kmq-language-select.kmq-lang-toggle:focus-within {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
+}
+
+/* Short viewports (small Activity frames, landscape phones): the rail would
+   run off the bottom, so tuck the picker beside the feedback toggle. */
+@media (max-height: 560px) {
+    .kmq-language-select.kmq-lang-toggle {
+        top: 208px;
+        left: 64px;
+    }
 }
 
 /* Floating sound widget (standalone website): autoplay unlock, mute, volume.

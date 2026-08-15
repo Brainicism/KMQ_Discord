@@ -4714,11 +4714,15 @@ function RestartBanner({
 export default function App({
     webAuth,
     localeOverride,
+    onChangeLocaleOverride,
 }: {
     webAuth?: WebAuth;
     /** Web only: the visitor's explicit language choice from the shell picker
      *  (null = follow the browser). Changing it live-swaps the game's bundle. */
     localeOverride?: string | null;
+    /** Web only: hands a language choice back to the shell, which owns the
+     *  cookie and re-renders itself plus the game in the new locale. */
+    onChangeLocaleOverride?: (tag: string) => void;
 }) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
@@ -4782,9 +4786,16 @@ export default function App({
         ? (localeOverride ?? null)
         : activityLocaleOverride;
 
-    // Persists and applies an Activity language choice; the live-swap effect
-    // re-fetches the bundle in response.
-    const changeActivityLocale = (tag: string): void => {
+    // Applies a language choice from the in-game picker. On the web the shell
+    // owns the override (cookie + its own re-render), so hand it up; in the
+    // Activity persist it here and let the live-swap effect re-fetch the
+    // bundle in response.
+    const changeLocale = (tag: string): void => {
+        if (webAuth) {
+            onChangeLocaleOverride?.(tag);
+            return;
+        }
+
         storeLocaleOverride(tag);
         setActivityLocaleOverride(tag);
     };
@@ -5338,6 +5349,17 @@ export default function App({
                 </button>
             )}
 
+            {/* Language picker — left cluster, below feedback. Sits with the
+                other global preferences (theme) rather than in the web room
+                widget, so it's reachable on every surface and never clipped by
+                a screen edge. */}
+            <LanguageSelect
+                value={localeTag}
+                onChange={changeLocale}
+                t={t}
+                className="kmq-lang-toggle sidebar-toggle left"
+            />
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -5852,17 +5874,6 @@ export default function App({
             />
 
             {webAuth && <SoundControls audio={roundAudio} t={t} />}
-
-            {/* Embedded Activity language picker. On the web the shell/room bar
-                own the picker instead, so this only renders inside Discord. */}
-            {!webAuth && authState && (
-                <LanguageSelect
-                    value={localeTag}
-                    onChange={changeActivityLocale}
-                    t={t}
-                    className="kmq-activity-lang"
-                />
-            )}
 
             {/* Player chat — web rooms and the embedded Activity alike. (In
                 Discord the channel has its own text chat, but this keeps the

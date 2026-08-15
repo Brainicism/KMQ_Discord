@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from "react";
 import { fetchRoom, roomPath } from "../platform/webPlatform";
-import LanguageSelect from "./LanguageSelect";
 import type { Translator } from "../i18n/translator";
 import type { WebRoomView } from "../platform/webPlatform";
 import type { WebSession } from "../platform/webPlatform";
@@ -20,8 +19,6 @@ export default function RoomBar({
     room: initialRoom,
     onLeave,
     onEvicted,
-    currentLocale,
-    onChangeLocale,
     t,
 }: {
     session: WebSession;
@@ -29,10 +26,6 @@ export default function RoomBar({
     onLeave: () => void;
     /** Called when the server no longer recognizes us as a member. */
     onEvicted: () => void;
-    /** Resolved locale tag driving the in-room language picker. */
-    currentLocale: string;
-    /** Persists a language choice and re-renders the game + shell in it. */
-    onChangeLocale: (tag: string) => void;
     t: Translator;
 }): JSX.Element {
     const [room, setRoom] = useState<WebRoomView>(initialRoom);
@@ -170,12 +163,6 @@ export default function RoomBar({
                         >
                             {t("web.room.leave")}
                         </button>
-                        <LanguageSelect
-                            value={currentLocale}
-                            onChange={onChangeLocale}
-                            t={t}
-                            className="kmq-room-bar-lang"
-                        />
                     </div>
                 </div>
             )}
