@@ -1308,10 +1308,22 @@ body::before {
     scroll-margin-bottom: 16px;
 }
 
+/* Balanced rows: exactly `--mc-cols` columns (set per round to half the
+   choices, so medium 6 → 3+3 and hard 8 → 4+4). A fixed count rather than
+   auto-fit, which packs as many as fit and orphans the remainder — 5+1 at full
+   width. Narrow panels drop to two columns, which stays even for every choice
+   count the game uses (4, 6, 8). */
 .mc-choices {
+    --mc-cols: 2;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(var(--mc-cols), minmax(0, 1fr));
     gap: 8px;
+}
+
+@media (max-width: 720px) {
+    .mc-choices {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .mc-choice {
