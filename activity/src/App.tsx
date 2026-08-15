@@ -1962,7 +1962,18 @@ function MultipleChoiceInput({
                     {t("guessPlaceholderWaiting")}
                 </span>
             ) : (
-                <div className="mc-choices">
+                <div
+                    className="mc-choices"
+                    // Half the choices per row (medium 6 → 3+3, hard 8 → 4+4)
+                    // instead of packing as many as fit and orphaning the
+                    // remainder on a short second row. The grid still collapses
+                    // to fewer columns when the panel is too narrow.
+                    style={
+                        {
+                            "--mc-cols": Math.ceil(choices.length / 2),
+                        } as CSSProperties
+                    }
+                >
                     {choices.map((choice) => (
                         <button
                             key={choice.id}
