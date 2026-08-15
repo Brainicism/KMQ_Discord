@@ -427,6 +427,7 @@ export default function LandingPage(): JSX.Element {
                         guest: state.session.user.guest === true,
                     }}
                     localeOverride={localeOverride}
+                    onChangeLocaleOverride={changeLocale}
                 />
                 <RoomBar
                     session={state.session}
@@ -436,8 +437,6 @@ export default function LandingPage(): JSX.Element {
                         exitRoom(state.session, null);
                     }}
                     onEvicted={() => exitRoom(state.session, "removed")}
-                    currentLocale={resolvedLocale}
-                    onChangeLocale={changeLocale}
                     t={t}
                 />
             </>
