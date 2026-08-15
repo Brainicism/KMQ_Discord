@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Activer le son",
                 "mute": "Couper le son",
+                "retry": "Son interrompu — appuyez pour reprendre",
                 "unmute": "Activer le son",
                 "volume": "Volume"
             },

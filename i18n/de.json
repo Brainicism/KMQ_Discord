@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Ton aktivieren",
                 "mute": "Stumm",
+                "retry": "Ton gestoppt – zum Fortsetzen tippen",
                 "unmute": "Ton an",
                 "volume": "Lautstärke"
             },

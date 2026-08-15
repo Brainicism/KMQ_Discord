@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Aktifkan suara",
                 "mute": "Bisukan",
+                "retry": "Suara berhenti — ketuk untuk melanjutkan",
                 "unmute": "Bunyikan",
                 "volume": "Volume"
             },

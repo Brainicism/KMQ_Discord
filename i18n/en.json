@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Enable sound",
                 "mute": "Mute",
+                "retry": "Sound stopped — tap to resume",
                 "unmute": "Unmute",
                 "volume": "Volume"
             },
