@@ -5023,7 +5023,10 @@ export default function App({
                 // Web rooms: a song may already be playing (late join /
                 // reconnect); each GET streams from the live position.
                 if (snapshot.currentAudio) {
-                    handleRoundAudio(snapshot.currentAudio.audioUrl);
+                    handleRoundAudio(
+                        snapshot.currentAudio.audioUrl,
+                        snapshot.currentAudio.playbackDurationSec,
+                    );
                 }
 
                 // A restart may have been announced before we connected (or
@@ -5066,7 +5069,10 @@ export default function App({
                         // next round's audio must start on time even while
                         // the previous reveal is held on screen.
                         if (event.type === "roundAudio") {
-                            handleRoundAudio(event.audioUrl);
+                            handleRoundAudio(
+                                event.audioUrl,
+                                event.playbackDurationSec,
+                            );
                             return;
                         }
 
@@ -5089,6 +5095,8 @@ export default function App({
                             if (event.snapshot.currentAudio) {
                                 handleRoundAudio(
                                     event.snapshot.currentAudio.audioUrl,
+                                    event.snapshot.currentAudio
+                                        .playbackDurationSec,
                                 );
                             }
 

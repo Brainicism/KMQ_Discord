@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Geluid inschakelen",
                 "mute": "Dempen",
+                "retry": "Geluid gestopt — tik om te hervatten",
                 "unmute": "Dempen opheffen",
                 "volume": "Volume"
             },

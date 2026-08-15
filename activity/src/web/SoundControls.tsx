@@ -29,6 +29,22 @@ export default function SoundControls({
         );
     }
 
+    // The stream dropped and the automatic re-fetches didn't bring it back.
+    // Offer the same recovery by hand rather than leaving silence unexplained.
+    if (audio.stalled) {
+        return (
+            <div className="kmq-sound-controls">
+                <button
+                    type="button"
+                    className="kmq-sound-unlock"
+                    onClick={audio.retry}
+                >
+                    🔇 {t("web.sound.retry")}
+                </button>
+            </div>
+        );
+    }
+
     return (
         <div className="kmq-sound-controls">
             <button

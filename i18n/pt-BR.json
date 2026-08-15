@@ -375,6 +375,7 @@
             "sound": {
                 "enable": "Ativar som",
                 "mute": "Silenciar",
+                "retry": "O som parou — toque para retomar",
                 "unmute": "Ativar som",
                 "volume": "Volume"
             },

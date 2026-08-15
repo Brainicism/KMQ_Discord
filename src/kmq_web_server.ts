@@ -37,7 +37,10 @@ import {
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
-import { buildAudioStreamArgs } from "./web_audio_registry";
+import {
+    buildAudioStreamArgs,
+    remainingPlaybackSec,
+} from "./web_audio_registry";
 import {
     createWebSession,
     deleteWebSession,
@@ -3099,12 +3102,24 @@ export default class KmqWebServer {
                 const token = (request.params as { token: string }).token;
                 const entry = this.activityHub.getAudioEntry(token);
                 if (!entry) {
+                    // Expected right after a session ends (the entry is
+                    // dropped while the element re-requests), otherwise a sign
+                    // the client is chasing a playback that got replaced.
+                    logger.info(
+                        `Audio stream token not found. token=${token.slice(0, 8)}`,
+                    );
+
                     await reply.code(404).send({ error: "Unknown token" });
                     return;
                 }
 
-                const args = buildAudioStreamArgs(entry, Date.now());
+                const now = Date.now();
+                const args = buildAudioStreamArgs(entry, now);
                 if (!args) {
+                    logger.info(
+                        `Audio stream past its end. gid=${entry.guildID}, elapsed=${((now - entry.mintedAt) / 1000).toFixed(1)}s, duration=${entry.playbackDurationSec}s`,
+                    );
+
                     await reply.code(410).send({ error: "Playback ended" });
                     return;
                 }
@@ -3166,9 +3181,23 @@ export default class KmqWebServer {
                     }
                 });
 
+                const elapsedSec = (now - entry.mintedAt) / 1000;
+                logger.info(
+                    `Audio stream starting. gid=${entry.guildID}, elapsed=${elapsedSec.toFixed(1)}s, remaining=${remainingPlaybackSec(entry, now).toFixed(1)}s, active=${this.activeAudioStreams}`,
+                );
+
                 // Tab closed / element released: kill the transcode instead
                 // of encoding to a dead socket for the rest of the song.
                 request.raw.on("close", () => {
+                    // A body cut short is exactly what a listener hears as
+                    // "the audio stopped" — worth distinguishing from the
+                    // normal case where the client leaves after we finished.
+                    if (!reply.raw.writableEnded) {
+                        logger.info(
+                            `Audio stream client disconnected mid-body. gid=${entry.guildID}, afterSec=${((Date.now() - now) / 1000).toFixed(1)}`,
+                        );
+                    }
+
                     child.kill("SIGKILL");
                     release();
                 });
