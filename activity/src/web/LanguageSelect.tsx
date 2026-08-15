@@ -23,6 +23,7 @@ export default function LanguageSelect({
     return (
         <label
             className={`kmq-language-select${className ? ` ${className}` : ""}`}
+            title={t("web.language")}
         >
             <span className="kmq-language-select-icon" aria-hidden>
                 🌐
