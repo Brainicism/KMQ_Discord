@@ -122,7 +122,7 @@ export async function fetchSnapshot(
 async function postAction(
     accessToken: string,
     instanceId: string,
-    path: "start" | "skip" | "end" | "hint" | "emote",
+    path: "start" | "skip" | "end" | "hint" | "emote" | "chat",
     extra?: Record<string, unknown>,
 ): Promise<GuessResult> {
     const resp = await fetch(`${getApiBase()}/${path}`, {
@@ -185,6 +185,44 @@ export const sendEmote = (
     instanceId: string,
     emote: string,
 ) => postAction(accessToken, instanceId, "emote", { emote });
+
+/** Sends a web room chat message (server masks profanity, then broadcasts). */
+export const sendChat = (
+    accessToken: string,
+    instanceId: string,
+    text: string,
+) => postAction(accessToken, instanceId, "chat", { text });
+
+export type FeedbackResult = { ok: true } | { ok: false };
+
+/**
+ * Submits player feedback to the alert webhook (the web/Activity equivalent of
+ * the /feedback slash command). `improveKMQ` is required; `likeKMQ` optional.
+ */
+export async function submitFeedback(
+    accessToken: string,
+    instanceId: string,
+    answers: { likeKMQ: string; improveKMQ: string },
+): Promise<FeedbackResult> {
+    try {
+        const resp = await fetch(`${getApiBase()}/feedback`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${accessToken}`,
+            },
+            body: JSON.stringify({
+                instance_id: instanceId,
+                likeKMQ: answers.likeKMQ,
+                improveKMQ: answers.improveKMQ,
+            }),
+        });
+
+        return resp.ok ? { ok: true } : { ok: false };
+    } catch {
+        return { ok: false };
+    }
+}
 
 /**
  * Submit a GuildPreference change. Server validates the shape and accepts

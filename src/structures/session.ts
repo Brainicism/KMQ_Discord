@@ -33,6 +33,7 @@ import {
     truncatedString,
     underline,
 } from "../helpers/utils";
+import { isGuestUserID } from "../helpers/web_session_manager";
 import { sql } from "kysely";
 import ClipAction from "../enums/clip_action";
 import EnvVariableManager from "../env_variable_manager";
@@ -566,6 +567,16 @@ export default abstract class Session extends EventEmitter {
      */
     addBookmarkedSong(userID: string, bookmarkedSong: BookmarkedSong): void {
         if (!userID) {
+            return;
+        }
+
+        // Website guests are dropped here rather than at the transport: their
+        // synthetic IDs have no Discord account to DM the list to at session
+        // end, and persisting them would seed `bookmarked_songs` with rows
+        // keyed to an identity that's orphaned the moment they log out. The
+        // web client already hides the bookmark affordance for guests; this
+        // closes the direct-API path behind it.
+        if (isGuestUserID(userID)) {
             return;
         }
 

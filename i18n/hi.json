@@ -32,6 +32,20 @@
         "emoteBarLabel": "प्रतिक्रिया भेजें",
         "endGameBusy": "समाप्त हो रहा है…",
         "endGameButton": "खेल समाप्त करें",
+        "feedback": {
+            "cancel": "रद्द करें",
+            "close": "बंद करें",
+            "error": "आपकी प्रतिक्रिया नहीं भेजी जा सकी। कृपया पुनः प्रयास करें।",
+            "improveLabel": "KMQ में क्या सुधार किया जा सकता है?",
+            "improvePlaceholder": "KMQ बहुत अधिक आदी बनाता है। मेरा परिवार और दोस्त मुझे याद करते हैं।",
+            "likeLabel": "KMQ के बारे में आपको क्या पसंद है?",
+            "likePlaceholder": "KMQ मुझे नया संगीत और शैलियाँ खोजने में मदद करता है।",
+            "open": "प्रतिक्रिया भेजें",
+            "sending": "भेजा जा रहा है...",
+            "submit": "प्रतिक्रिया भेजें",
+            "success": "आपकी प्रतिक्रिया के लिए धन्यवाद!",
+            "title": "KMQ प्रतिक्रिया"
+        },
         "gameType": {
             "classic": "क्लासिक",
             "clip": "क्लिप",
@@ -264,6 +278,7 @@
             "title": "एक गाना खोजें"
         },
         "sessionEndedBanner": "कोई सक्रिय खेल नहीं — ऊपर वाले बटन से शुरू करें (या इस चैनल में {{playSlash}} टाइप करें)।",
+        "sessionEndedBannerWeb": "कोई सक्रिय खेल नहीं — ऊपर वाले बटन से शुरू करें।",
         "sessionWinnerNone": "खेल समाप्त — कोई अंक नहीं मिले।",
         "sessionWinnerSoloMany": "🏆 {{username}} {{score}} अंकों के साथ जीते!",
         "sessionWinnerSoloOne": "🏆 {{username}} 1 अंक के साथ जीते!",
@@ -304,6 +319,73 @@
         "themeToggleDark": "डार्क मोड में स्विच करें",
         "themeToggleLight": "लाइट मोड में स्विच करें",
         "waitingForNextRound": "अगले राउंड का इंतज़ार है…",
+        "web": {
+            "cancel": "रद्द करें",
+            "chat": {
+                "collapse": "चैट छोटा करें",
+                "empty": "अभी तक कोई संदेश नहीं। नमस्ते कहें!",
+                "placeholder": "संदेश लिखें…",
+                "send": "भेजें",
+                "title": "चैट"
+            },
+            "createRoom": "एक कमरा बनाएँ",
+            "error": {
+                "full": "वह कमरा भरा हुआ है।",
+                "generic": "कुछ गड़बड़ हो गई। कृपया पुनः प्रयास करें।",
+                "guestForbidden": "अतिथि अभी कमरे नहीं बना सकते। आमंत्रण कोड से किसी कमरे में शामिल हों, या Discord से लॉग इन करें।",
+                "guestUnavailable": "अतिथि खेल अभी उपलब्ध नहीं है।",
+                "loginFailed": "लॉग इन विफल रहा। कृपया पुनः प्रयास करें।",
+                "notFound": "वह कमरा मौजूद नहीं है (या सभी चले गए)।",
+                "removed": "आपको कमरे से हटा दिया गया।",
+                "unauthorized": "आपका लॉगिन समाप्त हो गया है। कृपया फिर से लॉग इन करें।",
+                "wrongPassword": "गलत पासवर्ड। कृपया पुनः प्रयास करें।"
+            },
+            "guestNote": "अतिथि तुरंत कमरे बना सकते हैं और उनमें शामिल हो सकते हैं। अपने आँकड़े रखने के लिए Discord से लॉग इन करें।",
+            "guestNoteLoggedIn": "आप अतिथि के रूप में खेल रहे हैं — नीचे कमरा बनाएँ, सार्वजनिक सूची देखें, या आमंत्रण कोड से शामिल हों। अपने आँकड़े रखने के लिए Discord से लॉग इन करें।",
+            "inviteCodePlaceholder": "आमंत्रण कोड या लिंक",
+            "join": "शामिल हों",
+            "joinAsGuest": "अतिथि के रूप में शामिल हों",
+            "language": "भाषा",
+            "loading": "लोड हो रहा है...",
+            "lobby": {
+                "empty": "अभी कोई सार्वजनिक कमरा नहीं — ऊपर एक बनाएँ!",
+                "roomName": "{{owner}} का कमरा",
+                "title": "सार्वजनिक कमरे"
+            },
+            "loggedInAs": "इस रूप में लॉग इन",
+            "loginDiscord": "Discord से लॉग इन करें",
+            "logout": "लॉग आउट",
+            "nicknameLabel": "अतिथि उपनाम",
+            "nicknamePlaceholder": "एक उपनाम चुनें",
+            "or": "या",
+            "passwordLabel": "कमरे का पासवर्ड",
+            "passwordOptionalLabel": "कमरे का पासवर्ड (वैकल्पिक)",
+            "passwordOptionalPlaceholder": "पासवर्ड (वैकल्पिक)",
+            "passwordPlaceholder": "पासवर्ड",
+            "passwordRequired": "इस कमरे के लिए पासवर्ड आवश्यक है।",
+            "playAsGuest": "अतिथि के रूप में खेलें",
+            "playingAsGuest": "अतिथि के रूप में खेल रहे हैं",
+            "room": {
+                "away": "{{username}} (अनुपस्थित)",
+                "copied": "कॉपी किया गया!",
+                "copyInvite": "आमंत्रण लिंक कॉपी करें",
+                "label": "कमरा",
+                "leave": "छोड़ें"
+            },
+            "sound": {
+                "enable": "ध्वनि सक्षम करें",
+                "mute": "म्यूट",
+                "retry": "आवाज़ रुक गई — फिर से चलाने के लिए टैप करें",
+                "unmute": "अनम्यूट",
+                "volume": "आवाज़"
+            },
+            "tagline": "के-पॉप संगीत अनुमान लगाने का खेल",
+            "visibilityLabel": "कमरे की दृश्यता",
+            "visibilityPrivate": "निजी",
+            "visibilityPrivateHint": "केवल आमंत्रण लिंक वाले लोग ही शामिल हो सकते हैं।",
+            "visibilityPublic": "सार्वजनिक",
+            "visibilityPublicHint": "कोई भी इस कमरे को लॉबी सूची में ढूँढ सकता है।"
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

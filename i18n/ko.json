@@ -32,6 +32,20 @@
         "emoteBarLabel": "반응 표시 보내기",
         "endGameBusy": "종료 중…",
         "endGameButton": "게임 종료",
+        "feedback": {
+            "cancel": "취소",
+            "close": "닫기",
+            "error": "피드백을 보내지 못했습니다. 다시 시도해 주세요.",
+            "improveLabel": "KMQ에서 개선할 수 있는 점은 무엇입니까?",
+            "improvePlaceholder": "KMQ는 너무 중독성이 있어요. 제 가족과 친구들이 저를 그리워해요.",
+            "likeLabel": "KMQ의 어떤 점이 마음에 드나요?",
+            "likePlaceholder": "KMQ는 새로운 음악과 장르를 발견하도록 도와줍니다.",
+            "open": "피드백 보내기",
+            "sending": "보내는 중...",
+            "submit": "피드백 보내기",
+            "success": "피드백을 보내주셔서 감사합니다!",
+            "title": "KMQ의 피드백"
+        },
         "gameType": {
             "classic": "클래식",
             "clip": "클립",
@@ -264,6 +278,7 @@
             "title": "노래 찾아보기"
         },
         "sessionEndedBanner": "진행 중인 게임이 없습니다 — 위 버튼으로 시작하세요 (또는 이 채널에서 {{playSlash}}).",
+        "sessionEndedBannerWeb": "진행 중인 게임이 없습니다 — 위 버튼으로 시작하세요.",
         "sessionWinnerNone": "게임 종료 — 득점 없음.",
         "sessionWinnerSoloMany": "🏆 {{username}}님이 {{score}}점으로 우승!",
         "sessionWinnerSoloOne": "🏆 {{username}}님이 1점으로 우승!",
@@ -304,6 +319,73 @@
         "themeToggleDark": "다크 모드로 전환",
         "themeToggleLight": "라이트 모드로 전환",
         "waitingForNextRound": "다음 라운드를 기다리는 중…",
+        "web": {
+            "cancel": "취소",
+            "chat": {
+                "collapse": "채팅 접기",
+                "empty": "아직 메시지가 없습니다. 인사해 보세요!",
+                "placeholder": "메시지 입력…",
+                "send": "보내기",
+                "title": "채팅"
+            },
+            "createRoom": "방 만들기",
+            "error": {
+                "full": "그 방은 가득 찼습니다.",
+                "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
+                "guestForbidden": "지금은 게스트가 방을 만들 수 없습니다. 초대 코드로 방에 참여하거나 Discord로 로그인하세요.",
+                "guestUnavailable": "지금은 게스트 플레이를 사용할 수 없습니다.",
+                "loginFailed": "로그인에 실패했습니다. 다시 시도해 주세요.",
+                "notFound": "그 방은 존재하지 않습니다 (또는 모두 나갔습니다).",
+                "removed": "방에서 내보내졌습니다.",
+                "unauthorized": "로그인이 만료되었습니다. 다시 로그인해 주세요.",
+                "wrongPassword": "비밀번호가 틀렸습니다. 다시 시도해 주세요."
+            },
+            "guestNote": "게스트도 바로 방을 만들고 참여할 수 있습니다. 통계를 저장하려면 Discord로 로그인하세요.",
+            "guestNoteLoggedIn": "게스트로 플레이 중입니다 — 아래에서 방을 만들거나, 공개 목록을 둘러보거나, 초대 코드로 참여하세요. 통계를 저장하려면 Discord로 로그인하세요.",
+            "inviteCodePlaceholder": "초대 코드 또는 링크",
+            "join": "참여",
+            "joinAsGuest": "게스트로 참여",
+            "language": "언어",
+            "loading": "불러오는 중...",
+            "lobby": {
+                "empty": "지금은 공개 방이 없습니다 — 위에서 하나 만들어 보세요!",
+                "roomName": "{{owner}}님의 방",
+                "title": "공개 방"
+            },
+            "loggedInAs": "로그인 계정",
+            "loginDiscord": "Discord로 로그인",
+            "logout": "로그아웃",
+            "nicknameLabel": "게스트 닉네임",
+            "nicknamePlaceholder": "닉네임을 정하세요",
+            "or": "또는",
+            "passwordLabel": "방 비밀번호",
+            "passwordOptionalLabel": "방 비밀번호 (선택)",
+            "passwordOptionalPlaceholder": "비밀번호 (선택)",
+            "passwordPlaceholder": "비밀번호",
+            "passwordRequired": "이 방은 비밀번호가 필요합니다.",
+            "playAsGuest": "게스트로 플레이",
+            "playingAsGuest": "게스트로 플레이 중",
+            "room": {
+                "away": "{{username}} (자리 비움)",
+                "copied": "복사됨!",
+                "copyInvite": "초대 링크 복사",
+                "label": "방",
+                "leave": "나가기"
+            },
+            "sound": {
+                "enable": "소리 켜기",
+                "mute": "음소거",
+                "retry": "소리가 멈췄습니다 — 눌러서 다시 재생",
+                "unmute": "음소거 해제",
+                "volume": "볼륨"
+            },
+            "tagline": "K-팝 노래 맞히기 게임",
+            "visibilityLabel": "방 공개 설정",
+            "visibilityPrivate": "비공개",
+            "visibilityPrivateHint": "초대 링크가 있는 사람만 참여할 수 있습니다.",
+            "visibilityPublic": "공개",
+            "visibilityPublicHint": "누구나 로비 목록에서 이 방을 찾을 수 있습니다."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

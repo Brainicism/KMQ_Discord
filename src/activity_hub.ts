@@ -15,6 +15,7 @@ import type ActivityAutocompleteArtistsArgs from "./interfaces/activity_autocomp
 import type ActivityAutocompleteArtistsResponse from "./interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "./interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "./interfaces/activity_bookmark_response";
+import type ActivityChatArgs from "./interfaces/activity_chat_args";
 import type ActivityEmoteArgs from "./interfaces/activity_emote_args";
 import type ActivityGuessArgs from "./interfaces/activity_guess_args";
 import type ActivityGuessResponse from "./interfaces/activity_guess_response";
@@ -283,6 +284,17 @@ export default class ActivityHub {
     async emote(args: ActivityEmoteArgs): Promise<ActivityGuessResponse> {
         const target = await this.resolveCluster(args.guildID);
         return this.sendRequest<ActivityGuessResponse>(target, "emote", args);
+    }
+
+    /**
+     * Relays a web room chat message; the worker masks profanity and
+     * re-broadcasts it to everyone in the room.
+     * @param args - guildID/userID/text
+     * @returns the worker's accept/reject response
+     */
+    async chat(args: ActivityChatArgs): Promise<ActivityGuessResponse> {
+        const target = await this.resolveCluster(args.guildID);
+        return this.sendRequest<ActivityGuessResponse>(target, "chat", args);
     }
 
     /**

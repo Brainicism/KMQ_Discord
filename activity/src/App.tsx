@@ -29,10 +29,12 @@ import {
     openActivityStream,
     preset as apiPreset,
     searchSongs,
+    sendChat as apiSendChat,
     sendEmote as apiSendEmote,
     setOption as apiSetOption,
     skipVote as apiSkipVote,
     startGame as apiStartGame,
+    submitFeedback,
     submitGuess,
     submitMcGuess,
 } from "./api";
@@ -42,9 +44,14 @@ import {
     readSdkLocale,
 } from "./platform/discordPlatform";
 import { isEmbedded } from "./platform";
+import {
+    readStoredLocaleOverride,
+    storeLocaleOverride,
+} from "./localePreference";
 import { THEME_STORAGE_KEY, applyTheme, readInitialTheme } from "./theme";
 import type { Theme } from "./theme";
 import { makeTranslator } from "./i18n/translator";
+import LanguageSelect from "./web/LanguageSelect";
 import SoundControls from "./web/SoundControls";
 import useRoundAudio from "./web/useRoundAudio";
 import kmqLogoUrl from "./assets/kmq_logo.png";
@@ -81,6 +88,7 @@ import type {
     ActivitySongSearchResult,
 } from "./types/activity_song_info";
 import type ActivityEvent from "./types/activity_event";
+import type ChatMessage from "./types/chat_message";
 import type FloatingEmote from "./types/floating_emote";
 import type ActivityRoundMeta from "./types/activity_round_meta";
 import type { ActivityMultipleChoiceOption } from "./types/activity_round_meta";
@@ -185,6 +193,7 @@ const initialUi: UiState = {
     options: null,
     roundHistory: [],
     floatingEmotes: [],
+    chatMessages: [],
     recap: null,
     levelUps: [],
 };
@@ -1323,6 +1332,7 @@ function CurrentRound({
     noActiveGame,
     levelUps,
     viewerID,
+    isWeb,
     t,
 }: {
     round: ActivityRoundMeta | null;
@@ -1348,6 +1358,9 @@ function CurrentRound({
     levelUps: UiState["levelUps"];
     /** The viewer's Discord ID, to highlight their own level-up. */
     viewerID: string | null;
+    /** True on the standalone website, where there is no `/play` slash command
+     *  to point idle players at (the empty-state banner drops that clause). */
+    isWeb: boolean;
     t: Translator;
 }) {
     return (
@@ -1565,9 +1578,11 @@ function CurrentRound({
                                 </p>
                             ) : noActiveGame ? (
                                 <p className="empty">
-                                    {t("sessionEndedBanner", {
-                                        playSlash: "/play",
-                                    })}
+                                    {isWeb
+                                        ? t("sessionEndedBannerWeb")
+                                        : t("sessionEndedBanner", {
+                                              playSlash: "/play",
+                                          })}
                                 </p>
                             ) : (
                                 <p className="empty">
@@ -1947,7 +1962,18 @@ function MultipleChoiceInput({
                     {t("guessPlaceholderWaiting")}
                 </span>
             ) : (
-                <div className="mc-choices">
+                <div
+                    className="mc-choices"
+                    // Half the choices per row (medium 6 → 3+3, hard 8 → 4+4)
+                    // instead of packing as many as fit and orphaning the
+                    // remainder on a short second row. The grid still collapses
+                    // to fewer columns when the panel is too narrow.
+                    style={
+                        {
+                            "--mc-cols": Math.ceil(choices.length / 2),
+                        } as CSSProperties
+                    }
+                >
                     {choices.map((choice) => (
                         <button
                             key={choice.id}
@@ -2295,6 +2321,10 @@ function Confetti() {
 const EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"] as const;
 const FLOATING_EMOTE_LIMIT = 30;
 const EMOTE_FLOAT_MS = 2600;
+// Rolling cap on retained chat messages (chat is ephemeral, so old lines just
+// scroll out of the buffer).
+const CHAT_BUFFER_LIMIT = 100;
+const CHAT_MAX_LENGTH = 300;
 const EMOTE_CLIENT_COOLDOWN_MS = 500;
 
 function EmoteBar({
@@ -2382,6 +2412,165 @@ function FloatingEmotes({
                     onDismiss={onDismiss}
                 />
             ))}
+        </div>
+    );
+}
+
+// Minimum client-side gap between sent chat messages; the server enforces its
+// own cooldown too, this just avoids obviously wasted round-trips.
+const CHAT_CLIENT_COOLDOWN_MS = 600;
+
+/**
+ * Web-room chat: a collapsible floating panel where players in the room can
+ * talk. Messages arrive over the game websocket (profanity-masked server-side)
+ * and are ephemeral — no backlog on join. Web only; the embedded Discord
+ * Activity uses the channel's own text chat instead.
+ */
+function ChatPanel({
+    accessToken,
+    instanceId,
+    messages,
+    selfID,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    messages: ChatMessage[];
+    selfID: string | null;
+    t: Translator;
+}): JSX.Element {
+    const [open, setOpen] = useState(false);
+    const [draft, setDraft] = useState("");
+    // Count messages seen while collapsed, for the unread badge.
+    const [unread, setUnread] = useState(0);
+    const lastSentRef = useRef(0);
+    const listRef = useRef<HTMLDivElement | null>(null);
+    const seenCountRef = useRef(messages.length);
+
+    // Track unread while collapsed; clear on open. Pin the scroll to the newest
+    // message whenever the list grows and the panel is open.
+    useEffect(() => {
+        const delta = messages.length - seenCountRef.current;
+        seenCountRef.current = messages.length;
+        if (delta <= 0) return;
+
+        if (open) {
+            const el = listRef.current;
+            if (el) el.scrollTop = el.scrollHeight;
+        } else {
+            setUnread((n) => Math.min(99, n + delta));
+        }
+    }, [messages.length, open]);
+
+    useEffect(() => {
+        if (!open) return;
+        setUnread(0);
+        const el = listRef.current;
+        if (el) el.scrollTop = el.scrollHeight;
+    }, [open]);
+
+    const send = (): void => {
+        const text = draft.trim();
+        if (!text) return;
+        const now = Date.now();
+        if (now - lastSentRef.current < CHAT_CLIENT_COOLDOWN_MS) return;
+        lastSentRef.current = now;
+        setDraft("");
+        // Fire-and-forget: the broadcast echoes our own message back, so the
+        // list is driven entirely by inbound events (no optimistic append).
+        void apiSendChat(accessToken, instanceId, text);
+    };
+
+    return (
+        <div className="kmq-chat" data-open={open}>
+            {open ? (
+                <div className="kmq-chat-panel">
+                    <div className="kmq-chat-header">
+                        <span className="kmq-chat-title">
+                            💬 {t("web.chat.title")}
+                        </span>
+                        <button
+                            type="button"
+                            className="kmq-chat-collapse"
+                            onClick={() => setOpen(false)}
+                            aria-label={t("web.chat.collapse")}
+                        >
+                            ▾
+                        </button>
+                    </div>
+                    <div className="kmq-chat-messages" ref={listRef}>
+                        {messages.length === 0 ? (
+                            <p className="kmq-chat-empty">
+                                {t("web.chat.empty")}
+                            </p>
+                        ) : (
+                            messages.map((msg) => (
+                                <div
+                                    key={msg.id}
+                                    className="kmq-chat-message"
+                                    data-self={msg.userID === selfID}
+                                >
+                                    {msg.avatarUrl ? (
+                                        <img
+                                            className="kmq-chat-avatar"
+                                            src={msg.avatarUrl}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <span className="kmq-chat-avatar kmq-chat-avatar-fallback">
+                                            {msg.username
+                                                .slice(0, 1)
+                                                .toUpperCase()}
+                                        </span>
+                                    )}
+                                    <div className="kmq-chat-bubble">
+                                        <span className="kmq-chat-name">
+                                            {msg.username}
+                                        </span>
+                                        <span className="kmq-chat-text">
+                                            {msg.text}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))
+                        )}
+                    </div>
+                    <form
+                        className="kmq-chat-input-row"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            send();
+                        }}
+                    >
+                        <input
+                            className="kmq-chat-input"
+                            value={draft}
+                            maxLength={CHAT_MAX_LENGTH}
+                            onChange={(e) => setDraft(e.target.value)}
+                            placeholder={t("web.chat.placeholder")}
+                            aria-label={t("web.chat.placeholder")}
+                        />
+                        <button
+                            type="submit"
+                            className="kmq-chat-send"
+                            disabled={!draft.trim()}
+                        >
+                            {t("web.chat.send")}
+                        </button>
+                    </form>
+                </div>
+            ) : (
+                <button
+                    type="button"
+                    className="kmq-chat-toggle"
+                    onClick={() => setOpen(true)}
+                >
+                    💬 {t("web.chat.title")}
+                    {unread > 0 && (
+                        <span className="kmq-chat-badge">{unread}</span>
+                    )}
+                </button>
+            )}
         </div>
     );
 }
@@ -4205,6 +4394,143 @@ function SongSearchModal({
     );
 }
 
+/**
+ * Feedback modal — the web/Activity surface for the /feedback slash command.
+ * Two questions mirroring FeedbackCommand.FEEDBACK_QUESTIONS: an optional
+ * "what do you like" and a required "what can be improved". Posts to
+ * /api/activity/feedback, which forwards to the alert webhook.
+ */
+function FeedbackModal({
+    accessToken,
+    instanceId,
+    visible,
+    onClose,
+    t,
+}: {
+    accessToken: string;
+    instanceId: string;
+    visible: boolean;
+    onClose: () => void;
+    t: Translator;
+}): React.JSX.Element {
+    const [likeKMQ, setLikeKMQ] = useState("");
+    const [improveKMQ, setImproveKMQ] = useState("");
+    const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
+        "idle",
+    );
+
+    const canSubmit = improveKMQ.trim().length > 0 && status !== "sending";
+
+    const submit = async (): Promise<void> => {
+        if (!canSubmit) return;
+        setStatus("sending");
+        const result = await submitFeedback(accessToken, instanceId, {
+            likeKMQ: likeKMQ.trim(),
+            improveKMQ: improveKMQ.trim(),
+        });
+
+        if (result.ok) {
+            setStatus("sent");
+            setLikeKMQ("");
+            setImproveKMQ("");
+        } else {
+            setStatus("error");
+        }
+    };
+
+    return (
+        <div
+            className={`song-search-overlay${visible ? " visible" : ""}`}
+            role="dialog"
+            aria-modal="true"
+            onClick={onClose}
+        >
+            <div
+                className={`song-search-modal feedback-modal${
+                    visible ? " visible" : ""
+                }`}
+                onClick={(e) => e.stopPropagation()}
+            >
+                <div className="song-search-head">
+                    <span className="song-search-title">
+                        {t("feedback.title")}
+                    </span>
+                    <button
+                        type="button"
+                        className="song-search-close"
+                        aria-label={t("feedback.close")}
+                        onClick={onClose}
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {status === "sent" ? (
+                    <p className="feedback-success">{t("feedback.success")}</p>
+                ) : (
+                    <form
+                        className="feedback-form"
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            void submit();
+                        }}
+                    >
+                        <label className="feedback-label">
+                            {t("feedback.likeLabel")}
+                            <textarea
+                                className="feedback-input"
+                                value={likeKMQ}
+                                maxLength={2000}
+                                rows={3}
+                                placeholder={t("feedback.likePlaceholder")}
+                                onChange={(e) => setLikeKMQ(e.target.value)}
+                            />
+                        </label>
+
+                        <label className="feedback-label">
+                            {t("feedback.improveLabel")}
+                            <textarea
+                                className="feedback-input"
+                                value={improveKMQ}
+                                maxLength={2000}
+                                rows={3}
+                                required
+                                placeholder={t("feedback.improvePlaceholder")}
+                                onChange={(e) => setImproveKMQ(e.target.value)}
+                            />
+                        </label>
+
+                        {status === "error" && (
+                            <p className="feedback-error">
+                                {t("feedback.error")}
+                            </p>
+                        )}
+
+                        <div className="feedback-actions">
+                            <button
+                                type="button"
+                                className="feedback-button secondary"
+                                onClick={onClose}
+                            >
+                                {t("feedback.cancel")}
+                            </button>
+                            <button
+                                type="submit"
+                                className="feedback-button"
+                                disabled={!canSubmit}
+                            >
+                                {status === "sending"
+                                    ? t("feedback.sending")
+                                    : t("feedback.submit")}
+                            </button>
+                        </div>
+                    </form>
+                )}
+            </div>
+        </div>
+    );
+}
+
 function SongHistory({
     history,
     bookmarkedLinks,
@@ -4385,7 +4711,19 @@ function RestartBanner({
     );
 }
 
-export default function App({ webAuth }: { webAuth?: WebAuth }) {
+export default function App({
+    webAuth,
+    localeOverride,
+    onChangeLocaleOverride,
+}: {
+    webAuth?: WebAuth;
+    /** Web only: the visitor's explicit language choice from the shell picker
+     *  (null = follow the browser). Changing it live-swaps the game's bundle. */
+    localeOverride?: string | null;
+    /** Web only: hands a language choice back to the shell, which owns the
+     *  cookie and re-renders itself plus the game in the new locale. */
+    onChangeLocaleOverride?: (tag: string) => void;
+}) {
     const [error, setError] = useState<ConnectionError | null>(null);
     const [ready, setReady] = useState(false);
     const [ui, setUi] = useState<UiState>(initialUi);
@@ -4430,14 +4768,43 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
     const [songInfoRefreshNonce, setSongInfoRefreshNonce] = useState(0);
     const [myProfileOpen, setMyProfileOpen] = useState(false);
     const [searchOpen, setSearchOpen] = useState(false);
+    const [feedbackOpen, setFeedbackOpen] = useState(false);
     // Resolved bundle locale (KMQ LocaleType tag) — passed to song search so
     // returned names match the UI language.
     const [localeTag, setLocaleTag] = useState("en");
+    // Embedded Activity language override (persisted to localStorage). On the
+    // web the shell owns the override and passes it in via `localeOverride`, so
+    // this stays null there; in the Activity there is no shell, so App manages
+    // its own override and renders its own picker.
+    const [activityLocaleOverride, setActivityLocaleOverride] = useState<
+        string | null
+    >(() => (webAuth ? null : readStoredLocaleOverride()));
+
+    // The active override regardless of surface: the shell's on web, App's own
+    // in the Activity. Drives the initial bundle fetch and the live swap below.
+    const effectiveLocaleOverride = webAuth
+        ? (localeOverride ?? null)
+        : activityLocaleOverride;
+
+    // Applies a language choice from the in-game picker. On the web the shell
+    // owns the override (cookie + its own re-render), so hand it up; in the
+    // Activity persist it here and let the live-swap effect re-fetch the
+    // bundle in response.
+    const changeLocale = (tag: string): void => {
+        if (webAuth) {
+            onChangeLocaleOverride?.(tag);
+            return;
+        }
+
+        storeLocaleOverride(tag);
+        setActivityLocaleOverride(tag);
+    };
     // Mount-through-close presence for the overlays so they animate out, not
     // just in. (The `&& authState/ui.options` guards live at the render site.)
     const myProfile = usePresence(myProfileOpen, 200);
     const optionsPanel = usePresence(optionsOpen, 220);
     const searchModal = usePresence(searchOpen, 200);
+    const feedbackModal = usePresence(feedbackOpen, 200);
 
     // A finished round (roundHistory grows) or a session end can change EXP /
     // level, so invalidate open profile cards by bumping the nonce.
@@ -4563,6 +4930,39 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
         [bundle],
     );
 
+    // When the viewer changes language via a picker (the shell's on web, App's
+    // own in the Activity), re-fetch the bundle and swap it live — no reload, so
+    // the game session is preserved. The connect effect already fetched the
+    // initial bundle for this override, so the ref skips the redundant fetch on
+    // mount and only fires on an actual change. The picker always sets a concrete
+    // locale, so the override is never cleared back to null here.
+    const localeOverrideRef = useRef(effectiveLocaleOverride);
+    useEffect(() => {
+        if (localeOverrideRef.current === effectiveLocaleOverride) {
+            return undefined;
+        }
+
+        localeOverrideRef.current = effectiveLocaleOverride;
+        if (!effectiveLocaleOverride) return undefined;
+
+        let cancelled = false;
+        (async () => {
+            try {
+                const next = await fetchI18nBundle(effectiveLocaleOverride);
+                if (!cancelled) {
+                    setBundle(next.strings);
+                    setLocaleTag(next.locale);
+                }
+            } catch (e) {
+                console.warn("locale override swap failed", e);
+            }
+        })();
+
+        return () => {
+            cancelled = true;
+        };
+    }, [effectiveLocaleOverride]);
+
     useEffect(() => {
         let cancelled = false;
         // Captured per run: present on a reconnect, null on the first connect.
@@ -4599,8 +4999,18 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 const snapshot = await fetchSnapshot(accessToken, instanceId);
 
                 if (cancelled) return;
+                // An explicit language override always wins. On the web the
+                // shell owns it (and localizes itself from the same source,
+                // keeping game + shell in one language); in the Activity it's
+                // App's own persisted choice. Absent an override, the web falls
+                // back to the browser language and the Activity to the account
+                // locale (then the SDK locale below).
+                const baseLocale = webAuth
+                    ? navigator.language
+                    : snapshot.viewerLocale;
+
                 const initialBundle = await fetchI18nBundle(
-                    snapshot.viewerLocale || "en",
+                    effectiveLocaleOverride || baseLocale || "en",
                 );
 
                 if (cancelled) return;
@@ -4613,7 +5023,10 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 // Web rooms: a song may already be playing (late join /
                 // reconnect); each GET streams from the live position.
                 if (snapshot.currentAudio) {
-                    handleRoundAudio(snapshot.currentAudio.audioUrl);
+                    handleRoundAudio(
+                        snapshot.currentAudio.audioUrl,
+                        snapshot.currentAudio.playbackDurationSec,
+                    );
                 }
 
                 // A restart may have been announced before we connected (or
@@ -4624,11 +5037,14 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
 
                 // The SDK exposes the live Discord client locale, which can
                 // differ from the OAuth-embedded user.locale. Fetch the
-                // matching bundle and swap if it's different. On the web
-                // there's no SDK (and calling in would load its chunk); the
-                // snapshot's viewerLocale — the login-time Discord locale —
-                // already won.
-                const sdkLocale = webAuth ? null : await readSdkLocale();
+                // matching bundle and swap if it's different. Skipped when the
+                // viewer set an explicit override (their choice wins) and on the
+                // web (no SDK; the browser locale/override already won above).
+                const sdkLocale =
+                    webAuth || effectiveLocaleOverride
+                        ? null
+                        : await readSdkLocale();
+
                 if (
                     !cancelled &&
                     sdkLocale &&
@@ -4653,7 +5069,10 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                         // next round's audio must start on time even while
                         // the previous reveal is held on screen.
                         if (event.type === "roundAudio") {
-                            handleRoundAudio(event.audioUrl);
+                            handleRoundAudio(
+                                event.audioUrl,
+                                event.playbackDurationSec,
+                            );
                             return;
                         }
 
@@ -4676,6 +5095,8 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             if (event.snapshot.currentAudio) {
                                 handleRoundAudio(
                                     event.snapshot.currentAudio.audioUrl,
+                                    event.snapshot.currentAudio
+                                        .playbackDurationSec,
                                 );
                             }
 
@@ -4921,6 +5342,32 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 </button>
             )}
 
+            {/* Feedback toggle — left cluster, below lookup. */}
+            {authState && (
+                <button
+                    type="button"
+                    className={`sidebar-toggle left feedback ${
+                        feedbackOpen ? "active" : ""
+                    }`}
+                    onClick={() => setFeedbackOpen(true)}
+                    aria-label={t("feedback.open")}
+                    title={t("feedback.open")}
+                >
+                    <span>💬</span>
+                </button>
+            )}
+
+            {/* Language picker — left cluster, below feedback. Sits with the
+                other global preferences (theme) rather than in the web room
+                widget, so it's reachable on every surface and never clipped by
+                a screen edge. */}
+            <LanguageSelect
+                value={localeTag}
+                onChange={changeLocale}
+                t={t}
+                className="kmq-lang-toggle sidebar-toggle left"
+            />
+
             <div
                 className={`kmq-layout ${historyOpen ? "left-open" : ""} ${
                     sidebarOpen ? "right-open" : ""
@@ -5086,6 +5533,16 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             />
                         )}
 
+                        {authState && feedbackModal.mounted && (
+                            <FeedbackModal
+                                accessToken={authState.accessToken}
+                                instanceId={authState.instanceId}
+                                visible={feedbackModal.visible}
+                                onClose={() => setFeedbackOpen(false)}
+                                t={t}
+                            />
+                        )}
+
                         {authState && myProfile.mounted && (
                             <div
                                 className={`profile-modal-overlay${
@@ -5144,6 +5601,7 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                             noActiveGame={ui.sessionEnded}
                             levelUps={ui.levelUps}
                             viewerID={authState?.userID ?? null}
+                            isWeb={!!webAuth}
                             t={t}
                             winnerText={
                                 ui.sessionEnded &&
@@ -5423,7 +5881,20 @@ export default function App({ webAuth }: { webAuth?: WebAuth }) {
                 onDismiss={dismissFloatingEmote}
             />
 
-            {webAuth && <SoundControls audio={roundAudio} />}
+            {webAuth && <SoundControls audio={roundAudio} t={t} />}
+
+            {/* Player chat — web rooms and the embedded Activity alike. (In
+                Discord the channel has its own text chat, but this keeps the
+                conversation next to the game without tabbing away.) */}
+            {authState && (
+                <ChatPanel
+                    accessToken={authState.accessToken}
+                    instanceId={authState.instanceId}
+                    messages={ui.chatMessages}
+                    selfID={authState.userID}
+                    t={t}
+                />
+            )}
 
             {restartsAtEpochMs !== null && (
                 <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />
@@ -5595,6 +6066,21 @@ function reduce(
                         id: `${msg.userID}-${Date.now()}-${Math.random()}`,
                         emote: msg.emote,
                         left: 8 + Math.random() * 84,
+                    },
+                ],
+            };
+        case "chat":
+            return {
+                ...prev,
+                chatMessages: [
+                    ...prev.chatMessages.slice(-(CHAT_BUFFER_LIMIT - 1)),
+                    {
+                        id: msg.id,
+                        userID: msg.userID,
+                        username: msg.username,
+                        avatarUrl: msg.avatarUrl,
+                        text: msg.text,
+                        ts: msg.ts,
                     },
                 ],
             };

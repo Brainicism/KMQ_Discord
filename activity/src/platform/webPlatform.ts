@@ -9,6 +9,31 @@ import type { PlatformUser } from "./index";
  */
 
 const WEB_SESSION_STORAGE_KEY = "kmq:webSession";
+// A visitor's explicit language choice, persisted so it sticks across visits
+// and survives a page reload (it also outlives localStorage-clears on logout,
+// which is intentional — language is a device preference, not account state).
+const LOCALE_COOKIE = "kmq_locale";
+const LOCALE_COOKIE_MAX_AGE_S = 60 * 60 * 24 * 365; // 1 year
+
+/**
+ * The languages a visitor can pick from, in display order. Tags mirror the
+ * server's LocaleType; labels are endonyms (a language name is conventionally
+ * shown in its own language, so these are intentionally not translated).
+ */
+export const WEB_LOCALES: ReadonlyArray<{ tag: string; label: string }> = [
+    { tag: "en", label: "English" },
+    { tag: "es-ES", label: "Español" },
+    { tag: "fr", label: "Français" },
+    { tag: "de", label: "Deutsch" },
+    { tag: "nl", label: "Nederlands" },
+    { tag: "pt-BR", label: "Português" },
+    { tag: "ru", label: "Русский" },
+    { tag: "id", label: "Bahasa Indonesia" },
+    { tag: "hi", label: "हिन्दी" },
+    { tag: "ko", label: "한국어" },
+    { tag: "ja", label: "日本語" },
+    { tag: "zh-CN", label: "中文" },
+];
 
 export interface WebSession {
     token: string;
@@ -90,7 +115,8 @@ export async function completeLoginFromUrl(): Promise<WebSession | null> {
 
 /**
  * Creates a guest session (no Discord account) under a self-chosen display
- * name. Guests can join rooms via invite code/link but cannot host.
+ * name. Guests host and join rooms like anyone else; what they give up is
+ * persisted stats (their synthetic ID is orphaned on logout).
  * @param username - the display name the guest picked
  * @returns the new session, or null when guest mode is unavailable
  */
@@ -102,7 +128,7 @@ export async function guestLogin(username: string): Promise<WebSession | null> {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
                 username,
-                locale: navigator.language || "",
+                locale: readLocale() || "",
             }),
         });
     } catch {
@@ -166,9 +192,30 @@ export async function logout(session: WebSession | null): Promise<void> {
     }
 }
 
-/** Web equivalent of the SDK's live-locale lookup. */
+/** Reads the visitor's saved language override (the `kmq_locale` cookie). */
+export function getStoredLocaleOverride(): string | null {
+    const match = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith(`${LOCALE_COOKIE}=`));
+
+    if (!match) return null;
+    const value = decodeURIComponent(match.slice(LOCALE_COOKIE.length + 1));
+    return value || null;
+}
+
+/** Persists an explicit language choice so it survives reloads and revisits. */
+export function setStoredLocaleOverride(locale: string): void {
+    document.cookie =
+        `${LOCALE_COOKIE}=${encodeURIComponent(locale)}; ` +
+        `path=/; max-age=${LOCALE_COOKIE_MAX_AGE_S}; SameSite=Lax`;
+}
+
+/**
+ * Web equivalent of the SDK's live-locale lookup: an explicit language override
+ * (set via the language picker) wins over the browser's own preference.
+ */
 export function readLocale(): string | null {
-    return navigator.language || null;
+    return getStoredLocaleOverride() ?? navigator.language ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -182,15 +229,36 @@ export interface WebRoomMemberView {
     connected: boolean;
 }
 
+export type WebRoomVisibility = "public" | "private";
+
 export interface WebRoomView {
     code: string;
     ownerID: string;
+    visibility: WebRoomVisibility;
+    hasPassword: boolean;
     members: WebRoomMemberView[];
+}
+
+/** A public-lobby list entry (never includes the roster or password). */
+export interface PublicRoomSummaryView {
+    code: string;
+    ownerUsername: string;
+    memberCount: number;
+    maxMembers: number;
+    hasPassword: boolean;
 }
 
 export type WebRoomResult =
     | { room: WebRoomView }
-    | { error: "not_found" | "full" | "unauthorized" | "unavailable" };
+    | {
+          error:
+              | "not_found"
+              | "full"
+              | "guest_forbidden"
+              | "wrong_password"
+              | "unauthorized"
+              | "unavailable";
+      };
 
 async function roomRequest(
     session: WebSession,
@@ -210,12 +278,20 @@ async function roomRequest(
         return { error: "unavailable" };
     }
 
-    if (resp.status === 401 || resp.status === 403) {
+    // A locked room answers 403 with error:"wrong_password", and a guest
+    // creating a room while guest hosting is switched off answers
+    // "guest_forbidden"; a real auth failure is a bare 403/401.
+    if (resp.status === 403) {
+        const reason = await readErrorReason(resp);
+        if (reason === "wrong_password") return { error: "wrong_password" };
+        if (reason === "guest_forbidden") return { error: "guest_forbidden" };
         return { error: "unauthorized" };
     }
 
+    if (resp.status === 401) return { error: "unauthorized" };
     if (resp.status === 404) return { error: "not_found" };
     if (resp.status === 409) return { error: "full" };
+
     if (!resp.ok) return { error: "unavailable" };
 
     const body = (await resp.json()) as { room?: WebRoomView };
@@ -223,18 +299,59 @@ async function roomRequest(
     return { room: body.room };
 }
 
-export async function createRoom(session: WebSession): Promise<WebRoomResult> {
-    return roomRequest(session, "/api/web/room", { method: "POST" });
+async function readErrorReason(resp: Response): Promise<string | null> {
+    try {
+        const body = (await resp.json()) as { error?: string };
+        return body?.error ?? null;
+    } catch {
+        return null;
+    }
+}
+
+export async function createRoom(
+    session: WebSession,
+    options: { visibility: WebRoomVisibility; password?: string } = {
+        visibility: "private",
+    },
+): Promise<WebRoomResult> {
+    return roomRequest(session, "/api/web/room", {
+        method: "POST",
+        body: JSON.stringify({
+            visibility: options.visibility,
+            password: options.password || null,
+        }),
+    });
 }
 
 export async function joinRoom(
     session: WebSession,
     code: string,
+    password?: string,
 ): Promise<WebRoomResult> {
     return roomRequest(session, "/api/web/room/join", {
         method: "POST",
-        body: JSON.stringify({ code }),
+        body: JSON.stringify({ code, password: password || null }),
     });
+}
+
+/**
+ * @param session - the web session
+ * @returns the public lobby list, or null on any error (caller shows empty)
+ */
+export async function listPublicRooms(
+    session: WebSession,
+): Promise<PublicRoomSummaryView[] | null> {
+    try {
+        const resp = await fetch("/api/web/rooms", {
+            headers: { Authorization: `Bearer ${session.token}` },
+        });
+
+        if (!resp.ok) return null;
+        const body = (await resp.json()) as { rooms?: PublicRoomSummaryView[] };
+        return body?.rooms ?? [];
+    } catch {
+        return null;
+    }
 }
 
 /**

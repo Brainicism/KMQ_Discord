@@ -389,6 +389,12 @@ export const ACTIVITY_RATE_LIMIT_LIFECYCLE = 30;
 export const ACTIVITY_RATE_LIMIT_READ = 60;
 export const ACTIVITY_RATE_LIMIT_ACTION = 60;
 export const ACTIVITY_RATE_LIMIT_GUESS = 120;
+// Feedback is submitted rarely; a tight per-IP limit keeps the alert webhook
+// from being spammed.
+export const ACTIVITY_RATE_LIMIT_FEEDBACK = 5;
+// Cap each feedback answer so a malicious client can't ship a huge webhook
+// payload.
+export const ACTIVITY_FEEDBACK_MAX_LENGTH = 2000;
 
 // Standalone-website ("web mode") auth. Web session tokens are opaque bearer
 // strings prefixed so resolveAccessToken can route them to the local
@@ -406,11 +412,11 @@ export const WEB_OAUTH_STATE_TTL_MS = 5 * 60 * 1000;
 export const WEB_OAUTH_STATE_COOKIE = "kmq_oauth_state";
 
 // Guests (no Discord account) get synthetic numeric user IDs with bits 62+61
-// set plus 60 random bits: disjoint from real snowflakes (below 2^61 until
-// ~2032) and from room guild IDs (bit 62 | owner snowflake, so bit 61 stays
-// clear for decades). Guests can join rooms but never host, so a guest ID is
-// never fed to roomIDForOwner (which would collide, as bit 62 is already
-// set).
+// set plus 60 random bits (bit 60 stays clear — the random part is 60 bits
+// wide): disjoint from real snowflakes (below 2^61 until ~2032), from
+// Discord-hosted room guild IDs (bit 62 | owner snowflake, so bit 61 stays
+// clear for decades), and from guest-hosted room guild IDs (bit 60 set, see
+// WEB_GUEST_ROOM_ID_FLAG).
 export const WEB_GUEST_ID_FLAG = (1n << 62n) | (1n << 61n);
 export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
 
@@ -420,7 +426,35 @@ export const WEB_GUEST_USERNAME_MAX_LENGTH = 32;
 // routing) without colliding with real guilds. Derived from the creator's
 // user ID so a recreated room keeps its game options and presets.
 export const WEB_ROOM_ID_FLAG = 1n << 62n;
+// A guest-hosted room can't use `bit 62 | ownerID` — a guest ID already has
+// bit 62 set, so the room ID would come out equal to the owner's user ID. Its
+// guild ID is instead bits 62+61+60 | the owner's 60 random bits, which keeps
+// bit 62 set (so every web-room code path still recognizes it) while sitting
+// above the guest user-ID range, and stays under 2^63 (signed-BIGINT-safe for
+// any analytics CAST). Still deterministic per owner, so a guest recreating
+// their room keeps its options.
+export const WEB_GUEST_ROOM_ID_FLAG = (1n << 62n) | (1n << 61n) | (1n << 60n);
+// The random part of a guest user ID (and of the guest room ID derived from
+// it): the low 60 bits.
+export const WEB_GUEST_ID_RANDOM_MASK = (1n << 60n) - 1n;
 export const WEB_ROOM_MAX_MEMBERS = 8;
+// Invite codes are shared in chat, typed by hand, and read aloud, so draw them
+// from an alphabet with no look-alike characters: the digits 0/1 and letters
+// O/I are excluded (L stays — nothing resembles it once 1 and I are gone), and
+// it's uppercase-only to avoid case confusion. 32 chars ^ 12 ≈ 60 bits, ample
+// for ephemeral, rate-limited rooms.
+export const WEB_ROOM_CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+export const WEB_ROOM_CODE_LENGTH = 12;
+// Cap the optional join-password length; rooms are ephemeral, this is only
+// abuse defense against a huge payload.
+export const WEB_ROOM_PASSWORD_MAX_LENGTH = 128;
+// Guest-login abuse hardening, and the only lever bounding free identities:
+// on top of the fastify token-bucket limit, a single IP can mint at most this
+// many guest sessions per rolling window. Stops a script from farming
+// thousands of ephemeral identities while still leaving plenty of headroom for
+// a shared/NAT'd IP.
+export const WEB_GUEST_LOGIN_PER_IP_MAX = 30;
+export const WEB_GUEST_LOGIN_IP_WINDOW_MS = 60 * 60 * 1000;
 // A member with no open websocket is dropped from the room after this grace
 // period (survives refreshes and brief network blips); a room with no members
 // left is closed.
@@ -446,6 +480,11 @@ export const ACTIVITY_EMOTES = ["🔥", "😂", "👏", "😱", "❤️", "🎉"
 
 // Per-user cooldown between accepted emotes, to curb spam (ms).
 export const ACTIVITY_EMOTE_COOLDOWN_MS = 600;
+
+// Web room chat: cap message length and rate-limit per user to curb spam and
+// oversized broadcast payloads.
+export const ACTIVITY_CHAT_MAX_LENGTH = 300;
+export const ACTIVITY_CHAT_COOLDOWN_MS = 750;
 
 // Discord OAuth + activity REST endpoints used by the admiral.
 const DISCORD_API_BASE = "https://discord.com/api";

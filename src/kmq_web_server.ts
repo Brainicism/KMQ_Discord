@@ -1,10 +1,12 @@
 import * as uuid from "uuid";
 import {
     ACTIVITY_ACCESS_TOKEN_CACHE_TTL_MS,
+    ACTIVITY_FEEDBACK_MAX_LENGTH,
     ACTIVITY_GUESS_MAX_LENGTH,
     ACTIVITY_HTTP_TIMEOUT_MS,
     ACTIVITY_INSTANCE_CACHE_TTL_MS,
     ACTIVITY_RATE_LIMIT_ACTION,
+    ACTIVITY_RATE_LIMIT_FEEDBACK,
     ACTIVITY_RATE_LIMIT_GUESS,
     ACTIVITY_RATE_LIMIT_LIFECYCLE,
     ACTIVITY_RATE_LIMIT_READ,
@@ -24,15 +26,21 @@ import {
     ELIMINATION_MAX_LIVES,
     WEB_AUDIO_MAX_CONCURRENT_STREAMS,
     WEB_AUDIO_URL_PREFIX,
+    WEB_GUEST_LOGIN_IP_WINDOW_MS,
+    WEB_GUEST_LOGIN_PER_IP_MAX,
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
+    WEB_ROOM_PASSWORD_MAX_LENGTH,
     WEB_ROOM_SWEEP_INTERVAL_MS,
     discordAvatarUrl,
 } from "./constants";
 import { IPCLogger } from "./logger";
 import { availableGenders } from "./enums/option_types/gender";
-import { buildAudioStreamArgs } from "./web_audio_registry";
+import {
+    buildAudioStreamArgs,
+    remainingPlaybackSec,
+} from "./web_audio_registry";
 import {
     createWebSession,
     deleteWebSession,
@@ -48,6 +56,7 @@ import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
+import FeedbackCommand from "./commands/misc_commands/feedback";
 import GameType from "./enums/game_type";
 import GuessModeType from "./enums/option_types/guess_mode_type";
 import KmqConfiguration from "./kmq_configuration";
@@ -540,6 +549,10 @@ export default class KmqWebServer {
 
     private webRoomManager: WebRoomManager | null = null;
 
+    // Per-IP guest-login timestamps (rolling window), for the abuse cap on
+    // top of the fastify token-bucket limit. Pruned lazily on each attempt.
+    private guestLoginsByIP: Map<string, number[]> = new Map();
+
     // Live ffmpeg transcodes serving /api/web/audio streams (one per
     // listener), for the global concurrency cap.
     private activeAudioStreams = 0;
@@ -600,7 +613,14 @@ export default class KmqWebServer {
      * Starts web server
      * */
     async startWebServer(fleet: Fleet): Promise<void> {
-        const httpServer = fastify({});
+        // Trust only the loopback proxy (nginx on 127.0.0.1) so `request.ip`
+        // and @fastify/rate-limit resolve the real client IP from the
+        // X-Forwarded-For nginx appends, rather than seeing every external
+        // request as 127.0.0.1. This makes the per-IP rate limits (including
+        // the guest-login cap) effective and keeps the `request.ip ===
+        // "127.0.0.1"` internal-route gates from being bypassed via the proxy.
+        // Loopback-only trust prevents clients spoofing X-Forwarded-For.
+        const httpServer = fastify({ trustProxy: "loopback" });
         await httpServer.register(fastifyView, {
             engine: {
                 ejs,
@@ -1455,6 +1475,97 @@ export default class KmqWebServer {
                 } catch (e) {
                     logger.warn(
                         `Activity emote failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/chat",
+            limit(ACTIVITY_RATE_LIMIT_ACTION),
+            async (request, reply) => {
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as { text?: string };
+                if (typeof body.text !== "string") {
+                    await reply.code(400).send({ error: "Missing text" });
+                    return;
+                }
+
+                try {
+                    const result = await this.activityHub!.chat({
+                        guildID: ctx.instance.guildID,
+                        userID: ctx.user.id,
+                        text: body.text,
+                    });
+
+                    if (!result.ok) {
+                        await reply.code(409).send({ error: result.reason });
+                        return;
+                    }
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity chat failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                    );
+                    await reply.code(500).send({ error: "Internal" });
+                }
+            },
+        );
+
+        httpServer.post(
+            "/api/activity/feedback",
+            limit(ACTIVITY_RATE_LIMIT_FEEDBACK),
+            async (request, reply) => {
+                // Gated on being an authed instance/room participant so only
+                // real players can reach the alert webhook. Mirrors the
+                // /feedback slash command's two questions (see FeedbackCommand
+                // .FEEDBACK_QUESTIONS): "like" is optional, "improve" required.
+                const ctx = await requireAuthedInstance(request, reply);
+                if (!ctx) return;
+
+                const body = (request.body ?? {}) as {
+                    likeKMQ?: unknown;
+                    improveKMQ?: unknown;
+                };
+
+                const readAnswer = (v: unknown): string | undefined =>
+                    typeof v === "string" ? v.trim() : undefined;
+
+                const likeKMQ = readAnswer(body.likeKMQ);
+                const improveKMQ = readAnswer(body.improveKMQ);
+
+                if (!improveKMQ) {
+                    await reply.code(400).send({ error: "Missing improveKMQ" });
+                    return;
+                }
+
+                if (
+                    (likeKMQ?.length ?? 0) > ACTIVITY_FEEDBACK_MAX_LENGTH ||
+                    improveKMQ.length > ACTIVITY_FEEDBACK_MAX_LENGTH
+                ) {
+                    await reply.code(400).send({ error: "Feedback too long" });
+                    return;
+                }
+
+                try {
+                    // The submitter's chosen/display username is the tag —
+                    // getUserTag would 404 for web guests, who have no Discord
+                    // account.
+                    await FeedbackCommand.submitFeedback(
+                        ctx.instance.guildID,
+                        ctx.user.username,
+                        ctx.user.id,
+                        [likeKMQ, improveKMQ],
+                    );
+
+                    await reply.code(200).send({ ok: true });
+                } catch (e) {
+                    logger.warn(
+                        `Activity feedback failed. uid=${ctx.user.id}, err=${(e as Error).message}`,
                     );
                     await reply.code(500).send({ error: "Internal" });
                 }
@@ -2580,6 +2691,19 @@ export default class KmqWebServer {
                     return;
                 }
 
+                // Per-IP rolling-window cap on top of the token-bucket limit:
+                // stops a script farming ephemeral guest identities.
+                if (!this.recordGuestLogin(request.ip)) {
+                    logger.warn(
+                        `Guest-login rate limit hit for IP ${request.ip}`,
+                    );
+
+                    await reply
+                        .code(429)
+                        .send({ error: "Too many guest logins" });
+                    return;
+                }
+
                 const body = request.body as {
                     username?: string;
                     locale?: string;
@@ -2733,20 +2857,43 @@ export default class KmqWebServer {
                 const user = await requireWebUser(request, reply);
                 if (!user) return;
 
-                // Guests can join rooms but never host: free identities
-                // shouldn't own persistent per-owner state (game options,
-                // presets), and a guest ID fed to roomIDForOwner would
-                // collide with the guest ID range (bit 62 already set).
-                if (isGuestUserID(user.id)) {
+                // Guests host like anyone else (their rooms get their own
+                // guild-ID space, see WebRoomManager.roomIDForOwner), unless
+                // hosting has been shed via the feature switch — joining an
+                // invite still works in that case.
+                const isGuest = isGuestUserID(user.id);
+                if (
+                    isGuest &&
+                    !KmqConfiguration.Instance.webGuestHostingEnabled()
+                ) {
                     await reply.code(403).send({ error: "guest_forbidden" });
                     return;
                 }
 
-                const result = this.webRoomManager!.createRoom({
-                    id: user.id,
-                    username: user.username,
-                    avatarUrl: user.avatarUrl,
-                });
+                const createBody = (request.body ?? {}) as {
+                    visibility?: unknown;
+                    password?: unknown;
+                };
+
+                // Default private (preserves the pre-lobbies behavior); only
+                // "public" opts into the browse list.
+                const visibility =
+                    createBody.visibility === "public" ? "public" : "private";
+
+                const password = this.parseRoomPassword(createBody.password);
+                if (password === undefined) {
+                    await reply.code(400).send({ error: "Invalid password" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.createRoom(
+                    {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                    },
+                    { visibility, password },
+                );
 
                 if ("error" in result) {
                     // Only possible when rejoining one's own still-alive room
@@ -2768,21 +2915,43 @@ export default class KmqWebServer {
                 const user = await requireWebUser(request, reply);
                 if (!user) return;
 
-                const code = (request.body as { code?: string } | null)?.code;
+                const joinBody = (request.body ?? {}) as {
+                    code?: unknown;
+                    password?: unknown;
+                };
+
+                const code = joinBody.code;
                 if (!code || typeof code !== "string") {
                     await reply.code(400).send({ error: "Missing code" });
                     return;
                 }
 
-                const result = this.webRoomManager!.joinRoom(code, {
-                    id: user.id,
-                    username: user.username,
-                    avatarUrl: user.avatarUrl,
-                });
+                const password = this.parseRoomPassword(joinBody.password);
+                if (password === undefined) {
+                    await reply.code(400).send({ error: "Invalid password" });
+                    return;
+                }
+
+                const result = this.webRoomManager!.joinRoom(
+                    code,
+                    {
+                        id: user.id,
+                        username: user.username,
+                        avatarUrl: user.avatarUrl,
+                    },
+                    password ?? undefined,
+                );
 
                 if ("error" in result) {
+                    // not_found → 404; wrong_password → 403; full → 409.
+                    const statusByError: Record<string, number> = {
+                        not_found: 404,
+                        wrong_password: 403,
+                        full: 409,
+                    };
+
                     await reply
-                        .code(result.error === "not_found" ? 404 : 409)
+                        .code(statusByError[result.error] ?? 409)
                         .send({ error: result.error });
                     return;
                 }
@@ -2836,6 +3005,67 @@ export default class KmqWebServer {
                 });
             },
         );
+
+        httpServer.get(
+            "/api/web/rooms",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                // Public lobby list — the "find a game" surface. Any web user
+                // (guest included) may browse it; it never leaks rosters or
+                // passwords (see WebRoomManager.listPublicRooms).
+                const user = await requireWebUser(request, reply);
+                if (!user) return;
+
+                await reply.code(200).send({
+                    rooms: this.webRoomManager!.listPublicRooms(),
+                });
+            },
+        );
+    }
+
+    /**
+     * Validates a client-supplied room password. Returns the trimmed password,
+     * null when none was supplied (open room), or `undefined` when the value
+     * is the wrong type or too long (the caller should 400).
+     * @param raw - the raw `password` field from the request body
+     * @returns the password, null, or undefined (invalid)
+     */
+    private parseRoomPassword(raw: unknown): string | null | undefined {
+        if (raw === undefined || raw === null || raw === "") {
+            return null;
+        }
+
+        if (
+            typeof raw !== "string" ||
+            raw.length > WEB_ROOM_PASSWORD_MAX_LENGTH
+        ) {
+            return undefined;
+        }
+
+        return raw;
+    }
+
+    /**
+     * Records a guest-login attempt from an IP and reports whether it's within
+     * the rolling-window cap. Prunes expired timestamps as it goes.
+     * @param ip - the requesting IP
+     * @returns true if allowed (and recorded); false if the IP is over the cap
+     */
+    private recordGuestLogin(ip: string): boolean {
+        const now = Date.now();
+        const cutoff = now - WEB_GUEST_LOGIN_IP_WINDOW_MS;
+        const recent = (this.guestLoginsByIP.get(ip) ?? []).filter(
+            (t) => t > cutoff,
+        );
+
+        if (recent.length >= WEB_GUEST_LOGIN_PER_IP_MAX) {
+            this.guestLoginsByIP.set(ip, recent);
+            return false;
+        }
+
+        recent.push(now);
+        this.guestLoginsByIP.set(ip, recent);
+        return true;
     }
 
     /**
@@ -2872,12 +3102,24 @@ export default class KmqWebServer {
                 const token = (request.params as { token: string }).token;
                 const entry = this.activityHub.getAudioEntry(token);
                 if (!entry) {
+                    // Expected right after a session ends (the entry is
+                    // dropped while the element re-requests), otherwise a sign
+                    // the client is chasing a playback that got replaced.
+                    logger.info(
+                        `Audio stream token not found. token=${token.slice(0, 8)}`,
+                    );
+
                     await reply.code(404).send({ error: "Unknown token" });
                     return;
                 }
 
-                const args = buildAudioStreamArgs(entry, Date.now());
+                const now = Date.now();
+                const args = buildAudioStreamArgs(entry, now);
                 if (!args) {
+                    logger.info(
+                        `Audio stream past its end. gid=${entry.guildID}, elapsed=${((now - entry.mintedAt) / 1000).toFixed(1)}s, duration=${entry.playbackDurationSec}s`,
+                    );
+
                     await reply.code(410).send({ error: "Playback ended" });
                     return;
                 }
@@ -2939,9 +3181,23 @@ export default class KmqWebServer {
                     }
                 });
 
+                const elapsedSec = (now - entry.mintedAt) / 1000;
+                logger.info(
+                    `Audio stream starting. gid=${entry.guildID}, elapsed=${elapsedSec.toFixed(1)}s, remaining=${remainingPlaybackSec(entry, now).toFixed(1)}s, active=${this.activeAudioStreams}`,
+                );
+
                 // Tab closed / element released: kill the transcode instead
                 // of encoding to a dead socket for the rest of the song.
                 request.raw.on("close", () => {
+                    // A body cut short is exactly what a listener hears as
+                    // "the audio stopped" — worth distinguishing from the
+                    // normal case where the client leaves after we finished.
+                    if (!reply.raw.writableEnded) {
+                        logger.info(
+                            `Audio stream client disconnected mid-body. gid=${entry.guildID}, afterSec=${((Date.now() - now) / 1000).toFixed(1)}`,
+                        );
+                    }
+
                     child.kill("SIGKILL");
                     release();
                 });

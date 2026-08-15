@@ -1,9 +1,14 @@
 import {
+    WEB_GUEST_ID_FLAG,
+    WEB_GUEST_ROOM_ID_FLAG,
+    WEB_ROOM_CODE_ALPHABET,
+    WEB_ROOM_CODE_LENGTH,
     WEB_ROOM_DISCONNECT_GRACE_MS,
     WEB_ROOM_ID_FLAG,
     WEB_ROOM_MAX_MEMBERS,
 } from "../../../constants";
 import { describe } from "mocha";
+import { isGuestUserID } from "../../../helpers/web_session_manager";
 import WebRoomManager from "../../../web_room_manager";
 import assert from "assert";
 import type { WebRoomMemberIdentity } from "../../../web_room_manager";
@@ -11,6 +16,16 @@ import type { WebRoomMemberIdentity } from "../../../web_room_manager";
 const user = (n: number): WebRoomMemberIdentity => ({
     id: (100000000000000000n + BigInt(n)).toString(),
     username: `user${n}`,
+    avatarUrl: null,
+});
+
+/**
+ * @param n - a seed for the guest's random bits
+ * @returns a guest identity, shaped exactly like mintGuestUserID's output
+ */
+const guest = (n: number): WebRoomMemberIdentity => ({
+    id: (WEB_GUEST_ID_FLAG | BigInt(n)).toString(),
+    username: `guest${n}`,
     avatarUrl: null,
 });
 
@@ -253,6 +268,8 @@ describe("web room manager", () => {
             assert.deepStrictEqual(serialized, {
                 code: created.room.code,
                 ownerID: user(1).id,
+                visibility: "private",
+                hasPassword: false,
                 members: [
                     {
                         id: user(1).id,
@@ -262,6 +279,241 @@ describe("web room manager", () => {
                     },
                 ],
             });
+        });
+    });
+
+    describe("visibility and public listing", () => {
+        it("defaults to a private, unlisted room", () => {
+            const created = manager.createRoom(user(1));
+            assert.ok("room" in created);
+            assert.strictEqual(created.room.visibility, "private");
+            assert.deepStrictEqual(manager.listPublicRooms(), []);
+        });
+
+        it("lists public rooms with owner name and counts, newest first", () => {
+            const a = manager.createRoom(user(1), { visibility: "public" });
+            assert.ok("room" in a);
+            manager.joinRoom(a.room.code, user(2));
+
+            clock.now += 1000;
+            const b = manager.createRoom(user(3), { visibility: "public" });
+            assert.ok("room" in b);
+
+            // A private room stays out of the list.
+            manager.createRoom(user(4), { visibility: "private" });
+
+            const list = manager.listPublicRooms();
+            assert.strictEqual(list.length, 2);
+            // Newest (user3's) first.
+            assert.strictEqual(list[0]!.code, b.room.code);
+            assert.strictEqual(list[0]!.ownerUsername, "user3");
+            assert.strictEqual(list[0]!.memberCount, 1);
+            assert.strictEqual(list[0]!.hasPassword, false);
+            assert.strictEqual(list[1]!.code, a.room.code);
+            assert.strictEqual(list[1]!.memberCount, 2);
+        });
+    });
+
+    describe("password-protected rooms", () => {
+        it("rejects a join with a wrong/missing password and accepts the right one", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+                password: "hunter2",
+            });
+
+            assert.ok("room" in created);
+            const { code } = created.room;
+
+            assert.deepStrictEqual(manager.joinRoom(code, user(2)), {
+                error: "wrong_password",
+            });
+
+            assert.deepStrictEqual(manager.joinRoom(code, user(2), "nope"), {
+                error: "wrong_password",
+            });
+
+            assert.ok("room" in manager.joinRoom(code, user(2), "hunter2"));
+            assert.strictEqual(created.room.members.size, 2);
+        });
+
+        it("surfaces the password requirement without leaking the password", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+                password: "secret",
+            });
+
+            assert.ok("room" in created);
+
+            const serialized = manager.serializeRoom(created.room);
+            assert.strictEqual(serialized.hasPassword, true);
+            assert.ok(!("passwordHash" in serialized));
+
+            const summary = manager.listPublicRooms()[0]!;
+            assert.strictEqual(summary.hasPassword, true);
+        });
+
+        it("lets an existing member reconnect without re-supplying the password", () => {
+            const created = manager.createRoom(user(1), {
+                password: "pw",
+            });
+
+            assert.ok("room" in created);
+            // The owner is already a member; a bare join refreshes identity.
+            assert.ok("room" in manager.joinRoom(created.room.code, user(1)));
+        });
+
+        it("re-applies visibility and password when the owner recreates the room", () => {
+            const created = manager.createRoom(user(1), {
+                visibility: "public",
+            });
+
+            assert.ok("room" in created);
+            manager.joinRoom(created.room.code, user(2));
+            manager.leaveRoom(user(1).id);
+
+            // Owner recreates → same room, now private + locked.
+            const again = manager.createRoom(user(1), {
+                visibility: "private",
+                password: "locked",
+            });
+
+            assert.ok("room" in again);
+            assert.strictEqual(again.room, created.room);
+            assert.strictEqual(again.room.visibility, "private");
+            assert.strictEqual(again.room.passwordHash !== null, true);
+        });
+    });
+
+    describe("guest hosting", () => {
+        it("gives a guest-hosted room its own guild-ID space", () => {
+            const roomID = WebRoomManager.roomIDForOwner(guest(7).id);
+
+            // Still a web room (bit 62), but distinct from the owner's user
+            // ID — `bit 62 | guestID` would have been the guest ID itself.
+            assert.strictEqual(BigInt(roomID) & WEB_ROOM_ID_FLAG, 1n << 62n);
+            assert.notStrictEqual(roomID, guest(7).id);
+            assert.strictEqual(
+                BigInt(roomID) & WEB_GUEST_ROOM_ID_FLAG,
+                WEB_GUEST_ROOM_ID_FLAG,
+            );
+
+            // ...and it must never read back as a guest *user* ID.
+            assert.strictEqual(isGuestUserID(roomID), false);
+            assert.strictEqual(isGuestUserID(guest(7).id), true);
+        });
+
+        it("keeps guest room IDs disjoint from Discord-hosted room IDs", () => {
+            const guestRoomIDs = new Set<string>();
+            for (let i = 1; i <= 50; i++) {
+                guestRoomIDs.add(WebRoomManager.roomIDForOwner(guest(i).id));
+                // A Discord-derived room ID can never land in the guest room
+                // space: it leaves bits 61 and 60 clear.
+                const discordRoomID = WebRoomManager.roomIDForOwner(user(i).id);
+                assert.notStrictEqual(
+                    BigInt(discordRoomID) & WEB_GUEST_ROOM_ID_FLAG,
+                    WEB_GUEST_ROOM_ID_FLAG,
+                );
+            }
+
+            // Distinct guests get distinct rooms.
+            assert.strictEqual(guestRoomIDs.size, 50);
+        });
+
+        it("lets a guest create a room and is deterministic per guest", () => {
+            const created = manager.createRoom(guest(1), {
+                visibility: "public",
+            });
+
+            assert.ok("room" in created);
+            assert.strictEqual(created.room.ownerID, guest(1).id);
+            assert.strictEqual(
+                created.room.roomID,
+                WebRoomManager.roomIDForOwner(guest(1).id),
+            );
+
+            // Listed in the public lobby like any other room.
+            assert.deepStrictEqual(
+                manager.listPublicRooms().map((r) => r.code),
+                [created.room.code],
+            );
+
+            manager.leaveRoom(guest(1).id);
+            const again = manager.createRoom(guest(1));
+            assert.ok("room" in again);
+            assert.strictEqual(again.room.roomID, created.room.roomID);
+        });
+
+        it("fills a guest-hosted room entirely with guests", () => {
+            const created = manager.createRoom(guest(1));
+            assert.ok("room" in created);
+            const { code } = created.room;
+
+            for (let i = 2; i <= WEB_ROOM_MAX_MEMBERS; i++) {
+                assert.ok("room" in manager.joinRoom(code, guest(i)));
+            }
+
+            assert.strictEqual(created.room.members.size, WEB_ROOM_MAX_MEMBERS);
+            // Only the member cap applies — there is no separate guest cap.
+            assert.deepStrictEqual(manager.joinRoom(code, guest(99)), {
+                error: "full",
+            });
+        });
+
+        it("lets guests and Discord users share a room in either direction", () => {
+            const guestHosted = manager.createRoom(guest(1));
+            assert.ok("room" in guestHosted);
+            assert.ok(
+                "room" in manager.joinRoom(guestHosted.room.code, user(2)),
+            );
+
+            const discordHosted = manager.createRoom(user(3));
+            assert.ok("room" in discordHosted);
+            for (let i = 10; i < 10 + WEB_ROOM_MAX_MEMBERS - 1; i++) {
+                assert.ok(
+                    "room" in
+                        manager.joinRoom(discordHosted.room.code, guest(i)),
+                );
+            }
+
+            assert.strictEqual(
+                discordHosted.room.members.size,
+                WEB_ROOM_MAX_MEMBERS,
+            );
+        });
+
+        it("hands a guest-hosted room over to a Discord member on leave", () => {
+            const created = manager.createRoom(guest(1));
+            assert.ok("room" in created);
+            manager.joinRoom(created.room.code, user(2));
+
+            manager.leaveRoom(guest(1).id);
+            assert.strictEqual(created.room.ownerID, user(2).id);
+            // The room ID stays the creator-derived one for its lifetime.
+            assert.strictEqual(
+                created.room.roomID,
+                WebRoomManager.roomIDForOwner(guest(1).id),
+            );
+        });
+    });
+
+    describe("invite codes", () => {
+        it("draws codes only from the look-alike-free alphabet", () => {
+            const allowed = new RegExp(
+                `^[${WEB_ROOM_CODE_ALPHABET}]{${WEB_ROOM_CODE_LENGTH}}$`,
+            );
+
+            const seen = new Set<string>();
+            for (let i = 0; i < 200; i++) {
+                const created = manager.createRoom(user(i));
+                assert.ok("room" in created);
+                const { code } = created.room;
+
+                assert.match(code, allowed);
+                // No 0/O or 1/I look-alikes ever appear.
+                assert.doesNotMatch(code, /[0O1I]/);
+                assert.strictEqual(seen.has(code), false);
+                seen.add(code);
+            }
         });
     });
 });

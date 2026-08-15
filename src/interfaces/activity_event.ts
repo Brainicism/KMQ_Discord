@@ -66,6 +66,18 @@ type ActivityEvent =
           emote: string;
       }
     | {
+          // Web rooms only: a player's chat message, relayed to everyone in the
+          // room. Text is profanity-masked server-side. Not persisted, so late
+          // joiners don't see backlog.
+          type: "chat";
+          id: string;
+          userID: string;
+          username: string;
+          avatarUrl: string | null;
+          text: string;
+          ts: number;
+      }
+    | {
           type: "levelUp";
           levelUps: Array<{
               userID: string;

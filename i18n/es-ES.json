@@ -32,6 +32,20 @@
         "emoteBarLabel": "Envía una reacción",
         "endGameBusy": "Finalizando…",
         "endGameButton": "Finalizar partida",
+        "feedback": {
+            "cancel": "Cancelar",
+            "close": "Cerrar",
+            "error": "No se pudieron enviar tus comentarios. Inténtalo de nuevo.",
+            "improveLabel": "¿Qué se puede mejorar en KMQ?",
+            "improvePlaceholder": "KMQ es DEMASIADO adictivo. Mi familia y amigos me echan de menos.",
+            "likeLabel": "¿Qué te gusta de KMQ?",
+            "likePlaceholder": "KMQ me ayuda a descubrir nueva música y géneros.",
+            "open": "Enviar comentarios",
+            "sending": "Enviando...",
+            "submit": "Enviar comentarios",
+            "success": "¡Gracias por tus comentarios!",
+            "title": "Comentarios de KMQ"
+        },
         "gameType": {
             "classic": "Clásico",
             "clip": "Clip",
@@ -264,6 +278,7 @@
             "title": "Buscar una canción"
         },
         "sessionEndedBanner": "No hay partida activa — inicia una con el botón de arriba (o {{playSlash}} en este canal).",
+        "sessionEndedBannerWeb": "No hay partida activa — inicia una con el botón de arriba.",
         "sessionWinnerNone": "Fin de la partida — no se anotaron puntos.",
         "sessionWinnerSoloMany": "🏆 ¡{{username}} gana con {{score}} puntos!",
         "sessionWinnerSoloOne": "🏆 ¡{{username}} gana con 1 punto!",
@@ -304,6 +319,73 @@
         "themeToggleDark": "Cambiar a modo oscuro",
         "themeToggleLight": "Cambiar a modo claro",
         "waitingForNextRound": "Esperando la próxima ronda…",
+        "web": {
+            "cancel": "Cancelar",
+            "chat": {
+                "collapse": "Contraer chat",
+                "empty": "Aún no hay mensajes. ¡Saluda!",
+                "placeholder": "Escribe un mensaje…",
+                "send": "Enviar",
+                "title": "Chat"
+            },
+            "createRoom": "Crear una sala",
+            "error": {
+                "full": "Esa sala está llena.",
+                "generic": "Algo salió mal. Inténtalo de nuevo.",
+                "guestForbidden": "Los invitados no pueden crear salas ahora mismo. Únete a una con un código de invitación o inicia sesión con Discord.",
+                "guestUnavailable": "El juego como invitado no está disponible ahora mismo.",
+                "loginFailed": "Error al iniciar sesión. Inténtalo de nuevo.",
+                "notFound": "Esa sala no existe (o todos se han ido).",
+                "removed": "Se te ha expulsado de la sala.",
+                "unauthorized": "Tu sesión ha caducado. Inicia sesión de nuevo.",
+                "wrongPassword": "Contraseña incorrecta. Inténtalo de nuevo."
+            },
+            "guestNote": "Los invitados pueden crear salas y unirse a ellas al instante. Inicia sesión con Discord para conservar tus estadísticas.",
+            "guestNoteLoggedIn": "Estás jugando como invitado: crea una sala abajo, explora la lista pública o únete con un código de invitación. Inicia sesión con Discord para conservar tus estadísticas.",
+            "inviteCodePlaceholder": "Código o enlace de invitación",
+            "join": "Unirse",
+            "joinAsGuest": "Unirse como invitado",
+            "language": "Idioma",
+            "loading": "Cargando...",
+            "lobby": {
+                "empty": "No hay salas públicas ahora mismo, ¡crea una arriba!",
+                "roomName": "Sala de {{owner}}",
+                "title": "Salas públicas"
+            },
+            "loggedInAs": "Sesión iniciada como",
+            "loginDiscord": "Iniciar sesión con Discord",
+            "logout": "Cerrar sesión",
+            "nicknameLabel": "Apodo de invitado",
+            "nicknamePlaceholder": "Elige un apodo",
+            "or": "o",
+            "passwordLabel": "Contraseña de la sala",
+            "passwordOptionalLabel": "Contraseña de la sala (opcional)",
+            "passwordOptionalPlaceholder": "Contraseña (opcional)",
+            "passwordPlaceholder": "Contraseña",
+            "passwordRequired": "Esta sala requiere una contraseña.",
+            "playAsGuest": "Jugar como invitado",
+            "playingAsGuest": "Jugando como invitado",
+            "room": {
+                "away": "{{username}} (ausente)",
+                "copied": "¡Copiado!",
+                "copyInvite": "Copiar enlace de invitación",
+                "label": "Sala",
+                "leave": "Salir"
+            },
+            "sound": {
+                "enable": "Activar sonido",
+                "mute": "Silenciar",
+                "retry": "El sonido se detuvo: toca para reanudar",
+                "unmute": "Activar sonido",
+                "volume": "Volumen"
+            },
+            "tagline": "El juego de adivinar canciones de K-pop",
+            "visibilityLabel": "Visibilidad de la sala",
+            "visibilityPrivate": "Privada",
+            "visibilityPrivateHint": "Solo pueden unirse quienes tengan el enlace de invitación.",
+            "visibilityPublic": "Pública",
+            "visibilityPublicHint": "Cualquiera puede encontrar esta sala en la lista de salas."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

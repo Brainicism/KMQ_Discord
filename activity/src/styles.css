@@ -341,6 +341,13 @@ body::before {
     top: 160px;
 }
 
+/* Left cluster, below lookup. */
+.sidebar-toggle.feedback {
+    right: auto;
+    left: 16px;
+    top: 208px;
+}
+
 .sidebar-toggle:hover {
     background: var(--red-light);
     border-color: var(--red-primary);
@@ -1301,10 +1308,22 @@ body::before {
     scroll-margin-bottom: 16px;
 }
 
+/* Balanced rows: exactly `--mc-cols` columns (set per round to half the
+   choices, so medium 6 → 3+3 and hard 8 → 4+4). A fixed count rather than
+   auto-fit, which packs as many as fit and orphans the remainder — 5+1 at full
+   width. Narrow panels drop to two columns, which stays even for every choice
+   count the game uses (4, 6, 8). */
 .mc-choices {
+    --mc-cols: 2;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    grid-template-columns: repeat(var(--mc-cols), minmax(0, 1fr));
     gap: 8px;
+}
+
+@media (max-width: 720px) {
+    .mc-choices {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
 }
 
 .mc-choice {
@@ -3418,6 +3437,82 @@ fieldset.options-override:disabled .options-group {
     border-color: var(--border-red);
 }
 
+/* Feedback modal — reuses the song-search overlay/modal shell. */
+.feedback-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    overflow-y: auto;
+}
+
+.feedback-label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.feedback-input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+    font-weight: 400;
+    resize: vertical;
+}
+
+.feedback-input:focus {
+    outline: none;
+    border-color: var(--border-red);
+}
+
+.feedback-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.feedback-button {
+    padding: 9px 16px;
+    border: none;
+    border-radius: var(--radius-md);
+    background: var(--red-primary);
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.feedback-button.secondary {
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+}
+
+.feedback-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.feedback-success {
+    margin: 20px 16px;
+    text-align: center;
+    color: var(--text-primary);
+    font-weight: 700;
+}
+
+.feedback-error {
+    margin: 0;
+    color: var(--red-primary);
+    font-size: 0.8rem;
+}
+
 .song-search-status {
     margin: 8px 16px 16px;
     color: var(--text-secondary);
@@ -3485,6 +3580,7 @@ fieldset.options-override:disabled .options-group {
    ============================================================ */
 
 .kmq-web-landing {
+    position: relative;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -3611,6 +3707,119 @@ fieldset.options-override:disabled .options-group {
     line-height: 1.45;
 }
 
+/* Create-room controls: visibility toggle + optional password. */
+.kmq-web-landing-create {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.kmq-web-landing-visibility {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    overflow: hidden;
+}
+
+.kmq-web-landing-toggle {
+    padding: 8px 20px;
+    border: none;
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.kmq-web-landing-toggle[data-active="true"] {
+    background: var(--red-primary);
+    color: #ffffff;
+}
+
+.kmq-web-landing-hint {
+    margin: 0;
+    max-width: 300px;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+}
+
+.kmq-web-landing-password {
+    flex-direction: column;
+    align-items: stretch;
+    width: min(90vw, 300px);
+}
+
+/* Stretch the password field to the form width so it lines up with the
+   full-width Join button below it (overrides the fixed input width). */
+.kmq-web-landing-password .kmq-web-landing-input {
+    width: auto;
+}
+
+/* Public lobby list. */
+.kmq-web-landing-lobby {
+    width: min(92vw, 360px);
+    margin-top: 20px;
+}
+
+.kmq-web-landing-lobby-title {
+    margin: 0 0 8px;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.kmq-web-landing-lobby-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    /* Cap the visible height so a large lobby scrolls within a fixed box
+       instead of stretching the whole page. ~6 rooms show before scrolling.
+       padding-right keeps rows clear of the scrollbar when it appears. */
+    max-height: 320px;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.kmq-web-landing-lobby-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-elevated);
+}
+
+.kmq-web-landing-lobby-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+.kmq-web-landing-lobby-count {
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.kmq-web-landing-lobby-row .kmq-web-landing-button {
+    margin-top: 0;
+    padding: 6px 16px;
+    font-size: 0.85rem;
+}
+
 /* Floating room widget (standalone website): invite link, presence, leave.
    Fixed overlay so it never disturbs the game layout underneath. */
 .kmq-room-bar {
@@ -3722,6 +3931,110 @@ fieldset.options-override:disabled .options-group {
     border: 1px solid var(--border);
 }
 
+/* Language picker: a compact pill wrapping the native <select>. Used both as a
+   corner control on the landing shell and inline in the room bar. */
+.kmq-language-select {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.kmq-language-select-icon {
+    font-size: 0.85rem;
+    line-height: 1;
+}
+
+.kmq-language-select-input {
+    appearance: none;
+    -webkit-appearance: none;
+    border: none;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+    padding: 0 2px;
+    /* Native option lists inherit the OS palette; hint the current scheme so
+       they stay legible in dark mode. */
+    color-scheme: light dark;
+}
+
+.kmq-language-select-input:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
+    border-radius: 4px;
+}
+
+/* Landing shell: float the picker in the top-right corner. */
+.kmq-web-landing-lang {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+}
+
+/* In-game: the last button of the left toggle rail (history → theme → profile
+   → lookup → feedback → language), on both the website and the Activity. Same
+   40px circle as its neighbours; the native <select> is stretched invisibly
+   over the whole circle so the entire target opens the list, and the emoji
+   underneath is what's actually seen. */
+.kmq-language-select.kmq-lang-toggle {
+    position: fixed;
+    left: 16px;
+    top: 256px;
+    z-index: 99;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    gap: 0;
+    justify-content: center;
+    border-radius: 50%;
+    border: 1px solid var(--border-red);
+    background: var(--bg-surface);
+    box-shadow: var(--shadow-md);
+    transition: all 0.2s;
+}
+
+.kmq-language-select.kmq-lang-toggle:hover {
+    background: var(--red-light);
+    border-color: var(--red-primary);
+    box-shadow: var(--shadow-glow);
+    transform: scale(1.05);
+}
+
+.kmq-language-select.kmq-lang-toggle .kmq-language-select-icon {
+    font-size: 1.1rem;
+}
+
+.kmq-language-select.kmq-lang-toggle .kmq-language-select-input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    opacity: 0;
+}
+
+/* The <select> itself is invisible, so ring the circle instead. */
+.kmq-language-select.kmq-lang-toggle:focus-within {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
+}
+
+/* Short viewports (small Activity frames, landscape phones): the rail would
+   run off the bottom, so tuck the picker beside the feedback toggle. */
+@media (max-height: 560px) {
+    .kmq-language-select.kmq-lang-toggle {
+        top: 208px;
+        left: 64px;
+    }
+}
+
 /* Floating sound widget (standalone website): autoplay unlock, mute, volume.
    Bottom-left, mirroring the room bar bottom-right. */
 .kmq-sound-controls {
@@ -3774,6 +4087,263 @@ fieldset.options-override:disabled .options-group {
 .kmq-sound-volume {
     width: 90px;
     accent-color: var(--red-primary);
+}
+
+/* Web room chat: collapsible floating panel, bottom-left above the sound
+   widget. Left corner is shared with sound controls (bottom:12), so the chat
+   sits just above them. Panel and toggle swap on open/close, so each plays an
+   entrance on mount; all of it is neutralised by the global
+   prefers-reduced-motion guard. */
+.kmq-chat {
+    position: fixed;
+    left: 12px;
+    bottom: 64px;
+    z-index: 60;
+    max-width: calc(100vw - 24px);
+}
+
+.kmq-chat-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-elevated);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+    transition: all 0.15s;
+    /* Mounts when the panel closes (and on first render); fade + slide up like
+       the other floating controls. No fill mode, so the animation's transform
+       doesn't outrank the hover/active ones once it finishes. */
+    animation: control-enter 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+.kmq-chat-toggle:hover {
+    background: var(--bg-hover);
+    transform: translateY(-1px);
+}
+
+.kmq-chat-toggle:active {
+    transform: scale(0.96);
+}
+
+.kmq-chat-toggle:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 2px;
+}
+
+.kmq-chat-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    border-radius: 9px;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    /* Same pop the bookmark star uses; replays whenever the count re-mounts
+       from zero unread. */
+    animation: bookmark-pop 0.4s ease;
+}
+
+.kmq-chat-panel {
+    display: flex;
+    flex-direction: column;
+    width: min(320px, calc(100vw - 24px));
+    height: min(60vh, 380px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--bg-elevated);
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
+    /* Grows out of the toggle it replaces (bottom-left corner), mirroring the
+       profile modal's pop-in. */
+    transform-origin: bottom left;
+    animation: kmq-chat-panel-in 0.22s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes kmq-chat-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+.kmq-chat-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--border);
+}
+
+.kmq-chat-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.kmq-chat-collapse {
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    transition:
+        color 0.15s ease,
+        transform 0.1s ease;
+}
+
+.kmq-chat-collapse:hover {
+    color: var(--text-primary);
+}
+
+.kmq-chat-collapse:active {
+    transform: scale(0.9);
+}
+
+.kmq-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+}
+
+.kmq-chat-empty {
+    margin: auto;
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.kmq-chat-message {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    /* Messages append to the bottom of the list and carry stable keys, so only
+       the freshly-mounted row rises into place, not the whole history. */
+    animation: kmq-chat-message-in 0.28s cubic-bezier(0.2, 0.8, 0.3, 1);
+}
+
+@keyframes kmq-chat-message-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.kmq-chat-avatar {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.kmq-chat-avatar-fallback {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-base);
+    color: var(--text-secondary);
+    font-size: 0.7rem;
+    font-weight: 700;
+}
+
+.kmq-chat-bubble {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.kmq-chat-name {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+}
+
+.kmq-chat-message[data-self="true"] .kmq-chat-name {
+    color: var(--red-primary);
+}
+
+.kmq-chat-text {
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.kmq-chat-input-row {
+    display: flex;
+    gap: 6px;
+    padding: 8px;
+    border-top: 1px solid var(--border);
+}
+
+.kmq-chat-input {
+    flex: 1;
+    min-width: 0;
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    background: var(--bg-base);
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    transition: border-color 0.15s;
+}
+
+.kmq-chat-input:focus {
+    border-color: var(--red-primary);
+}
+
+.kmq-chat-input:focus-visible {
+    outline: 2px solid var(--red-primary);
+    outline-offset: 1px;
+}
+
+.kmq-chat-send {
+    border: none;
+    border-radius: var(--radius-pill);
+    padding: 7px 14px;
+    background: var(--red-primary);
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.kmq-chat-send:hover:not(:disabled) {
+    background: #d32f3e;
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-1px);
+}
+
+.kmq-chat-send:active:not(:disabled) {
+    transform: scale(0.96);
+}
+
+.kmq-chat-send:disabled {
+    opacity: 0.5;
+    cursor: default;
 }
 
 /* Impending-restart warning (both platforms): fixed top-center so it stays

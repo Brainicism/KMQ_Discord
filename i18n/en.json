@@ -32,6 +32,20 @@
         "emoteBarLabel": "Send a reaction",
         "endGameBusy": "Ending...",
         "endGameButton": "End game",
+        "feedback": {
+            "cancel": "Cancel",
+            "close": "Close",
+            "error": "Couldn't send your feedback. Please try again.",
+            "improveLabel": "What can be improved about KMQ?",
+            "improvePlaceholder": "KMQ is TOO addictive. My family and friends miss me.",
+            "likeLabel": "What do you like about KMQ?",
+            "likePlaceholder": "KMQ helps me discover new music and genres.",
+            "open": "Send feedback",
+            "sending": "Sending...",
+            "submit": "Send feedback",
+            "success": "Thanks for your feedback!",
+            "title": "KMQ Feedback"
+        },
         "gameType": {
             "classic": "Classic",
             "clip": "Clip",
@@ -264,6 +278,7 @@
             "title": "Look up a song"
         },
         "sessionEndedBanner": "No active game — start one with the button above (or {{playSlash}} in this channel).",
+        "sessionEndedBannerWeb": "No active game — start one with the button above.",
         "sessionWinnerNone": "Game over — no points scored.",
         "sessionWinnerSoloMany": "🏆 {{username}} wins with {{score}} points!",
         "sessionWinnerSoloOne": "🏆 {{username}} wins with 1 point!",
@@ -304,6 +319,73 @@
         "themeToggleDark": "Switch to dark mode",
         "themeToggleLight": "Switch to light mode",
         "waitingForNextRound": "Waiting for the next round...",
+        "web": {
+            "cancel": "Cancel",
+            "chat": {
+                "collapse": "Collapse chat",
+                "empty": "No messages yet. Say hi!",
+                "placeholder": "Type a message…",
+                "send": "Send",
+                "title": "Chat"
+            },
+            "createRoom": "Create a room",
+            "error": {
+                "full": "That room is full.",
+                "generic": "Something went wrong. Please try again.",
+                "guestForbidden": "Guests can't create rooms right now. Join one with an invite code, or log in with Discord.",
+                "guestUnavailable": "Guest play is unavailable right now.",
+                "loginFailed": "Login failed. Please try again.",
+                "notFound": "That room doesn't exist (or everyone left).",
+                "removed": "You were removed from the room.",
+                "unauthorized": "Your login expired. Please log in again.",
+                "wrongPassword": "Wrong password. Please try again."
+            },
+            "guestNote": "Guests can create and join rooms right away. Log in with Discord to keep your stats.",
+            "guestNoteLoggedIn": "You're playing as a guest — create a room below, browse the public list, or join with an invite code. Log in with Discord to keep your stats.",
+            "inviteCodePlaceholder": "Invite code or link",
+            "join": "Join",
+            "joinAsGuest": "Join as guest",
+            "language": "Language",
+            "loading": "Loading...",
+            "lobby": {
+                "empty": "No public rooms right now — create one above!",
+                "roomName": "{{owner}}'s room",
+                "title": "Public rooms"
+            },
+            "loggedInAs": "Logged in as",
+            "loginDiscord": "Log in with Discord",
+            "logout": "Log out",
+            "nicknameLabel": "Guest nickname",
+            "nicknamePlaceholder": "Pick a nickname",
+            "or": "or",
+            "passwordLabel": "Room password",
+            "passwordOptionalLabel": "Room password (optional)",
+            "passwordOptionalPlaceholder": "Password (optional)",
+            "passwordPlaceholder": "Password",
+            "passwordRequired": "This room requires a password.",
+            "playAsGuest": "Play as guest",
+            "playingAsGuest": "Playing as guest",
+            "room": {
+                "away": "{{username}} (away)",
+                "copied": "Copied!",
+                "copyInvite": "Copy invite link",
+                "label": "Room",
+                "leave": "Leave"
+            },
+            "sound": {
+                "enable": "Enable sound",
+                "mute": "Mute",
+                "retry": "Sound stopped — tap to resume",
+                "unmute": "Unmute",
+                "volume": "Volume"
+            },
+            "tagline": "The K-pop music guessing game",
+            "visibilityLabel": "Room visibility",
+            "visibilityPrivate": "Private",
+            "visibilityPrivateHint": "Only people with the invite link can join.",
+            "visibilityPublic": "Public",
+            "visibilityPublicHint": "Anyone can find this room in the lobby list."
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

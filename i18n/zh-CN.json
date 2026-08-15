@@ -32,6 +32,20 @@
         "emoteBarLabel": "发送反应",
         "endGameBusy": "正在结束…",
         "endGameButton": "结束游戏",
+        "feedback": {
+            "cancel": "取消",
+            "close": "关闭",
+            "error": "无法发送您的反馈。请重试。",
+            "improveLabel": "KMQ有哪些可以改进的地方？",
+            "improvePlaceholder": "KMQ 太上瘾了。我的家人和朋友们都想念我。",
+            "likeLabel": "你喜欢KMQ的哪些方面？",
+            "likePlaceholder": "KMQ帮助我发现新的音乐和流派。",
+            "open": "发送反馈",
+            "sending": "发送中...",
+            "submit": "发送反馈",
+            "success": "感谢您的反馈！",
+            "title": "KMQ反馈"
+        },
         "gameType": {
             "classic": "经典",
             "clip": "剪辑",
@@ -264,6 +278,7 @@
             "title": "查找歌曲"
         },
         "sessionEndedBanner": "没有进行中的游戏 — 使用上方按钮开始(或在此频道使用 {{playSlash}})。",
+        "sessionEndedBannerWeb": "没有进行中的游戏 — 使用上方按钮开始。",
         "sessionWinnerNone": "游戏结束 — 未得分。",
         "sessionWinnerSoloMany": "🏆 {{username}} 以 {{score}} 分获胜!",
         "sessionWinnerSoloOne": "🏆 {{username}} 以 1 分获胜!",
@@ -304,6 +319,73 @@
         "themeToggleDark": "切换到深色模式",
         "themeToggleLight": "切换到浅色模式",
         "waitingForNextRound": "等待下一回合…",
+        "web": {
+            "cancel": "取消",
+            "chat": {
+                "collapse": "收起聊天",
+                "empty": "还没有消息。打个招呼吧!",
+                "placeholder": "输入消息…",
+                "send": "发送",
+                "title": "聊天"
+            },
+            "createRoom": "创建房间",
+            "error": {
+                "full": "该房间已满。",
+                "generic": "出了点问题。请重试。",
+                "guestForbidden": "访客目前无法创建房间。请用邀请码加入房间，或使用 Discord 登录。",
+                "guestUnavailable": "访客游玩当前不可用。",
+                "loginFailed": "登录失败。请重试。",
+                "notFound": "该房间不存在（或所有人都已离开）。",
+                "removed": "你已被移出房间。",
+                "unauthorized": "你的登录已过期。请重新登录。",
+                "wrongPassword": "密码错误。请重试。"
+            },
+            "guestNote": "访客可以立即创建和加入房间。使用 Discord 登录即可保存统计数据。",
+            "guestNoteLoggedIn": "你正在以访客身份游玩 — 在下方创建房间、浏览公开列表，或用邀请码加入。使用 Discord 登录即可保存统计数据。",
+            "inviteCodePlaceholder": "邀请码或链接",
+            "join": "加入",
+            "joinAsGuest": "以访客身份加入",
+            "language": "语言",
+            "loading": "加载中...",
+            "lobby": {
+                "empty": "目前没有公开房间 — 在上方创建一个吧！",
+                "roomName": "{{owner}} 的房间",
+                "title": "公开房间"
+            },
+            "loggedInAs": "已登录为",
+            "loginDiscord": "使用 Discord 登录",
+            "logout": "退出登录",
+            "nicknameLabel": "访客昵称",
+            "nicknamePlaceholder": "取个昵称",
+            "or": "或",
+            "passwordLabel": "房间密码",
+            "passwordOptionalLabel": "房间密码（可选）",
+            "passwordOptionalPlaceholder": "密码（可选）",
+            "passwordPlaceholder": "密码",
+            "passwordRequired": "此房间需要密码。",
+            "playAsGuest": "以访客身份游玩",
+            "playingAsGuest": "以访客身份游玩",
+            "room": {
+                "away": "{{username}}（离开）",
+                "copied": "已复制！",
+                "copyInvite": "复制邀请链接",
+                "label": "房间",
+                "leave": "离开"
+            },
+            "sound": {
+                "enable": "启用声音",
+                "mute": "静音",
+                "retry": "声音已停止 — 点按以继续",
+                "unmute": "取消静音",
+                "volume": "音量"
+            },
+            "tagline": "K-pop 音乐猜歌游戏",
+            "visibilityLabel": "房间可见性",
+            "visibilityPrivate": "私密",
+            "visibilityPrivateHint": "只有拥有邀请链接的人才能加入。",
+            "visibilityPublic": "公开",
+            "visibilityPublicHint": "任何人都能在大厅列表中找到此房间。"
+        },
         "youtubePlayLabel": "▶ YouTube"
     },
     "command": {

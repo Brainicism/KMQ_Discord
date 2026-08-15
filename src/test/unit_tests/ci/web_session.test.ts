@@ -174,6 +174,10 @@ describe("web session manager", () => {
                 WEB_GUEST_ID_FLAG,
             );
 
+            // The random part is 60 bits, so bit 60 stays clear — that's what
+            // separates a guest user ID from a guest-hosted room's guild ID.
+            assert.strictEqual(BigInt(id) & (1n << 60n), 0n);
+
             // Effectively unique: 60 random bits.
             assert.notStrictEqual(id, mintGuestUserID());
         });
@@ -188,6 +192,14 @@ describe("web session manager", () => {
                 isGuestUserID(WebRoomManager.roomIDForOwner("123456789")),
                 false,
             );
+            // A guest-hosted room's guild ID shares both guest flag bits, so
+            // it must be told apart by bit 60 — otherwise a room ID would read
+            // back as a guest player.
+            const guestID = mintGuestUserID();
+            const guestRoomID = WebRoomManager.roomIDForOwner(guestID);
+            assert.notStrictEqual(guestRoomID, guestID);
+            assert.strictEqual(isGuestUserID(guestRoomID), false);
+
             assert.strictEqual(isGuestUserID("not-a-number"), false);
         });
 

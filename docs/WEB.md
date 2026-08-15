@@ -81,9 +81,9 @@ Activity and the bot untouched.
 ## 5. Rooms
 
 - A room is identified by an unguessable invite code; internally it maps to a
-  synthetic guild ID `(1 << 62) | ownerUserID`. The ID is deterministic per
-  owner, so a recreated room keeps its game options, presets, and unique-song
-  history.
+  synthetic guild ID `(1 << 62) | ownerUserID` (guest-hosted rooms use a
+  separate space — see below). The ID is deterministic per owner, so a
+  recreated room keeps its game options, presets, and unique-song history.
 - One active room per owner; 8 members max; solo play is a room of one.
 - Presence is derived from the game websocket: a member whose socket stays
   closed for 60s is dropped, ownership transfers on leave, and an empty room
@@ -98,18 +98,45 @@ Activity and the bot untouched.
   `webModeEnabled`), visitors without a Discord account can pick a nickname
   and play. It hot-reloads like every other switch, so the free-identity
   surface can be shed instantly without taking down the site.
-- Guests can **join** rooms (via invite link or code) but never host: room
-  creation returns `403 {"error": "guest_forbidden"}` and the UI doesn't
-  offer it. Hosting stays tied to Discord accounts, which keeps persistent
-  per-owner state (options, presets) and the room-ID scheme meaningful, and
-  caps the abuse value of free identities.
-- A guest is a synthetic numeric user ID with bits 62+61 set (disjoint from
-  real snowflakes and from room guild IDs) on a normal `web_sessions` row —
-  everything downstream (guessing, EXP, scoreboards) treats it like any
-  player. The identity is ephemeral by design: logging out (or the 30-day
-  session TTL) orphans it, and any stats it accrued stay behind under an ID
-  that can never be logged into again. `user_id >= 6917529027641081856`
-  (2^62 + 2^61) identifies guest rows when querying.
+- Guests **host and join** rooms like anyone else — create a room (public or
+  private, with or without a password), browse the public lobby, join by
+  invite. Rooms cap at `WEB_ROOM_MAX_MEMBERS` regardless of who's in them;
+  there's no separate guest cap, since one would only stop a Discord host
+  from inviting a full table of guest friends while an abuser simply hosts
+  their own room instead. The lever that actually bounds free identities is
+  the per-IP guest-login limit (`WEB_GUEST_LOGIN_PER_IP_MAX` per
+  `WEB_GUEST_LOGIN_IP_WINDOW_MS`).
+- `webGuestHostingEnabled` (default **on** wherever guests are enabled) sheds
+  just the hosting half if it's ever abused: room creation by a guest then
+  returns `403 {"error": "guest_forbidden"}` while joining an invite keeps
+  working.
+- A guest is a synthetic numeric user ID with bits 62+61 set and bit 60 clear,
+  on a normal `web_sessions` row — everything downstream (guessing, EXP,
+  scoreboards) treats it like any player. The identity is ephemeral by design:
+  logging out (or the 30-day session TTL) orphans it.
+- Because it's orphaned, a guest ID is never written to a **player-keyed**
+  table. `GameSession.updatePlayerStats` filters guests out of `player_stats`,
+  `player_servers`, `player_game_session_stats` and EXP/level-ups, and
+  `Session.addBookmarkedSong` drops them from `bookmarked_songs` (there's no
+  account to DM the list to). A guest's score and EXP live in the in-memory
+  scoreboard for that session only.
+
+#### ID spaces
+
+Three disjoint ranges, all under 2^63 so a `CAST(... AS SIGNED)` is safe:
+
+| Kind                     | Bits set   | Range                                       |
+| ------------------------ | ---------- | ------------------------------------------- |
+| Discord-hosted room ID   | 62         | `[2^62, 2^62+2^61)`                         |
+| Guest **user** ID        | 62+61      | `[2^62+2^61, 2^62+2^61+2^60)`               |
+| Guest-hosted **room** ID | 62+61+60   | `[2^62+2^61+2^60, 2^63)`                    |
+
+A guest-hosted room can't use `(1 << 62) | ownerID` — a guest ID already has
+bit 62 set, so the room ID would come out *equal to the host's user ID*, which
+would put a user ID into `guilds.guild_id`, `game_sessions.guild_id` and
+`player_servers.server_id`. Setting bit 60 instead keeps the two namespaces
+apart, and keeps `isGuestUserID` (which now also requires bit 60 clear) from
+reading a room's guild ID back as a player.
 
 ## 6. Audio streaming
 
@@ -138,6 +165,26 @@ room"; real Discord snowflakes won't reach that bit until ~2049. E.g.:
 ```sql
 -- Web-room game sessions
 SELECT COUNT(*) FROM game_sessions WHERE CAST(guild_id AS UNSIGNED) >= 1 << 62;
+
+-- ...split by who opened the room (see the ID-space table in §5)
+SELECT CAST(guild_id AS UNSIGNED) >= (1 << 62) + (1 << 61) + (1 << 60)
+           AS guest_hosted,
+       COUNT(*)
+FROM game_sessions
+WHERE CAST(guild_id AS UNSIGNED) >= 1 << 62
+GROUP BY guest_hosted;
+```
+
+Guest **user** IDs occupy `[2^62+2^61, 2^62+2^61+2^60)`, so they overlap the
+web-room *guild* ID range numerically — the two never collide in practice
+because they live in different columns, but don't reuse one range's predicate
+on the other's column. Player-keyed tables shouldn't contain guest IDs at all
+(see §5); a non-zero count here means a write path is missing its filter:
+
+```sql
+SELECT COUNT(*) FROM player_stats
+WHERE CAST(player_id AS UNSIGNED) BETWEEN (1 << 62) + (1 << 61)
+                                      AND (1 << 62) + (1 << 61) + (1 << 60) - 1;
 ```
 
 ## 8. Troubleshooting
