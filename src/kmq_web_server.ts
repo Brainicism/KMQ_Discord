@@ -21,9 +21,11 @@ import {
     DISCORD_OAUTH_AUTHORIZE_URL,
     DISCORD_OAUTH_TOKEN_URL,
     DISCORD_USERS_ME_URL,
+    DOCS_BASE_URL,
     EARLIEST_BEGINNING_SEARCH_YEAR,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
+    LEGACY_DOC_PATHS,
     WEB_AUDIO_MAX_CONCURRENT_STREAMS,
     WEB_AUDIO_URL_PREFIX,
     WEB_GUEST_LOGIN_IP_WINDOW_MS,
@@ -501,6 +503,20 @@ export function parseSetOptionBody(body: unknown): SetOptionBody | null {
     }
 }
 
+/**
+ * The public origin this deployment is reachable at. Used for the OAuth
+ * redirect URI, and for the crawler-facing bits of the website (canonical
+ * URL, link-preview tags, robots.txt, sitemap). Falls back to the Activity
+ * tunnel URL so a dev setup configured only for the Activity works too.
+ * @returns the origin with trailing slashes stripped, or null if unconfigured
+ */
+function siteOrigin(): string | null {
+    const base =
+        process.env.WEB_PUBLIC_BASE_URL || process.env.ACTIVITY_PUBLIC_BASE_URL;
+
+    return base ? base.replace(/\/+$/, "") : null;
+}
+
 export default class KmqWebServer {
     private dbContext: DatabaseContext;
 
@@ -679,8 +695,14 @@ export default class KmqWebServer {
             // there so the SPA can pick up the params from window.location.
             const activityIndexPath = path.join(activityDistRoot, "index.html");
 
+            // The SPA's <head> carries the crawler-facing tags (canonical,
+            // Open Graph, JSON-LD) with a placeholder origin, substituted here
+            // so a self-hosted deployment advertises its own URL rather than
+            // whatever the file was built against.
+            const SITE_ORIGIN_PLACEHOLDER = "__KMQ_SITE_ORIGIN__";
+
             const serveActivityIndex = async (
-                _request: unknown,
+                request: any,
                 reply: any,
             ): Promise<void> => {
                 try {
@@ -689,7 +711,20 @@ export default class KmqWebServer {
                         "utf8",
                     );
 
-                    await reply.type("text/html").send(html);
+                    // Room invite links are private and short-lived; keep them
+                    // out of search results even though they serve the same
+                    // indexable shell as the landing page.
+                    if (String(request.url).startsWith("/play/r/")) {
+                        reply.header("X-Robots-Tag", "noindex, nofollow");
+                    }
+
+                    const origin =
+                        siteOrigin() ??
+                        `${request.protocol}://${request.hostname}`;
+
+                    await reply
+                        .type("text/html")
+                        .send(html.split(SITE_ORIGIN_PLACEHOLDER).join(origin));
                 } catch (e) {
                     logger.warn(
                         `Failed to serve activity index. err=${
@@ -724,6 +759,76 @@ export default class KmqWebServer {
         } else {
             logger.info(
                 `Activity dist not found at ${activityDistRoot}; skipping static handler. Build with 'npm run build:activity' to enable.`,
+            );
+        }
+
+        // ─── Crawler-facing files for the standalone website ───────────────
+        // nginx proxies the whole public origin here, so robots.txt and the
+        // sitemap have to come from this server — there's no static docroot
+        // in front of it to drop them in.
+        httpServer.get(
+            "/robots.txt",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (_request, reply) => {
+                const origin = siteOrigin();
+                const lines = [
+                    "User-agent: *",
+                    // API/websocket routes return JSON or upgrade; room links
+                    // are private invites (also sent as X-Robots-Tag when the
+                    // page itself is served).
+                    "Disallow: /api/",
+                    "Disallow: /ws/",
+                    "Disallow: /play/r/",
+                    "Allow: /",
+                    "",
+                ];
+
+                if (origin) {
+                    lines.push(`Sitemap: ${origin}/sitemap.xml`, "");
+                }
+
+                await reply
+                    .type("text/plain; charset=utf-8")
+                    .send(lines.join("\n"));
+            },
+        );
+
+        httpServer.get(
+            "/sitemap.xml",
+            limit(ACTIVITY_RATE_LIMIT_READ),
+            async (request, reply) => {
+                const origin =
+                    siteOrigin() ?? `${request.protocol}://${request.hostname}`;
+
+                // Only the landing page: /play serves the same SPA and
+                // canonicalizes to "/", and room URLs are deliberately
+                // excluded above.
+                await reply.type("application/xml; charset=utf-8").send(
+                    `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+        <loc>${origin}/</loc>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+</urlset>
+`,
+                );
+            },
+        );
+
+        // Legacy documentation links — the bot's Discord/top.gg listings and
+        // older README revisions point at <origin>/PRIVACY and friends, which
+        // started 404ing once the SPA took over the origin. 301 them to the
+        // docs site so the links keep working and their ranking signal lands
+        // on a page that exists.
+        for (const doc of LEGACY_DOC_PATHS) {
+            httpServer.get(
+                `/${doc}`,
+                limit(ACTIVITY_RATE_LIMIT_READ),
+                async (_request, reply) => {
+                    await reply.redirect(`${DOCS_BASE_URL}/${doc}`, 301);
+                },
             );
         }
 
@@ -2394,13 +2499,7 @@ export default class KmqWebServer {
         // WEB_PUBLIC_BASE_URL is the site origin used to build the OAuth
         // redirect_uri; it falls back to the Activity tunnel URL so a dev
         // setup configured for the Activity works for the website too.
-        const webPublicBaseUrl = (): string | null => {
-            const base =
-                process.env.WEB_PUBLIC_BASE_URL ||
-                process.env.ACTIVITY_PUBLIC_BASE_URL;
-
-            return base ? base.replace(/\/+$/, "") : null;
-        };
+        const webPublicBaseUrl = siteOrigin;
 
         const requireWebMode = async (reply: any): Promise<boolean> => {
             if (KmqConfiguration.Instance.webModeEnabled()) {

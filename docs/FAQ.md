@@ -1,4 +1,7 @@
 # Frequently Asked Questions
+## Do I need Discord to play?
+No! You can play KMQ right in your browser at [kpop.gg](https://kpop.gg). Pick a nickname to play as a guest, or log in with Discord to earn EXP and keep your stats. Create a room and share its link to play with friends.
+
 ## Why isn't [x] artist or [y] song available on the bot?
 All song and artist data is retrieved from [the database kindly provided by Daisuki](http://kpop.daisuki.com.br/). According to their guidelines, songs are generally only listed if they are an *official* music video. Album B-sides are not considered on this site, therefore, not considered on this bot.
 

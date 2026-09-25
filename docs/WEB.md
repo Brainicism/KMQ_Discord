@@ -5,7 +5,7 @@ required. Players log in with Discord OAuth, group up in shareable
 multiplayer rooms, and the song audio is streamed to the browser. It is the
 same server and the same SPA bundle as the [Discord Activity](ACTIVITY.md);
 the bundle detects at load time whether it's inside Discord's iframe or on
-the open web.
+the open web. The production deployment is live at [kpop.gg](https://kpop.gg).
 
 This document covers:
 
