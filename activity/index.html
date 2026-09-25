@@ -12,6 +12,132 @@
             name="viewport"
             content="width=device-width, initial-scale=1.0, interactive-widget=overlays-content"
         />
+
+        <!-- SEO / link previews. `__KMQ_SITE_ORIGIN__` is substituted with
+             WEB_PUBLIC_BASE_URL (falling back to ACTIVITY_PUBLIC_BASE_URL) by
+             the server when it serves this file, so a self-hosted deployment
+             advertises its own origin instead of kpop.gg. -->
+        <title>KMQ — Play the K-pop Music Quiz online</title>
+        <meta
+            name="description"
+            content="Guess the K-pop song before your friends do. Play KMQ free in your browser, or add the Discord bot to your server — thousands of official K-pop music videos, no download required."
+        />
+        <link rel="canonical" href="__KMQ_SITE_ORIGIN__/" />
+
+        <!-- Tints the mobile browser chrome to match the page behind it.
+             Mirrors --bg-base in styles.css for each theme; the app defaults
+             to dark, which is why dark is listed last as the fallback for
+             browsers that ignore the media attribute. -->
+        <meta
+            name="theme-color"
+            media="(prefers-color-scheme: light)"
+            content="#faf7f5"
+        />
+        <meta
+            name="theme-color"
+            media="(prefers-color-scheme: dark)"
+            content="#161012"
+        />
+
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="KMQ — K-pop Music Quiz" />
+        <meta
+            property="og:title"
+            content="KMQ — Play the K-pop Music Quiz online"
+        />
+        <meta
+            property="og:description"
+            content="Guess the K-pop song before your friends do. Play free in your browser, or add the Discord bot to your server."
+        />
+        <meta property="og:url" content="__KMQ_SITE_ORIGIN__/" />
+        <meta
+            property="og:image"
+            content="__KMQ_SITE_ORIGIN__/activity/og-banner.png"
+        />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="490" />
+        <meta
+            property="og:image:alt"
+            content="K-pop Music Quiz — the KMQ mascot wearing headphones"
+        />
+        <meta property="og:locale" content="en_US" />
+
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta
+            name="twitter:title"
+            content="KMQ — Play the K-pop Music Quiz online"
+        />
+        <meta
+            name="twitter:description"
+            content="Guess the K-pop song before your friends do. Play free in your browser, or add the Discord bot to your server."
+        />
+        <meta
+            name="twitter:image"
+            content="__KMQ_SITE_ORIGIN__/activity/og-banner.png"
+        />
+
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@graph": [
+                    {
+                        "@type": "WebSite",
+                        "@id": "__KMQ_SITE_ORIGIN__/#website",
+                        "url": "__KMQ_SITE_ORIGIN__/",
+                        "name": "KMQ — K-pop Music Quiz",
+                        "description": "A K-pop song guessing game you can play in your browser or on Discord.",
+                        "inLanguage": [
+                            "en",
+                            "ko",
+                            "ja",
+                            "es-ES",
+                            "fr",
+                            "zh-CN",
+                            "nl",
+                            "id",
+                            "pt-BR",
+                            "ru",
+                            "de",
+                            "hi"
+                        ]
+                    },
+                    {
+                        "@type": "VideoGame",
+                        "@id": "__KMQ_SITE_ORIGIN__/#game",
+                        "name": "KMQ — K-pop Music Quiz",
+                        "alternateName": "K-pop Music Quiz",
+                        "url": "__KMQ_SITE_ORIGIN__/",
+                        "description": "KMQ plays a random K-pop music video's audio and the first player to type the right song name scores. Play solo or with up to eight friends in a browser room, as a Discord Activity, or with the KMQ Discord bot in a voice channel.",
+                        "image": "__KMQ_SITE_ORIGIN__/activity/og-banner.png",
+                        "applicationCategory": "GameApplication",
+                        "applicationSubCategory": "Music Trivia",
+                        "operatingSystem": "Any modern web browser",
+                        "browserRequirements": "Requires JavaScript.",
+                        "gamePlatform": ["Web browser", "Discord"],
+                        "playMode": ["SinglePlayer", "MultiPlayer"],
+                        "genre": ["Music", "Trivia", "Quiz"],
+                        "isAccessibleForFree": true,
+                        "offers": {
+                            "@type": "Offer",
+                            "price": "0",
+                            "priceCurrency": "USD",
+                            "availability": "https://schema.org/InStock"
+                        },
+                        "author": {
+                            "@type": "Organization",
+                            "name": "KMQ",
+                            "url": "__KMQ_SITE_ORIGIN__/"
+                        },
+                        "sameAs": [
+                            "https://top.gg/bot/508759831755096074",
+                            "https://github.com/Brainicism/KMQ_Discord",
+                            "https://discord.gg/RCuzwYV"
+                        ]
+                    }
+                ]
+            }
+        </script>
+
         <link
             rel="preconnect"
             href="https://fonts.googleapis.com"
@@ -23,10 +149,42 @@
             rel="stylesheet"
         />
         <link rel="icon" type="image/png" href="/src/assets/kmq_logo.png" />
-        <title>KMQ</title>
     </head>
     <body>
         <div id="root"></div>
+        <!-- Crawlers that don't execute JavaScript (and users who block it)
+             still get a description of the game and the links out. The SPA
+             renders into #root above and this block never shows for them. -->
+        <noscript>
+            <h1>KMQ — the K-pop Music Quiz</h1>
+            <p>
+                KMQ plays a random K-pop music video's audio; the first player
+                to type the right song name scores the point. Play solo or with
+                friends, free, in your browser — or add the KMQ bot to your
+                Discord server and play in a voice channel.
+            </p>
+            <p>
+                Playing in the browser requires JavaScript. Enable it to create
+                or join a room.
+            </p>
+            <ul>
+                <li>
+                    <a href="https://docs.kpop.gg/GAMEPLAY"
+                        >Gameplay guide and full command list</a
+                    >
+                </li>
+                <li>
+                    <a href="https://invite.kpop.gg"
+                        >Add the KMQ bot to your Discord server</a
+                    >
+                </li>
+                <li>
+                    <a href="https://discord.gg/RCuzwYV"
+                        >Join the official KMQ Discord server</a
+                    >
+                </li>
+            </ul>
+        </noscript>
         <script type="module" src="/src/main.tsx"></script>
     </body>
 </html>

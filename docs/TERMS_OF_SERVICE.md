@@ -5,7 +5,7 @@ This Terms of Service agreement applies to all users of KMQ. By using the bot, y
 Misuse of the bot or violation of Discord's terms of service is prohibited. Users must not attempt to spam, overload, or intentionally disrupt the bot's operation. Users must respect the integrity of the game by not exploiting game mechanics or disrupting gameplay. The KMQ team reserves the right to prohibit any server or user from using KMQ.
 
 ## Privacy
-Data is collected in accordance with the [Privacy Policy](https://kpop.gg/PRIVACY).
+Data is collected in accordance with the [Privacy Policy](https://docs.kpop.gg/PRIVACY).
 
 ## Liability
 We are not liable for any damages or losses caused by the use of this bot.

@@ -37,6 +37,22 @@ export class KmqImages {
 
 export const GROUP_LIST_URL = "https://kmq.kpop.gg/groups";
 
+/** Where the gameplay guide, FAQ and policy pages are published. */
+export const DOCS_BASE_URL = "https://docs.kpop.gg";
+
+/**
+ * Document paths that used to live at the root of the public origin, before
+ * the website took it over. Redirected to {@link DOCS_BASE_URL} so links
+ * published elsewhere (top.gg, Discord's app directory) keep resolving.
+ */
+export const LEGACY_DOC_PATHS = [
+    "GAMEPLAY",
+    "FAQ",
+    "PRIVACY",
+    "TERMS_OF_SERVICE",
+    "DEVELOPER",
+];
+
 export const EARLIEST_BEGINNING_SEARCH_YEAR = 1900;
 export const DEFAULT_ENDING_SEARCH_YEAR = new Date().getFullYear();
 export const DEFAULT_BEGINNING_SEARCH_YEAR = DEFAULT_ENDING_SEARCH_YEAR - 15;

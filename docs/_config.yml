@@ -1,2 +1,14 @@
 theme: jekyll-theme-cayman
-url: https://brainicism.github.io/
+# Must match the CNAME: jekyll-seo-tag builds every page's canonical and
+# og:url from this, and a stale origin tells search engines the real page
+# lives somewhere that just redirects back here.
+url: https://docs.kpop.gg
+title: K-pop Music Quiz
+description: The K-pop song guessing game. Play in your browser at kpop.gg, or add the KMQ bot to your Discord server.
+twitter:
+    card: summary_large_image
+defaults:
+    - scope:
+          path: ""
+      values:
+          image: https://raw.githubusercontent.com/Brainicism/KMQ_Discord/master/images/banner.png

@@ -1,10 +1,22 @@
 # K-pop Music Quiz
 
+## [🎮 Play now in your browser at kpop.gg!](https://kpop.gg)
+
 ## [Click here to join our official Discord server!](https://discord.gg/R55g4CRESW)
 
 ## [You can invite the bot here.](http://invite.kpop.gg)
 
-Welcome to KMQ, the K-Pop song guessing game. Type `/play` while in a voice channel to begin a game of KMQ! The bot will automatically start playing a random song, and the first person to type in the correct guess will win a point.
+Welcome to KMQ, the K-Pop song guessing game. A random song starts playing, and the first person to type the correct guess wins a point.
+
+# Ways to Play
+
+-   **In your browser:** go to [kpop.gg](https://kpop.gg), log in with Discord or play as a guest, and create a room. Share the room link to play with friends (up to 8 players per room), or play solo. There's nothing to install, and your EXP and stats carry over when you log in with Discord.
+-   **As a Discord Activity:** start KMQ from the Activities menu in a voice channel and everyone in the call plays together inside Discord.
+-   **With the Discord bot:** [invite the bot](http://invite.kpop.gg) and type `/play` while in a voice channel to begin a game of KMQ!
+
+The rest of this guide covers the game options, modes, and commands. Options and modes work the same everywhere; in the browser and the Activity you set them from the in-game menus instead of typing commands.
+
+# Getting Started with the Bot
 
 Use `/options` to see all the options you can change to make your perfect game!
 
@@ -28,6 +40,7 @@ We update our songs frequently! Expect to see songs on the bot the same day they
 
 # Sections
 
+-   [Ways to Play](#ways-to-play)
 -   [EXP System](#exp-system)
 -   [Game Options](#game-options)
 -   [Game Modes](#game-modes)
