@@ -38,6 +38,8 @@ ENV BOT_CLIENT_ID=$BOT_CLIENT_ID
 COPY activity/package.json activity/yarn.lock activity/tsconfig.json \
      activity/vite.config.ts activity/index.html activity/
 COPY activity/src/ activity/src/
+# Files Vite copies verbatim into dist/ (e.g. the og:image link preview).
+COPY activity/public/ activity/public/
 RUN cd activity && yarn install --frozen-lockfile && yarn build
 
 # ================================================================= #
