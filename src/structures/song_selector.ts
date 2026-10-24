@@ -343,7 +343,15 @@ export default class SongSelector {
                       interaction,
                   );
 
-        const result = new Set(matchedSongs);
+        const result = new Set(
+            SongSelector.applyShuffleWeighting(
+                SongSelector.sortForShuffle(
+                    matchedSongs,
+                    this.guildPreference.gameOptions.shuffleType,
+                ),
+                this.guildPreference.gameOptions.shuffleType,
+            ),
+        );
 
         // map matched songs to list of aliases, then normalize/deduplicate to check for repeated song names
         const songAliasByMatchedSong = matchedSongs.map((song) => {
@@ -422,6 +430,84 @@ export default class SongSelector {
         }
 
         return new QueriedSong(song);
+    }
+
+    /**
+     * Sorts songs into the order the shuffle type expects (popularity, or
+     * release date for chronological shuffles), matching querySelectedSongs'
+     * SQL ordering. Used for playlist songs, which aren't ordered by the DB.
+     * @param songs - The songs to sort
+     * @param shuffleType - The shuffle type
+     * @returns a sorted copy of the songs
+     */
+    static sortForShuffle(
+        songs: Array<QueriedSong>,
+        shuffleType: ShuffleType,
+    ): Array<QueriedSong> {
+        switch (shuffleType) {
+            case ShuffleType.CHRONOLOGICAL:
+                return [...songs].sort(
+                    (a, b) => a.publishDate.getTime() - b.publishDate.getTime(),
+                );
+            case ShuffleType.REVERSE_CHRONOLOGICAL:
+                return [...songs].sort(
+                    (a, b) => b.publishDate.getTime() - a.publishDate.getTime(),
+                );
+            default:
+                return [...songs].sort((a, b) => b.views - a.views);
+        }
+    }
+
+    /**
+     * Applies the shuffle type's post-sort step: partitioned shuffling for
+     * chronological shuffles, and selection weights for weighted shuffles
+     * @param sortedSongs - The songs, already ordered via sortForShuffle or SQL
+     * @param shuffleType - The shuffle type
+     * @returns the songs with selection weights assigned
+     */
+    static applyShuffleWeighting(
+        sortedSongs: Array<QueriedSong>,
+        shuffleType: ShuffleType,
+    ): Array<QueriedSong> {
+        let result = sortedSongs;
+        let selectionWeightValues: Array<number> = [1];
+
+        switch (shuffleType) {
+            case ShuffleType.WEIGHTED_EASY:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_EASY;
+                break;
+            case ShuffleType.WEIGHTED_HARD:
+                selectionWeightValues = SELECTION_WEIGHT_VALUES_HARD;
+                break;
+            case ShuffleType.CHRONOLOGICAL:
+            case ShuffleType.REVERSE_CHRONOLOGICAL:
+                if (result.length > CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS * 2) {
+                    // shuffle songs within each partitions
+                    result = shufflePartitionedArray(
+                        result,
+                        CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
+                    );
+                }
+
+                break;
+            default:
+                break;
+        }
+
+        result = result
+            .map((song, index) => ({
+                ...song,
+                selectionWeight:
+                    selectionWeightValues[
+                        Math.floor(
+                            (index / result.length) *
+                                selectionWeightValues.length,
+                        )
+                    ],
+            }))
+            .map((x) => new QueriedSong(x));
+
+        return result;
     }
 
     private async getCollabGroupIds(
@@ -720,42 +806,7 @@ export default class SongSelector {
 
         const count = result.length;
         result = result.slice(gameOptions.limitStart, gameOptions.limitEnd);
-        let selectionWeightValues: Array<number> = [1];
-
-        switch (shuffleType) {
-            case ShuffleType.WEIGHTED_EASY:
-                selectionWeightValues = SELECTION_WEIGHT_VALUES_EASY;
-                break;
-            case ShuffleType.WEIGHTED_HARD:
-                selectionWeightValues = SELECTION_WEIGHT_VALUES_HARD;
-                break;
-            case ShuffleType.CHRONOLOGICAL:
-            case ShuffleType.REVERSE_CHRONOLOGICAL:
-                if (result.length > CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS * 2) {
-                    // shuffle songs within each partitions
-                    result = shufflePartitionedArray(
-                        result,
-                        CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
-                    );
-                }
-
-                break;
-            default:
-                break;
-        }
-
-        result = result
-            .map((song, index) => ({
-                ...song,
-                selectionWeight:
-                    selectionWeightValues[
-                        Math.floor(
-                            (index / result.length) *
-                                selectionWeightValues.length,
-                        )
-                    ],
-            }))
-            .map((x) => new QueriedSong(x));
+        result = SongSelector.applyShuffleWeighting(result, shuffleType);
 
         return {
             songs: new Set(result),
