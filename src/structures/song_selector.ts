@@ -168,13 +168,13 @@ export default class SongSelector {
             randomSong = this.selectRandomSong(
                 ignoredSongs,
                 this.lastAlternatingGender,
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             );
         } else {
             randomSong = this.selectRandomSong(
                 ignoredSongs,
                 null,
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             );
         }
 
@@ -226,6 +226,7 @@ export default class SongSelector {
         switch (shuffleType) {
             case ShuffleType.POPULARITY:
             case ShuffleType.CHRONOLOGICAL:
+            case ShuffleType.PLAYLIST_ORDER:
             case ShuffleType.REVERSE_CHRONOLOGICAL:
                 return queriedSongList[0]!;
             case ShuffleType.WEIGHTED_EASY:
@@ -343,9 +344,9 @@ export default class SongSelector {
             SongSelector.applyShuffleWeighting(
                 SongSelector.sortForShuffle(
                     matchedSongs,
-                    this.guildPreference.gameOptions.shuffleType,
+                    this.guildPreference.getEffectiveShuffleType(),
                 ),
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             ),
         );
 
@@ -449,6 +450,9 @@ export default class SongSelector {
                 return [...songs].sort(
                     (a, b) => b.publishDate.getTime() - a.publishDate.getTime(),
                 );
+            case ShuffleType.PLAYLIST_ORDER:
+                // Matched playlist songs already arrive in playlist order
+                return [...songs];
             default:
                 return [...songs].sort((a, b) => b.views - a.views);
         }
@@ -783,7 +787,7 @@ export default class SongSelector {
                 new Date(`${gameOptions.endYear}-12-31`),
             );
 
-        const shuffleType = gameOptions.shuffleType;
+        const shuffleType = this.guildPreference.getEffectiveShuffleType();
         if (
             [
                 ShuffleType.CHRONOLOGICAL,

@@ -16,6 +16,7 @@ type GuessRejectReason =
     | "playlist_invalid_url"
     | "playlist_unsupported_url"
     | "playlist_no_matches"
-    | "playlist_resolve_failed";
+    | "playlist_resolve_failed"
+    | "shuffle_requires_playlist";
 
 export default GuessRejectReason;
