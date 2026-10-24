@@ -1408,6 +1408,30 @@ describe("song selector", () => {
         });
     });
 
+    describe("getUniqueSongCounter", () => {
+        it("should count the songs remaining after a limit with a nonzero start", async () => {
+            await guildPreference.songSelector.reloadSongs();
+            const { countBeforeLimit } =
+                guildPreference.songSelector.getSongs();
+
+            // limit range extends past the end of the eligible songs
+            await guildPreference.setLimit(
+                countBeforeLimit - 5,
+                countBeforeLimit + 100,
+            );
+            await guildPreference.songSelector.reloadSongs();
+            assert.strictEqual(
+                guildPreference.songSelector.getSongs().songs.size,
+                5,
+            );
+
+            assert.strictEqual(
+                guildPreference.songSelector.getUniqueSongCounter().totalSongs,
+                5,
+            );
+        });
+    });
+
     describe("song selector snapshots", () => {
         describe("non-playlist", () => {
             const snapshotPayloads = [

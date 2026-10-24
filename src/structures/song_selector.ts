@@ -120,11 +120,7 @@ export default class SongSelector {
                 this.uniqueSongsPlayed.size -
                 setDifference([...this.uniqueSongsPlayed], [...selectedSongs])
                     .size,
-            totalSongs: Math.min(
-                this.selectedSongs.countBeforeLimit,
-                this.guildPreference.gameOptions.limitEnd -
-                    this.guildPreference.gameOptions.limitStart,
-            ),
+            totalSongs: this.selectedSongs.songs.size,
         };
     }
 
