@@ -1326,6 +1326,88 @@ describe("song selector", () => {
         });
     });
 
+    describe("playlist shuffle", () => {
+        let playlistSongs: Array<QueriedSong>;
+        beforeEach(async () => {
+            await guildPreference.setLimit(0, 500);
+            await guildPreference.songSelector.reloadSongs();
+            // playlist matches come back in arbitrary order, not by views/date
+            playlistSongs = _.shuffle([
+                ...guildPreference.songSelector.getSongs().songs,
+            ]);
+
+            sinon.stub(State, "playlistManager").value({
+                getMatchedSpotifyPlaylist: () =>
+                    Promise.resolve({
+                        matchedSongs: playlistSongs,
+                        metadata: {},
+                        truncated: false,
+                        unmatchedSongs: [],
+                    }),
+            });
+
+            guildPreference.gameOptions.spotifyPlaylistID = "spotify|test";
+        });
+
+        afterEach(() => {
+            sinon.restore();
+        });
+
+        it("popularity shuffle should play the most viewed song first", async () => {
+            await guildPreference.setShuffleType(ShuffleType.POPULARITY);
+            await guildPreference.songSelector.reloadSongs();
+            const mostViewed = _.maxBy(playlistSongs, (x) => x.views)!;
+            assert.strictEqual(
+                guildPreference.songSelector.queryRandomSong()!.youtubeLink,
+                mostViewed.youtubeLink,
+            );
+        });
+
+        it("chronological shuffle should be roughly ordered by release date", async () => {
+            await guildPreference.setShuffleType(ShuffleType.CHRONOLOGICAL);
+            await guildPreference.songSelector.reloadSongs();
+            const songsArray = [
+                ...guildPreference.songSelector.getSongs().songs,
+            ];
+
+            const partitionSize = Math.ceil(
+                songsArray.length / CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
+            );
+
+            for (let i = 0; i < CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS - 1; i++) {
+                const partition = songsArray.slice(
+                    partitionSize * i,
+                    partitionSize * (i + 1),
+                );
+
+                const nextPartition = songsArray.slice(
+                    partitionSize * (i + 1),
+                    partitionSize * (i + 2),
+                );
+
+                assert.ok(
+                    _.maxBy(partition, (x) => x.publishDate)!.publishDate <=
+                        _.minBy(nextPartition, (x) => x.publishDate)!
+                            .publishDate,
+                );
+            }
+        });
+
+        it("weighted easy shuffle should weight popular songs higher", async () => {
+            await guildPreference.setShuffleType(ShuffleType.WEIGHTED_EASY);
+            await guildPreference.songSelector.reloadSongs();
+            const songsArray = [
+                ...guildPreference.songSelector.getSongs().songs,
+            ];
+
+            const mostViewed = _.maxBy(songsArray, (x) => x.views)!;
+            const leastViewed = _.minBy(songsArray, (x) => x.views)!;
+            assert.ok(
+                mostViewed.selectionWeight! > leastViewed.selectionWeight!,
+            );
+        });
+    });
+
     describe("song selector snapshots", () => {
         describe("non-playlist", () => {
             const snapshotPayloads = [
