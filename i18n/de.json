@@ -145,7 +145,7 @@
                 "preset": "Speichern Sie die aktuellen Optionen als benannte Voreinstellung oder laden/löschen Sie eine gespeicherte.",
                 "release": "Nur offizielle Musikvideos, oder alle Videotypen (B-Seiten, Tanzpraktiken, etc.).",
                 "seek": "Wo jeder Song beginnt zu spielen — ein zufälliger Punkt, der Anfang oder die Mitte.",
-                "shuffle": "Wie der nächste Song ausgewählt wird — zufällig, nach Schwierigkeitsgrad oder Beliebtheit gewichtet, oder nach Erscheinungsdatum.",
+                "shuffle": "Wie der nächste Song ausgewählt wird — zufällig, nach Schwierigkeitsgrad oder Beliebtheit gewichtet, nach Erscheinungsdatum oder in der Reihenfolge der Wiedergabeliste.",
                 "special": "Einen Audio-Modifikator (Geschwindigkeit, Tonhöhe oder Rückwärts) auf jedes Lied anwenden.",
                 "subunits": "Ob auch Untereinheiten einer ausgewählten Gruppe einbezogen werden.",
                 "timer": "Sekunden zum Raten, bevor die Runde abläuft. Bei Aus ist es deaktiviert."
@@ -181,6 +181,8 @@
                 "set": "Satz",
                 "urlPlaceholder": "Spotify- oder YouTube-Playlist-URL"
             },
+            "playlistOrderRequiresPlaylist": "Die Wiedergabelisten-Reihenfolge ist nur verfügbar, solange eine Wiedergabeliste eingestellt ist.",
+            "playlist_order": "Wiedergabelisten-Reihenfolge",
             "popularity": "Beliebtheit",
             "preset": {
                 "confirmDelete": "Löschen bestätigen",
@@ -668,6 +670,7 @@
             "multipleChoicePenalty": "Multiple-Choice-Strafe",
             "powerHourBonus": "Power-Hour-Bonus",
             "shuffleChronologicalPenalty": "Zufällige Chronologie-Strafe",
+            "shufflePlaylistOrderPenalty": "Shuffle-Playlist-Reihenfolge-Strafe",
             "shufflePopularityPenalty": "Shuffle-Popularitätsstrafe",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy-Strafe",
             "title": "EP-Boni",
@@ -1648,10 +1651,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "Die Zufallswiedergabe {{playlistOrder}} kann nur verwendet werden, solange eine Wiedergabeliste eingestellt ist. Lege zuerst mit {{playlistCommand}} eine fest.",
+                    "title": "Wiedergabeliste erforderlich"
+                }
+            },
             "help": {
                 "description": "Wähle aus, wie Songs gemischt werden.",
                 "example": {
                     "chronological": "Die Songs werden in der Reihenfolge ihrer Veröffentlichung abgespielt, mit etwas Zufälligkeit. {{penalty}} EXP-Strafe wird angewendet",
+                    "playlistOrder": "Die Songs werden in der Reihenfolge der aktuellen Wiedergabeliste abgespielt. Nur verfügbar, solange eine Wiedergabeliste eingestellt ist. Die {{penalty}} EXP-Strafe wird angewendet",
                     "popularity": "Die Songs werden nach abnehmender Beliebtheit abgespielt. Die {{penalty}} EXP-Strafe wird angewendet",
                     "random": "Songs werden zufällig abgespielt",
                     "reset": "Auf den Standard-Shuffle-Modus {{defaultShuffle}} zurücksetzen"

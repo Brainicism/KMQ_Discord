@@ -8,6 +8,7 @@ import {
     clickableSlashCommand,
     getDebugLogHeader,
     getInteractionValue,
+    sendErrorMessage,
     sendOptionsMessage,
 } from "../../helpers/discord_utils";
 import CommandPrechecks from "../../command_prechecks";
@@ -93,6 +94,23 @@ export default class ShuffleCommand implements BaseCommand {
                         penalty: `${
                             ExpBonusModifierValues[
                                 ExpBonusModifier.SHUFFLE_CHRONOLOGICAL
+                            ]
+                        }x`,
+                    },
+                ),
+            },
+            {
+                example: `${clickableSlashCommand(
+                    COMMAND_NAME,
+                    OptionAction.SET,
+                )} shuffle:${ShuffleType.PLAYLIST_ORDER}`,
+                explanation: i18n.translate(
+                    guildID,
+                    "command.shuffle.help.example.playlistOrder",
+                    {
+                        penalty: `${
+                            ExpBonusModifierValues[
+                                ExpBonusModifier.SHUFFLE_PLAYLIST_ORDER
                             ]
                         }x`,
                     },
@@ -225,6 +243,38 @@ export default class ShuffleCommand implements BaseCommand {
         const guildPreference = await GuildPreference.getGuildPreference(
             messageContext.guildID,
         );
+
+        if (
+            shuffleType === ShuffleType.PLAYLIST_ORDER &&
+            !guildPreference.isPlaylist()
+        ) {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Playlist order shuffle rejected, no playlist set.`,
+            );
+
+            await sendErrorMessage(
+                messageContext,
+                {
+                    title: i18n.translate(
+                        messageContext.guildID,
+                        "command.shuffle.failure.playlistOrderRequiresPlaylist.title",
+                    ),
+                    description: i18n.translate(
+                        messageContext.guildID,
+                        "command.shuffle.failure.playlistOrderRequiresPlaylist.description",
+                        {
+                            playlistOrder: `\`${ShuffleType.PLAYLIST_ORDER}\``,
+                            playlistCommand: clickableSlashCommand(
+                                "playlist",
+                                OptionAction.SET,
+                            ),
+                        },
+                    ),
+                },
+                interaction,
+            );
+            return;
+        }
 
         const reset = shuffleType == null;
         if (reset) {

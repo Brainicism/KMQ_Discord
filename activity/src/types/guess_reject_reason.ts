@@ -18,6 +18,8 @@ type GuessRejectReason =
     | "playlist_unsupported_url"
     | "playlist_no_matches"
     | "playlist_resolve_failed"
+    | "playlist_managed"
+    | "shuffle_requires_playlist"
     | "daily_requires_login"
     | "daily_not_solo";
 

@@ -145,7 +145,7 @@
                 "preset": "Salve as opções atuais como um predefinido nomeado ou carregue/exclua um salvo.",
                 "release": "Apenas videoclipes oficiais, ou todos os tipos de vídeos (b-sides, práticas de dança, etc.).",
                 "seek": "Onde cada música começa a tocar — um ponto aleatório, o início ou o meio.",
-                "shuffle": "Como a próxima música é escolhida — aleatoriamente, ponderada por dificuldade ou popularidade, ou pela data de lançamento.",
+                "shuffle": "Como a próxima música é escolhida — aleatoriamente, ponderada por dificuldade ou popularidade, pela data de lançamento ou na ordem da playlist.",
                 "special": "Aplique um modificador de áudio (velocidade, tom ou reverso) a cada música.",
                 "subunits": "Se as subunidades de um grupo selecionado também estão incluídas.",
                 "timer": "Segundos para adivinhar antes que a rodada termine. Desativar desabilita isso."
@@ -181,6 +181,8 @@
                 "set": "Definir",
                 "urlPlaceholder": "URL da playlist do Spotify ou YouTube"
             },
+            "playlistOrderRequiresPlaylist": "A ordem da playlist só está disponível enquanto uma playlist estiver definida.",
+            "playlist_order": "Ordem da Playlist",
             "popularity": "Popularidade",
             "preset": {
                 "confirmDelete": "Confirmar exclusão",
@@ -668,6 +670,7 @@
             "multipleChoicePenalty": "Penalidade de Múltipla Escolha",
             "powerHourBonus": "Bônus Power Hour",
             "shuffleChronologicalPenalty": "Penalidade de Cronologia Aleatória",
+            "shufflePlaylistOrderPenalty": "Penalidade de Ordem da Playlist",
             "shufflePopularityPenalty": "Penalidade de Popularidade Aleatória",
             "shuffleWeightedEasyPenalty": "Penalidade de Embaralhamento Ponderado Fácil",
             "title": "Bônus de EXP",
@@ -1648,10 +1651,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "O modo {{playlistOrder}} só pode ser usado enquanto uma playlist estiver definida. Use {{playlistCommand}} para definir uma primeiro.",
+                    "title": "Playlist Necessária"
+                }
+            },
             "help": {
                 "description": "Escolha como as músicas são embaralhadas.",
                 "example": {
                     "chronological": "As músicas serão tocadas na ordem em que foram lançadas, com alguma aleatoriedade. A penalidade de {{penalty}} EXP será aplicada",
+                    "playlistOrder": "As músicas serão reproduzidas na ordem da playlist atual. Disponível apenas enquanto uma playlist estiver definida. A penalidade de {{penalty}} EXP será aplicada",
                     "popularity": "As músicas serão reproduzidas com base na popularidade decrescente. A penalidade de {{penalty}} EXP será aplicada",
                     "random": "As músicas serão tocadas aleatoriamente",
                     "reset": "Restaurar para o modo de embaralhamento padrão de {{defaultShuffle}}"

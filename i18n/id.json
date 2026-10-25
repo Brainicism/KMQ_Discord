@@ -145,7 +145,7 @@
                 "preset": "Simpan opsi saat ini sebagai preset bernama, atau muat/hapus yang sudah disimpan.",
                 "release": "Hanya video musik resmi, atau semua jenis video (b-sides, dance practice, dll.).",
                 "seek": "Di mana setiap lagu mulai diputar — titik acak, awal, atau tengah.",
-                "shuffle": "Bagaimana lagu berikutnya dipilih — secara acak, diberi bobot menurut kesulitan atau popularitas, atau berdasarkan tanggal rilis.",
+                "shuffle": "Bagaimana lagu berikutnya dipilih — secara acak, diberi bobot menurut kesulitan atau popularitas, berdasarkan tanggal rilis, atau sesuai urutan playlist.",
                 "special": "Terapkan modifikasi audio (kecepatan, nada, atau balik) ke setiap lagu.",
                 "subunits": "Apakah subunit dari grup yang dipilih juga disertakan.",
                 "timer": "Detik untuk menebak sebelum ronde habis. Nonaktif mematikannya."
@@ -181,6 +181,8 @@
                 "set": "Atur",
                 "urlPlaceholder": "URL playlist Spotify atau YouTube"
             },
+            "playlistOrderRequiresPlaylist": "Urutan playlist hanya tersedia saat playlist sedang diatur.",
+            "playlist_order": "Urutan Playlist",
             "popularity": "Popularitas",
             "preset": {
                 "confirmDelete": "Konfirmasi hapus",
@@ -668,6 +670,7 @@
             "multipleChoicePenalty": "Penalti Pilihan Ganda",
             "powerHourBonus": "Bonus Power Hour",
             "shuffleChronologicalPenalty": "Penalti Pengacakan Kronologis",
+            "shufflePlaylistOrderPenalty": "Penalti Pengacakan Urutan Playlist",
             "shufflePopularityPenalty": "Penalti Pengacakan Popularitas",
             "shuffleWeightedEasyPenalty": "Penalti Mudah Tertimbang Acak",
             "title": "Bonus EXP",
@@ -1648,10 +1651,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "Pengacakan {{playlistOrder}} hanya dapat digunakan saat playlist sedang diatur. Gunakan {{playlistCommand}} untuk mengatur playlist terlebih dahulu.",
+                    "title": "Playlist Diperlukan"
+                }
+            },
             "help": {
                 "description": "Pilih cara mengacak lagu.",
                 "example": {
                     "chronological": "Lagu akan diputar sesuai urutan dirilisnya, dengan sedikit acak. Penalti {{penalty}} EXP akan diterapkan",
+                    "playlistOrder": "Lagu akan diputar sesuai urutan playlist saat ini. Hanya tersedia saat playlist sedang diatur. Penalti {{penalty}} EXP akan diterapkan",
                     "popularity": "Lagu akan diputar berdasarkan popularitas menurun. Penalti {{penalty}} EXP akan diterapkan",
                     "random": "Lagu akan diputar secara acak",
                     "reset": "Atur ulang ke mode acak default {{defaultShuffle}}"

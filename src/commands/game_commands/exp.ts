@@ -317,6 +317,18 @@ export default class ExpCommand implements BaseCommand {
                 name: ExpBonusModifier.SHUFFLE_CHRONOLOGICAL,
                 isPenalty: true,
             });
+        } else if (
+            guildPreference.getEffectiveShuffleType() ===
+            ShuffleType.PLAYLIST_ORDER
+        ) {
+            modifiers.push({
+                displayName: i18n.translate(
+                    guildPreference.guildID,
+                    "command.exp.shufflePlaylistOrderPenalty",
+                ),
+                name: ExpBonusModifier.SHUFFLE_PLAYLIST_ORDER,
+                isPenalty: true,
+            });
         }
 
         if (guildPreference.isMultipleChoiceMode()) {
