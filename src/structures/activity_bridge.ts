@@ -50,6 +50,7 @@ import MessageContext from "./message_context";
 import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
 import ProfileCommand from "../commands/game_commands/profile";
 import Session from "./session";
+import ShuffleType from "../enums/option_types/shuffle_type";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
@@ -1327,6 +1328,18 @@ function ensureWorkerHandlerRegistered(): void {
                                 }
 
                                 case "shuffle": {
+                                    if (
+                                        optionArgs.shuffle ===
+                                            ShuffleType.PLAYLIST_ORDER &&
+                                        !guildPreference.isPlaylist()
+                                    ) {
+                                        reply({
+                                            ok: false,
+                                            reason: "shuffle_requires_playlist",
+                                        });
+                                        return;
+                                    }
+
                                     await guildPreference.setShuffleType(
                                         optionArgs.shuffle,
                                     );

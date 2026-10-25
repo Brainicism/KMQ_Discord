@@ -125,7 +125,7 @@
                 "preset": "Enregistrez les options actuelles comme préréglage nommé, ou chargez/supprimez un préréglage enregistré.",
                 "release": "Seulement les clips musicaux officiels, ou tous les types de vidéos (b-sides, pratiques de danse, etc.).",
                 "seek": "Où chaque chanson commence à jouer : un point aléatoire, le début ou le milieu.",
-                "shuffle": "Comment la prochaine chanson est choisie : aléatoirement, pondérée par difficulté ou popularité, ou par date de sortie.",
+                "shuffle": "Comment la prochaine chanson est choisie : aléatoirement, pondérée par difficulté ou popularité, par date de sortie, ou dans l'ordre de la liste de lecture.",
                 "special": "Appliquer un modificateur audio (vitesse, tonalité ou inversion) à chaque chanson.",
                 "subunits": "Si les sous-unités du groupe sélectionné sont également incluses.",
                 "timer": "Secondes pour deviner avant que le temps de la manche n'expire. Désactivé le désactive."
@@ -161,6 +161,8 @@
                 "set": "Définir",
                 "urlPlaceholder": "URL de la liste de lecture Spotify ou YouTube"
             },
+            "playlistOrderRequiresPlaylist": "L'ordre de la liste n'est disponible que lorsqu'une liste de lecture est définie.",
+            "playlist_order": "Ordre de la liste",
             "popularity": "Popularité",
             "preset": {
                 "confirmDelete": "Confirmer la suppression",
@@ -624,6 +626,7 @@
             "multipleChoicePenalty": "Pénalité pour choix multiples",
             "powerHourBonus": "Bonus Power Hour",
             "shuffleChronologicalPenalty": "Pénalité chronologique de mélange",
+            "shufflePlaylistOrderPenalty": "Pénalité pour ordre de liste de Shuffle",
             "shufflePopularityPenalty": "Pénalité pour popularité de Shuffle",
             "shuffleWeightedEasyPenalty": "Pénalité pondérée pour Shuffle facile",
             "title": "Bonus EXP",
@@ -1604,10 +1607,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "Le mode {{playlistOrder}} ne peut être utilisé que lorsqu'une liste de lecture est définie. Utilisez {{playlistCommand}} pour en définir une d'abord.",
+                    "title": "Liste de lecture requise"
+                }
+            },
             "help": {
                 "description": "Choisissez comment les chansons sont mélangées.",
                 "example": {
                     "chronological": "Les chansons seront jouées dans l'ordre de leur sortie, avec une certaine aléatoire. Une pénalité de {{penalty}} EXP sera appliquée",
+                    "playlistOrder": "Les chansons seront jouées dans l'ordre de la liste de lecture actuelle. Disponible uniquement lorsqu'une liste de lecture est définie. Une pénalité de {{penalty}} EXP sera appliquée",
                     "popularity": "Les chansons seront jouées en fonction de leur popularité décroissante. Une pénalité de {{penalty}} EXP sera appliquée",
                     "random": "Les chansons seront jouées au hasard",
                     "reset": "Réinitialiser au mode de mélange par défaut de {{defaultShuffle}}"
