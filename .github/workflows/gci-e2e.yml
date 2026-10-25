@@ -27,6 +27,12 @@ concurrency:
 jobs:
     build:
         runs-on: ubuntu-latest
+        # Every run drives the same CI bot, test bot, and voice channel, so
+        # runs from different PRs/branches must not overlap. Queue them
+        # repo-wide (the workflow-level group above only dedupes per PR).
+        concurrency:
+            group: gci-e2e-live-bot
+            cancel-in-progress: false
         timeout-minutes: 15
         if: ${{ !github.event.issue.pull_request_target || contains(github.event.pull_request.labels.*.name, 'safe to test') || github.actor == 'dependabot[bot]' }}
         env:

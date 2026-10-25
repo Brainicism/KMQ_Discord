@@ -383,7 +383,10 @@ export default class GameSession extends Session {
         }
 
         const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
-        const incorrectGuessers = round.getIncorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers(
+            this.isHiddenMode(),
+        );
+
         if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
@@ -539,7 +542,10 @@ export default class GameSession extends Session {
         const round = this.round;
         if (interaction.data.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
             const guildID = interaction.guild?.id as string;
-            round.userSkipped(interaction.member!.id);
+            if (SkipCommand.canVoteToSkip(this, interaction.member!.id)) {
+                round.userSkipped(interaction.member!.id);
+            }
+
             if (SkipCommand.isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
@@ -549,7 +555,7 @@ export default class GameSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
+                            skipCounter: SkipCommand.getSkipCounter(this),
                         },
                     ),
                 );
@@ -561,7 +567,7 @@ export default class GameSession extends Session {
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
-                        skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
+                        skipCounter: SkipCommand.getSkipCounter(this),
                     }),
                 );
 
@@ -657,7 +663,7 @@ export default class GameSession extends Session {
         if (!round) return MultipleChoiceGuessResult.INELIGIBLE;
 
         if (
-            round.getIncorrectGuessers().has(userID) ||
+            round.getIncorrectGuessers(this.isHiddenMode()).has(userID) ||
             !this.guessEligible(messageContext, createdAt)
         ) {
             return MultipleChoiceGuessResult.INELIGIBLE;
@@ -1761,7 +1767,10 @@ export default class GameSession extends Session {
     ): number {
         if (!this.round) return 0;
         const round = this.round;
-        const incorrectGuessers = round.getIncorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers(
+            this.isHiddenMode(),
+        );
+
         if (multipleChoiceMode && incorrectGuessers.has(userID)) return 0;
 
         if (
@@ -2393,7 +2402,7 @@ export default class GameSession extends Session {
         const remainingPlayers = this.scoreboard
             .getRemainingPlayers(
                 round.getCorrectGuessers(this.isHiddenMode()).map((x) => x.id),
-                round.getIncorrectGuessers(),
+                round.getIncorrectGuessers(this.isHiddenMode()),
             )
             .map((player) => player.username)
             .join("\n");

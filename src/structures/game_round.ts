@@ -222,8 +222,12 @@ export default class GameRound extends Round {
             .flatMap((playerGuessResults) => {
                 const playerId = playerGuessResults[0];
                 const guessResults = playerGuessResults[1];
-                const correctGuess = guessResults.find((x) => x.correct);
-                if (correctGuess) {
+                const correctGuess = GameRound.decidingGuess(
+                    guessResults,
+                    isHidden,
+                );
+
+                if (correctGuess?.correct) {
                     return [
                         new KmqMember(playerId, correctGuess.pointsAwarded),
                     ];
@@ -238,12 +242,17 @@ export default class GameRound extends Round {
             );
     }
 
-    getIncorrectGuessers(): Set<string> {
+    /**
+     * @param isHidden - Whether the game is in hidden mode
+     * @returns the players who guessed, but whose deciding guess is wrong
+     */
+    getIncorrectGuessers(isHidden = false): Set<string> {
         return new Set(
             Object.entries(this.guesses)
                 .filter((playerGuessResults) => {
                     const guessResults = playerGuessResults[1];
-                    return !guessResults.some((x) => x.correct);
+                    return !GameRound.decidingGuess(guessResults, isHidden)
+                        ?.correct;
                 })
                 .map((x) => x[0]),
         );
@@ -776,17 +785,9 @@ export default class GameRound extends Round {
             return 99999999;
         }
 
-        const correctGuessTimes = playersGuess
-            .filter((x) => x.correct)
-            .map((x) => x.timeToGuessMs);
-
-        if (isHidden) {
-            // Use the most recent guess time for hidden games, since they can be overwritten
-            return Math.max(...correctGuessTimes);
-        }
-
-        // Use the fastest guess time for normal games
-        return Math.min(...correctGuessTimes);
+        // Hidden games: the most recent guess, since it replaces earlier
+        // ones. Normal games: the fastest correct guess.
+        return GameRound.decidingGuess(playersGuess, isHidden)!.timeToGuessMs;
     }
 
     /**
@@ -930,5 +931,23 @@ export default class GameRound extends Round {
      */
     private static spaceHint(compact: string): string {
         return compact.split("").join(" ");
+    }
+
+    /**
+     * @param guessResults - A player's guesses this round, oldest first
+     * @param isHidden - Whether the game is in hidden mode
+     * @returns the guess that decides the player's result: their latest one
+     * in hidden mode (players may change their answer until the round ends),
+     * otherwise their first correct one, if any
+     */
+    private static decidingGuess<T extends { correct: boolean }>(
+        guessResults: Array<T>,
+        isHidden: boolean,
+    ): T | undefined {
+        if (isHidden) {
+            return guessResults[guessResults.length - 1];
+        }
+
+        return guessResults.find((x) => x.correct);
     }
 }
