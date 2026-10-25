@@ -324,6 +324,8 @@ function rejectReasonText(
             return t("options.playlist.errors.failed");
         case "shuffle_requires_playlist":
             return t("options.playlistOrderRequiresPlaylist");
+        case "playlist_managed":
+            return t("options.playlist.managed");
         default:
             return t("rejectGeneric");
     }

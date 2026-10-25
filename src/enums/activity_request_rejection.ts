@@ -18,6 +18,8 @@ type ActivityRequestRejection =
     | "playlist_unsupported_url"
     | "playlist_no_matches"
     | "playlist_resolve_failed"
+    // A song-pool option the active playlist manages
+    | "playlist_managed"
     // kind="shuffle" with playlist_order while no playlist is set
     | "shuffle_requires_playlist";
 

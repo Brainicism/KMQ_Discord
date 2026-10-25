@@ -2,7 +2,6 @@ import { IPCLogger } from "../../logger";
 import { KmqImages } from "../../constants";
 import {
     getDebugLogHeader,
-    getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -149,21 +148,30 @@ export default class HintCommand implements BaseCommand {
             return false;
         }
 
-        if (gameSession.gameType === GameType.ELIMINATION) {
-            const eliminationScoreboard =
-                gameSession.scoreboard as EliminationScoreboard;
+        return (
+            gameSession.round.getHintRequests() >=
+            HintCommand.getHintThreshold(gameSession)
+        );
+    }
 
+    /**
+     * @param gameSession - The current game session
+     * @returns the number of hint requests needed to reveal a hint: a
+     * majority of the remaining players in elimination, otherwise of all
+     * participants
+     */
+    static getHintThreshold(gameSession: GameSession): number {
+        if (gameSession.gameType === GameType.ELIMINATION) {
             return (
-                gameSession.round.getHintRequests() >=
-                Math.floor(eliminationScoreboard.getAlivePlayersCount() * 0.5) +
-                    1
+                Math.floor(
+                    (
+                        gameSession.scoreboard as EliminationScoreboard
+                    ).getAlivePlayersCount() * 0.5,
+                ) + 1
             );
         }
 
-        return (
-            gameSession.round.getHintRequests() >=
-            gameSession.getVoteMajorityCount()
-        );
+        return gameSession.getVoteMajorityCount();
     }
 
     static isHintAvailable(
@@ -235,8 +243,8 @@ export default class HintCommand implements BaseCommand {
                         messageContext.guildID,
                         "command.hint.request.description",
                         {
-                            hintCounter: `${gameSession.round.getHintRequests()}/${getMajorityCount(
-                                messageContext.guildID,
+                            hintCounter: `${gameSession.round.getHintRequests()}/${HintCommand.getHintThreshold(
+                                gameSession,
                             )}`,
                         },
                     ),

@@ -4,7 +4,6 @@ import { chooseRandom } from "../helpers/utils";
 import {
     getCurrentVoiceMembers,
     getDebugLogHeader,
-    getMajorityCount,
     tryCreateInteractionSuccessAcknowledgement,
 } from "../helpers/discord_utils";
 import { userBonusIsActive } from "../helpers/game_utils";
@@ -183,9 +182,7 @@ export default class ListeningSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                                guildID,
-                            )}`,
+                            skipCounter: SkipCommand.getSkipCounter(this),
                         },
                     ),
                 );
@@ -197,9 +194,7 @@ export default class ListeningSession extends Session {
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
-                        skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                            guildID,
-                        )}`,
+                        skipCounter: SkipCommand.getSkipCounter(this),
                     }),
                 );
 

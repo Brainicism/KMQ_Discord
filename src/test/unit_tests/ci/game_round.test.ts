@@ -64,6 +64,37 @@ describe("game round", () => {
             });
         });
 
+        describe("song has no name", () => {
+            it("still accepts the artist's name in artist mode", () => {
+                gameRound = new GameRound(
+                    new QueriedSong({
+                        songName: "",
+                        cleanSongName: "",
+                        hangulSongName: null,
+                        artistName: "Jisoo",
+                        hangulArtistName: null,
+                        youtubeLink: "abcde",
+                        betterAudioLink: null,
+                        publishDate: new Date(),
+                        members: "female",
+                        artistID: 1,
+                        isSolo: "y",
+                        views: 1000000,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    }),
+                    5,
+                    guildID,
+                );
+
+                assert.strictEqual(
+                    gameRound.checkGuess("Jisoo", GuessModeType.ARTIST),
+                    1,
+                );
+            });
+        });
+
         describe("artist collabs", () => {
             it("should record them as two separate artists", () => {
                 gameRound = new GameRound(
@@ -1129,6 +1160,118 @@ describe("game round", () => {
                         gameRound.hints.songHint[LocaleType.KO],
                     );
                 }
+            });
+        });
+    });
+
+    describe("deciding guess", () => {
+        const alice = "alice";
+        beforeEach(() => {
+            gameRound = new GameRound(
+                new QueriedSong({
+                    songName: "Song1",
+                    cleanSongName: "Song1",
+                    hangulSongName: null,
+                    artistName: "Jisoo",
+                    hangulArtistName: null,
+                    youtubeLink: "abcde",
+                    betterAudioLink: null,
+                    publishDate: new Date(),
+                    members: "female",
+                    artistID: 1,
+                    isSolo: "y",
+                    views: 1000000,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                }),
+                5,
+                guildID,
+            );
+
+            gameRound.songStartedAt = 0;
+        });
+
+        describe("hidden mode: the latest guess wins", () => {
+            it("a correct guess followed by a wrong one counts as wrong", () => {
+                gameRound.storeGuess(
+                    alice,
+                    "Song1",
+                    1000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                gameRound.storeGuess(
+                    alice,
+                    "nope",
+                    2000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                assert.deepStrictEqual(gameRound.getCorrectGuessers(true), []);
+                assert.ok(gameRound.getIncorrectGuessers(true).has(alice));
+            });
+
+            it("a wrong guess followed by a correct one counts, timed at the correct one", () => {
+                gameRound.storeGuess(
+                    alice,
+                    "nope",
+                    1000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                gameRound.storeGuess(
+                    alice,
+                    "Song1",
+                    3000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                const [guesser] = gameRound.getCorrectGuessers(true);
+                assert.strictEqual(guesser!.id, alice);
+                assert.strictEqual(
+                    gameRound.getTimeToGuessMs(alice, true),
+                    3000,
+                );
+
+                assert.strictEqual(
+                    gameRound.getIncorrectGuessers(true).size,
+                    0,
+                );
+            });
+
+            it("an artist guess followed by a song guess earns the song's points", () => {
+                gameRound.storeGuess(alice, "Jisoo", 1000, GuessModeType.BOTH);
+                gameRound.storeGuess(alice, "Song1", 2000, GuessModeType.BOTH);
+
+                const [guesser] = gameRound.getCorrectGuessers(true);
+                assert.strictEqual(guesser!.pointsAwarded, 1);
+            });
+        });
+
+        describe("other modes: the first correct guess counts", () => {
+            it("a later wrong guess doesn't undo a correct one", () => {
+                gameRound.storeGuess(
+                    alice,
+                    "Song1",
+                    1000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                gameRound.storeGuess(
+                    alice,
+                    "nope",
+                    2000,
+                    GuessModeType.SONG_NAME,
+                );
+
+                const [guesser] = gameRound.getCorrectGuessers(false);
+                assert.strictEqual(guesser!.id, alice);
+                assert.strictEqual(
+                    gameRound.getTimeToGuessMs(alice, false),
+                    1000,
+                );
+                assert.strictEqual(gameRound.getIncorrectGuessers().size, 0);
             });
         });
     });
