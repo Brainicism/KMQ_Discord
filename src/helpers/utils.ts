@@ -375,11 +375,15 @@ export function friendlyFormattedNumber(n: number): string {
  * @returns the number with its proper ordinal suffix
  */
 export function getOrdinalNum(n: number): string {
+    // 11th-13th (and 111th, 211th, ...) take "th" despite ending in 1-3
+    const lastTwoDigits = n % 100;
     return (
         friendlyFormattedNumber(n) +
         (n > 0
             ? ["th", "st", "nd", "rd"][
-                  (n > 3 && n < 21) || n % 10 > 3 ? 0 : n % 10
+                  (lastTwoDigits > 3 && lastTwoDigits < 21) || n % 10 > 3
+                      ? 0
+                      : n % 10
               ]
             : "")
     );

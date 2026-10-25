@@ -14,6 +14,7 @@ import {
     shufflePartitionedArray,
 } from "../helpers/utils";
 import { getDebugLogHeader } from "../helpers/discord_utils";
+import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import EnvVariableManager from "../env_variable_manager";
 import GameOption from "../enums/game_option_name";
@@ -168,13 +169,13 @@ export default class SongSelector {
             randomSong = this.selectRandomSong(
                 ignoredSongs,
                 this.lastAlternatingGender,
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             );
         } else {
             randomSong = this.selectRandomSong(
                 ignoredSongs,
                 null,
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             );
         }
 
@@ -226,6 +227,7 @@ export default class SongSelector {
         switch (shuffleType) {
             case ShuffleType.POPULARITY:
             case ShuffleType.CHRONOLOGICAL:
+            case ShuffleType.PLAYLIST_ORDER:
             case ShuffleType.REVERSE_CHRONOLOGICAL:
                 return queriedSongList[0]!;
             case ShuffleType.WEIGHTED_EASY:
@@ -343,9 +345,9 @@ export default class SongSelector {
             SongSelector.applyShuffleWeighting(
                 SongSelector.sortForShuffle(
                     matchedSongs,
-                    this.guildPreference.gameOptions.shuffleType,
+                    this.guildPreference.getEffectiveShuffleType(),
                 ),
-                this.guildPreference.gameOptions.shuffleType,
+                this.guildPreference.getEffectiveShuffleType(),
             ),
         );
 
@@ -449,6 +451,9 @@ export default class SongSelector {
                 return [...songs].sort(
                     (a, b) => b.publishDate.getTime() - a.publishDate.getTime(),
                 );
+            case ShuffleType.PLAYLIST_ORDER:
+                // Matched playlist songs already arrive in playlist order
+                return [...songs];
             default:
                 return [...songs].sort((a, b) => b.views - a.views);
         }
@@ -771,19 +776,22 @@ export default class SongSelector {
             queryBuilder = queryBuilder.where("vtype", "=", "audio");
         }
 
+        // Bind the bounds as date strings: mysql2 serializes Date params in
+        // the process's local timezone, which shifts midnight-UTC dates back
+        // a day west of UTC and drops songs released on Dec 31 of endYear
         queryBuilder = queryBuilder
             .where(
                 "publishedon",
                 ">=",
-                new Date(`${gameOptions.beginningYear}-01-01`),
+                sql<Date>`${`${gameOptions.beginningYear}-01-01`}`,
             )
             .where(
                 "publishedon",
                 "<=",
-                new Date(`${gameOptions.endYear}-12-31`),
+                sql<Date>`${`${gameOptions.endYear}-12-31`}`,
             );
 
-        const shuffleType = gameOptions.shuffleType;
+        const shuffleType = this.guildPreference.getEffectiveShuffleType();
         if (
             [
                 ShuffleType.CHRONOLOGICAL,
