@@ -72,6 +72,8 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "coed",
 ];
 export const DEFAULT_LIMIT = 500;
+// Unused guilds' loaded song lists are released after this long
+export const GUILD_SONG_LIST_IDLE_RELEASE_MS = 30 * 60 * 1000;
 
 export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.MULTIGUESS_DELAY]: 1.5,

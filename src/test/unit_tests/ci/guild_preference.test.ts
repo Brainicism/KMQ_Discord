@@ -1,9 +1,67 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import GameOption from "../../../enums/game_option_name";
 import GuildPreference from "../../../structures/guild_preference";
+import Session from "../../../structures/session";
 import assert from "assert";
+import sinon from "sinon";
 
 describe("guild preference", () => {
+    describe("releaseIdleSongLists", () => {
+        const sandbox = sinon.createSandbox();
+        afterEach(() => {
+            sandbox.restore();
+        });
+
+        it("drops idle guilds' song lists and keeps active ones", async () => {
+            // A guild's first fetch only creates its row; later ones are cached
+            for (const id of ["idle-guild", "recent-guild", "playing-guild"]) {
+                // eslint-disable-next-line no-await-in-loop
+                await GuildPreference.getGuildPreference(id);
+            }
+
+            const idle = await GuildPreference.getGuildPreference("idle-guild");
+            const recent =
+                await GuildPreference.getGuildPreference("recent-guild");
+
+            const playing =
+                await GuildPreference.getGuildPreference("playing-guild");
+
+            for (const gp of [idle, recent, playing]) {
+                sandbox.stub(gp, "updateGuildPreferences");
+                // eslint-disable-next-line no-await-in-loop
+                await gp.songSelector.reloadSongs();
+            }
+
+            const now = Date.now();
+            idle.lastAccessedAt = now - 60 * 60 * 1000;
+            playing.lastAccessedAt = now - 60 * 60 * 1000;
+            recent.lastAccessedAt = now;
+            sandbox
+                .stub(Session, "getSession")
+                .callsFake((guildID: string) =>
+                    guildID === "playing-guild"
+                        ? ({} as unknown as Session)
+                        : undefined,
+                );
+
+            GuildPreference.releaseIdleSongLists(30 * 60 * 1000, now);
+            assert.strictEqual(idle.songSelector.selectedSongs, null);
+            assert.ok(recent.songSelector.getSongs().songs.size > 0);
+            assert.ok(playing.songSelector.getSongs().songs.size > 0);
+
+            // released lists come back on the next reload
+            await idle.songSelector.reloadSongs();
+            assert.ok(idle.songSelector.getSongs().songs.size > 0);
+        });
+
+        it("refreshes lastAccessedAt when a cached preference is fetched", async () => {
+            const gp = await GuildPreference.getGuildPreference("idle-guild");
+            gp.lastAccessedAt = 0;
+            await GuildPreference.getGuildPreference("idle-guild");
+            assert.ok(gp.lastAccessedAt > 0);
+        });
+    });
+
     describe("fromGuild", () => {
         describe("no guild preference provided", () => {
             it("should return a guild preference with default options", () => {
