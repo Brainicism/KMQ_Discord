@@ -872,7 +872,8 @@ export default class GameRound extends Round {
         );
 
         return {
-            exact: !!this.song.songName && cleanedArtistAliases.includes(guess),
+            exact:
+                !!this.song.artistName && cleanedArtistAliases.includes(guess),
             similar: GameRound.similarityCheck(guess, cleanedArtistAliases),
         };
     }
