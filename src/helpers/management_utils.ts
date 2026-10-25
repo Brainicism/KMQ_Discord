@@ -1,6 +1,7 @@
 /* eslint-disable global-require */
 import Eris from "eris";
 /* eslint-disable import/no-dynamic-require */
+import { GUILD_SONG_LIST_IDLE_RELEASE_MS } from "../constants";
 import { IPCLogger } from "../logger";
 import { chooseRandom, delay, isPrimaryInstance, isWeekend } from "./utils";
 import {
@@ -12,6 +13,7 @@ import { sendInfoMessage, sendPowerHourNotification } from "./discord_utils";
 import { sql } from "kysely";
 import EnvType from "../enums/env_type";
 import GameRound from "../structures/game_round";
+import GuildPreference from "../structures/guild_preference";
 import KmqConfiguration from "../kmq_configuration";
 import MessageContext from "../structures/message_context";
 import NewsCommand from "../commands/misc_commands/news";
@@ -534,6 +536,15 @@ export function registerIntervals(clusterID: number): void {
         await updateBotStatus();
         // Clear any guilds stuck in parsing Playlist state
         cleanupPlaylistParsingLocks();
+        // Free song lists of guilds that haven't played in a while
+        const releasedSongLists = GuildPreference.releaseIdleSongLists(
+            GUILD_SONG_LIST_IDLE_RELEASE_MS,
+        );
+
+        if (releasedSongLists > 0) {
+            logger.info(`Released ${releasedSongLists} idle guild song lists`);
+        }
+
         // Reload ban data
         await reloadBanData();
     });

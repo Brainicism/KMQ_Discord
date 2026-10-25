@@ -769,17 +769,31 @@ export default class PlayCommand implements BaseCommand {
         // Don't allow emojis that aren't in this server
         // Emojis are of the format: <(a if animated):(alphanumeric):(number)>
         const emojis = teamName.match(/<a?:[a-zA-Z0-9]+:[0-9]+>/gm) || [];
+        // Guild emojis aren't cached (see gateway_cache_trimming), so fetch
+        // them only when the name actually contains a custom emoji
+        let guildEmojiIDs: Set<string> = new Set();
+        if (emojis.length > 0) {
+            try {
+                guildEmojiIDs = new Set(
+                    (
+                        await State.client.getRESTGuildEmojis(
+                            messageContext.guildID,
+                        )
+                    ).map((e) => e.id),
+                );
+            } catch (e) {
+                logger.warn(
+                    `${getDebugLogHeader(messageContext)} | Failed to fetch guild emojis for team name check. err = ${e}`,
+                );
+            }
+        }
+
         for (const emoji of emojis) {
             const emojiID = (
                 emoji.match(/(?<=<a?:[a-zA-Z0-9]+:)[0-9]+(?=>)/gm) ?? []
             ).join("");
 
-            if (
-                !State.client.guilds
-                    .get(messageContext.guildID)!
-                    .emojis.map((e) => e.id)
-                    .includes(emojiID)
-            ) {
+            if (!guildEmojiIDs.has(emojiID)) {
                 // eslint-disable-next-line no-await-in-loop
                 await sendErrorMessage(
                     messageContext,
