@@ -94,6 +94,27 @@ import type Scoreboard from "./scoreboard";
 
 const logger = new IPCLogger("activity_bridge");
 
+/**
+ * Song-pool options a playlist overrides; mirrors the slash commands gated
+ * by CommandPrechecks.notPlaylistPrecheck. The Activity disables these
+ * controls while a playlist is set, and the bridge enforces it.
+ */
+const PLAYLIST_MANAGED_OPTION_KINDS: ReadonlySet<
+    ActivitySetOptionArgs["kind"]
+> = new Set([
+    "gender",
+    "limit",
+    "cutoff",
+    "language",
+    "release",
+    "artisttype",
+    "subunits",
+    "ost",
+    "groups",
+    "includes",
+    "excludes",
+]);
+
 let workerHandlerRegistered = false;
 
 function snapshotPlayer(player: Player): ActivityScoreboardPlayer {
@@ -1169,6 +1190,19 @@ function ensureWorkerHandlerRegistered(): void {
                                 await GuildPreference.getGuildPreference(
                                     optionArgs.guildID,
                                 );
+
+                            if (
+                                guildPreference.isPlaylist() &&
+                                PLAYLIST_MANAGED_OPTION_KINDS.has(
+                                    optionArgs.kind,
+                                )
+                            ) {
+                                reply({
+                                    ok: false,
+                                    reason: "playlist_managed",
+                                });
+                                return;
+                            }
 
                             switch (optionArgs.kind) {
                                 case "gender": {
