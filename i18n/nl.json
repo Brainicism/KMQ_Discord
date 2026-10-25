@@ -125,7 +125,7 @@
                 "preset": "Sla de huidige opties op als een benoemde preset, of laad/verwijder een opgeslagen preset.",
                 "release": "Alleen officiële muziekvideo's, of alle soorten video's (b-kanten, dansoefeningen, etc.).",
                 "seek": "Waar elk nummer begint te spelen — een willekeurig punt, het begin of het midden.",
-                "shuffle": "Hoe het volgende nummer wordt gekozen — willekeurig, gewogen op moeilijkheid of populariteit, of op releasedatum.",
+                "shuffle": "Hoe het volgende nummer wordt gekozen — willekeurig, gewogen op moeilijkheid of populariteit, op releasedatum, of in de volgorde van de afspeellijst.",
                 "special": "Pas een audiomodificatie (snelheid, toonhoogte of omgekeerd) toe op elk nummer.",
                 "subunits": "Of subeenheden van een geselecteerde groep ook zijn inbegrepen.",
                 "timer": "Seconden om te raden voordat de ronde eindigt. Uit schakelt het uit."
@@ -161,6 +161,8 @@
                 "set": "Instellen",
                 "urlPlaceholder": "Spotify- of YouTube-afspeellijst URL"
             },
+            "playlistOrderRequiresPlaylist": "Afspeellijstvolgorde is alleen beschikbaar zolang er een afspeellijst is ingesteld.",
+            "playlist_order": "Afspeellijstvolgorde",
             "popularity": "Populariteit",
             "preset": {
                 "confirmDelete": "Bevestig verwijderen",
@@ -624,6 +626,7 @@
             "multipleChoicePenalty": "Straf voor meerdere keuzes",
             "powerHourBonus": "Bonus voor Power Hour",
             "shuffleChronologicalPenalty": "Straf voor willekeurige chronologische volgorde",
+            "shufflePlaylistOrderPenalty": "Straf voor afspeellijstvolgorde",
             "shufflePopularityPenalty": "Straf voor willekeurige populariteit",
             "shuffleWeightedEasyPenalty": "Straf voor willekeurige gewogen gemakkelijke modus",
             "title": "EXP-bonussen",
@@ -1604,10 +1607,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "{{playlistOrder}} kan alleen worden gebruikt zolang er een afspeellijst is ingesteld. Gebruik eerst {{playlistCommand}} om er een in te stellen.",
+                    "title": "Afspeellijst vereist"
+                }
+            },
             "help": {
                 "description": "Kies hoe nummers worden geschud.",
                 "example": {
                     "chronological": "Nummers worden afgespeeld in de volgorde waarin ze zijn uitgebracht, met enige willekeur. {{penalty}} EXP-straf wordt toegepast",
+                    "playlistOrder": "Nummers worden afgespeeld in de volgorde van de huidige afspeellijst. Alleen beschikbaar zolang er een afspeellijst is ingesteld. {{penalty}} EXP-straf wordt toegepast",
                     "popularity": "Nummers worden afgespeeld op basis van afnemende populariteit. {{penalty}} EXP-straf wordt toegepast",
                     "random": "Nummers worden willekeurig afgespeeld",
                     "reset": "Reset naar de standaard schudmodus van {{defaultShuffle}}"
