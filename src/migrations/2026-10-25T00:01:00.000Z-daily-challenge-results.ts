@@ -17,6 +17,11 @@ export async function up(db: Kysely<KmqDB>): Promise<void> {
             col.notNull().defaultTo(0),
         )
         .addColumn("completed_at", "datetime", (col) => col.notNull())
+        // Present for someone else's run: they've heard the day's answers, so
+        // the row blocks their own attempt but never ranks.
+        .addColumn("spectated", "boolean", (col) =>
+            col.notNull().defaultTo(false),
+        )
         // One result per player per day enforces single-play-per-day.
         .addUniqueConstraint("daily_challenge_results_player_date", [
             "player_id",

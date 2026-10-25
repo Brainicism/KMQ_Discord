@@ -1539,6 +1539,7 @@ export default class PlayCommand implements BaseCommand {
             if (dailyChallengeDate) {
                 gameSession.dailyChallenge = true;
                 gameSession.dailyChallengeDate = dailyChallengeDate;
+                gameSession.dailyPlayerID = gameOwner.id;
             }
         }
 

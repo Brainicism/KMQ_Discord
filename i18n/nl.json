@@ -37,9 +37,12 @@
             "leaderboardEmpty": "Nog geen finishers — wees de eerste!",
             "leaderboardTitle": "Scorebord",
             "loading": "Laden...",
+            "notSolo": "De dagelijkse uitdaging speel je solo. Speel hem alleen in je spraakkanaal of kamer.",
             "play": "Speel de uitdaging van vandaag",
+            "requiresLogin": "Log in met Discord om de dagelijkse uitdaging te spelen.",
             "shareHeader": "🎵 KMQ Dagelijkse {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} punten",
+            "spectated": "Je hebt vandaag de dagelijkse uitdaging van iemand anders gezien, dus je hebt de nummers al gehoord. Kom morgen terug!",
             "startFailed": "Kon de uitdaging niet starten.",
             "starting": "Starten...",
             "streakLabel": "Beste reeks: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Iedereen in het kanaal zou de antwoorden horen. Start de dagelijkse uitdaging als je alleen in het spraakkanaal bent.",
+                    "title": "Dagelijkse uitdaging is solo"
+                }
+            },
             "help": {
                 "description": "Speel de dagelijkse uitdaging van vandaag — een vaste set nummers die iedereen krijgt, één keer per dag. Voer het opnieuw uit na voltooiing om je resultaat en het klassement te zien.",
                 "example": {

@@ -37,9 +37,12 @@
             "leaderboardEmpty": "No finishers yet — be the first!",
             "leaderboardTitle": "Leaderboard",
             "loading": "Loading...",
+            "notSolo": "The Daily Challenge is a solo run. Play it alone in your voice channel or room.",
             "play": "Play today's challenge",
+            "requiresLogin": "Log in with Discord to play the Daily Challenge.",
             "shareHeader": "🎵 KMQ Daily {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "spectated": "You watched someone else's Daily Challenge today, so you've already heard its songs. Come back tomorrow!",
             "startFailed": "Couldn't start the challenge.",
             "starting": "Starting...",
             "streakLabel": "Best streak: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Everyone in the channel would hear the answers. Start the Daily Challenge while you're alone in the voice channel.",
+                    "title": "Daily Challenge Is Solo"
+                }
+            },
             "help": {
                 "description": "Play today's Daily Challenge — a fixed set of songs everyone gets, once per day. Run it again after finishing to see your result and the leaderboard.",
                 "example": {

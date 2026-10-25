@@ -1,15 +1,19 @@
 import { DAILY_CHALLENGE_LEADERBOARD_SIZE, KmqImages } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { getDailyChallengeDate } from "../../helpers/daily_challenge";
 import {
+    checkDailyEligibility,
     getDailyLeaderboard,
     getDailyResultForPlayer,
 } from "../../helpers/daily_challenge_manager";
 import {
+    getCurrentVoiceMembers,
     getDebugLogHeader,
     getUserTag,
+    getUserVoiceChannel,
+    sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
+import { getDailyChallengeDate } from "../../helpers/daily_challenge";
 import CommandPrechecks from "../../command_prechecks";
 import Eris from "eris";
 import GameType from "../../enums/game_type";
@@ -115,6 +119,37 @@ export default class DailyCommand implements BaseCommand {
                 )} | Daily already completed; showed status.`,
             );
             return;
+        }
+
+        // A solo run: anyone else in the channel would hear every answer
+        const voiceChannel = getUserVoiceChannel(messageContext);
+        if (voiceChannel) {
+            const eligibility = checkDailyEligibility(
+                messageContext.author.id,
+                getCurrentVoiceMembers(voiceChannel.id).map((m) => m.id),
+            );
+
+            if (eligibility !== "ok") {
+                await sendErrorMessage(
+                    messageContext,
+                    {
+                        title: i18n.translate(
+                            messageContext.guildID,
+                            "command.daily.failure.notSolo.title",
+                        ),
+                        description: i18n.translate(
+                            messageContext.guildID,
+                            "command.daily.failure.notSolo.description",
+                        ),
+                    },
+                    interaction,
+                );
+
+                logger.info(
+                    `${getDebugLogHeader(messageContext)} | Daily rejected: ${eligibility}.`,
+                );
+                return;
+            }
         }
 
         await PlayCommand.startGame(

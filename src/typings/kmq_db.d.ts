@@ -80,6 +80,7 @@ export interface DailyChallengeResults {
     correct_count: Generated<number>;
     player_id: string;
     score: Generated<number>;
+    spectated: Generated<number>;
     total_count: Generated<number>;
 }
 

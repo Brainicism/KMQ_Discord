@@ -37,9 +37,12 @@
             "leaderboardEmpty": "Ainda não há vencedores — seja o primeiro!",
             "leaderboardTitle": "Placar",
             "loading": "Carregando...",
+            "notSolo": "O Desafio Diário é solo. Jogue sozinho no seu canal de voz ou sala.",
             "play": "Jogue o desafio de hoje",
+            "requiresLogin": "Entre com o Discord para jogar o Desafio Diário.",
             "shareHeader": "🎵 KMQ Diário {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "spectated": "Você assistiu ao Desafio Diário de outra pessoa hoje, então já ouviu as músicas. Volte amanhã!",
             "startFailed": "Não foi possível iniciar o desafio.",
             "starting": "Iniciando...",
             "streakLabel": "Melhor sequência: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Todos no canal ouviriam as respostas. Inicie o Desafio Diário quando estiver sozinho no canal de voz.",
+                    "title": "O Desafio Diário é solo"
+                }
+            },
             "help": {
                 "description": "Jogue o Desafio Diário de hoje — um conjunto fixo de músicas que todos recebem, uma vez por dia. Execute-o novamente após terminar para ver seu resultado e o placar.",
                 "example": {

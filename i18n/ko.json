@@ -37,9 +37,12 @@
             "leaderboardEmpty": "아직 완주자가 없습니다 — 첫 번째가 되세요!",
             "leaderboardTitle": "리더보드",
             "loading": "로딩 중...",
+            "notSolo": "데일리 챌린지는 혼자 플레이합니다. 음성 채널이나 방에서 혼자 플레이하세요.",
             "play": "오늘의 챌린지를 플레이하세요",
+            "requiresLogin": "데일리 챌린지를 플레이하려면 Discord로 로그인하세요.",
             "shareHeader": "🎵 KMQ 데일리 {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} 점",
+            "spectated": "오늘 다른 사람의 데일리 챌린지를 봐서 이미 노래를 들었습니다. 내일 다시 오세요!",
             "startFailed": "챌린지를 시작할 수 없습니다.",
             "starting": "시작 중...",
             "streakLabel": "최고 연승: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "채널에 있는 모두가 정답을 듣게 됩니다. 음성 채널에 혼자 있을 때 데일리 챌린지를 시작하세요.",
+                    "title": "데일리 챌린지는 혼자 플레이"
+                }
+            },
             "help": {
                 "description": "오늘의 데일리 챌린지를 플레이하세요 — 모두가 받는 고정된 노래 세트, 하루에 한 번. 완료 후 결과와 리더보드 보기 위해 다시 실행하세요.",
                 "example": {

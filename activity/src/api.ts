@@ -382,7 +382,7 @@ export async function fetchDailyInfo(
     accessToken: string,
     instanceId: string,
 ): Promise<DailyInfo | null> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/daily-info`, {
+    const resp = await fetch(`${getApiBase()}/daily-info`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",
@@ -400,7 +400,7 @@ export async function startDaily(
     accessToken: string,
     instanceId: string,
 ): Promise<GuessResult> {
-    const resp = await fetch(`${ACTIVITY_PROXY_BASE}/daily-start`, {
+    const resp = await fetch(`${getApiBase()}/daily-start`, {
         method: "POST",
         headers: {
             "Content-Type": "application/json",

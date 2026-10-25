@@ -4778,7 +4778,13 @@ function DailyPanel({
                     <p className="daily-loading">{t("networkError")}</p>
                 ) : (
                     <>
-                        {info.completed && info.result ? (
+                        {info.completed && info.result?.spectated ? (
+                            <div className="daily-cta">
+                                <p className="daily-cta-text">
+                                    {t("daily.spectated")}
+                                </p>
+                            </div>
+                        ) : info.completed && info.result ? (
                             <div className="daily-result">
                                 <div className="daily-grid">
                                     {dailyGrid(
@@ -4829,7 +4835,12 @@ function DailyPanel({
                                 </button>
                                 {startError && (
                                     <p className="daily-error">
-                                        {t("daily.startFailed")}
+                                        {startError === "daily_not_solo"
+                                            ? t("daily.notSolo")
+                                            : startError ===
+                                                "daily_requires_login"
+                                              ? t("daily.requiresLogin")
+                                              : t("daily.startFailed")}
                                     </p>
                                 )}
                             </div>

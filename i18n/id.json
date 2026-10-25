@@ -37,9 +37,12 @@
             "leaderboardEmpty": "Belum ada yang menyelesaikan — jadilah yang pertama!",
             "leaderboardTitle": "Papan Peringkat",
             "loading": "Memuat...",
+            "notSolo": "Tantangan Harian dimainkan sendiri. Mainkan sendirian di saluran suara atau ruangan Anda.",
             "play": "Mainkan tantangan hari ini",
+            "requiresLogin": "Masuk dengan Discord untuk memainkan Tantangan Harian.",
             "shareHeader": "🎵 KMQ Harian {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} poin",
+            "spectated": "Hari ini Anda menonton Tantangan Harian orang lain, jadi Anda sudah mendengar lagu-lagunya. Kembali lagi besok!",
             "startFailed": "Tidak dapat memulai tantangan.",
             "starting": "Memulai...",
             "streakLabel": "Rekor terbaik: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Semua orang di saluran akan mendengar jawabannya. Mulai Tantangan Harian saat Anda sendirian di saluran suara.",
+                    "title": "Tantangan Harian Dimainkan Sendiri"
+                }
+            },
             "help": {
                 "description": "Mainkan Tantangan Harian hari ini — satu set lagu tetap yang diterima semua orang, sekali per hari. Jalankan lagi setelah selesai untuk melihat hasil Anda dan papan peringkat.",
                 "example": {

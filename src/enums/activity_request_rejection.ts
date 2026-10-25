@@ -19,6 +19,9 @@ type ActivityRequestRejection =
     | "playlist_invalid_url"
     | "playlist_unsupported_url"
     | "playlist_no_matches"
-    | "playlist_resolve_failed";
+    | "playlist_resolve_failed"
+    // Daily Challenge: a solo run for Discord-authenticated players
+    | "daily_requires_login"
+    | "daily_not_solo";
 
 export default ActivityRequestRejection;

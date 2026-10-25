@@ -16,23 +16,25 @@ import {
 import { IPCLogger } from "../logger";
 import {
     botHasVoicePermissions,
+    getCurrentVoiceMembers,
     getUserVoiceChannelID,
     searchArtists,
 } from "../helpers/discord_utils";
-import {
-    clearWebRoomMembers,
-    getWebRoomMembers,
-    setWebRoomMembers,
-} from "./web_room_state";
 import {
     buildDailyGuildPreference,
     getDailyChallengeDate,
 } from "../helpers/daily_challenge";
 import {
+    checkDailyEligibility,
     getDailyLeaderboard,
     getDailyResultForPlayer,
     hasCompletedDailyChallenge,
 } from "../helpers/daily_challenge_manager";
+import {
+    clearWebRoomMembers,
+    getWebRoomMembers,
+    setWebRoomMembers,
+} from "./web_room_state";
 import { onGuildPreferenceChanged } from "../helpers/guild_preference_events";
 import { parseKmqPlaylistIdentifier } from "../helpers/utils";
 import { songTagEmojisToUnicode } from "../helpers/game_utils";
@@ -2013,6 +2015,7 @@ function ensureWorkerHandlerRegistered(): void {
                                           correctCount: result.correctCount,
                                           totalCount: result.totalCount,
                                           bestStreak: result.bestStreak,
+                                          spectated: result.spectated,
                                       }
                                     : null,
                                 leaderboard: leaderboard.map((entry) => {
@@ -2097,23 +2100,66 @@ function ensureWorkerHandlerRegistered(): void {
                             return;
                         }
 
-                        const startVoiceChannelID = getUserVoiceChannelID(
-                            startArgs.guildID,
-                            startArgs.userID,
-                        );
+                        const isWebStart = startArgs.mode === "web";
+                        let startVoiceChannelID = "";
+                        let participantIDs: Array<string>;
+                        if (isWebStart) {
+                            setWebRoomMembers(
+                                startArgs.guildID,
+                                startArgs.members ?? [],
+                            );
 
-                        if (!startVoiceChannelID) {
-                            reply({ ok: false, reason: "not_in_vc" });
-                            return;
+                            participantIDs = getWebRoomMembers(
+                                startArgs.guildID,
+                            ).map((m) => m.id);
+
+                            if (!participantIDs.includes(startArgs.userID)) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+                        } else {
+                            const userVoiceChannelID = getUserVoiceChannelID(
+                                startArgs.guildID,
+                                startArgs.userID,
+                            );
+
+                            if (!userVoiceChannelID) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+
+                            if (!botHasVoicePermissions(userVoiceChannelID)) {
+                                reply({
+                                    ok: false,
+                                    reason: "bot_no_voice_perms",
+                                });
+                                return;
+                            }
+
+                            startVoiceChannelID = userVoiceChannelID;
+                            participantIDs = getCurrentVoiceMembers(
+                                userVoiceChannelID,
+                            ).map((m) => m.id);
                         }
 
-                        if (!botHasVoicePermissions(startVoiceChannelID)) {
-                            reply({ ok: false, reason: "bot_no_voice_perms" });
+                        const eligibility = checkDailyEligibility(
+                            startArgs.userID,
+                            participantIDs,
+                        );
+
+                        if (eligibility !== "ok") {
+                            reply({
+                                ok: false,
+                                reason:
+                                    eligibility === "requires_login"
+                                        ? "daily_requires_login"
+                                        : "daily_not_solo",
+                            });
                             return;
                         }
 
                         const messageContext = new MessageContext(
-                            startArgs.textChannelID,
+                            isWebStart ? "" : startArgs.textChannelID,
                             new KmqMember(startArgs.userID),
                             startArgs.guildID,
                         );
@@ -2125,17 +2171,26 @@ function ensureWorkerHandlerRegistered(): void {
                                     date,
                                 );
 
-                            const gameSession = new GameSession(
-                                guildPreference,
-                                startArgs.textChannelID,
-                                startVoiceChannelID,
-                                startArgs.guildID,
-                                new KmqMember(startArgs.userID),
-                                GameType.CLASSIC,
-                            );
+                            const gameOwner = new KmqMember(startArgs.userID);
+                            const gameSession = isWebStart
+                                ? new WebGameSession(
+                                      guildPreference,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      GameType.CLASSIC,
+                                  )
+                                : new GameSession(
+                                      guildPreference,
+                                      startArgs.textChannelID,
+                                      startVoiceChannelID,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      GameType.CLASSIC,
+                                  );
 
                             gameSession.dailyChallenge = true;
                             gameSession.dailyChallengeDate = date;
+                            gameSession.dailyPlayerID = startArgs.userID;
 
                             const previous = Session.getSession(
                                 startArgs.guildID,

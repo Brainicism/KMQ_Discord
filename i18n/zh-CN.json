@@ -37,9 +37,12 @@
             "leaderboardEmpty": "尚无人完成 — 成为第一个吧！",
             "leaderboardTitle": "排行榜",
             "loading": "加载中...",
+            "notSolo": "每日挑战需要单人进行。请在你的语音频道或房间中独自游玩。",
             "play": "参与今天的挑战",
+            "requiresLogin": "请使用 Discord 登录以进行每日挑战。",
             "shareHeader": "🎵 KMQ 每日 {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} 分",
+            "spectated": "你今天观看了别人的每日挑战，已经听过这些歌曲了。明天再来吧！",
             "startFailed": "无法启动挑战。",
             "starting": "开始中...",
             "streakLabel": "最佳连胜：{{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "频道中的所有人都会听到答案。请在你独自一人在语音频道中时开始每日挑战。",
+                    "title": "每日挑战仅限单人"
+                }
+            },
             "help": {
                 "description": "进行今天的每日挑战——每个人每天都会得到一组固定的歌曲。完成后再次运行以查看您的结果和排行榜。",
                 "example": {

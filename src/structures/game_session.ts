@@ -125,6 +125,10 @@ export default class GameSession extends Session {
      *  dailyChallenge is true). */
     public dailyChallengeDate: string | null = null;
 
+    /** The one player whose run a Daily Challenge session is (its starter).
+     *  Anyone else present is a spectator: their guesses don't count. */
+    public dailyPlayerID: string | null = null;
+
     /** The number of songs correctly guessed */
     private correctGuesses: number;
 
@@ -1858,6 +1862,14 @@ export default class GameSession extends Session {
             return false;
         }
 
+        // a Daily Challenge is a solo run
+        if (
+            this.dailyChallenge &&
+            messageContext.author.id !== this.dailyPlayerID
+        ) {
+            return false;
+        }
+
         // check elimination mode constraints
         if (this.gameType === GameType.ELIMINATION) {
             const eliminationScoreboard = this
@@ -1925,27 +1937,36 @@ export default class GameSession extends Session {
         const completedAt = new Date();
         const challengeDate = dailyChallengeDateValue(this.dailyChallengeDate);
         await Promise.all(
-            this.scoreboard.getPlayers().map((player) => {
-                const stats = this.dailyPlayerStats.get(player.id) ?? {
-                    correct: 0,
-                    currentStreak: 0,
-                    bestStreak: 0,
-                };
+            this.scoreboard
+                .getPlayers()
+                // Guests never rank (unlimited identities could farm answers)
+                .filter((player) => !isGuestUserID(player.id))
+                .map((player) => {
+                    const isRunner = player.id === this.dailyPlayerID;
+                    const stats = (isRunner &&
+                        this.dailyPlayerStats.get(player.id)) || {
+                        correct: 0,
+                        currentStreak: 0,
+                        bestStreak: 0,
+                    };
 
-                return dbContext.kmq
-                    .insertInto("daily_challenge_results")
-                    .ignore()
-                    .values({
-                        player_id: player.id,
-                        challenge_date: challengeDate,
-                        score: player.getScore(),
-                        correct_count: stats.correct,
-                        total_count: DAILY_CHALLENGE_ROUNDS,
-                        best_streak: stats.bestStreak,
-                        completed_at: completedAt,
-                    })
-                    .execute();
-            }),
+                    // Spectators heard today's answers: their row blocks a
+                    // replay and is excluded from the leaderboard
+                    return dbContext.kmq
+                        .insertInto("daily_challenge_results")
+                        .ignore()
+                        .values({
+                            player_id: player.id,
+                            challenge_date: challengeDate,
+                            score: isRunner ? player.getScore() : 0,
+                            correct_count: stats.correct,
+                            total_count: DAILY_CHALLENGE_ROUNDS,
+                            best_streak: stats.bestStreak,
+                            spectated: isRunner ? 0 : 1,
+                            completed_at: completedAt,
+                        })
+                        .execute();
+                }),
         );
     }
 

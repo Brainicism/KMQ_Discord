@@ -11,6 +11,8 @@ export default interface ActivityDailyInfoResponse {
         correctCount: number;
         totalCount: number;
         bestStreak: number;
+        /** Watched someone else's run: blocks a replay today, never ranks. */
+        spectated: boolean;
     } | null;
     /** Top results for the day, highest score first. */
     leaderboard: {

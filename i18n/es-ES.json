@@ -37,9 +37,12 @@
             "leaderboardEmpty": "Nadie ha terminado todavía — ¡sé el primero!",
             "leaderboardTitle": "Clasificación",
             "loading": "Cargando...",
+            "notSolo": "El Desafío Diario es una partida en solitario. Juégalo solo en tu canal de voz o sala.",
             "play": "Jugar el desafío de hoy",
+            "requiresLogin": "Inicia sesión con Discord para jugar el Desafío Diario.",
             "shareHeader": "🎵 KMQ Diario {{date}}",
             "shareLine": "{{correct}}/{{total}} · {{score}} pts",
+            "spectated": "Hoy viste el Desafío Diario de otra persona, así que ya escuchaste sus canciones. ¡Vuelve mañana!",
             "startFailed": "No se pudo iniciar el desafío.",
             "starting": "Comenzando...",
             "streakLabel": "Mejor racha: {{streak}}",
@@ -537,6 +540,12 @@
             }
         },
         "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Todos en el canal escucharían las respuestas. Inicia el Desafío Diario cuando estés solo en el canal de voz.",
+                    "title": "El Desafío Diario es en solitario"
+                }
+            },
             "help": {
                 "description": "Juega el Desafío Diario de hoy — un conjunto fijo de canciones que todos reciben, una vez por día. Ejecútalo de nuevo después de terminar para ver tu resultado y la clasificación.",
                 "example": {

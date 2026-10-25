@@ -1921,16 +1921,32 @@ export default class KmqWebServer {
                 const ctx = await requireAuthedInstance(request, reply);
                 if (!ctx) return;
 
-                if (!ctx.instance.channelID) {
+                if (!ctx.instance.webRoom && !ctx.instance.channelID) {
                     await reply.code(400).send({ error: "No channel" });
                     return;
                 }
+
+                const room = ctx.instance.webRoom
+                    ? this.webRoomManager?.getRoomForUser(ctx.user.id)
+                    : undefined;
 
                 try {
                     const result = await this.activityHub!.startDailyChallenge({
                         guildID: ctx.instance.guildID,
                         userID: ctx.user.id,
-                        textChannelID: ctx.instance.channelID,
+                        textChannelID: ctx.instance.channelID ?? "",
+                        ...(ctx.instance.webRoom
+                            ? {
+                                  mode: "web" as const,
+                                  members: [
+                                      ...(room?.members.values() ?? []),
+                                  ].map((m) => ({
+                                      id: m.id,
+                                      username: m.username,
+                                      avatarUrl: m.avatarUrl,
+                                  })),
+                              }
+                            : {}),
                     });
 
                     if (!result.ok) {
