@@ -72,11 +72,17 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "coed",
 ];
 export const DEFAULT_LIMIT = 500;
+// Unused guilds' loaded song lists are released after this long
+export const GUILD_SONG_LIST_IDLE_RELEASE_MS = 30 * 60 * 1000;
 
 export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.MULTIGUESS_DELAY]: 1.5,
     [AdvancedCommandAction.SONG_START_DELAY]: 3,
 };
+
+/** Upper bound (seconds) for each advanced delay setting, shared by /advanced
+ *  and the Activity/website options panel. */
+export const ADVANCED_SETTING_MAX_DELAY_SEC = 60;
 
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
@@ -163,6 +169,8 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.SHUFFLE_POPULARITY]: 0.2,
     [ExpBonusModifier.SHUFFLE_WEIGHTED_EASY]: 0.5,
     [ExpBonusModifier.SHUFFLE_CHRONOLOGICAL]: 0.8,
+    // The order is fully known to whoever built the playlist
+    [ExpBonusModifier.SHUFFLE_PLAYLIST_ORDER]: 0.2,
     [ExpBonusModifier.ARTIST_GUESS]: 0.3,
     [ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED]: 0,
     [ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON]: 2,
@@ -476,6 +484,9 @@ export const WEB_GUEST_LOGIN_IP_WINDOW_MS = 60 * 60 * 1000;
 // left is closed.
 export const WEB_ROOM_DISCONNECT_GRACE_MS = 60_000;
 export const WEB_ROOM_SWEEP_INTERVAL_MS = 30_000;
+// How often the web server drops expired entries from its in-memory caches
+// (tokens, tickets, OAuth states, guest-login windows).
+export const WEB_SERVER_CACHE_SWEEP_INTERVAL_MS = 60_000;
 
 // Browser audio streaming for web rooms. A minted token stays redeemable for
 // the playback's remaining duration plus this buffer (reconnects/reloads can

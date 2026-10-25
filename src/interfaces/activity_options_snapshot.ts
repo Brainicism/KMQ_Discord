@@ -37,6 +37,10 @@ export default interface ActivityOptionsSnapshot {
     goal: number | null;
     /** Seconds until a round times out; null when disabled. */
     timer: number | null;
+    /** Advanced: seconds others may still guess after the first correct one. */
+    multiguessDelay: number;
+    /** Advanced: seconds between a round ending and the next song starting. */
+    songStartDelay: number;
     /** Session duration in minutes; null when unset (no time limit). */
     duration: number | null;
     /** How the eligible song pool is ordered/sampled each round. */

@@ -27,6 +27,7 @@ import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
 import Session from "./session";
+import ShuffleType from "../enums/option_types/shuffle_type";
 import SongSelector from "./song_selector";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -45,7 +46,6 @@ import type MultiGuessType from "../enums/option_types/multiguess_type";
 import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
 import type SeekType from "../enums/option_types/seek_type";
-import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
 
@@ -213,6 +213,9 @@ export default class GuildPreference {
     /** Callback to send song messages */
     public answerTypeChangeCallback: (() => Promise<void>) | undefined;
 
+    /** When this preference was last fetched via getGuildPreference */
+    public lastAccessedAt: number = Date.now();
+
     /** The guild preference cache */
     private static guildPreferencesCache: {
         [guildID: string]: GuildPreference;
@@ -246,6 +249,15 @@ export default class GuildPreference {
             }
         }
 
+        // e.g. a preset saved with playlist order but without its playlist
+        if (
+            validatedGameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER &&
+            !validatedGameOptions.spotifyPlaylistID
+        ) {
+            validatedGameOptions.shuffleType = DEFAULT_SHUFFLE;
+            newDefaultOptionsAdded++;
+        }
+
         this.gameOptions = validatedGameOptions;
 
         if (newDefaultOptionsAdded && process.env.NODE_ENV !== EnvType.TEST) {
@@ -266,6 +278,7 @@ export default class GuildPreference {
                 GuildPreference.guildPreferencesCache[guildID];
 
             if (cachedGuildPreference) {
+                cachedGuildPreference.lastAccessedAt = Date.now();
                 return cachedGuildPreference;
             }
 
@@ -281,6 +294,11 @@ export default class GuildPreference {
                     .insertInto("guilds")
                     .values({ guild_id: guildID, join_date: new Date() })
                     .execute();
+
+                // Cache it like any other guild; otherwise the first caller
+                // (e.g. a session) keeps an instance later lookups never see
+                GuildPreference.guildPreferencesCache[guildID] =
+                    guildPreference;
                 return guildPreference;
             }
 
@@ -310,6 +328,36 @@ export default class GuildPreference {
             GuildPreference.guildPreferencesCache[guildID] = guildPreference;
             return guildPreference;
         });
+    }
+
+    /**
+     * Drops the loaded song list of cached guilds that haven't been used for a
+     * while and have no active session. Every guild that ever played or opened
+     * its options otherwise keeps its whole song pool in memory for the life of
+     * the worker (hundreds to tens of thousands of songs each). The list
+     * reloads on demand: callers already reload when it's empty.
+     * @param idleMs - how long a guild must go unused before its list is dropped
+     * @param now - current epoch ms
+     * @returns the number of song lists released
+     */
+    static releaseIdleSongLists(idleMs: number, now = Date.now()): number {
+        let released = 0;
+        for (const [guildID, guildPreference] of Object.entries(
+            GuildPreference.guildPreferencesCache,
+        )) {
+            if (
+                now - guildPreference.lastAccessedAt < idleMs ||
+                Session.getSession(guildID) ||
+                !guildPreference.songSelector.selectedSongs
+            ) {
+                continue;
+            }
+
+            guildPreference.songSelector.selectedSongs = null;
+            released++;
+        }
+
+        return released;
     }
 
     /**
@@ -918,12 +966,29 @@ export default class GuildPreference {
         kmqPlaylistIdentifier: string | null,
     ): Promise<void> {
         this.gameOptions.spotifyPlaylistID = kmqPlaylistIdentifier;
-        await this.updateGuildPreferences([
+        const updatedOptions: Array<{
+            name: GameOptionInternal;
+            value: GameOptionValue;
+        }> = [
             {
                 name: GameOptionInternal.PLAYLIST_ID,
                 value: kmqPlaylistIdentifier,
             },
-        ]);
+        ];
+
+        // Playlist order is meaningless without a playlist
+        if (
+            kmqPlaylistIdentifier === null &&
+            this.gameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER
+        ) {
+            this.gameOptions.shuffleType = DEFAULT_SHUFFLE;
+            updatedOptions.push({
+                name: GameOptionInternal.SHUFFLE_TYPE,
+                value: DEFAULT_SHUFFLE,
+            });
+        }
+
+        await this.updateGuildPreferences(updatedOptions);
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
@@ -936,6 +1001,21 @@ export default class GuildPreference {
      */
     isPlaylist(): boolean {
         return this.gameOptions.spotifyPlaylistID !== null;
+    }
+
+    /**
+     * @returns the shuffle type to select songs with: playlist order only
+     * applies while a playlist is set, and falls back to random otherwise
+     */
+    getEffectiveShuffleType(): ShuffleType {
+        if (
+            this.gameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER &&
+            !this.isPlaylist()
+        ) {
+            return ShuffleType.RANDOM;
+        }
+
+        return this.gameOptions.shuffleType;
     }
 
     /**

@@ -447,6 +447,11 @@ export default class PlaylistManager {
                     .execute()
             ).map((x) => new QueriedSong(x));
 
+            matchedSongs = PlaylistManager.sortByPlaylistPosition(
+                matchedSongs,
+                youtubePlaylistVideoIDs.map((x) => x.videoId),
+            );
+
             unmatchedSongs = youtubePlaylistVideoIDs
                 .filter(
                     (x) =>
@@ -595,6 +600,7 @@ export default class PlaylistManager {
 
         let matchedSongs: Array<QueriedSong> = [];
         let unmatchedSongs: Array<string> = [];
+        const matchedSongPositions: Map<QueriedSong, number> = new Map();
         let truncated = false;
 
         if (
@@ -637,11 +643,15 @@ export default class PlaylistManager {
 
         let numProcessedPlaylistPages = 0;
         const parseStartTime = Date.now();
-        for await (const results of asyncPool(
+        // asyncPool yields in completion order; index pages to keep playlist order
+        const tracksByPage: Array<Array<SpotifyTrack>> = [];
+        for await (const { page, tracks } of asyncPool(
             10,
-            requestURLs,
-            (requestURL: string) =>
-                this.generateSpotifyResponsePromise(requestURL, guildID),
+            requestURLs.map((requestURL, idx) => ({ requestURL, idx })),
+            ({ requestURL, idx }: { requestURL: string; idx: number }) =>
+                this.generateSpotifyResponsePromise(requestURL, guildID).then(
+                    (results) => ({ page: idx, tracks: results }),
+                ),
         )) {
             if (
                 numProcessedPlaylistPages % Math.floor(numPlaylistPages / 4) ===
@@ -654,9 +664,11 @@ export default class PlaylistManager {
                 );
             }
 
-            spotifySongs.push(...results);
+            tracksByPage[page] = tracks;
             numProcessedPlaylistPages++;
         }
+
+        spotifySongs.push(...tracksByPage.flat());
 
         logger.info(
             `${logHeader} | Finished grabbing Spotify song data for playlist after ${
@@ -711,16 +723,23 @@ export default class PlaylistManager {
         }, 2000);
 
         try {
-            for await (const queryOutput of asyncPool(
+            for await (const { queryOutput, position } of asyncPool(
                 4,
-                spotifySongs,
-                (x: SpotifyTrack) =>
-                    this.generateSpotifySongMatchingPromise(x, guildID),
+                spotifySongs.map((track, idx) => ({ track, idx })),
+                ({ track, idx }: { track: SpotifyTrack; idx: number }) =>
+                    this.generateSpotifySongMatchingPromise(
+                        track,
+                        guildID,
+                    ).then((output) => ({
+                        queryOutput: output,
+                        position: idx,
+                    })),
             )) {
                 if (typeof queryOutput === "string") {
                     unmatchedSongs.push(queryOutput);
                 } else {
                     matchedSongs.push(queryOutput);
+                    matchedSongPositions.set(queryOutput, position);
                 }
 
                 const processedSongCount =
@@ -770,6 +789,12 @@ export default class PlaylistManager {
             );
         }
 
+        // Restore playlist order (matching completes out of order) before
+        // dedupe, so a repeated song keeps its first position
+        matchedSongs.sort(
+            (a, b) =>
+                matchedSongPositions.get(a)! - matchedSongPositions.get(b)!,
+        );
         matchedSongs = _.uniqBy(matchedSongs, "youtubeLink");
         unmatchedSongs = _.uniq(unmatchedSongs);
         metadata.matchedSongsLength = matchedSongs.length;
@@ -816,6 +841,35 @@ export default class PlaylistManager {
         this.cachedPlaylists[playlistId] = playlist;
         return playlist;
     };
+
+    /**
+     * @param songs - songs matched from a playlist, in any order
+     * @param playlistVideoIDs - the playlist's video IDs, in playlist order
+     * @returns the songs ordered by their first appearance in the playlist,
+     * by either their main link or their better audio link
+     */
+    static sortByPlaylistPosition(
+        songs: Array<QueriedSong>,
+        playlistVideoIDs: Array<string>,
+    ): Array<QueriedSong> {
+        const firstPosition = new Map<string, number>();
+        for (const [idx, videoID] of playlistVideoIDs.entries()) {
+            if (!firstPosition.has(videoID)) {
+                firstPosition.set(videoID, idx);
+            }
+        }
+
+        const position = (song: QueriedSong): number =>
+            Math.min(
+                firstPosition.get(song.youtubeLink) ?? Number.MAX_SAFE_INTEGER,
+                song.betterAudioLink
+                    ? (firstPosition.get(song.betterAudioLink) ??
+                          Number.MAX_SAFE_INTEGER)
+                    : Number.MAX_SAFE_INTEGER,
+            );
+
+        return [...songs].sort((a, b) => position(a) - position(b));
+    }
 
     /**
      * Remove any guilds that have been stuck parsing for more than 10 minutes

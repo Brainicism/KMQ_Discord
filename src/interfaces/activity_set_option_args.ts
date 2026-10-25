@@ -1,4 +1,5 @@
 import type { GenderModeOptions } from "../enums/option_types/gender";
+import type AdvancedCommandAction from "../enums/advanced_setting_action_name";
 import type AnswerType from "../enums/option_types/answer_type";
 import type ArtistType from "../enums/option_types/artist_type";
 import type GuessModeType from "../enums/option_types/guess_mode_type";
@@ -28,6 +29,7 @@ type ActivitySetOptionArgs = {
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
+    | { kind: "advanced"; setting: AdvancedCommandAction; value: number }
     | { kind: "duration"; duration: number | null }
     | { kind: "shuffle"; shuffle: ShuffleType }
     | { kind: "seek"; seek: SeekType }

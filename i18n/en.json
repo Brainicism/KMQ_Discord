@@ -76,6 +76,7 @@
         "notInVCWarning": "Join the voice channel to start a game.",
         "openOnYouTube": "Open on YouTube",
         "options": {
+            "advancedWarning": "Change these at your own risk.",
             "all": "All",
             "alternating": "Alternating",
             "answer": "Answer Type",
@@ -85,6 +86,7 @@
             "both": "Both",
             "bside": "B-side",
             "category": {
+                "advanced": "Advanced",
                 "artists": "Artists",
                 "gameplay": "Gameplay",
                 "playback": "Playback",
@@ -95,6 +97,7 @@
             "coed": "Coed",
             "cutoff": "Year Range",
             "cutoffRangeError": "Start year can't be after end year.",
+            "default": "Default",
             "duration": "Duration (minutes)",
             "easy": "Multiple Choice (Easy)",
             "exclude": "Exclude",
@@ -121,12 +124,14 @@
                 "language": "Play only Korean-language songs, or songs in any language.",
                 "limit": "Restrict the pool to the top X most popular songs in range.",
                 "multiguess": "When on, others get a brief window to also guess after the first correct answer.",
+                "multiguessDelay": "The delay before ending the round, after someone guesses correctly",
                 "ost": "Whether OST (soundtrack) songs are included, excluded, or played exclusively.",
                 "playlist": "Play songs from a Spotify or YouTube playlist. While active, the song-pool filters are managed by the playlist.",
                 "preset": "Save the current options as a named preset, or load/delete a saved one.",
                 "release": "Only official music videos, or all video types (b-sides, dance practices, etc.).",
                 "seek": "Where each song starts playing — a random point, the beginning, or the middle.",
-                "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, or by release date.",
+                "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, by release date, or in playlist order.",
+                "songStartDelay": "The delay before playing a new song after a game round completes",
                 "special": "Apply an audio modifier (speed, pitch, or reverse) to every song.",
                 "subunits": "Whether a selected group's subunits are included too.",
                 "timer": "Seconds to guess before the round times out. Off disables it."
@@ -143,6 +148,7 @@
             "medium": "Multiple Choice (Medium)",
             "middle": "Middle",
             "multiguess": "Multiguess",
+            "multiguessDelay": "Multiguess delay",
             "off": "Off",
             "official": "Official",
             "on": "On",
@@ -162,6 +168,8 @@
                 "set": "Set",
                 "urlPlaceholder": "Spotify or YouTube playlist URL"
             },
+            "playlistOrderRequiresPlaylist": "Playlist order is only available while a playlist is set.",
+            "playlist_order": "Playlist Order",
             "popularity": "Popularity",
             "preset": {
                 "confirmDelete": "Confirm delete",
@@ -186,10 +194,12 @@
             "resetAll": "Reset all options",
             "resetConfirm": "Tap again to confirm",
             "reversechronological": "Reverse Chronological",
+            "seconds": "sec",
             "seek": "Seek",
             "shuffle": "Shuffle",
             "soloists": "Soloists",
             "song": "Song",
+            "songStartDelay": "Song start delay",
             "special": "Special",
             "special_fast": "Fast",
             "special_faster": "Faster",
@@ -627,6 +637,7 @@
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
             "shuffleChronologicalPenalty": "Shuffle Chronological Penalty",
+            "shufflePlaylistOrderPenalty": "Shuffle Playlist Order Penalty",
             "shufflePopularityPenalty": "Shuffle Popularity Penalty",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "EXP Bonuses",
@@ -1609,10 +1620,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "{{playlistOrder}} shuffle can only be used while a playlist is set. Use {{playlistCommand}} to set one first.",
+                    "title": "Playlist Required"
+                }
+            },
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
                     "chronological": "Songs will play in the order they were released, with some randomness. {{penalty}} EXP penalty will be applied",
+                    "playlistOrder": "Songs will play in the order of the current playlist. Only available while a playlist is set. {{penalty}} EXP penalty will be applied",
                     "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"

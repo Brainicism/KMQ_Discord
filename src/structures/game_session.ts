@@ -385,7 +385,10 @@ export default class GameSession extends Session {
         }
 
         const correctGuessers = round.getCorrectGuessers(this.isHiddenMode());
-        const incorrectGuessers = round.getIncorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers(
+            this.isHiddenMode(),
+        );
+
         if (this.isHiddenMode()) {
             // Determine whether to wait for more guesses
             if (
@@ -662,7 +665,7 @@ export default class GameSession extends Session {
         if (!round) return MultipleChoiceGuessResult.INELIGIBLE;
 
         if (
-            round.getIncorrectGuessers().has(userID) ||
+            round.getIncorrectGuessers(this.isHiddenMode()).has(userID) ||
             !this.guessEligible(messageContext, createdAt)
         ) {
             return MultipleChoiceGuessResult.INELIGIBLE;
@@ -1812,7 +1815,10 @@ export default class GameSession extends Session {
     ): number {
         if (!this.round) return 0;
         const round = this.round;
-        const incorrectGuessers = round.getIncorrectGuessers();
+        const incorrectGuessers = round.getIncorrectGuessers(
+            this.isHiddenMode(),
+        );
+
         if (multipleChoiceMode && incorrectGuessers.has(userID)) return 0;
 
         if (
@@ -2515,7 +2521,7 @@ export default class GameSession extends Session {
         const remainingPlayers = this.scoreboard
             .getRemainingPlayers(
                 round.getCorrectGuessers(this.isHiddenMode()).map((x) => x.id),
-                round.getIncorrectGuessers(),
+                round.getIncorrectGuessers(this.isHiddenMode()),
             )
             .map((player) => player.username)
             .join("\n");

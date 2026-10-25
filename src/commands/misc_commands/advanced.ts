@@ -1,5 +1,5 @@
+import { ADVANCED_SETTING_MAX_DELAY_SEC, OptionAction } from "../../constants";
 import { IPCLogger } from "../../logger";
-import { OptionAction } from "../../constants";
 import { bold } from "../../helpers/utils";
 import {
     getDebugLogHeader,
@@ -23,8 +23,8 @@ const logger = new IPCLogger(COMMAND_NAME);
 
 // eslint-disable-next-line import/no-unused-modules
 export default class AdvancedSettingCommand implements BaseCommand {
-    static MAX_MULTIGUESS_DELAY = 60;
-    static MAX_SONG_START_DELAY = 60;
+    static MAX_MULTIGUESS_DELAY = ADVANCED_SETTING_MAX_DELAY_SEC;
+    static MAX_SONG_START_DELAY = ADVANCED_SETTING_MAX_DELAY_SEC;
     validations = {
         arguments: [],
         maxArgCount: 0,

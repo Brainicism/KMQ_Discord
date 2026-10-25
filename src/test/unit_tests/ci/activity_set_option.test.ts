@@ -1,4 +1,4 @@
-import { parseSetOptionBody } from "../../../kmq_web_server";
+import { parseSetOptionBody } from "../../../web_server/option_body_parser";
 import AnswerType from "../../../enums/option_types/answer_type";
 import ArtistType from "../../../enums/option_types/artist_type";
 import GuessModeType from "../../../enums/option_types/guess_mode_type";
@@ -326,6 +326,43 @@ describe("parseSetOptionBody", () => {
                 );
             });
         }
+    });
+
+    describe("advanced (decimal delays)", () => {
+        it("accepts each advanced setting with a value in [0, 60]", () => {
+            assert.deepStrictEqual(
+                parseSetOptionBody({
+                    kind: "advanced",
+                    setting: "multiguess_delay",
+                    value: 2.5,
+                }),
+                { kind: "advanced", setting: "multiguess_delay", value: 2.5 },
+            );
+
+            for (const value of [0, 60]) {
+                assert.deepStrictEqual(
+                    parseSetOptionBody({
+                        kind: "advanced",
+                        setting: "song_start_delay",
+                        value,
+                    }),
+                    { kind: "advanced", setting: "song_start_delay", value },
+                );
+            }
+        });
+
+        it("rejects unknown settings and out-of-range or non-numeric values", () => {
+            for (const body of [
+                { kind: "advanced", setting: "volume", value: 1 },
+                { kind: "advanced", setting: "multiguess_delay", value: -1 },
+                { kind: "advanced", setting: "multiguess_delay", value: 60.5 },
+                { kind: "advanced", setting: "song_start_delay", value: "3" },
+                { kind: "advanced", setting: "song_start_delay", value: NaN },
+                { kind: "advanced", setting: "song_start_delay" },
+            ]) {
+                assert.strictEqual(parseSetOptionBody(body), null);
+            }
+        });
     });
 
     describe("playlist", () => {

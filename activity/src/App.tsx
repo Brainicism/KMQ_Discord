@@ -324,6 +324,10 @@ function rejectReasonText(
             return t("options.playlist.errors.noMatches");
         case "playlist_resolve_failed":
             return t("options.playlist.errors.failed");
+        case "shuffle_requires_playlist":
+            return t("options.playlistOrderRequiresPlaylist");
+        case "playlist_managed":
+            return t("options.playlist.managed");
         default:
             return t("rejectGeneric");
     }
@@ -2666,6 +2670,12 @@ function AchievementToasts({
 
 const GENDER_OPTIONS: ActivityGender[] = ["male", "female", "coed"];
 const GUESS_MODE_OPTIONS: ActivityGuessMode[] = ["song", "artist", "both"];
+// Mirrors DEFAULT_ADVANCED_SETTINGS / ADVANCED_SETTING_MAX_DELAY_SEC on the
+// server (the Activity bundle can't import the bot's constants)
+const DEFAULT_MULTIGUESS_DELAY_SEC = 1.5;
+const DEFAULT_SONG_START_DELAY_SEC = 3;
+const ADVANCED_DELAY_MAX_SEC = 60;
+
 const SHUFFLE_OPTIONS: ActivityShuffle[] = [
     "random",
     "weighted_easy",
@@ -2673,6 +2683,8 @@ const SHUFFLE_OPTIONS: ActivityShuffle[] = [
     "popularity",
     "chronological",
     "reversechronological",
+    // Only offered while a playlist is set (the server rejects it otherwise)
+    "playlist_order",
 ];
 const SEEK_OPTIONS: ActivitySeek[] = ["random", "beginning", "middle"];
 const LANGUAGE_OPTIONS: ActivityLanguage[] = ["all", "korean"];
@@ -3193,6 +3205,20 @@ function OptionsPanel({
         void submit({ kind: "duration", duration }, { ...options, duration });
     };
 
+    const submitMultiguessDelay = (value: number): void => {
+        void submit(
+            { kind: "advanced", setting: "multiguess_delay", value },
+            { ...options, multiguessDelay: value },
+        );
+    };
+
+    const submitSongStartDelay = (value: number): void => {
+        void submit(
+            { kind: "advanced", setting: "song_start_delay", value },
+            { ...options, songStartDelay: value },
+        );
+    };
+
     const pickShuffle = (shuffle: ActivityShuffle): void => {
         if (shuffle === options.shuffle) return;
         void submit({ kind: "shuffle", shuffle }, { ...options, shuffle });
@@ -3628,7 +3654,9 @@ function OptionsPanel({
                     label={t("options.shuffle")}
                     help={t("options.help.shuffle")}
                 >
-                    {SHUFFLE_OPTIONS.map((s) => (
+                    {SHUFFLE_OPTIONS.filter(
+                        (s) => s !== "playlist_order" || playlistActive,
+                    ).map((s) => (
                         <button
                             key={s}
                             type="button"
@@ -3678,6 +3706,39 @@ function OptionsPanel({
                         ))}
                     </PillField>
                 </fieldset>
+            </OptionsCategory>
+
+            <OptionsCategory
+                id="advanced"
+                label={t("options.category.advanced")}
+                open={openCategories.has("advanced")}
+                onToggle={toggleCategory}
+            >
+                <p className="options-group-wide options-managed-note">
+                    {t("options.advancedWarning")}
+                </p>
+
+                <DecimalNumberGroup
+                    label={t("options.multiguessDelay")}
+                    help={t("options.help.multiguessDelay")}
+                    value={options.multiguessDelay}
+                    defaultValue={DEFAULT_MULTIGUESS_DELAY_SEC}
+                    max={ADVANCED_DELAY_MAX_SEC}
+                    onCommit={submitMultiguessDelay}
+                    defaultLabel={t("options.default")}
+                    unit={t("options.seconds")}
+                />
+
+                <DecimalNumberGroup
+                    label={t("options.songStartDelay")}
+                    help={t("options.help.songStartDelay")}
+                    value={options.songStartDelay}
+                    defaultValue={DEFAULT_SONG_START_DELAY_SEC}
+                    max={ADVANCED_DELAY_MAX_SEC}
+                    onCommit={submitSongStartDelay}
+                    defaultLabel={t("options.default")}
+                    unit={t("options.seconds")}
+                />
             </OptionsCategory>
 
             <OptionsCategory
@@ -3996,6 +4057,76 @@ function NullableNumberGroup({
                     onClick={() => onCommit(null)}
                 >
                     {offLabel}
+                </button>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * A required, non-negative decimal setting (advanced delays) with a button to
+ * restore its default. Values outside [0, max] are reverted on blur.
+ */
+function DecimalNumberGroup({
+    label,
+    help,
+    value,
+    defaultValue,
+    max,
+    onCommit,
+    defaultLabel,
+    unit,
+}: {
+    label: string;
+    help?: string;
+    value: number;
+    defaultValue: number;
+    max: number;
+    onCommit: (next: number) => void;
+    defaultLabel: string;
+    unit: string;
+}) {
+    const [text, setText] = useState(String(value));
+
+    useEffect(() => {
+        setText(String(value));
+    }, [value]);
+
+    const commit = (): void => {
+        const n = Number(text);
+        if (text.trim() === "" || !Number.isFinite(n) || n < 0 || n > max) {
+            setText(String(value));
+            return;
+        }
+
+        if (n === value) return;
+        onCommit(n);
+    };
+
+    return (
+        <div className="options-group">
+            <OptionLabel label={label} help={help} />
+            <div className="number-row">
+                <input
+                    type="number"
+                    className="option-number"
+                    value={text}
+                    min={0}
+                    max={max}
+                    step={0.5}
+                    aria-label={`${label} (${unit})`}
+                    onChange={(e) => setText(e.target.value)}
+                    onBlur={commit}
+                />
+                <span className="option-unit">{unit}</span>
+                <button
+                    type="button"
+                    className={`pill ${value === defaultValue ? "on" : ""}`}
+                    onClick={() => {
+                        if (value !== defaultValue) onCommit(defaultValue);
+                    }}
+                >
+                    {defaultLabel}
                 </button>
             </div>
         </div>
