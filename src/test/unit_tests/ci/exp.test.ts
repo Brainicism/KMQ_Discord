@@ -370,13 +370,27 @@ describe("exp command", () => {
                 sandbox
                     .stub(game_utils, "isFirstGameOfDay")
                     .callsFake(() => Promise.resolve(true));
+
+                // isolate from the other modifiers, which depend on the
+                // current time and the song pool
+                sandbox.stub(game_utils, "isPowerHour").callsFake(() => false);
+                sandbox.stub(utils, "isWeekend").callsFake(() => false);
+                sandbox
+                    .stub(guildPreference, "getAvailableSongCount")
+                    .callsFake(() =>
+                        Promise.resolve({
+                            count: 200,
+                            countBeforeLimit: 200,
+                            ineligibleDueToCommonAlias: 0,
+                        }),
+                    );
             });
 
             afterEach(() => {
                 sandbox.restore();
             });
 
-            describe("is first game of day", async () => {
+            it("is first game of day", async () => {
                 const modifiers =
                     await ExpCommand.calculateOptionsExpMultiplierInternal(
                         guildPreference,
