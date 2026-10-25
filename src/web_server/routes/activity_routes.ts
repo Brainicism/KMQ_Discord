@@ -17,6 +17,7 @@ import {
     DISCORD_OAUTH_TOKEN_URL,
     ELIMINATION_DEFAULT_LIVES,
     ELIMINATION_MAX_LIVES,
+    WEB_SERVER_CACHE_SWEEP_INTERVAL_MS,
 } from "../../constants";
 import {
     ACTIVITY_GAME_TYPES,
@@ -26,7 +27,7 @@ import {
     parseSetOptionBody,
 } from "../option_body_parser";
 import { IPCLogger } from "../../logger";
-import { resolveServerLocale } from "../web_server_utils";
+import { pruneExpiredEntries, resolveServerLocale } from "../web_server_utils";
 import FeedbackCommand from "../../commands/misc_commands/feedback";
 import GameType from "../../enums/game_type";
 import axios from "axios";
@@ -60,6 +61,11 @@ export default function registerActivityRoutes(
             expiresAt: number;
         }
     > = new Map();
+
+    // Tickets are deleted when redeemed; drop the ones nobody redeemed
+    setInterval(() => {
+        pruneExpiredEntries(wsTicketCache);
+    }, WEB_SERVER_CACHE_SWEEP_INTERVAL_MS).unref();
 
     httpServer.post(
         "/api/activity/token",
@@ -1059,10 +1065,30 @@ export default function registerActivityRoutes(
             wsTicketCache.delete(ticket);
 
             const { userID, instanceId, guildID } = entry;
+            const isWebRoom =
+                !!server.webRoomManager?.getRoomByCode(instanceId);
 
             const subscriber: ActivitySubscriber = {
                 id: `${userID}:${instanceId}`,
                 send: (data) => {
+                    // A socket outlives its owner's membership (leave,
+                    // logout, sweep, room closed); stop streaming the
+                    // room's events to someone no longer in it.
+                    if (
+                        isWebRoom &&
+                        !server.webRoomManager
+                            ?.getRoomByCode(instanceId)
+                            ?.members.has(userID)
+                    ) {
+                        try {
+                            socket.close(4403, "No longer a room member");
+                        } catch {
+                            // ignore
+                        }
+
+                        return;
+                    }
+
                     try {
                         socket.send(data);
                     } catch (e) {
