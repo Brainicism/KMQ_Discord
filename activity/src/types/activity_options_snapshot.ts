@@ -13,6 +13,7 @@ export type ActivityShuffle =
     | "chronological"
     | "reversechronological"
     | "playlist_order";
+export type ActivityAdvancedSetting = "multiguess_delay" | "song_start_delay";
 export type ActivitySeek = "beginning" | "random" | "middle";
 export type ActivityLanguage = "korean" | "all";
 export type ActivityRelease = "official" | "bside" | "all";
@@ -50,6 +51,10 @@ export default interface ActivityOptionsSnapshot {
     endYear: number;
     goal: number | null;
     timer: number | null;
+    /** Advanced: seconds others may still guess after the first correct one. */
+    multiguessDelay: number;
+    /** Advanced: seconds between a round ending and the next song starting. */
+    songStartDelay: number;
     duration: number | null;
     shuffle: ActivityShuffle;
     seek: ActivitySeek;

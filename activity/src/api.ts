@@ -12,6 +12,7 @@ import type {
     ActivityShuffle,
     ActivitySpecial,
     ActivitySubunits,
+    ActivityAdvancedSetting,
 } from "./types/activity_options_snapshot";
 import type { ActivityProfileResponse } from "./types/activity_profile";
 import type {
@@ -39,6 +40,11 @@ export type SetOptionRequest =
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
+    | {
+          kind: "advanced";
+          setting: ActivityAdvancedSetting;
+          value: number;
+      }
     | { kind: "duration"; duration: number | null }
     | { kind: "shuffle"; shuffle: ActivityShuffle }
     | { kind: "seek"; seek: ActivitySeek }
