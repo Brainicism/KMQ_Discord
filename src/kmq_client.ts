@@ -1,5 +1,9 @@
 /* eslint-disable no-await-in-loop */
 import { IPCLogger } from "./logger";
+import {
+    trimGuildPayload,
+    uncacheCategoryChannel,
+} from "./helpers/gateway_cache_trimming";
 import Eris from "eris";
 import fs from "fs";
 import path from "path";
@@ -18,6 +22,12 @@ export default class KmqClient extends Eris.Client {
         this.commands = {};
         this.commandsHandlers = {};
         this.aliases = {};
+        // Registered before any shard connects, so the initial GUILD_CREATE
+        // burst is trimmed too
+        this.on("rawWS", trimGuildPayload);
+        this.on("channelCreate", (channel) =>
+            uncacheCategoryChannel(this, channel),
+        );
         // eslint-disable-next-line @typescript-eslint/no-floating-promises
         this.registerCommands(true);
     }

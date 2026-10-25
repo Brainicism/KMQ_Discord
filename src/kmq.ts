@@ -72,6 +72,9 @@ const options: Options = {
                 GUILD_BAN_ADD: true,
                 GUILD_BAN_REMOVE: true,
                 TYPING_START: true,
+                // Emojis/stickers aren't cached (see gateway_cache_trimming)
+                GUILD_EMOJIS_UPDATE: true,
+                GUILD_STICKERS_UPDATE: true,
             },
             maxShards: "auto" as const,
             intents:
