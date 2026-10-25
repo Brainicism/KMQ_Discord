@@ -322,6 +322,8 @@ function rejectReasonText(
             return t("options.playlist.errors.noMatches");
         case "playlist_resolve_failed":
             return t("options.playlist.errors.failed");
+        case "playlist_managed":
+            return t("options.playlist.managed");
         default:
             return t("rejectGeneric");
     }
