@@ -173,6 +173,37 @@ describe("web room manager", () => {
             assert.strictEqual(again.room, created.room);
             assert.strictEqual(again.room.members.size, 2);
         });
+
+        it("keeps a sole member's room alive when they create again while in it", () => {
+            const created = manager.createRoom(user(1));
+            assert.ok("room" in created);
+
+            const again = manager.createRoom(user(1));
+            assert.ok("room" in again);
+            assert.strictEqual(again.room, created.room);
+            assert.deepStrictEqual(closed, []);
+            assert.strictEqual(
+                manager.getRoomByCode(created.room.code),
+                created.room,
+            );
+
+            assert.strictEqual(
+                manager.getRoomForUser(user(1).id),
+                created.room,
+            );
+        });
+
+        it("lets a member of a full room create again without a full error", () => {
+            const created = manager.createRoom(user(1));
+            assert.ok("room" in created);
+            for (let i = 2; i <= WEB_ROOM_MAX_MEMBERS; i++) {
+                manager.joinRoom(created.room.code, user(i));
+            }
+
+            const again = manager.createRoom(user(1));
+            assert.ok("room" in again);
+            assert.strictEqual(again.room.members.size, WEB_ROOM_MAX_MEMBERS);
+        });
     });
 
     describe("presence and sweep", () => {

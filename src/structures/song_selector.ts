@@ -14,6 +14,7 @@ import {
     shufflePartitionedArray,
 } from "../helpers/utils";
 import { getDebugLogHeader } from "../helpers/discord_utils";
+import { sql } from "kysely";
 import ArtistType from "../enums/option_types/artist_type";
 import EnvVariableManager from "../env_variable_manager";
 import GameOption from "../enums/game_option_name";
@@ -771,16 +772,19 @@ export default class SongSelector {
             queryBuilder = queryBuilder.where("vtype", "=", "audio");
         }
 
+        // Bind the bounds as date strings: mysql2 serializes Date params in
+        // the process's local timezone, which shifts midnight-UTC dates back
+        // a day west of UTC and drops songs released on Dec 31 of endYear
         queryBuilder = queryBuilder
             .where(
                 "publishedon",
                 ">=",
-                new Date(`${gameOptions.beginningYear}-01-01`),
+                sql<Date>`${`${gameOptions.beginningYear}-01-01`}`,
             )
             .where(
                 "publishedon",
                 "<=",
-                new Date(`${gameOptions.endYear}-12-31`),
+                sql<Date>`${`${gameOptions.endYear}-12-31`}`,
             );
 
         const shuffleType = gameOptions.shuffleType;

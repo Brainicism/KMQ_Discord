@@ -3,6 +3,7 @@
 /* eslint-disable no-await-in-loop */
 import {
     CHRONOLOGICAL_SHUFFLE_NUM_PARTITIONS,
+    EARLIEST_BEGINNING_SEARCH_YEAR,
     FOREIGN_LANGUAGE_TAGS,
     LAST_PLAYED_SONG_QUEUE_SIZE,
 } from "../../../constants";
@@ -245,8 +246,7 @@ describe("song selector", () => {
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) =>
-                                song.publishDate >= new Date("2016-01-01"),
+                            (song) => song.publishDate.getFullYear() >= 2016,
                         ),
                         true,
                     );
@@ -262,7 +262,7 @@ describe("song selector", () => {
                     assert.strict(songs.size > 0);
                     assert.strictEqual(
                         Array.from(songs).every(
-                            (song) => song.publishDate < new Date("2016-01-01"),
+                            (song) => song.publishDate.getFullYear() < 2016,
                         ),
                         true,
                     );
@@ -280,8 +280,8 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
-                                song.publishDate >= new Date("2008-01-01") &&
-                                song.publishDate < new Date("2019-01-01"),
+                                song.publishDate.getFullYear() >= 2008 &&
+                                song.publishDate.getFullYear() < 2019,
                         ),
                         true,
                     );
@@ -299,8 +299,8 @@ describe("song selector", () => {
                     assert.strictEqual(
                         Array.from(songs).every(
                             (song) =>
-                                song.publishDate >= new Date("2017-01-01") &&
-                                song.publishDate < new Date("2018-01-01"),
+                                song.publishDate.getFullYear() >= 2017 &&
+                                song.publishDate.getFullYear() < 2018,
                         ),
                         true,
                     );
@@ -463,8 +463,11 @@ describe("song selector", () => {
             });
         });
 
-        describe("subunits", async () => {
-            const artists = await getMatchingGroupNames({}, ["AOA"]);
+        describe("subunits", () => {
+            let artists: Awaited<ReturnType<typeof getMatchingGroupNames>>;
+            before(async () => {
+                artists = await getMatchingGroupNames({}, ["AOA"]);
+            });
 
             describe("exclude subunits", () => {
                 it("should only return the songs by the specified group, excluding subunits", async () => {
@@ -638,6 +641,12 @@ describe("song selector", () => {
                     await guildPreference.setGroups(matchedGroups);
                     await guildPreference.setSubunitPreference(
                         SubunitsPreference.INCLUDE,
+                    );
+
+                    // BIGBANG + 2NE1's only song is from 2009, before the
+                    // (current year - 15) default cutoff
+                    await guildPreference.setBeginningCutoffYear(
+                        EARLIEST_BEGINNING_SEARCH_YEAR,
                     );
                     await guildPreference.songSelector.reloadSongs();
                     const { songs } = guildPreference.songSelector.getSongs();
