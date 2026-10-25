@@ -50,6 +50,7 @@ import MessageContext from "./message_context";
 import MultipleChoiceGuessResult from "../enums/multiple_choice_guess_result";
 import ProfileCommand from "../commands/game_commands/profile";
 import Session from "./session";
+import ShuffleType from "../enums/option_types/shuffle_type";
 import SkipCommand from "../commands/game_commands/skip";
 import SongSelector from "./song_selector";
 import State from "../state";
@@ -93,6 +94,27 @@ import type QueriedSong from "./queried_song";
 import type Scoreboard from "./scoreboard";
 
 const logger = new IPCLogger("activity_bridge");
+
+/**
+ * Song-pool options a playlist overrides; mirrors the slash commands gated
+ * by CommandPrechecks.notPlaylistPrecheck. The Activity disables these
+ * controls while a playlist is set, and the bridge enforces it.
+ */
+const PLAYLIST_MANAGED_OPTION_KINDS: ReadonlySet<
+    ActivitySetOptionArgs["kind"]
+> = new Set([
+    "gender",
+    "limit",
+    "cutoff",
+    "language",
+    "release",
+    "artisttype",
+    "subunits",
+    "ost",
+    "groups",
+    "includes",
+    "excludes",
+]);
 
 let workerHandlerRegistered = false;
 
@@ -890,7 +912,8 @@ function ensureWorkerHandlerRegistered(): void {
                             // After the await, the round may have transitioned
                             // (skipped or naturally ended). Compare by identity.
                             const currentRound = session.round;
-                            const threshold = session.getVoteMajorityCount();
+                            const threshold =
+                                SkipCommand.getSkipThreshold(session);
 
                             if (currentRound === originalRound) {
                                 pushEvent(session.guildID, {
@@ -969,7 +992,8 @@ function ensureWorkerHandlerRegistered(): void {
                             }
 
                             const requesters = currentRound.getHintRequests();
-                            const threshold = session.getVoteMajorityCount();
+                            const threshold =
+                                HintCommand.getHintThreshold(session);
 
                             pushEvent(session.guildID, {
                                 type: "hintProgress",
@@ -1172,6 +1196,19 @@ function ensureWorkerHandlerRegistered(): void {
                                     optionArgs.guildID,
                                 );
 
+                            if (
+                                guildPreference.isPlaylist() &&
+                                PLAYLIST_MANAGED_OPTION_KINDS.has(
+                                    optionArgs.kind,
+                                )
+                            ) {
+                                reply({
+                                    ok: false,
+                                    reason: "playlist_managed",
+                                });
+                                return;
+                            }
+
                             switch (optionArgs.kind) {
                                 case "gender": {
                                     if (optionArgs.genders.length === 0) {
@@ -1301,6 +1338,18 @@ function ensureWorkerHandlerRegistered(): void {
                                 }
 
                                 case "shuffle": {
+                                    if (
+                                        optionArgs.shuffle ===
+                                            ShuffleType.PLAYLIST_ORDER &&
+                                        !guildPreference.isPlaylist()
+                                    ) {
+                                        reply({
+                                            ok: false,
+                                            reason: "shuffle_requires_playlist",
+                                        });
+                                        return;
+                                    }
+
                                     await guildPreference.setShuffleType(
                                         optionArgs.shuffle,
                                     );

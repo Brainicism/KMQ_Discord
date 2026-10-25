@@ -322,6 +322,10 @@ function rejectReasonText(
             return t("options.playlist.errors.noMatches");
         case "playlist_resolve_failed":
             return t("options.playlist.errors.failed");
+        case "shuffle_requires_playlist":
+            return t("options.playlistOrderRequiresPlaylist");
+        case "playlist_managed":
+            return t("options.playlist.managed");
         default:
             return t("rejectGeneric");
     }
@@ -2590,6 +2594,8 @@ const SHUFFLE_OPTIONS: ActivityShuffle[] = [
     "popularity",
     "chronological",
     "reversechronological",
+    // Only offered while a playlist is set (the server rejects it otherwise)
+    "playlist_order",
 ];
 const SEEK_OPTIONS: ActivitySeek[] = ["random", "beginning", "middle"];
 const LANGUAGE_OPTIONS: ActivityLanguage[] = ["all", "korean"];
@@ -3559,7 +3565,9 @@ function OptionsPanel({
                     label={t("options.shuffle")}
                     help={t("options.help.shuffle")}
                 >
-                    {SHUFFLE_OPTIONS.map((s) => (
+                    {SHUFFLE_OPTIONS.filter(
+                        (s) => s !== "playlist_order" || playlistActive,
+                    ).map((s) => (
                         <button
                             key={s}
                             type="button"

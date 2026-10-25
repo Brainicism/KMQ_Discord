@@ -129,7 +129,7 @@
                 "preset": "Save the current options as a named preset, or load/delete a saved one.",
                 "release": "Only official music videos, or all video types (b-sides, dance practices, etc.).",
                 "seek": "Where each song starts playing — a random point, the beginning, or the middle.",
-                "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, or by release date.",
+                "shuffle": "How the next song is chosen — randomly, weighted by difficulty or popularity, by release date, or in playlist order.",
                 "songStartDelay": "The delay before playing a new song after a game round completes",
                 "special": "Apply an audio modifier (speed, pitch, or reverse) to every song.",
                 "subunits": "Whether a selected group's subunits are included too.",
@@ -167,6 +167,8 @@
                 "set": "Set",
                 "urlPlaceholder": "Spotify or YouTube playlist URL"
             },
+            "playlistOrderRequiresPlaylist": "Playlist order is only available while a playlist is set.",
+            "playlist_order": "Playlist Order",
             "popularity": "Popularity",
             "preset": {
                 "confirmDelete": "Confirm delete",
@@ -632,6 +634,7 @@
             "multipleChoicePenalty": "Multiple Choice Penalty",
             "powerHourBonus": "Power Hour Bonus",
             "shuffleChronologicalPenalty": "Shuffle Chronological Penalty",
+            "shufflePlaylistOrderPenalty": "Shuffle Playlist Order Penalty",
             "shufflePopularityPenalty": "Shuffle Popularity Penalty",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "EXP Bonuses",
@@ -1612,10 +1615,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "{{playlistOrder}} shuffle can only be used while a playlist is set. Use {{playlistCommand}} to set one first.",
+                    "title": "Playlist Required"
+                }
+            },
             "help": {
                 "description": "Choose how songs are shuffled.",
                 "example": {
                     "chronological": "Songs will play in the order they were released, with some randomness. {{penalty}} EXP penalty will be applied",
+                    "playlistOrder": "Songs will play in the order of the current playlist. Only available while a playlist is set. {{penalty}} EXP penalty will be applied",
                     "popularity": "Songs will play based on descending popularity. {{penalty}} EXP penalty will be applied",
                     "random": "Songs will play randomly",
                     "reset": "Reset to the default shuffle mode of {{defaultShuffle}}"

@@ -11,7 +11,8 @@ export type ActivityShuffle =
     | "weighted_hard"
     | "popularity"
     | "chronological"
-    | "reversechronological";
+    | "reversechronological"
+    | "playlist_order";
 export type ActivityAdvancedSetting = "multiguess_delay" | "song_start_delay";
 export type ActivitySeek = "beginning" | "random" | "middle";
 export type ActivityLanguage = "korean" | "all";

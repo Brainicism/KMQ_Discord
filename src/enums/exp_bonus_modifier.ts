@@ -21,6 +21,7 @@ enum ExpBonusModifier {
     HINT_USED,
     FIRST_GAME_OF_DAY,
     HIDDEN,
+    SHUFFLE_PLAYLIST_ORDER,
 }
 
 export default ExpBonusModifier;

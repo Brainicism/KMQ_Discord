@@ -129,7 +129,7 @@
                 "preset": "現在のオプションを名前付きプリセットとして保存するか、保存済みのものを読み込む/削除します。",
                 "release": "公式のミュージックビデオのみ、またはすべてのビデオタイプ（Bサイド、ダンスプラクティスなど）。",
                 "seek": "曲が再生開始される場所 — ランダムなポイント、最初、または中間。",
-                "shuffle": "次の曲が選ばれる方法—ランダム、難易度または人気による重み付け、リリース日による選択。",
+                "shuffle": "次の曲が選ばれる方法—ランダム、難易度または人気による重み付け、リリース日順、またはプレイリスト順。",
                 "songStartDelay": "ゲームラウンドが終了してから新しい曲を再生するまでの遅延時間",
                 "special": "すべての曲にオーディオの変更 (速度、音程、または逆再生) を適用します。",
                 "subunits": "選択したグループのサブユニットも含まれるかどうか。",
@@ -167,6 +167,8 @@
                 "set": "設定",
                 "urlPlaceholder": "SpotifyまたはYouTubeのプレイリストURL"
             },
+            "playlistOrderRequiresPlaylist": "プレイリスト順はプレイリストが設定されている場合のみ利用できます。",
+            "playlist_order": "プレイリスト順",
             "popularity": "人気度",
             "preset": {
                 "confirmDelete": "削除を確認",
@@ -632,6 +634,7 @@
             "multipleChoicePenalty": "複数選択肢のペナルティ",
             "powerHourBonus": "パワーアワーボーナス",
             "shuffleChronologicalPenalty": "シャッフルの時系列ペナルティ",
+            "shufflePlaylistOrderPenalty": "シャッフルプレイリスト順ペナルティ",
             "shufflePopularityPenalty": "シャッフル人気ペナルティ",
             "shuffleWeightedEasyPenalty": "シャッフル加重イージーペナルティ",
             "title": "EXPボーナス",
@@ -1612,10 +1615,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "{{playlistOrder}}シャッフルはプレイリストが設定されている場合のみ使用できます。先に{{playlistCommand}}でプレイリストを設定してください。",
+                    "title": "プレイリストが必要です"
+                }
+            },
             "help": {
                 "description": "曲のシャッフル方法を選択してください。",
                 "example": {
                     "chronological": "曲はリリースされた順番で再生され、一部ランダム性があります。{{penalty}} EXPのペナルティが適用されます",
+                    "playlistOrder": "曲は現在のプレイリストの順番で再生されます。プレイリストが設定されている場合のみ利用できます。{{penalty}} EXPのペナルティが適用されます。",
                     "popularity": "曲は人気順に再生されます。{{penalty}} EXPのペナルティが適用されます。",
                     "random": "曲はランダムに再生されます。",
                     "reset": "デフォルトのシャッフルモードにリセットする（{{defaultShuffle}}）"
