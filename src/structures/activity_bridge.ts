@@ -909,7 +909,8 @@ function ensureWorkerHandlerRegistered(): void {
                             // After the await, the round may have transitioned
                             // (skipped or naturally ended). Compare by identity.
                             const currentRound = session.round;
-                            const threshold = session.getVoteMajorityCount();
+                            const threshold =
+                                SkipCommand.getSkipThreshold(session);
 
                             if (currentRound === originalRound) {
                                 pushEvent(session.guildID, {
@@ -988,7 +989,8 @@ function ensureWorkerHandlerRegistered(): void {
                             }
 
                             const requesters = currentRound.getHintRequests();
-                            const threshold = session.getVoteMajorityCount();
+                            const threshold =
+                                HintCommand.getHintThreshold(session);
 
                             pushEvent(session.guildID, {
                                 type: "hintProgress",
