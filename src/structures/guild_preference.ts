@@ -27,6 +27,7 @@ import AnswerType from "../enums/option_types/answer_type";
 import EnvType from "../enums/env_type";
 import GameOption from "../enums/game_option_name";
 import Session from "./session";
+import ShuffleType from "../enums/option_types/shuffle_type";
 import SongSelector from "./song_selector";
 import _ from "lodash";
 import dbContext from "../database_context";
@@ -45,7 +46,6 @@ import type MultiGuessType from "../enums/option_types/multiguess_type";
 import type OstPreference from "../enums/option_types/ost_preference";
 import type ReleaseType from "../enums/option_types/release_type";
 import type SeekType from "../enums/option_types/seek_type";
-import type ShuffleType from "../enums/option_types/shuffle_type";
 import type SpecialType from "../enums/option_types/special_type";
 import type SubunitsPreference from "../enums/option_types/subunit_preference";
 
@@ -244,6 +244,15 @@ export default class GuildPreference {
 
                 newDefaultOptionsAdded++;
             }
+        }
+
+        // e.g. a preset saved with playlist order but without its playlist
+        if (
+            validatedGameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER &&
+            !validatedGameOptions.spotifyPlaylistID
+        ) {
+            validatedGameOptions.shuffleType = DEFAULT_SHUFFLE;
+            newDefaultOptionsAdded++;
         }
 
         this.gameOptions = validatedGameOptions;
@@ -923,12 +932,29 @@ export default class GuildPreference {
         kmqPlaylistIdentifier: string | null,
     ): Promise<void> {
         this.gameOptions.spotifyPlaylistID = kmqPlaylistIdentifier;
-        await this.updateGuildPreferences([
+        const updatedOptions: Array<{
+            name: GameOptionInternal;
+            value: GameOptionValue;
+        }> = [
             {
                 name: GameOptionInternal.PLAYLIST_ID,
                 value: kmqPlaylistIdentifier,
             },
-        ]);
+        ];
+
+        // Playlist order is meaningless without a playlist
+        if (
+            kmqPlaylistIdentifier === null &&
+            this.gameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER
+        ) {
+            this.gameOptions.shuffleType = DEFAULT_SHUFFLE;
+            updatedOptions.push({
+                name: GameOptionInternal.SHUFFLE_TYPE,
+                value: DEFAULT_SHUFFLE,
+            });
+        }
+
+        await this.updateGuildPreferences(updatedOptions);
     }
 
     /** @returns the ID of the playlist to retrieve songs from */
@@ -941,6 +967,21 @@ export default class GuildPreference {
      */
     isPlaylist(): boolean {
         return this.gameOptions.spotifyPlaylistID !== null;
+    }
+
+    /**
+     * @returns the shuffle type to select songs with: playlist order only
+     * applies while a playlist is set, and falls back to random otherwise
+     */
+    getEffectiveShuffleType(): ShuffleType {
+        if (
+            this.gameOptions.shuffleType === ShuffleType.PLAYLIST_ORDER &&
+            !this.isPlaylist()
+        ) {
+            return ShuffleType.RANDOM;
+        }
+
+        return this.gameOptions.shuffleType;
     }
 
     /**

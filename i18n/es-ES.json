@@ -125,7 +125,7 @@
                 "preset": "Guarde las opciones actuales como un preajuste nombrado, o cargue/elimine uno guardado.",
                 "release": "Solo vídeos musicales oficiales, o todos los tipos de vídeos (b-sides, prácticas de baile, etc.).",
                 "seek": "Dónde empieza a reproducirse cada canción: un punto aleatorio, el principio o el medio.",
-                "shuffle": "Cómo se elige la siguiente canción: al azar, ponderada por dificultad o popularidad, o por fecha de lanzamiento.",
+                "shuffle": "Cómo se elige la siguiente canción: al azar, ponderada por dificultad o popularidad, por fecha de lanzamiento o en el orden de la lista de reproducción.",
                 "special": "Aplicar un modificador de audio (velocidad, tono o inversa) a cada canción.",
                 "subunits": "Si se incluyen también las subunidades de un grupo seleccionado.",
                 "timer": "Segundos para adivinar antes de que se agote el tiempo de la ronda. Desactivado lo desactiva."
@@ -161,6 +161,8 @@
                 "set": "Establecer",
                 "urlPlaceholder": "URL de la lista de reproducción de Spotify o YouTube"
             },
+            "playlistOrderRequiresPlaylist": "El orden de la lista solo está disponible mientras haya una lista de reproducción establecida.",
+            "playlist_order": "Orden de la lista",
             "popularity": "Popularidad",
             "preset": {
                 "confirmDelete": "Confirmar eliminación",
@@ -624,6 +626,7 @@
             "multipleChoicePenalty": "Penalización de opción múltiple",
             "powerHourBonus": "Bonificación de hora de poder",
             "shuffleChronologicalPenalty": "Penalización cronológica al mezclar",
+            "shufflePlaylistOrderPenalty": "Penalización de mezcla por orden de lista",
             "shufflePopularityPenalty": "Penalización de popularidad de mezcla",
             "shuffleWeightedEasyPenalty": "Penalización de mezcla ponderada fácil",
             "title": "Bonificaciones de EXP",
@@ -1604,10 +1607,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "La mezcla {{playlistOrder}} solo se puede usar mientras haya una lista de reproducción establecida. Usa {{playlistCommand}} para establecer una primero.",
+                    "title": "Se requiere una lista de reproducción"
+                }
+            },
             "help": {
                 "description": "Elija cómo se mezclan las canciones.",
                 "example": {
                     "chronological": "Las canciones se reproducirán en el orden en que se lanzaron, con cierta aleatoriedad. Se aplicará una penalización de {{penalty}} EXP",
+                    "playlistOrder": "Las canciones se reproducirán en el orden de la lista de reproducción actual. Solo disponible mientras haya una lista de reproducción establecida. Se aplicará una penalización de {{penalty}} EXP.",
                     "popularity": "Las canciones se reproducirán según la popularidad descendente. Se aplicará una penalización de {{penalty}} EXP.",
                     "random": "Las canciones se reproducirán al azar.",
                     "reset": "Restablecer el modo de mezcla predeterminado de {{defaultShuffle}}"

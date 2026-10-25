@@ -125,7 +125,7 @@
                 "preset": "현재 옵션을 이름이 있는 프리셋으로 저장하거나, 저장된 것을 로드/삭제합니다.",
                 "release": "공식 뮤직비디오만 또는 모든 비디오 유형 (b-sides, 댄스 연습 영상 등).",
                 "seek": "각 곡이 시작되는 지점 - 랜덤 지점, 시작, 또는 중간입니다.",
-                "shuffle": "다음 곡을 선택하는 방법 — 임의로, 난이도나 인기도로 가중치, 또는 출시일로.",
+                "shuffle": "다음 곡을 선택하는 방법 — 임의로, 난이도나 인기도로 가중치, 출시일로, 또는 플레이리스트 순서대로.",
                 "special": "모든 곡에 오디오 수정자(속도, 피치 또는 반전)를 적용합니다.",
                 "subunits": "선택한 그룹의 유닛도 포함되는지 여부입니다.",
                 "timer": "라운드가 시간 초과되기 전에 추측할 초수. '꺼짐'은 이를 비활성화합니다."
@@ -161,6 +161,8 @@
                 "set": "설정",
                 "urlPlaceholder": "Spotify 또는 YouTube 플레이리스트 URL"
             },
+            "playlistOrderRequiresPlaylist": "플레이리스트 순서는 플레이리스트가 설정된 경우에만 사용할 수 있습니다.",
+            "playlist_order": "플레이리스트 순서",
             "popularity": "인기도",
             "preset": {
                 "confirmDelete": "삭제 확인",
@@ -624,6 +626,7 @@
             "multipleChoicePenalty": "객관식 패널티",
             "powerHourBonus": "Power Hour 보너스",
             "shuffleChronologicalPenalty": "셔플 시간순 패널티",
+            "shufflePlaylistOrderPenalty": "셔플 플레이리스트 순서 패널티",
             "shufflePopularityPenalty": "셔플 인기 패널티",
             "shuffleWeightedEasyPenalty": "Shuffle Weighted Easy Penalty",
             "title": "경험치 보너스",
@@ -1604,10 +1607,17 @@
             }
         },
         "shuffle": {
+            "failure": {
+                "playlistOrderRequiresPlaylist": {
+                    "description": "{{playlistOrder}} 셔플은 플레이리스트가 설정된 경우에만 사용할 수 있습니다. 먼저 {{playlistCommand}}(으)로 플레이리스트를 설정하세요.",
+                    "title": "플레이리스트 필요"
+                }
+            },
             "help": {
                 "description": "노래를 섞는 방법을 선택합니다.",
                 "example": {
                     "chronological": "곡들은 출시된 순서로 재생되며, 약간의 무작위성이 있습니다. {{penalty}} EXP 패널티가 적용됩니다",
+                    "playlistOrder": "현재 플레이리스트의 순서대로 노래가 재생됩니다. 플레이리스트가 설정된 경우에만 사용할 수 있습니다. {{penalty}} 경험치 패널티가 적용됩니다.",
                     "popularity": "인기도에 따라 노래가 재생됩니다. {{penalty}} 경험치 패널티가 적용됩니다.",
                     "random": "노래가 무작위로 재생됩니다.",
                     "reset": "{{defaultShuffle}}의 기본 셔플 모드로 재설정합니다."

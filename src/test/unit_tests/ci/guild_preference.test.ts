@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/dot-notation */
 import GameOption from "../../../enums/game_option_name";
 import GuildPreference from "../../../structures/guild_preference";
+import ShuffleType from "../../../enums/option_types/shuffle_type";
 import assert from "assert";
+import sinon from "sinon";
 
 describe("guild preference", () => {
     describe("getGuildPreference", () => {
@@ -10,6 +12,75 @@ describe("guild preference", () => {
             const first = await GuildPreference.getGuildPreference(guildID);
             const second = await GuildPreference.getGuildPreference(guildID);
             assert.strictEqual(first, second);
+        });
+    });
+
+    describe("playlist order shuffle", () => {
+        let guildPreference: GuildPreference;
+        beforeEach(() => {
+            guildPreference = new GuildPreference("123");
+            sinon.stub(guildPreference, "updateGuildPreferences");
+        });
+
+        afterEach(() => {
+            sinon.restore();
+        });
+
+        it("is only effective while a playlist is set", () => {
+            guildPreference.gameOptions.shuffleType =
+                ShuffleType.PLAYLIST_ORDER;
+
+            assert.strictEqual(
+                guildPreference.getEffectiveShuffleType(),
+                ShuffleType.RANDOM,
+            );
+
+            guildPreference.gameOptions.spotifyPlaylistID = "spotify|abc";
+            assert.strictEqual(
+                guildPreference.getEffectiveShuffleType(),
+                ShuffleType.PLAYLIST_ORDER,
+            );
+        });
+
+        it("is reset when the playlist is cleared", async () => {
+            guildPreference.gameOptions.spotifyPlaylistID = "spotify|abc";
+            await guildPreference.setShuffleType(ShuffleType.PLAYLIST_ORDER);
+            await guildPreference.setKmqPlaylistID(null);
+            assert.strictEqual(
+                guildPreference.gameOptions.shuffleType,
+                ShuffleType.RANDOM,
+            );
+        });
+
+        it("keeps other shuffle types when the playlist is cleared", async () => {
+            guildPreference.gameOptions.spotifyPlaylistID = "spotify|abc";
+            await guildPreference.setShuffleType(ShuffleType.POPULARITY);
+            await guildPreference.setKmqPlaylistID(null);
+            assert.strictEqual(
+                guildPreference.gameOptions.shuffleType,
+                ShuffleType.POPULARITY,
+            );
+        });
+
+        it("is normalized away by validation when no playlist is set", async () => {
+            guildPreference.gameOptions.shuffleType =
+                ShuffleType.PLAYLIST_ORDER;
+            await guildPreference.validateGameOptions();
+            assert.strictEqual(
+                guildPreference.gameOptions.shuffleType,
+                ShuffleType.RANDOM,
+            );
+        });
+
+        it("survives validation when a playlist is set", async () => {
+            guildPreference.gameOptions.shuffleType =
+                ShuffleType.PLAYLIST_ORDER;
+            guildPreference.gameOptions.spotifyPlaylistID = "spotify|abc";
+            await guildPreference.validateGameOptions();
+            assert.strictEqual(
+                guildPreference.gameOptions.shuffleType,
+                ShuffleType.PLAYLIST_ORDER,
+            );
         });
     });
 

@@ -1362,6 +1362,29 @@ describe("song selector", () => {
             sinon.restore();
         });
 
+        it("playlist order shuffle should play songs in playlist order", async () => {
+            await guildPreference.setShuffleType(ShuffleType.PLAYLIST_ORDER);
+            await guildPreference.songSelector.reloadSongs();
+            const played = playlistSongs.map(
+                () =>
+                    guildPreference.songSelector.queryRandomSong()!.youtubeLink,
+            );
+
+            assert.deepStrictEqual(
+                played,
+                playlistSongs.map((x) => x.youtubeLink),
+            );
+        });
+
+        it("playlist order shuffle should fall back to random once the playlist is removed", async () => {
+            await guildPreference.setShuffleType(ShuffleType.PLAYLIST_ORDER);
+            await guildPreference.setKmqPlaylistID(null);
+            assert.strictEqual(
+                guildPreference.gameOptions.shuffleType,
+                ShuffleType.RANDOM,
+            );
+        });
+
         it("popularity shuffle should play the most viewed song first", async () => {
             await guildPreference.setShuffleType(ShuffleType.POPULARITY);
             await guildPreference.songSelector.reloadSongs();
