@@ -72,6 +72,8 @@ export const DEFAULT_GENDER: Array<GenderModeOptions> = [
     "coed",
 ];
 export const DEFAULT_LIMIT = 500;
+// Unused guilds' loaded song lists are released after this long
+export const GUILD_SONG_LIST_IDLE_RELEASE_MS = 30 * 60 * 1000;
 
 export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.MULTIGUESS_DELAY]: 1.5,
@@ -482,6 +484,9 @@ export const WEB_GUEST_LOGIN_IP_WINDOW_MS = 60 * 60 * 1000;
 // left is closed.
 export const WEB_ROOM_DISCONNECT_GRACE_MS = 60_000;
 export const WEB_ROOM_SWEEP_INTERVAL_MS = 30_000;
+// How often the web server drops expired entries from its in-memory caches
+// (tokens, tickets, OAuth states, guest-login windows).
+export const WEB_SERVER_CACHE_SWEEP_INTERVAL_MS = 60_000;
 
 // Browser audio streaming for web rooms. A minted token stays redeemable for
 // the playback's remaining duration plus this buffer (reconnects/reloads can

@@ -213,6 +213,9 @@ export default class GuildPreference {
     /** Callback to send song messages */
     public answerTypeChangeCallback: (() => Promise<void>) | undefined;
 
+    /** When this preference was last fetched via getGuildPreference */
+    public lastAccessedAt: number = Date.now();
+
     /** The guild preference cache */
     private static guildPreferencesCache: {
         [guildID: string]: GuildPreference;
@@ -275,6 +278,7 @@ export default class GuildPreference {
                 GuildPreference.guildPreferencesCache[guildID];
 
             if (cachedGuildPreference) {
+                cachedGuildPreference.lastAccessedAt = Date.now();
                 return cachedGuildPreference;
             }
 
@@ -290,6 +294,11 @@ export default class GuildPreference {
                     .insertInto("guilds")
                     .values({ guild_id: guildID, join_date: new Date() })
                     .execute();
+
+                // Cache it like any other guild; otherwise the first caller
+                // (e.g. a session) keeps an instance later lookups never see
+                GuildPreference.guildPreferencesCache[guildID] =
+                    guildPreference;
                 return guildPreference;
             }
 
@@ -319,6 +328,36 @@ export default class GuildPreference {
             GuildPreference.guildPreferencesCache[guildID] = guildPreference;
             return guildPreference;
         });
+    }
+
+    /**
+     * Drops the loaded song list of cached guilds that haven't been used for a
+     * while and have no active session. Every guild that ever played or opened
+     * its options otherwise keeps its whole song pool in memory for the life of
+     * the worker (hundreds to tens of thousands of songs each). The list
+     * reloads on demand: callers already reload when it's empty.
+     * @param idleMs - how long a guild must go unused before its list is dropped
+     * @param now - current epoch ms
+     * @returns the number of song lists released
+     */
+    static releaseIdleSongLists(idleMs: number, now = Date.now()): number {
+        let released = 0;
+        for (const [guildID, guildPreference] of Object.entries(
+            GuildPreference.guildPreferencesCache,
+        )) {
+            if (
+                now - guildPreference.lastAccessedAt < idleMs ||
+                Session.getSession(guildID) ||
+                !guildPreference.songSelector.selectedSongs
+            ) {
+                continue;
+            }
+
+            guildPreference.songSelector.selectedSongs = null;
+            released++;
+        }
+
+        return released;
     }
 
     /**
