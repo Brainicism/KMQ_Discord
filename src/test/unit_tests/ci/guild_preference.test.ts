@@ -6,6 +6,15 @@ import assert from "assert";
 import sinon from "sinon";
 
 describe("guild preference", () => {
+    describe("getGuildPreference", () => {
+        it("returns the same instance for a brand-new guild's first and later lookups", async () => {
+            const guildID = `new-guild-${Date.now()}`;
+            const first = await GuildPreference.getGuildPreference(guildID);
+            const second = await GuildPreference.getGuildPreference(guildID);
+            assert.strictEqual(first, second);
+        });
+    });
+
     describe("playlist order shuffle", () => {
         let guildPreference: GuildPreference;
         beforeEach(() => {
