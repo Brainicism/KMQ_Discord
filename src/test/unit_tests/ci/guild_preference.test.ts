@@ -4,6 +4,15 @@ import GuildPreference from "../../../structures/guild_preference";
 import assert from "assert";
 
 describe("guild preference", () => {
+    describe("getGuildPreference", () => {
+        it("returns the same instance for a brand-new guild's first and later lookups", async () => {
+            const guildID = `new-guild-${Date.now()}`;
+            const first = await GuildPreference.getGuildPreference(guildID);
+            const second = await GuildPreference.getGuildPreference(guildID);
+            assert.strictEqual(first, second);
+        });
+    });
+
     describe("fromGuild", () => {
         describe("no guild preference provided", () => {
             it("should return a guild preference with default options", () => {

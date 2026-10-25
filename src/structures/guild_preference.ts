@@ -281,6 +281,11 @@ export default class GuildPreference {
                     .insertInto("guilds")
                     .values({ guild_id: guildID, join_date: new Date() })
                     .execute();
+
+                // Cache it like any other guild; otherwise the first caller
+                // (e.g. a session) keeps an instance later lookups never see
+                GuildPreference.guildPreferencesCache[guildID] =
+                    guildPreference;
                 return guildPreference;
             }
 
