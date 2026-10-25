@@ -165,6 +165,8 @@ export const ExpBonusModifierValues = {
     [ExpBonusModifier.SHUFFLE_POPULARITY]: 0.2,
     [ExpBonusModifier.SHUFFLE_WEIGHTED_EASY]: 0.5,
     [ExpBonusModifier.SHUFFLE_CHRONOLOGICAL]: 0.8,
+    // The order is fully known to whoever built the playlist
+    [ExpBonusModifier.SHUFFLE_PLAYLIST_ORDER]: 0.2,
     [ExpBonusModifier.ARTIST_GUESS]: 0.3,
     [ExpBonusModifier.ARTIST_GUESS_GROUPS_SELECTED]: 0,
     [ExpBonusModifier.RANDOM_GUESS_BONUS_COMMON]: 2,
