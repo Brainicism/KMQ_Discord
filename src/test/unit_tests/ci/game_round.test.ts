@@ -64,6 +64,37 @@ describe("game round", () => {
             });
         });
 
+        describe("song has no name", () => {
+            it("still accepts the artist's name in artist mode", () => {
+                gameRound = new GameRound(
+                    new QueriedSong({
+                        songName: "",
+                        cleanSongName: "",
+                        hangulSongName: null,
+                        artistName: "Jisoo",
+                        hangulArtistName: null,
+                        youtubeLink: "abcde",
+                        betterAudioLink: null,
+                        publishDate: new Date(),
+                        members: "female",
+                        artistID: 1,
+                        isSolo: "y",
+                        views: 1000000,
+                        tags: "",
+                        vtype: "main",
+                        selectionWeight: 1,
+                    }),
+                    5,
+                    guildID,
+                );
+
+                assert.strictEqual(
+                    gameRound.checkGuess("Jisoo", GuessModeType.ARTIST),
+                    1,
+                );
+            });
+        });
+
         describe("artist collabs", () => {
             it("should record them as two separate artists", () => {
                 gameRound = new GameRound(
