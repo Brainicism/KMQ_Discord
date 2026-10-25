@@ -130,7 +130,7 @@ export default function registerInternalRoutes(
         await reply.code(200).send();
     });
 
-    // example: curl -X POST 127.0.0.1:5858/eval-central-request-handler  -H "Content-Type: text/plain" -d 'server.ratelimits
+    // example: curl -X POST 127.0.0.1:5858/eval-central-request-handler  -H "Content-Type: text/plain" -d 'this.ratelimits
     httpServer.post(
         "/eval-central-request-handler",
         {},
