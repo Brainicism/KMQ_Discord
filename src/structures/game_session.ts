@@ -542,7 +542,10 @@ export default class GameSession extends Session {
         const round = this.round;
         if (interaction.data.custom_id.startsWith(SKIP_BUTTON_PREFIX)) {
             const guildID = interaction.guild?.id as string;
-            round.userSkipped(interaction.member!.id);
+            if (SkipCommand.canVoteToSkip(this, interaction.member!.id)) {
+                round.userSkipped(interaction.member!.id);
+            }
+
             if (SkipCommand.isSkipMajority(guildID, this)) {
                 await round.interactionSuccessfulSkip();
                 await tryCreateInteractionSuccessAcknowledgement(
@@ -552,7 +555,7 @@ export default class GameSession extends Session {
                         guildID,
                         "command.skip.success.description",
                         {
-                            skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
+                            skipCounter: SkipCommand.getSkipCounter(this),
                         },
                     ),
                 );
@@ -564,7 +567,7 @@ export default class GameSession extends Session {
                     interaction,
                     i18n.translate(guildID, "command.skip.vote.title"),
                     i18n.translate(guildID, "command.skip.vote.description", {
-                        skipCounter: `${round.getSkipCount()}/${this.getVoteMajorityCount()}`,
+                        skipCounter: SkipCommand.getSkipCounter(this),
                     }),
                 );
 

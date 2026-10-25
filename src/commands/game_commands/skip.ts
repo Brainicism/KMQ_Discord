@@ -3,7 +3,6 @@ import { IPCLogger } from "../../logger";
 import {
     areUserAndBotInSameVoiceChannel,
     getDebugLogHeader,
-    getMajorityCount,
     sendErrorMessage,
     sendInfoMessage,
 } from "../../helpers/discord_utils";
@@ -19,7 +18,6 @@ import type BaseCommand from "../interfaces/base_command";
 import type CommandArgs from "../../interfaces/command_args";
 import type EliminationScoreboard from "../../structures/elimination_scoreboard";
 import type HelpDocumentation from "../../interfaces/help";
-import type Round from "../../structures/round";
 
 const COMMAND_NAME = "skip";
 const logger = new IPCLogger(COMMAND_NAME);
@@ -116,30 +114,19 @@ export default class SkipCommand implements BaseCommand {
             return;
         }
 
-        if (session.isGameSession()) {
-            if (session.gameType === GameType.ELIMINATION) {
-                if (
-                    !(
-                        session.scoreboard as EliminationScoreboard
-                    ).isPlayerEliminated(messageContext.author.id)
-                ) {
-                    logger.info(
-                        `${getDebugLogHeader(
-                            messageContext,
-                        )} | User skipped, elimination mode`,
-                    );
-                    session.round.userSkipped(messageContext.author.id);
-                }
-            }
+        if (SkipCommand.canVoteToSkip(session, messageContext.author.id)) {
+            session.round.userSkipped(messageContext.author.id);
+            logger.info(`${getDebugLogHeader(messageContext)} | User skipped`);
+        } else {
+            logger.info(
+                `${getDebugLogHeader(messageContext)} | Skip vote ignored, player is eliminated`,
+            );
         }
-
-        session.round.userSkipped(messageContext.author.id);
-        logger.info(`${getDebugLogHeader(messageContext)} | User skipped`);
 
         if (SkipCommand.isSkipMajority(messageContext.guildID, session)) {
             await SkipCommand.sendSkipMessage(
                 messageContext,
-                session.round,
+                session,
                 interaction,
             );
             await SkipCommand.skipSong(messageContext, session);
@@ -150,7 +137,7 @@ export default class SkipCommand implements BaseCommand {
 
             await SkipCommand.sendSkipNotification(
                 messageContext,
-                session.round,
+                session,
                 interaction,
             );
         }
@@ -171,7 +158,7 @@ export default class SkipCommand implements BaseCommand {
 
     static async sendSkipNotification(
         messageContext: MessageContext,
-        round: Round,
+        session: Session,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         // Activity subscribers get live skipProgress events in the iframe
@@ -194,9 +181,7 @@ export default class SkipCommand implements BaseCommand {
                 messageContext.guildID,
                 "command.skip.vote.description",
                 {
-                    skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                        messageContext.guildID,
-                    )}`,
+                    skipCounter: SkipCommand.getSkipCounter(session),
                 },
             ),
         };
@@ -217,7 +202,7 @@ export default class SkipCommand implements BaseCommand {
 
     static async sendSkipMessage(
         messageContext: MessageContext,
-        round: Round,
+        session: Session,
         interaction?: Eris.CommandInteraction,
     ): Promise<void> {
         const embedPayload = {
@@ -227,9 +212,7 @@ export default class SkipCommand implements BaseCommand {
                 messageContext.guildID,
                 "command.skip.success.description",
                 {
-                    skipCounter: `${round.getSkipCount()}/${getMajorityCount(
-                        messageContext.guildID,
-                    )}`,
+                    skipCounter: SkipCommand.getSkipCounter(session),
                 },
             ),
             thumbnailUrl: KmqImages.NOT_IMPRESSED,
@@ -256,21 +239,56 @@ export default class SkipCommand implements BaseCommand {
             return false;
         }
 
-        if (session.isGameSession()) {
-            if (session.gameType === GameType.ELIMINATION) {
-                return (
-                    session.round.getSkipCount() >=
-                    Math.floor(
-                        (
-                            session.scoreboard as EliminationScoreboard
-                        ).getAlivePlayersCount() * 0.5,
-                    ) +
-                        1
-                );
-            }
+        return (
+            session.round.getSkipCount() >=
+            SkipCommand.getSkipThreshold(session)
+        );
+    }
+
+    /**
+     * @param session - The current session
+     * @returns the number of skip votes needed to skip the song: a majority
+     * of the remaining players in elimination, otherwise of all participants
+     */
+    static getSkipThreshold(session: Session): number {
+        if (
+            session.isGameSession() &&
+            session.gameType === GameType.ELIMINATION
+        ) {
+            return (
+                Math.floor(
+                    (
+                        session.scoreboard as EliminationScoreboard
+                    ).getAlivePlayersCount() * 0.5,
+                ) + 1
+            );
         }
 
-        return session.round.getSkipCount() >= session.getVoteMajorityCount();
+        return session.getVoteMajorityCount();
+    }
+
+    /**
+     * @param session - The current session
+     * @returns the "votes/needed" skip tally shown to players
+     */
+    static getSkipCounter(session: Session): string {
+        return `${session.round?.getSkipCount() ?? 0}/${SkipCommand.getSkipThreshold(session)}`;
+    }
+
+    /**
+     * @param session - The current session
+     * @param userID - The player voting to skip
+     * @returns whether the player's skip vote counts (eliminated players
+     * don't get a say, matching the alive-player threshold)
+     */
+    static canVoteToSkip(session: Session, userID: string): boolean {
+        return !(
+            session.isGameSession() &&
+            session.gameType === GameType.ELIMINATION &&
+            (session.scoreboard as EliminationScoreboard).isPlayerEliminated(
+                userID,
+            )
+        );
     }
 
     /**

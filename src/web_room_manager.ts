@@ -200,6 +200,17 @@ export default class WebRoomManager {
             existingRoom.passwordHash = hash;
             existingRoom.passwordSalt = salt;
 
+            // Still a member (e.g. hitting create from another tab): stay
+            // put. Leaving first would close the room if they're its only
+            // member, then re-add them to a room that no longer exists.
+            const existingMember = existingRoom.members.get(user.id);
+            if (existingMember) {
+                existingMember.username = user.username;
+                existingMember.avatarUrl = user.avatarUrl;
+                this.onRoomChanged(existingRoom);
+                return { room: existingRoom };
+            }
+
             if (existingRoom.members.size >= WEB_ROOM_MAX_MEMBERS) {
                 return { error: "full" };
             }
