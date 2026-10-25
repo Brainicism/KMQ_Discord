@@ -56,6 +56,7 @@ import SongSelector from "./song_selector";
 import State from "../state";
 import WebGameSession from "./web_game_session";
 import type { ActivityMultipleChoiceOption } from "../interfaces/activity_round_meta";
+import type { PlayerAchievementUnlocks } from "./achievements";
 import type ActivityAutocompleteArtistsArgs from "../interfaces/activity_autocomplete_artists_args";
 import type ActivityAutocompleteArtistsResponse from "../interfaces/activity_autocomplete_artists_response";
 import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
@@ -2263,6 +2264,24 @@ export function attachActivityBridge(session: GameSession): void {
             })),
         });
     });
+
+    session.on(
+        "achievementUnlocks",
+        (unlocks: Array<PlayerAchievementUnlocks>) => {
+            for (const unlock of unlocks) {
+                const { username, avatarUrl } = lookupName(unlock.userID);
+                pushEvent(guildID, {
+                    type: "achievementUnlocked",
+                    userID: unlock.userID,
+                    username,
+                    avatarUrl,
+                    achievements: unlock.achievements.map((a) => ({
+                        name: a.name,
+                    })),
+                });
+            }
+        },
+    );
 
     // Emitted last by endSessionCore, after all post-session events (sessionEnd,
     // levelUp). Drop our listeners now that the session is over. The Session
