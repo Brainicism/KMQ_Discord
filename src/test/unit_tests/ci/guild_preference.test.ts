@@ -14,12 +14,6 @@ describe("guild preference", () => {
         });
 
         it("drops idle guilds' song lists and keeps active ones", async () => {
-            // A guild's first fetch only creates its row; later ones are cached
-            for (const id of ["idle-guild", "recent-guild", "playing-guild"]) {
-                // eslint-disable-next-line no-await-in-loop
-                await GuildPreference.getGuildPreference(id);
-            }
-
             const idle = await GuildPreference.getGuildPreference("idle-guild");
             const recent =
                 await GuildPreference.getGuildPreference("recent-guild");
@@ -60,6 +54,15 @@ describe("guild preference", () => {
             gp.lastAccessedAt = 0;
             await GuildPreference.getGuildPreference("idle-guild");
             assert.ok(gp.lastAccessedAt > 0);
+        });
+    });
+
+    describe("getGuildPreference", () => {
+        it("returns the same instance for a brand-new guild's first and later lookups", async () => {
+            const guildID = `new-guild-${Date.now()}`;
+            const first = await GuildPreference.getGuildPreference(guildID);
+            const second = await GuildPreference.getGuildPreference(guildID);
+            assert.strictEqual(first, second);
         });
     });
 
