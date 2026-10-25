@@ -1,4 +1,4 @@
-import { parseSetOptionBody } from "../../../kmq_web_server";
+import { parseSetOptionBody } from "../../../web_server/option_body_parser";
 import AnswerType from "../../../enums/option_types/answer_type";
 import ArtistType from "../../../enums/option_types/artist_type";
 import GuessModeType from "../../../enums/option_types/guess_mode_type";
