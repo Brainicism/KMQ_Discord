@@ -5,6 +5,8 @@ enum ShuffleType {
     POPULARITY = "popularity",
     CHRONOLOGICAL = "chronological",
     REVERSE_CHRONOLOGICAL = "reversechronological",
+    /** Only valid while a playlist is set; see GuildPreference.getEffectiveShuffleType */
+    PLAYLIST_ORDER = "playlist_order",
 }
 
 export default ShuffleType;

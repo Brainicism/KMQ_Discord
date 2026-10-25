@@ -418,10 +418,19 @@ describe("command prechecks", () => {
         const GUILD_ID = "123";
 
         const guildPreference = new GuildPreference(GUILD_ID);
-        sinon.stub(guildPreference, "updateGuildPreferences");
-        sinon
-            .stub(GuildPreference, "getGuildPreference")
-            .returns(Promise.resolve(guildPreference));
+        // Stub in hooks, not at load time: a describe-body stub is live for
+        // the entire test run and leaks into every other file
+        const playlistSandbox = sinon.createSandbox();
+        before(() => {
+            playlistSandbox.stub(guildPreference, "updateGuildPreferences");
+            playlistSandbox
+                .stub(GuildPreference, "getGuildPreference")
+                .returns(Promise.resolve(guildPreference));
+        });
+
+        after(() => {
+            playlistSandbox.restore();
+        });
 
         const session = new GameSession(
             guildPreference,
@@ -534,17 +543,23 @@ describe("command prechecks", () => {
             });
         });
 
-        describe("non-hidden answer type", async () => {
-            const guildPreference = new GuildPreference(GUILD_ID);
-            await guildPreference.setAnswerType(AnswerType.MULTIPLE_CHOICE_MED);
-            const session = new GameSession(
-                guildPreference,
-                "123",
-                "1234",
-                GUILD_ID,
-                mockKmqMember,
-                GameType.TEAMS,
-            );
+        describe("non-hidden answer type", () => {
+            let session: GameSession;
+            before(async () => {
+                const guildPreference = new GuildPreference(GUILD_ID);
+                await guildPreference.setAnswerType(
+                    AnswerType.MULTIPLE_CHOICE_MED,
+                );
+
+                session = new GameSession(
+                    guildPreference,
+                    "123",
+                    "1234",
+                    GUILD_ID,
+                    mockKmqMember,
+                    GameType.TEAMS,
+                );
+            });
 
             describe("change timer to another value", () => {
                 it("should return true", async () => {
