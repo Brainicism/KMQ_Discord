@@ -5,6 +5,7 @@ import {
     DISCORD_ACTIVITY_INSTANCE_URL,
     DISCORD_USERS_ME_URL,
     WEB_ROOM_SWEEP_INTERVAL_MS,
+    WEB_SERVER_CACHE_SWEEP_INTERVAL_MS,
     discordAvatarUrl,
 } from "./constants";
 import { IPCLogger } from "./logger";
@@ -12,6 +13,7 @@ import {
     isWebSessionToken,
     resolveWebSession,
 } from "./helpers/web_session_manager";
+import { pruneExpiredEntries } from "./web_server/web_server_utils";
 import WebRoomManager from "./web_room_manager";
 import axios from "axios";
 import ejs from "ejs";
@@ -60,6 +62,14 @@ export default class KmqWebServer {
     ) {
         this.dbContext = databaseContext;
         this.activityHub = activityHub;
+
+        // Entries only expire on lookup; without a sweep every token and
+        // instance ever seen stays in memory for the life of the process
+        setInterval(() => {
+            const now = Date.now();
+            pruneExpiredEntries(this.accessTokenCache, now);
+            pruneExpiredEntries(this.instanceCache, now);
+        }, WEB_SERVER_CACHE_SWEEP_INTERVAL_MS).unref();
 
         if (activityHub) {
             // Mirror membership to the worker owning the room's guild ID —

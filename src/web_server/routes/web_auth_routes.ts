@@ -11,6 +11,7 @@ import {
     WEB_LOGIN_CODE_TTL_MS,
     WEB_OAUTH_STATE_COOKIE,
     WEB_OAUTH_STATE_TTL_MS,
+    WEB_SERVER_CACHE_SWEEP_INTERVAL_MS,
     discordAvatarUrl,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
@@ -22,7 +23,7 @@ import {
     mintGuestUserID,
     sanitizeGuestUsername,
 } from "../../helpers/web_session_manager";
-import { siteOrigin } from "../web_server_utils";
+import { pruneExpiredEntries, siteOrigin } from "../web_server_utils";
 import KmqConfiguration from "../../kmq_configuration";
 import axios from "axios";
 import type { CachedDiscordUser, RouteRateLimit } from "../types";
@@ -129,13 +130,21 @@ export default function registerWebAuthRoutes(
     };
 
     const pruneExpired = (map: Map<string, { expiresAt: number }>): void => {
-        const now = Date.now();
-        for (const [key, value] of map) {
-            if (value.expiresAt <= now) {
-                map.delete(key);
+        pruneExpiredEntries(map);
+    };
+
+    // Lookups only expire entries they touch; sweep the rest, including IPs
+    // whose guest-login window has fully lapsed.
+    setInterval(() => {
+        pruneExpired(webOauthStates);
+        pruneExpired(webLoginCodes);
+        const cutoff = Date.now() - WEB_GUEST_LOGIN_IP_WINDOW_MS;
+        for (const [ip, timestamps] of guestLoginsByIP) {
+            if (timestamps.every((t) => t <= cutoff)) {
+                guestLoginsByIP.delete(ip);
             }
         }
-    };
+    }, WEB_SERVER_CACHE_SWEEP_INTERVAL_MS).unref();
 
     httpServer.get(
         "/api/web/login",

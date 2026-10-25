@@ -49,3 +49,22 @@ export function siteOrigin(): string | null {
 
     return base ? base.replace(/\/+$/, "") : null;
 }
+
+/**
+ * Deletes entries whose expiry has passed. The web server's caches are keyed
+ * by client-supplied or per-request values (tokens, tickets, nonces), so
+ * anything that only expires lazily on lookup must also be swept, or unused
+ * entries accumulate for the life of the process.
+ * @param map - a map of entries carrying an `expiresAt` epoch-ms timestamp
+ * @param now - current epoch ms
+ */
+export function pruneExpiredEntries(
+    map: Map<string, { expiresAt: number }>,
+    now = Date.now(),
+): void {
+    for (const [key, value] of map) {
+        if (value.expiresAt <= now) {
+            map.delete(key);
+        }
+    }
+}
