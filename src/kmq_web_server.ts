@@ -13,6 +13,7 @@ import {
     ACTIVITY_RATE_LIMIT_TOKEN,
     ACTIVITY_WS_HEARTBEAT_INTERVAL_MS,
     ACTIVITY_WS_TICKET_TTL_MS,
+    ADVANCED_SETTING_MAX_DELAY_SEC,
     CLIP_DEFAULT_DURATION_SEC,
     CLIP_MAX_DURATION_SEC,
     CLIP_MIN_DURATION_SEC,
@@ -56,6 +57,7 @@ import { measureExecutionTime, standardDateFormat } from "./helpers/utils";
 import { spawn } from "child_process";
 import { sql } from "kysely";
 import { userVoted } from "./helpers/bot_listing_manager";
+import AdvancedCommandAction from "./enums/advanced_setting_action_name";
 import AnswerType from "./enums/option_types/answer_type";
 import ArtistType from "./enums/option_types/artist_type";
 import FeedbackCommand from "./commands/misc_commands/feedback";
@@ -177,6 +179,10 @@ const MULTIGUESS_VALUES: ReadonlySet<string> = new Set(
 );
 
 const SHUFFLE_VALUES: ReadonlySet<string> = new Set(Object.values(ShuffleType));
+const ADVANCED_SETTING_VALUES: ReadonlySet<string> = new Set(
+    Object.values(AdvancedCommandAction),
+);
+
 const SEEK_VALUES: ReadonlySet<string> = new Set(Object.values(SeekType));
 const LANGUAGE_VALUES: ReadonlySet<string> = new Set(
     Object.values(LanguageType),
@@ -240,6 +246,7 @@ type SetOptionBody =
     | { kind: "cutoff"; beginningYear: number; endYear: number }
     | { kind: "goal"; goal: number | null }
     | { kind: "timer"; timer: number | null }
+    | { kind: "advanced"; setting: AdvancedCommandAction; value: number }
     | { kind: "duration"; duration: number | null }
     | { kind: "shuffle"; shuffle: ShuffleType }
     | { kind: "seek"; seek: SeekType }
@@ -447,6 +454,29 @@ export function parseSetOptionBody(body: unknown): SetOptionBody | null {
             }
 
             return { kind: "ost", ost: v as OstPreference };
+        }
+
+        case "advanced": {
+            const setting = obj["setting"];
+            if (
+                typeof setting !== "string" ||
+                !ADVANCED_SETTING_VALUES.has(setting)
+            ) {
+                return null;
+            }
+
+            const value = floatInRange(
+                obj["value"],
+                0,
+                ADVANCED_SETTING_MAX_DELAY_SEC,
+            );
+
+            if (value === null) return null;
+            return {
+                kind: "advanced",
+                setting: setting as AdvancedCommandAction,
+                value,
+            };
         }
 
         case "special": {

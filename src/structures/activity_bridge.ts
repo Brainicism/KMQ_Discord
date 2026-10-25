@@ -194,6 +194,8 @@ async function snapshotOptions(
         endYear: opts.endYear,
         goal: opts.goal,
         timer: opts.guessTimeout,
+        multiguessDelay: guildPreference.getMultiGuessDelay(),
+        songStartDelay: guildPreference.getSongStartDelay(),
         duration: opts.duration,
         shuffle: opts.shuffleType,
         seek: opts.seekType,
@@ -1234,6 +1236,14 @@ function ensureWorkerHandlerRegistered(): void {
                                 case "goal": {
                                     await guildPreference.setGoal(
                                         optionArgs.goal,
+                                    );
+                                    break;
+                                }
+
+                                case "advanced": {
+                                    await guildPreference.updateAdvancedSetting(
+                                        optionArgs.setting,
+                                        optionArgs.value,
                                     );
                                     break;
                                 }

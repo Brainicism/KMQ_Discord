@@ -78,6 +78,10 @@ export const DEFAULT_ADVANCED_SETTINGS = {
     [AdvancedCommandAction.SONG_START_DELAY]: 3,
 };
 
+/** Upper bound (seconds) for each advanced delay setting, shared by /advanced
+ *  and the Activity/website options panel. */
+export const ADVANCED_SETTING_MAX_DELAY_SEC = 60;
+
 export const KMQ_USER_AGENT = "KMQ (K-pop Music Quiz)";
 export const specialFfmpegArgs = {
     [SpecialType.REVERSE]: (seek: number, duration: number) => ({
