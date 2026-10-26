@@ -216,6 +216,16 @@
             "weighted_hard": "Weighted (Hard)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Play your first game",
+                "gamesPlayed": "Play {{count}} games",
+                "playStreak": "Play {{count}} days in a row",
+                "songsGuessed": "Guess {{count}} songs correctly",
+                "win": "Win a game"
+            },
+            "badgeHintPrompt": "Hover over or tap a badge to see how to earn it",
+            "badgeLocked": "Locked",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Badges",
             "buffFirstGame": "First Game of the Day",
             "buffPowerHour": "Power Hour",

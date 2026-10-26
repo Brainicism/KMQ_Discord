@@ -216,6 +216,16 @@
             "weighted_hard": "가중치 (어려움)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "첫 게임 플레이하기",
+                "gamesPlayed": "게임 {{count}}판 플레이하기",
+                "playStreak": "{{count}}일 연속 플레이하기",
+                "songsGuessed": "노래 {{count}}곡 맞히기",
+                "win": "게임에서 승리하기"
+            },
+            "badgeHintPrompt": "배지에 마우스를 올리거나 탭하면 획득 방법을 볼 수 있어요",
+            "badgeLocked": "잠김",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "배지",
             "buffFirstGame": "오늘의 첫 게임",
             "buffPowerHour": "파워 아워",

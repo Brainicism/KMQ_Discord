@@ -216,6 +216,16 @@
             "weighted_hard": "Gewichtet (Schwer)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Spiele dein erstes Spiel",
+                "gamesPlayed": "Spiele {{count}} Spiele",
+                "playStreak": "Spiele {{count}} Tage in Folge",
+                "songsGuessed": "Errate {{count}} Songs richtig",
+                "win": "Gewinne ein Spiel"
+            },
+            "badgeHintPrompt": "Fahre über ein Abzeichen oder tippe darauf, um zu sehen, wie man es erhält",
+            "badgeLocked": "Gesperrt",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Abzeichen",
             "buffFirstGame": "Erstes Spiel des Tages",
             "buffPowerHour": "Kraftstunde",

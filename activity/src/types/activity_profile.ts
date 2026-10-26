@@ -10,6 +10,20 @@ export interface ActivityProfileBuffs {
     multiplier: number;
 }
 
+export interface ActivityProfileBadgeHint {
+    key: "firstGame" | "win" | "gamesPlayed" | "songsGuessed" | "playStreak";
+    count?: number;
+}
+
+export interface ActivityProfileBadge {
+    name: string;
+    earned: boolean;
+    /** How to earn it; null for manually-awarded badges. */
+    hint: ActivityProfileBadgeHint | null;
+    /** Progress toward a locked threshold achievement; null otherwise. */
+    progress: { current: number; target: number } | null;
+}
+
 export interface ActivityProfileStats {
     level: number;
     exp: number;
@@ -30,7 +44,7 @@ export interface ActivityProfileStats {
     timesVoted: number;
     currentPlayStreak: number;
     longestPlayStreak: number;
-    badges: string[];
+    badges: ActivityProfileBadge[];
     buffs: ActivityProfileBuffs;
     voteURL: string;
 }

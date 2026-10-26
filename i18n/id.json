@@ -216,6 +216,16 @@
             "weighted_hard": "Berbobot (Sulit)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Mainkan permainan pertamamu",
+                "gamesPlayed": "Mainkan {{count}} permainan",
+                "playStreak": "Bermain {{count}} hari berturut-turut",
+                "songsGuessed": "Tebak {{count}} lagu dengan benar",
+                "win": "Menangkan satu permainan"
+            },
+            "badgeHintPrompt": "Arahkan kursor atau ketuk lencana untuk melihat cara mendapatkannya",
+            "badgeLocked": "Terkunci",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Lencana",
             "buffFirstGame": "Permainan Pertama Hari Ini",
             "buffPowerHour": "Jam Daya",
