@@ -397,4 +397,26 @@ describe("web game session", () => {
             assert.strictEqual(handleEnd.calledOnce, true);
         });
     });
+
+    describe("endRound", () => {
+        it("returns without the multiguess delay when the round already finished", async () => {
+            const clock = sandbox.useFakeTimers();
+            const round = { ...fakeRound(), finished: true } as Round;
+            let resolved = false;
+            const pending = session
+                .endRound(
+                    false,
+                    new MessageContext("", new KmqMember(OWNER_ID), ROOM_ID),
+                    round as any,
+                )
+                .then(() => {
+                    resolved = true;
+                });
+
+            // two room members with multiguess on: the delay would be 1.5s
+            await clock.tickAsync(0);
+            assert.strictEqual(resolved, true);
+            await pending;
+        });
+    });
 });
