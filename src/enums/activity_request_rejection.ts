@@ -13,6 +13,8 @@ type ActivityRequestRejection =
     | "empty_message"
     | "message_too_long"
     | "song_not_found"
+    // Daily Challenge: the viewer already played today's challenge.
+    | "already_completed"
     // Playlist set failures (POST /api/activity/option, kind="playlist").
     | "playlist_invalid_url"
     | "playlist_unsupported_url"
@@ -21,6 +23,9 @@ type ActivityRequestRejection =
     // A song-pool option the active playlist manages
     | "playlist_managed"
     // kind="shuffle" with playlist_order while no playlist is set
-    | "shuffle_requires_playlist";
+    | "shuffle_requires_playlist"
+    // Daily Challenge: a solo run for Discord-authenticated players
+    | "daily_requires_login"
+    | "daily_not_solo";
 
 export default ActivityRequestRejection;

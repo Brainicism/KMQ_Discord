@@ -8,6 +8,7 @@ import {
     ACTIVITY_IPC_REPLY,
     ACTIVITY_IPC_REQUEST,
     ACTIVITY_SONG_SEARCH_LIMIT,
+    DAILY_CHALLENGE_ROUNDS,
     DEFAULT_LOCALE,
     HIDDEN_DEFAULT_TIMER,
     youtubeThumbnailUrl,
@@ -15,9 +16,20 @@ import {
 import { IPCLogger } from "../logger";
 import {
     botHasVoicePermissions,
+    getCurrentVoiceMembers,
     getUserVoiceChannelID,
     searchArtists,
 } from "../helpers/discord_utils";
+import {
+    buildDailyGuildPreference,
+    getDailyChallengeDate,
+} from "../helpers/daily_challenge";
+import {
+    checkDailyEligibility,
+    getDailyLeaderboard,
+    getDailyResultForPlayer,
+    hasCompletedDailyChallenge,
+} from "../helpers/daily_challenge_manager";
 import {
     clearWebRoomMembers,
     getWebRoomMembers,
@@ -63,6 +75,9 @@ import type ActivityBookmarkArgs from "../interfaces/activity_bookmark_args";
 import type ActivityBookmarkResponse from "../interfaces/activity_bookmark_response";
 import type ActivityChatArgs from "../interfaces/activity_chat_args";
 import type ActivityCorrectGuesser from "../interfaces/activity_correct_guesser";
+import type ActivityDailyInfoArgs from "../interfaces/activity_daily_info_args";
+import type ActivityDailyInfoResponse from "../interfaces/activity_daily_info_response";
+import type ActivityDailyStartArgs from "../interfaces/activity_daily_start_args";
 import type ActivityEmoteArgs from "../interfaces/activity_emote_args";
 import type ActivityEvent from "../interfaces/activity_event";
 import type ActivityGuessArgs from "../interfaces/activity_guess_args";
@@ -2027,6 +2042,240 @@ function ensureWorkerHandlerRegistered(): void {
                                 } as ActivitySearchSongsResponse,
                             });
                         });
+
+                    return;
+                }
+
+                case "dailyChallengeInfo": {
+                    // Read-only: the viewer's status + the day's leaderboard.
+                    const infoArgs = args as ActivityDailyInfoArgs;
+                    const date = getDailyChallengeDate();
+                    const emptyPayload: ActivityDailyInfoResponse = {
+                        date,
+                        rounds: DAILY_CHALLENGE_ROUNDS,
+                        completed: false,
+                        result: null,
+                        leaderboard: [],
+                    };
+
+                    Promise.all([
+                        getDailyResultForPlayer(infoArgs.userID, date),
+                        getDailyLeaderboard(date),
+                    ])
+                        .then(([result, leaderboard]) => {
+                            const payload: ActivityDailyInfoResponse = {
+                                date,
+                                rounds: DAILY_CHALLENGE_ROUNDS,
+                                completed: result !== null,
+                                result: result
+                                    ? {
+                                          score: result.score,
+                                          correctCount: result.correctCount,
+                                          totalCount: result.totalCount,
+                                          bestStreak: result.bestStreak,
+                                          spectated: result.spectated,
+                                      }
+                                    : null,
+                                leaderboard: leaderboard.map((entry) => {
+                                    // No session in scope here (read-only op), so
+                                    // resolve names from the worker's user cache.
+                                    const cachedUser = State.client.users.get(
+                                        entry.playerID,
+                                    );
+
+                                    return {
+                                        userID: entry.playerID,
+                                        username:
+                                            cachedUser?.username ||
+                                            entry.playerID,
+                                        avatarUrl:
+                                            cachedUser?.avatarURL || null,
+                                        score: entry.score,
+                                        correctCount: entry.correctCount,
+                                        bestStreak: entry.bestStreak,
+                                    };
+                                }),
+                            };
+
+                            State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                                cid,
+                                payload,
+                            });
+                        })
+                        .catch((e) => {
+                            logger.error(
+                                `Error in activity dailyChallengeInfo for gid=${infoArgs.guildID}. err=${e}`,
+                            );
+
+                            State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                                cid,
+                                payload: emptyPayload,
+                            });
+                        });
+
+                    return;
+                }
+
+                case "startDailyChallenge": {
+                    const startArgs = args as ActivityDailyStartArgs;
+                    const reply = (payload: ActivityGuessResponse): void => {
+                        State.ipc.sendToAdmiral(ACTIVITY_IPC_REPLY, {
+                            cid,
+                            payload,
+                        });
+                    };
+
+                    runLocked(startArgs.guildID, async () => {
+                        if (
+                            KmqConfiguration.Instance.maintenanceModeEnabled()
+                        ) {
+                            reply({ ok: false, reason: "maintenance" });
+                            return;
+                        }
+
+                        if (State.bannedPlayers.has(startArgs.userID)) {
+                            reply({ ok: false, reason: "banned" });
+                            return;
+                        }
+
+                        const existing = Session.getSession(startArgs.guildID);
+                        if (existing && existing.sessionInitialized) {
+                            reply({
+                                ok: false,
+                                reason: "session_already_running",
+                            });
+                            return;
+                        }
+
+                        const date = getDailyChallengeDate();
+                        if (
+                            await hasCompletedDailyChallenge(
+                                startArgs.userID,
+                                date,
+                            )
+                        ) {
+                            reply({ ok: false, reason: "already_completed" });
+                            return;
+                        }
+
+                        const isWebStart = startArgs.mode === "web";
+                        let startVoiceChannelID = "";
+                        let participantIDs: Array<string>;
+                        if (isWebStart) {
+                            setWebRoomMembers(
+                                startArgs.guildID,
+                                startArgs.members ?? [],
+                            );
+
+                            participantIDs = getWebRoomMembers(
+                                startArgs.guildID,
+                            ).map((m) => m.id);
+
+                            if (!participantIDs.includes(startArgs.userID)) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+                        } else {
+                            const userVoiceChannelID = getUserVoiceChannelID(
+                                startArgs.guildID,
+                                startArgs.userID,
+                            );
+
+                            if (!userVoiceChannelID) {
+                                reply({ ok: false, reason: "not_in_vc" });
+                                return;
+                            }
+
+                            if (!botHasVoicePermissions(userVoiceChannelID)) {
+                                reply({
+                                    ok: false,
+                                    reason: "bot_no_voice_perms",
+                                });
+                                return;
+                            }
+
+                            startVoiceChannelID = userVoiceChannelID;
+                            participantIDs = getCurrentVoiceMembers(
+                                userVoiceChannelID,
+                            ).map((m) => m.id);
+                        }
+
+                        const eligibility = checkDailyEligibility(
+                            startArgs.userID,
+                            participantIDs,
+                        );
+
+                        if (eligibility !== "ok") {
+                            reply({
+                                ok: false,
+                                reason:
+                                    eligibility === "requires_login"
+                                        ? "daily_requires_login"
+                                        : "daily_not_solo",
+                            });
+                            return;
+                        }
+
+                        const messageContext = new MessageContext(
+                            isWebStart ? "" : startArgs.textChannelID,
+                            new KmqMember(startArgs.userID),
+                            startArgs.guildID,
+                        );
+
+                        try {
+                            const guildPreference =
+                                await buildDailyGuildPreference(
+                                    startArgs.guildID,
+                                    date,
+                                );
+
+                            const gameOwner = new KmqMember(startArgs.userID);
+                            const gameSession = isWebStart
+                                ? new WebGameSession(
+                                      guildPreference,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      GameType.CLASSIC,
+                                  )
+                                : new GameSession(
+                                      guildPreference,
+                                      startArgs.textChannelID,
+                                      startVoiceChannelID,
+                                      startArgs.guildID,
+                                      gameOwner,
+                                      GameType.CLASSIC,
+                                  );
+
+                            gameSession.dailyChallenge = true;
+                            gameSession.dailyChallengeDate = date;
+                            gameSession.dailyPlayerID = startArgs.userID;
+
+                            const previous = Session.getSession(
+                                startArgs.guildID,
+                            );
+
+                            if (previous) {
+                                await previous.endSession(
+                                    "Replaced by Daily Challenge",
+                                    false,
+                                );
+                            }
+
+                            gameSession.startedViaActivity = true;
+                            State.gameSessions[startArgs.guildID] = gameSession;
+                            // eslint-disable-next-line @typescript-eslint/no-use-before-define
+                            attachActivityBridge(gameSession);
+
+                            await gameSession.startRound(messageContext);
+                            reply({ ok: true });
+                        } catch (e) {
+                            logger.error(
+                                `Error in activity startDailyChallenge for gid=${startArgs.guildID}. err=${e}`,
+                            );
+
+                            reply({ ok: false, reason: "internal" });
+                        }
+                    });
 
                     return;
                 }

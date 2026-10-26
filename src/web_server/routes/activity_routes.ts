@@ -761,6 +761,79 @@ export default function registerActivityRoutes(
     );
 
     httpServer.post(
+        "/api/activity/daily-info",
+        limit(ACTIVITY_RATE_LIMIT_READ),
+        async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            try {
+                const result = await server.activityHub!.dailyChallengeInfo({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                });
+
+                await reply.code(200).send(result);
+            } catch (e) {
+                logger.warn(
+                    `Activity daily-info failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        },
+    );
+
+    httpServer.post(
+        "/api/activity/daily-start",
+        limit(ACTIVITY_RATE_LIMIT_LIFECYCLE),
+        async (request, reply) => {
+            const ctx = await requireAuthedInstance(request, reply);
+            if (!ctx) return;
+
+            if (!ctx.instance.webRoom && !ctx.instance.channelID) {
+                await reply.code(400).send({ error: "No channel" });
+                return;
+            }
+
+            const room = ctx.instance.webRoom
+                ? server.webRoomManager?.getRoomForUser(ctx.user.id)
+                : undefined;
+
+            try {
+                const result = await server.activityHub!.startDailyChallenge({
+                    guildID: ctx.instance.guildID,
+                    userID: ctx.user.id,
+                    textChannelID: ctx.instance.channelID ?? "",
+                    ...(ctx.instance.webRoom
+                        ? {
+                              mode: "web" as const,
+                              members: [...(room?.members.values() ?? [])].map(
+                                  (m) => ({
+                                      id: m.id,
+                                      username: m.username,
+                                      avatarUrl: m.avatarUrl,
+                                  }),
+                              ),
+                          }
+                        : {}),
+                });
+
+                if (!result.ok) {
+                    await reply.code(409).send({ error: result.reason });
+                    return;
+                }
+
+                await reply.code(200).send({ ok: true });
+            } catch (e) {
+                logger.warn(
+                    `Activity daily-start failed. gid=${ctx.instance.guildID}, err=${(e as Error).message}`,
+                );
+                await reply.code(500).send({ error: "Internal" });
+            }
+        },
+    );
+
+    httpServer.post(
         "/api/activity/song",
         limit(ACTIVITY_RATE_LIMIT_READ),
         async (request, reply) => {

@@ -30,6 +30,26 @@
         "bookmarkTitleActive": "Diesen Song als Lesezeichen speichern",
         "bookmarkTitleDone": "Gespeichert — per DM am Ende der Sitzung",
         "connectFailed": "Konnte keine Verbindung zu KMQ herstellen. Bitte versuche es erneut.",
+        "daily": {
+            "close": "Schließen",
+            "copied": "Kopiert!",
+            "copy": "Ergebnis kopieren",
+            "ctaText": "{{rounds}} Songs, für alle gleich — einmal am Tag.",
+            "leaderboardEmpty": "Keine Gewinner bisher — sei der Erste!",
+            "leaderboardTitle": "Bestenliste",
+            "loading": "Wird geladen...",
+            "notSolo": "Die Tagesherausforderung ist ein Solo-Lauf. Spiele sie allein in deinem Sprachkanal oder Raum.",
+            "play": "Spiele die heutige Herausforderung",
+            "requiresLogin": "Melde dich mit Discord an, um die Tagesherausforderung zu spielen.",
+            "shareHeader": "🎵 KMQ Täglich {{date}}",
+            "shareLine": "{{correct}}/{{total}} · {{score}} Pkt",
+            "spectated": "Du hast heute die Tagesherausforderung von jemand anderem gesehen und kennst ihre Lieder bereits. Komm morgen wieder!",
+            "startFailed": "Konnte die Herausforderung nicht starten.",
+            "starting": "Starten...",
+            "streakLabel": "Beste Serie: {{streak}}",
+            "summary": "{{correct}}/{{total}} erraten · {{score}} Pkt",
+            "title": "Tagesherausforderung"
+        },
         "emoteBarLabel": "Eine Reaktion senden",
         "endGameBusy": "Wird beendet…",
         "endGameButton": "Spiel beenden",
@@ -530,6 +550,30 @@
                     "rangeOption": "Wähle Songs für jedes Jahr zwischen [beginning_year] und [ending_year]"
                 },
                 "name": "cutoff"
+            }
+        },
+        "daily": {
+            "failure": {
+                "notSolo": {
+                    "description": "Alle im Kanal würden die Antworten hören. Starte die Tagesherausforderung, wenn du allein im Sprachkanal bist.",
+                    "title": "Tagesherausforderung nur solo"
+                }
+            },
+            "help": {
+                "description": "Spiele die heutige Tagesherausforderung — eine festgelegte Reihe von Liedern, die jeder einmal pro Tag erhält. Starte sie nach dem Beenden erneut, um dein Ergebnis und die Rangliste zu sehen.",
+                "example": {
+                    "play": "Starte (oder, falls heute bereits erledigt, sieh dir die) Tagesherausforderung an"
+                },
+                "name": "täglich"
+            },
+            "leaderboard": {
+                "empty": "Niemand hat die heutige Herausforderung bisher beendet.",
+                "entry": "{{rank}}. {{user}} — {{score}} ({{correct}} korrekt)",
+                "title": "**Heutige Rangliste**"
+            },
+            "result": {
+                "summary": "{{correct}}/{{total}} erraten · {{score}} Punkte · beste Serie {{streak}}",
+                "title": "Tägliche Herausforderung — {{date}}"
             }
         },
         "debug": {
