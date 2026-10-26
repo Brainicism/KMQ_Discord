@@ -1384,6 +1384,13 @@ export default class GameSession extends Session {
             round = this.round;
         }
 
+        // A round already ended by an earlier caller (e.g. every correct guess
+        // in multiple choice calls endRound) mustn't hold the mutex for the
+        // multiguess delay, or queued calls pile up and stall the next round
+        if (!round || round.finished) {
+            return;
+        }
+
         // wait and accept multiguess results
         await delay(
             this.multiguessDelayIsActive(this.guildPreference)
@@ -1391,8 +1398,10 @@ export default class GameSession extends Session {
                 : 0,
         );
 
-        // ensure that only one invocation can proceed
-        if (!round || round.finished) {
+        // ensure that only one invocation can proceed (finished may have
+        // been set while we waited)
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        if (round.finished) {
             return;
         }
 
