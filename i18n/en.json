@@ -338,6 +338,7 @@
                 "collapse": "Collapse chat",
                 "empty": "No messages yet. Say hi!",
                 "placeholder": "Type a message…",
+                "revealsAnswer": "That looks like the answer! Use the guess box so it isn't spoiled for everyone.",
                 "send": "Send",
                 "title": "Chat"
             },
