@@ -338,6 +338,7 @@
                 "collapse": "收起聊天",
                 "empty": "还没有消息。打个招呼吧!",
                 "placeholder": "输入消息…",
+                "revealsAnswer": "这看起来像是答案!请使用猜歌输入框,以免剧透给所有人。",
                 "send": "发送",
                 "title": "聊天"
             },

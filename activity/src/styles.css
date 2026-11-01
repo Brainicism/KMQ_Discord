@@ -4375,6 +4375,16 @@ fieldset.options-override:disabled .options-group {
     overflow-wrap: anywhere;
 }
 
+.kmq-chat-notice {
+    margin: 0;
+    padding: 6px 12px;
+    border-top: 1px solid var(--border);
+    background: var(--red-light);
+    color: var(--red-primary);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+
 .kmq-chat-input-row {
     display: flex;
     gap: 6px;

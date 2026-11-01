@@ -2462,6 +2462,8 @@ function ChatPanel({
 }): JSX.Element {
     const [open, setOpen] = useState(false);
     const [draft, setDraft] = useState("");
+    // Why the last message was turned away (e.g. it was the answer).
+    const [notice, setNotice] = useState<string | null>(null);
     // Count messages seen while collapsed, for the unread badge.
     const [unread, setUnread] = useState(0);
     const lastSentRef = useRef(0);
@@ -2497,9 +2499,19 @@ function ChatPanel({
         if (now - lastSentRef.current < CHAT_CLIENT_COOLDOWN_MS) return;
         lastSentRef.current = now;
         setDraft("");
-        // Fire-and-forget: the broadcast echoes our own message back, so the
-        // list is driven entirely by inbound events (no optimistic append).
-        void apiSendChat(accessToken, instanceId, text);
+        setNotice(null);
+        // The broadcast echoes our own message back, so the list is driven
+        // entirely by inbound events (no optimistic append). A message that
+        // would give away the answer is refused: hand the text back so it
+        // can go in the guess box instead.
+        void apiSendChat(accessToken, instanceId, text)
+            .then((result) => {
+                if (!result.ok && result.reason === "chat_reveals_answer") {
+                    setDraft((current) => current || text);
+                    setNotice(t("web.chat.revealsAnswer"));
+                }
+            })
+            .catch(() => {});
     };
 
     return (
@@ -2556,6 +2568,11 @@ function ChatPanel({
                             ))
                         )}
                     </div>
+                    {notice && (
+                        <p className="kmq-chat-notice" role="status">
+                            {notice}
+                        </p>
+                    )}
                     <form
                         className="kmq-chat-input-row"
                         onSubmit={(e) => {
@@ -2567,7 +2584,10 @@ function ChatPanel({
                             className="kmq-chat-input"
                             value={draft}
                             maxLength={CHAT_MAX_LENGTH}
-                            onChange={(e) => setDraft(e.target.value)}
+                            onChange={(e) => {
+                                setDraft(e.target.value);
+                                setNotice(null);
+                            }}
                             placeholder={t("web.chat.placeholder")}
                             aria-label={t("web.chat.placeholder")}
                         />

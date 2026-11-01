@@ -12,6 +12,9 @@ type ActivityRequestRejection =
     | "invalid_emote"
     | "empty_message"
     | "message_too_long"
+    // A chat message that would count as a correct guess (would spoil the
+    // round's answer for everyone)
+    | "chat_reveals_answer"
     | "song_not_found"
     // Playlist set failures (POST /api/activity/option, kind="playlist").
     | "playlist_invalid_url"
