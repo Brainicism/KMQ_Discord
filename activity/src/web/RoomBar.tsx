@@ -8,28 +8,32 @@ const ROOM_POLL_INTERVAL_MS = 5_000;
 const COPY_FLASH_MS = 1_500;
 
 /**
- * Floating room widget shown over the game on the standalone website: the
- * invite link, live member presence, and a leave button. Presence is
- * server-derived (websocket open/close), polled here — game events and
- * options already flow over the game websocket, this only decorates them
- * with who's in the room.
+ * Room widget on the standalone website: the invite link, live member
+ * presence, and a leave button. Docked at the top of the scoreboard rail on
+ * wide layouts (invite/leave always shown, member list on demand); a floating
+ * bottom-right pill on narrow ones, collapsed until tapped so it doesn't cover
+ * the game. Presence is server-derived (websocket open/close), polled here —
+ * game events and options already flow over the game websocket, this only
+ * decorates them with who's in the room.
  */
 export default function RoomBar({
     session,
     room: initialRoom,
+    docked,
     onLeave,
     onEvicted,
     t,
 }: {
     session: WebSession;
     room: WebRoomView;
+    docked: boolean;
     onLeave: () => void;
     /** Called when the server no longer recognizes us as a member. */
     onEvicted: () => void;
     t: Translator;
 }): JSX.Element {
     const [room, setRoom] = useState<WebRoomView>(initialRoom);
-    const [expanded, setExpanded] = useState(true);
+    const [expanded, setExpanded] = useState(false);
     const [copied, setCopied] = useState(false);
     const copyTimerRef = useRef<number | null>(null);
 
@@ -97,8 +101,31 @@ export default function RoomBar({
 
     const connectedCount = room.members.filter((m) => m.connected).length;
 
+    const actions = (
+        <div className="kmq-room-bar-actions">
+            <button
+                type="button"
+                className="kmq-room-bar-button"
+                onClick={() => void copyInvite()}
+            >
+                {copied ? t("web.room.copied") : t("web.room.copyInvite")}
+            </button>
+            <button
+                type="button"
+                className="kmq-room-bar-button kmq-room-bar-button-danger"
+                onClick={onLeave}
+            >
+                {t("web.room.leave")}
+            </button>
+        </div>
+    );
+
     return (
-        <div className="kmq-room-bar" data-expanded={expanded}>
+        <div
+            className="kmq-room-bar"
+            data-expanded={expanded}
+            data-docked={docked}
+        >
             <button
                 type="button"
                 className="kmq-room-bar-toggle"
@@ -107,63 +134,49 @@ export default function RoomBar({
             >
                 <span className="kmq-room-bar-dot" aria-hidden />
                 {t("web.room.label")} · {connectedCount}/{room.members.length}
+                <span className="kmq-room-bar-chevron" aria-hidden>
+                    ▾
+                </span>
             </button>
-
-            {expanded && (
+            {(expanded || docked) && (
                 <div className="kmq-room-bar-body">
-                    <div className="kmq-room-bar-members">
-                        {room.members.map((member) => (
-                            <span
-                                key={member.id}
-                                className="kmq-room-bar-member"
-                                data-connected={member.connected}
-                                title={
-                                    member.connected
-                                        ? member.username
-                                        : t("web.room.away", {
-                                              username: member.username,
-                                          })
-                                }
-                            >
-                                {member.avatarUrl ? (
-                                    <img
-                                        className="kmq-room-bar-avatar"
-                                        src={member.avatarUrl}
-                                        alt=""
-                                    />
-                                ) : (
-                                    <span className="kmq-room-bar-avatar kmq-room-bar-avatar-fallback">
-                                        {member.username
-                                            .slice(0, 1)
-                                            .toUpperCase()}
+                    {expanded && (
+                        <div className="kmq-room-bar-members">
+                            {room.members.map((member) => (
+                                <span
+                                    key={member.id}
+                                    className="kmq-room-bar-member"
+                                    data-connected={member.connected}
+                                    title={
+                                        member.connected
+                                            ? member.username
+                                            : t("web.room.away", {
+                                                  username: member.username,
+                                              })
+                                    }
+                                >
+                                    {member.avatarUrl ? (
+                                        <img
+                                            className="kmq-room-bar-avatar"
+                                            src={member.avatarUrl}
+                                            alt=""
+                                        />
+                                    ) : (
+                                        <span className="kmq-room-bar-avatar kmq-room-bar-avatar-fallback">
+                                            {member.username
+                                                .slice(0, 1)
+                                                .toUpperCase()}
+                                        </span>
+                                    )}
+                                    <span className="kmq-room-bar-name">
+                                        {member.username}
+                                        {member.id === room.ownerID ? " ★" : ""}
                                     </span>
-                                )}
-                                <span className="kmq-room-bar-name">
-                                    {member.username}
-                                    {member.id === room.ownerID ? " ★" : ""}
                                 </span>
-                            </span>
-                        ))}
-                    </div>
-
-                    <div className="kmq-room-bar-actions">
-                        <button
-                            type="button"
-                            className="kmq-room-bar-button"
-                            onClick={() => void copyInvite()}
-                        >
-                            {copied
-                                ? t("web.room.copied")
-                                : t("web.room.copyInvite")}
-                        </button>
-                        <button
-                            type="button"
-                            className="kmq-room-bar-button kmq-room-bar-button-danger"
-                            onClick={onLeave}
-                        >
-                            {t("web.room.leave")}
-                        </button>
-                    </div>
+                            ))}
+                        </div>
+                    )}
+                    {actions}
                 </div>
             )}
         </div>
