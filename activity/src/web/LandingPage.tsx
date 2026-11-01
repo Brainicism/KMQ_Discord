@@ -428,16 +428,19 @@ export default function LandingPage(): JSX.Element {
                     }}
                     localeOverride={localeOverride}
                     onChangeLocaleOverride={changeLocale}
-                />
-                <RoomBar
-                    session={state.session}
-                    room={state.room}
-                    onLeave={() => {
-                        void leaveRoom(state.session);
-                        exitRoom(state.session, null);
-                    }}
-                    onEvicted={() => exitRoom(state.session, "removed")}
-                    t={t}
+                    renderRoomBar={(docked) => (
+                        <RoomBar
+                            session={state.session}
+                            room={state.room}
+                            docked={docked}
+                            onLeave={() => {
+                                void leaveRoom(state.session);
+                                exitRoom(state.session, null);
+                            }}
+                            onEvicted={() => exitRoom(state.session, "removed")}
+                            t={t}
+                        />
+                    )}
                 />
             </>
         );

@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 import { createPortal } from "react-dom";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import {
     EXTERNAL_YOUTUBE_PROXY_PREFIX,
     MAX_GUESS_LENGTH,
@@ -376,23 +376,33 @@ type ProfileCache = Map<string, ProfileCacheEntry>;
 type SongInfoCacheEntry = { resp: ActivitySongInfoResponse; nonce: number };
 type SongInfoCache = Map<string, SongInfoCacheEntry>;
 
-/** True when the device supports a real hover pointer (desktop). */
-function useCanHover(): boolean {
-    const [can, setCan] = useState(
+/** Tracks whether a CSS media query currently matches. */
+function useMediaQuery(query: string): boolean {
+    const [matches, setMatches] = useState(
         () =>
             typeof window !== "undefined" &&
             !!window.matchMedia &&
-            window.matchMedia("(hover: hover)").matches,
+            window.matchMedia(query).matches,
     );
     useEffect(() => {
         if (!window.matchMedia) return;
-        const mq = window.matchMedia("(hover: hover)");
-        const onChange = (): void => setCan(mq.matches);
+        const mq = window.matchMedia(query);
+        const onChange = (): void => setMatches(mq.matches);
+        onChange();
         mq.addEventListener?.("change", onChange);
         return () => mq.removeEventListener?.("change", onChange);
-    }, []);
-    return can;
+    }, [query]);
+    return matches;
 }
+
+/** True when the device supports a real hover pointer (desktop). */
+function useCanHover(): boolean {
+    return useMediaQuery("(hover: hover)");
+}
+
+// Matches the CSS grid breakpoint: at this width the scoreboard is a
+// persistent right rail, and chat (plus the web room widget) docks into it.
+const WIDE_LAYOUT_QUERY = "(min-width: 901px)";
 
 // Keeps a conditionally-rendered element mounted through its close transition.
 // While `open`, it mounts and — after a frame, so the enter transition runs
@@ -2442,25 +2452,29 @@ function FloatingEmotes({
 const CHAT_CLIENT_COOLDOWN_MS = 600;
 
 /**
- * Web-room chat: a collapsible floating panel where players in the room can
- * talk. Messages arrive over the game websocket (profanity-masked server-side)
- * and are ephemeral — no backlog on join. Web only; the embedded Discord
- * Activity uses the channel's own text chat instead.
+ * Player chat, on the website and in the embedded Activity alike. Messages
+ * arrive over the game websocket (profanity-masked server-side) and are
+ * ephemeral — no backlog on join. On wide layouts it's docked in the
+ * scoreboard rail (open by default); on narrow ones it's a pill that opens a
+ * full-width bottom sheet, kept above the on-screen keyboard.
  */
 function ChatPanel({
     accessToken,
     instanceId,
     messages,
     selfID,
+    docked,
     t,
 }: {
     accessToken: string;
     instanceId: string;
     messages: ChatMessage[];
     selfID: string | null;
+    docked: boolean;
     t: Translator;
 }): JSX.Element {
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(docked);
+    const rootRef = useRef<HTMLDivElement | null>(null);
     const [draft, setDraft] = useState("");
     // Why the last message was turned away (e.g. it was the answer).
     const [notice, setNotice] = useState<string | null>(null);
@@ -2492,6 +2506,43 @@ function ChatPanel({
         if (el) el.scrollTop = el.scrollHeight;
     }, [open]);
 
+    // Crossing the layout breakpoint: docked chat starts open, the sheet
+    // starts closed so it doesn't cover the game.
+    useEffect(() => {
+        setOpen(docked);
+    }, [docked]);
+
+    // Keep the bottom sheet above the on-screen keyboard. iOS shrinks only
+    // the visual viewport, leaving fixed elements under the keyboard, so
+    // measure the covered strip and lift the sheet by it. (Chrome's
+    // overlays-content keyboard is handled in CSS via keyboard-inset-height,
+    // and Discord's Android WebView shrinks the whole window, which moves
+    // fixed elements up on its own.)
+    useEffect(() => {
+        const vv = window.visualViewport;
+        const el = rootRef.current;
+        if (docked || !open || !vv || !el) return;
+        const apply = (): void => {
+            const covered = Math.max(
+                0,
+                window.innerHeight - vv.height - vv.offsetTop,
+            );
+
+            el.style.setProperty("--kmq-chat-kb-inset", `${covered}px`);
+            el.style.setProperty("--kmq-chat-visible-h", `${vv.height}px`);
+        };
+
+        apply();
+        vv.addEventListener("resize", apply);
+        vv.addEventListener("scroll", apply);
+        return () => {
+            vv.removeEventListener("resize", apply);
+            vv.removeEventListener("scroll", apply);
+            el.style.removeProperty("--kmq-chat-kb-inset");
+            el.style.removeProperty("--kmq-chat-visible-h");
+        };
+    }, [docked, open]);
+
     const send = (): void => {
         const text = draft.trim();
         if (!text) return;
@@ -2515,7 +2566,12 @@ function ChatPanel({
     };
 
     return (
-        <div className="kmq-chat" data-open={open}>
+        <div
+            className="kmq-chat"
+            data-open={open}
+            data-docked={docked}
+            ref={rootRef}
+        >
             {open ? (
                 <div className="kmq-chat-panel">
                     <div className="kmq-chat-header">
@@ -4955,8 +5011,12 @@ export default function App({
     webAuth,
     localeOverride,
     onChangeLocaleOverride,
+    renderRoomBar,
 }: {
     webAuth?: WebAuth;
+    /** Web only: the room widget, docked in the scoreboard rail on wide
+     *  layouts (`docked` true) and floating bottom-right on narrow ones. */
+    renderRoomBar?: (docked: boolean) => ReactNode;
     /** Web only: the visitor's explicit language choice from the shell picker
      *  (null = follow the browser). Changing it live-swaps the game's bundle. */
     localeOverride?: string | null;
@@ -4993,6 +5053,7 @@ export default function App({
     // shown via the grid (this flag only drives its mobile drawer), and history
     // opens on demand; on mobile nothing covers the screen on load.
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const wideLayout = useMediaQuery(WIDE_LAYOUT_QUERY);
     const [historyOpen, setHistoryOpen] = useState(false);
     const [optionsOpen, setOptionsOpen] = useState(false);
     const [theme, setTheme] = useState<Theme>(readInitialTheme);
@@ -5454,36 +5515,46 @@ export default function App({
     };
 
     if (error) {
+        // The room widget stays available here so a stuck web player can
+        // still copy the invite or leave the room.
         return (
-            <div className="kmq-app error">
-                <h2>{t("appTitle")}</h2>
-                <p>
-                    {error.kind === "disconnected"
-                        ? t("statusDisconnected")
-                        : t("connectFailed")}
-                </p>
-                <button
-                    type="button"
-                    className="primary"
-                    onClick={reconnect}
-                    disabled={reconnecting}
-                >
-                    {reconnecting ? t("reconnecting") : t("reconnectButton")}
-                </button>
-            </div>
+            <>
+                <div className="kmq-app error">
+                    <h2>{t("appTitle")}</h2>
+                    <p>
+                        {error.kind === "disconnected"
+                            ? t("statusDisconnected")
+                            : t("connectFailed")}
+                    </p>
+                    <button
+                        type="button"
+                        className="primary"
+                        onClick={reconnect}
+                        disabled={reconnecting}
+                    >
+                        {reconnecting
+                            ? t("reconnecting")
+                            : t("reconnectButton")}
+                    </button>
+                </div>
+                {renderRoomBar?.(false)}
+            </>
         );
     }
 
     if (!ready) {
         return (
-            <div className="kmq-app loading">
-                <img
-                    className="kmq-splash-logo"
-                    src={kmqLogoUrl}
-                    alt={t("appTitle")}
-                />
-                <p>{t("statusConnecting")}</p>
-            </div>
+            <>
+                <div className="kmq-app loading">
+                    <img
+                        className="kmq-splash-logo"
+                        src={kmqLogoUrl}
+                        alt={t("appTitle")}
+                    />
+                    <p>{t("statusConnecting")}</p>
+                </div>
+                {renderRoomBar?.(false)}
+            </>
         );
     }
 
@@ -5602,7 +5673,7 @@ export default function App({
                     aria-label={t("feedback.open")}
                     title={t("feedback.open")}
                 >
-                    <span>💬</span>
+                    <span>📝</span>
                 </button>
             )}
 
@@ -6094,6 +6165,11 @@ export default function App({
                     className={`kmq-sidebar ${sidebarOpen ? "open" : ""}`}
                     aria-label={t("scoreboardHeading")}
                 >
+                    {wideLayout && renderRoomBar && (
+                        <div className="kmq-rail-room">
+                            {renderRoomBar(true)}
+                        </div>
+                    )}
                     <div className="sidebar-header">
                         <span className="sidebar-title">
                             {t("scoreboardHeading")}
@@ -6122,6 +6198,16 @@ export default function App({
                             <p className="empty">{t("scoreboardEmpty")}</p>
                         )}
                     </div>
+                    {wideLayout && authState && (
+                        <ChatPanel
+                            accessToken={authState.accessToken}
+                            instanceId={authState.instanceId}
+                            messages={ui.chatMessages}
+                            selfID={authState.userID}
+                            docked
+                            t={t}
+                        />
+                    )}
                 </aside>
             </div>
 
@@ -6132,18 +6218,22 @@ export default function App({
 
             {webAuth && <SoundControls audio={roundAudio} t={t} />}
 
-            {/* Player chat — web rooms and the embedded Activity alike. (In
-                Discord the channel has its own text chat, but this keeps the
-                conversation next to the game without tabbing away.) */}
-            {authState && (
+            {/* Narrow layouts: player chat and the web room widget float over
+                the game (on wide ones they're docked in the scoreboard rail).
+                Chat runs in the embedded Activity too: Discord's channel has
+                its own text chat, but this keeps the conversation next to the
+                game without tabbing away. */}
+            {!wideLayout && authState && (
                 <ChatPanel
                     accessToken={authState.accessToken}
                     instanceId={authState.instanceId}
                     messages={ui.chatMessages}
                     selfID={authState.userID}
+                    docked={false}
                     t={t}
                 />
             )}
+            {!wideLayout && renderRoomBar?.(false)}
 
             {restartsAtEpochMs !== null && (
                 <RestartBanner restartsAtEpochMs={restartsAtEpochMs} t={t} />

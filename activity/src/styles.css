@@ -2998,16 +2998,6 @@ fieldset.options-override:disabled .options-group {
 }
 
 /* ---- RESPONSIVE ---- */
-/* Below the grid breakpoint the history / scoreboard toggles are fixed in the
-   top corners (40px wide, 16px from each edge). Reserve horizontal room in the
-   header so the KMQ logo and the Start/End buttons don't slide under them. */
-@media (max-width: 900px) {
-    .kmq-app header {
-        padding-left: 52px;
-        padding-right: 52px;
-    }
-}
-
 @media (max-width: 600px) {
     .vote-row {
         grid-template-columns: 1fr;
@@ -4110,9 +4100,10 @@ fieldset.options-override:disabled .options-group {
     outline-offset: 2px;
 }
 
-/* Short viewports (small Activity frames, landscape phones): the rail would
-   run off the bottom, so tuck the picker beside the feedback toggle. */
-@media (max-height: 560px) {
+/* Short desktop-width viewports (small Activity frames): the rail would run
+   off the bottom, so tuck the picker beside the feedback toggle. (Narrow
+   layouts lay the toggles out as a top toolbar instead; see below.) */
+@media (min-width: 901px) and (max-height: 560px) {
     .kmq-language-select.kmq-lang-toggle {
         top: 208px;
         left: 64px;
@@ -4173,15 +4164,16 @@ fieldset.options-override:disabled .options-group {
     accent-color: var(--red-primary);
 }
 
-/* Web room chat: collapsible floating panel, bottom-left above the sound
-   widget. Left corner is shared with sound controls (bottom:12), so the chat
-   sits just above them. Panel and toggle swap on open/close, so each plays an
-   entrance on mount; all of it is neutralised by the global
-   prefers-reduced-motion guard. */
+/* Player chat. Narrow layouts: a pill bottom-left (above the website's sound
+   widget, which sits at bottom:12) that opens a full-width bottom sheet. Wide
+   layouts dock it in the scoreboard rail (see the CHAT + ROOM DOCKING
+   section). Panel and toggle swap on open/close, so each plays an entrance on
+   mount; all of it is neutralised by the global prefers-reduced-motion
+   guard. */
 .kmq-chat {
     position: fixed;
     left: 12px;
-    bottom: 64px;
+    bottom: 12px;
     z-index: 60;
     max-width: calc(100vw - 24px);
 }
@@ -4460,6 +4452,226 @@ fieldset.options-override:disabled .options-group {
     font-size: 0.85rem;
     font-weight: 600;
     box-shadow: var(--shadow-md);
+}
+
+/* ---- CHAT + ROOM DOCKING / SMALL-SCREEN LAYOUT ---- */
+
+/* The website's sound widget owns the bottom-left corner; the chat pill sits
+   above it. (The embedded Activity has no sound widget.) */
+body:has(.kmq-sound-controls) .kmq-chat:not([data-docked="true"]) {
+    bottom: 64px;
+}
+
+@media (min-width: 901px) {
+    /* Rail: room widget, scoreboard, then chat filling the rest. The
+       scoreboard scrolls on its own so chat keeps its share of the height. */
+    .kmq-sidebar:not(.left) {
+        overflow: hidden;
+    }
+
+    .kmq-sidebar:not(.left) > .sidebar-body {
+        flex: 0 1 auto;
+        min-height: 0;
+        overflow-y: auto;
+    }
+
+    .kmq-rail-room {
+        flex-shrink: 0;
+        border-bottom: 1px solid var(--border);
+    }
+}
+
+.kmq-chat[data-docked="true"] {
+    position: static;
+    max-width: none;
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    border-top: 1px solid var(--border);
+}
+
+.kmq-chat[data-docked="true"][data-open="true"] {
+    flex: 1 1 240px;
+    min-height: 200px;
+}
+
+.kmq-chat[data-docked="true"] .kmq-chat-panel {
+    width: auto;
+    height: auto;
+    flex: 1;
+    min-height: 0;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    animation: none;
+}
+
+.kmq-chat[data-docked="true"] .kmq-chat-header {
+    padding: 12px 18px;
+}
+
+.kmq-chat[data-docked="true"] .kmq-chat-toggle {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 12px 18px;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    animation: none;
+}
+
+.kmq-chat[data-docked="true"] .kmq-chat-toggle:hover {
+    background: var(--bg-hover);
+    transform: none;
+}
+
+/* Docked room widget: a compact section at the top of the rail. Invite and
+   leave are always shown; the member list expands on demand (the scoreboard
+   below already lists the players). */
+.kmq-room-bar[data-docked="true"] {
+    position: static;
+    align-items: stretch;
+    padding: 12px 18px;
+    gap: 8px;
+}
+
+.kmq-room-bar[data-docked="true"] .kmq-room-bar-toggle {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+}
+
+.kmq-room-bar[data-docked="true"] .kmq-room-bar-body {
+    padding: 0;
+    border: none;
+    background: transparent;
+    box-shadow: none;
+    max-width: none;
+}
+
+.kmq-room-bar[data-docked="true"] .kmq-room-bar-button {
+    flex: 1;
+}
+
+.kmq-room-bar-chevron {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    transition: transform 0.15s ease;
+}
+
+.kmq-room-bar[data-expanded="true"] .kmq-room-bar-chevron {
+    transform: rotate(180deg);
+}
+
+@media (max-width: 900px) {
+    /* Global toggles become one toolbar row across the top instead of a
+       column running down over the round card. The layout starts below it,
+       so scrolled content never slides under the buttons. */
+    .kmq-layout {
+        padding-top: 54px;
+    }
+
+    .kmq-main {
+        padding-top: 0;
+    }
+
+    .kmq-app header {
+        padding-top: 0;
+    }
+
+    .sidebar-toggle,
+    .sidebar-toggle.left,
+    .kmq-language-select.kmq-lang-toggle {
+        top: 10px;
+        width: 36px;
+        height: 36px;
+        font-size: 1rem;
+    }
+
+    .sidebar-toggle.left {
+        left: 12px;
+    }
+
+    .sidebar-toggle:not(.left):not(.theme) {
+        right: 12px;
+    }
+
+    .sidebar-toggle.theme {
+        top: 10px;
+        left: 54px;
+        font-size: 1.05rem;
+    }
+
+    .sidebar-toggle.profile {
+        top: 10px;
+        left: 96px;
+    }
+
+    .sidebar-toggle.search {
+        top: 10px;
+        left: 138px;
+    }
+
+    .sidebar-toggle.feedback {
+        top: 10px;
+        left: 180px;
+    }
+
+    .kmq-language-select.kmq-lang-toggle {
+        left: 222px;
+    }
+
+    /* Room for the bottom-corner widgets once scrolled to the end. */
+    .kmq-main {
+        padding-bottom: 120px;
+    }
+
+    /* With the chat sheet open, let the page scroll far enough to bring the
+       guess box up above it. */
+    body:has(.kmq-chat[data-open="true"]:not([data-docked="true"])) .kmq-main {
+        padding-bottom: calc(var(--app-vh, 100vh) * 0.6);
+    }
+
+    /* Open chat: a full-width bottom sheet, lifted above the on-screen
+       keyboard (iOS via the visualViewport-measured inset set in ChatPanel,
+       Chrome's overlays-content keyboard via keyboard-inset-height). */
+    .kmq-chat[data-open="true"] {
+        left: 0;
+        right: 0;
+        bottom: max(
+            var(--kmq-chat-kb-inset, 0px),
+            env(keyboard-inset-height, 0px)
+        );
+        max-width: none;
+        z-index: 110;
+    }
+
+    body:has(.kmq-sound-controls) .kmq-chat[data-open="true"] {
+        bottom: max(
+            var(--kmq-chat-kb-inset, 0px),
+            env(keyboard-inset-height, 0px)
+        );
+    }
+
+    .kmq-chat[data-open="true"] .kmq-chat-panel {
+        width: 100%;
+        height: min(
+            420px,
+            calc(
+                (
+                        var(--kmq-chat-visible-h, var(--app-vh, 100vh)) -
+                            env(keyboard-inset-height, 0px)
+                    ) *
+                    0.6
+            )
+        );
+        border-bottom: none;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        transform-origin: bottom center;
+    }
 }
 
 /* Respect users who opt out of motion at the OS level: drop the decorative
