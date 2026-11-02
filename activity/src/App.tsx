@@ -79,6 +79,7 @@ import type {
 } from "./api";
 import type { Translator } from "./i18n/translator";
 import type {
+    ActivityProfileBadge,
     ActivityProfileResponse,
     ActivityProfileStats,
 } from "./types/activity_profile";
@@ -625,6 +626,69 @@ function ProfileBuffs({
     );
 }
 
+function badgeHintText(badge: ActivityProfileBadge, t: Translator): string {
+    if (!badge.hint) return "";
+    const hint = t(`profile.badgeHint.${badge.hint.key}`, {
+        count: formatProfileNumber(badge.hint.count ?? 1),
+    });
+
+    if (!badge.progress) return hint;
+    return `${hint} (${t("profile.badgeProgress", {
+        current: formatProfileNumber(badge.progress.current),
+        target: formatProfileNumber(badge.progress.target),
+    })})`;
+}
+
+/**
+ * Owned badges, then locked achievements greyed out. Hovering, focusing or
+ * tapping a badge shows how it's earned in a caption under the list (a caption
+ * rather than a floating tooltip: the profile popover scrolls and would clip).
+ */
+function ProfileBadges({
+    badges,
+    t,
+}: {
+    badges: ActivityProfileBadge[];
+    t: Translator;
+}) {
+    const [activeIndex, setActiveIndex] = useState<number | null>(null);
+    const active = activeIndex === null ? null : badges[activeIndex];
+    const caption = active ? badgeHintText(active, t) : "";
+
+    return (
+        <div className="profile-badges">
+            <span className="profile-badges-title">{t("profile.badges")}</span>
+            <ul>
+                {badges.map((b, i) => {
+                    const hint = badgeHintText(b, t);
+                    return (
+                        <li
+                            key={b.name}
+                            className={b.earned ? undefined : "locked"}
+                            tabIndex={hint ? 0 : undefined}
+                            title={hint || undefined}
+                            aria-label={
+                                b.earned
+                                    ? undefined
+                                    : `${b.name} (${t("profile.badgeLocked")})`
+                            }
+                            onMouseEnter={() => setActiveIndex(i)}
+                            onMouseLeave={() => setActiveIndex(null)}
+                            onFocus={() => setActiveIndex(i)}
+                            onBlur={() => setActiveIndex(null)}
+                        >
+                            {b.name}
+                        </li>
+                    );
+                })}
+            </ul>
+            <p className="profile-badge-caption" aria-live="polite">
+                {caption || t("profile.badgeHintPrompt")}
+            </p>
+        </div>
+    );
+}
+
 function ProfileCardBody({
     stats,
     isSelf,
@@ -732,16 +796,7 @@ function ProfileCardBody({
             </dl>
 
             {stats.badges.length > 0 && (
-                <div className="profile-badges">
-                    <span className="profile-badges-title">
-                        {t("profile.badges")}
-                    </span>
-                    <ul>
-                        {stats.badges.map((b) => (
-                            <li key={b}>{b}</li>
-                        ))}
-                    </ul>
-                </div>
+                <ProfileBadges badges={stats.badges} t={t} />
             )}
 
             {/* isSelf reserved for future self-only affordances. */}
