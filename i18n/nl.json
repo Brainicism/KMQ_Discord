@@ -348,6 +348,7 @@
                 "collapse": "Chat inklappen",
                 "empty": "Nog geen berichten. Zeg hallo!",
                 "placeholder": "Typ een bericht…",
+                "revealsAnswer": "Dat lijkt op het antwoord! Gebruik het antwoordvak zodat je het niet voor iedereen verklapt.",
                 "send": "Versturen",
                 "title": "Chat"
             },

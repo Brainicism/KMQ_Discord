@@ -348,6 +348,7 @@
                 "collapse": "Réduire le chat",
                 "empty": "Aucun message pour l'instant. Dis bonjour !",
                 "placeholder": "Écris un message…",
+                "revealsAnswer": "Ça ressemble à la réponse ! Utilisez la zone de réponse pour ne pas la dévoiler à tout le monde.",
                 "send": "Envoyer",
                 "title": "Chat"
             },

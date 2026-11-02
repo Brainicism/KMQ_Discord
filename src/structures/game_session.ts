@@ -1080,6 +1080,24 @@ export default class GameSession extends Session {
         return this.guildPreference.isMultipleChoiceMode();
     }
 
+    /**
+     * Whether a chat message would give away the current round's answer,
+     * i.e. it would count as a correct guess. Typos count too: a near miss
+     * still spoils it.
+     * @param text - the chat message
+     * @returns whether the message reveals the answer
+     */
+    revealsCurrentAnswer(text: string): boolean {
+        if (!this.round || this.round.finished) return false;
+        return (
+            this.round.checkGuess(
+                text,
+                this.guildPreference.gameOptions.guessModeType,
+                true,
+            ) > 0
+        );
+    }
+
     /** @returns if hidden mode is active */
     isHiddenMode(): boolean {
         return this.guildPreference.isHiddenMode();

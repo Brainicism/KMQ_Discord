@@ -348,6 +348,7 @@
                 "collapse": "Chat einklappen",
                 "empty": "Noch keine Nachrichten. Sag Hallo!",
                 "placeholder": "Nachricht schreiben…",
+                "revealsAnswer": "Das sieht nach der Antwort aus! Nutze das Antwortfeld, damit du sie nicht allen verrätst.",
                 "send": "Senden",
                 "title": "Chat"
             },

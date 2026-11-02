@@ -7,11 +7,14 @@ import {
 } from "../../../structures/web_room_state";
 import { describe } from "mocha";
 import { sendMessage } from "../../../helpers/discord_utils";
+import GameRound from "../../../structures/game_round";
 import GameType from "../../../enums/game_type";
+import GuessModeType from "../../../enums/option_types/guess_mode_type";
 import GuildPreference from "../../../structures/guild_preference";
 import KmqMember from "../../../structures/kmq_member";
 import MessageContext from "../../../structures/message_context";
 import OstPreference from "../../../enums/option_types/ost_preference";
+import QueriedSong from "../../../structures/queried_song";
 import ReleaseType from "../../../enums/option_types/release_type";
 import SkipCommand from "../../../commands/game_commands/skip";
 import State from "../../../state";
@@ -417,6 +420,58 @@ describe("web game session", () => {
             await clock.tickAsync(0);
             assert.strictEqual(resolved, true);
             await pending;
+        });
+    });
+
+    describe("revealsCurrentAnswer", () => {
+        const hypeBoyRound = (): GameRound =>
+            new GameRound(
+                new QueriedSong({
+                    songName: "Hype Boy",
+                    cleanSongName: "Hype Boy",
+                    hangulSongName: null,
+                    artistName: "NewJeans",
+                    hangulArtistName: "뉴진스",
+                    youtubeLink: "abcde",
+                    betterAudioLink: null,
+                    publishDate: new Date(),
+                    members: "female",
+                    artistID: 1,
+                    isSolo: "n",
+                    views: 1000000,
+                    tags: "",
+                    vtype: "main",
+                    selectionWeight: 1,
+                }),
+                5,
+                ROOM_ID,
+            );
+
+        it("flags a message that would be a correct guess", () => {
+            session.round = hypeBoyRound();
+            assert.strictEqual(session.revealsCurrentAnswer("hype boy"), true);
+            assert.strictEqual(
+                session.revealsCurrentAnswer("that intro was so fast"),
+                false,
+            );
+        });
+
+        it("follows the guess mode", async () => {
+            session.round = hypeBoyRound();
+            assert.strictEqual(session.revealsCurrentAnswer("newjeans"), false);
+            await (session as any).guildPreference.setGuessModeType(
+                GuessModeType.ARTIST,
+            );
+
+            assert.strictEqual(session.revealsCurrentAnswer("newjeans"), true);
+        });
+
+        it("ignores messages between rounds", () => {
+            assert.strictEqual(session.revealsCurrentAnswer("hype boy"), false);
+            const round = hypeBoyRound();
+            round.finished = true;
+            session.round = round;
+            assert.strictEqual(session.revealsCurrentAnswer("hype boy"), false);
         });
     });
 });

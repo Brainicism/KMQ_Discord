@@ -1132,6 +1132,17 @@ function ensureWorkerHandlerRegistered(): void {
                         return;
                     }
 
+                    // Typing the answer into chat would spoil it for everyone
+                    // (and wouldn't score), so turn it back to the guess box.
+                    const chatSession = Session.getSession(chatArgs.guildID);
+                    if (
+                        chatSession?.isGameSession() &&
+                        chatSession.revealsCurrentAnswer(text)
+                    ) {
+                        reply({ ok: false, reason: "chat_reveals_answer" });
+                        return;
+                    }
+
                     const cooldownKey = `${chatArgs.guildID}:${chatArgs.userID}`;
                     const now = Date.now();
                     const last = chatCooldowns.get(cooldownKey) ?? 0;

@@ -348,6 +348,7 @@
                 "collapse": "Recolher chat",
                 "empty": "Ainda não há mensagens. Diga oi!",
                 "placeholder": "Digite uma mensagem…",
+                "revealsAnswer": "Isso parece ser a resposta! Use a caixa de palpite para não dar spoiler para todo mundo.",
                 "send": "Enviar",
                 "title": "Chat"
             },
