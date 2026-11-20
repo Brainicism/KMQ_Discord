@@ -142,4 +142,42 @@ describe("ProfileCommand.getProfileStats", () => {
         // VOTE bonus multiplier (2)
         assert.strictEqual(stats.buffs.multiplier, 2);
     });
+
+    it("lists owned badges first, then locked achievements with progress", async () => {
+        await dbContext.kmq
+            .insertInto("player_stats")
+            .values({
+                player_id: "badger",
+                songs_guessed: 50,
+                games_played: 3,
+                exp: 100,
+                level: 5,
+            })
+            .execute();
+
+        await dbContext.kmq
+            .insertInto("badges_players")
+            .values({ user_id: "badger", badge_id: 1000 })
+            .execute();
+
+        const stats = await ProfileCommand.getProfileStats("badger", GUILD_ID);
+        assert.ok(stats);
+        assert.deepStrictEqual(stats.badges[0], {
+            name: "🎮 First Game",
+            earned: true,
+            hint: { key: "firstGame" },
+            progress: null,
+        });
+
+        const centuryClub = stats.badges.find(
+            (b) => b.name === "💯 Century Club",
+        );
+
+        assert.deepStrictEqual(centuryClub, {
+            name: "💯 Century Club",
+            earned: false,
+            hint: { key: "songsGuessed", count: 100 },
+            progress: { current: 50, target: 100 },
+        });
+    });
 });

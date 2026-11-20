@@ -216,6 +216,16 @@
             "weighted_hard": "Взвешенный (Трудный)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Сыграйте свою первую игру",
+                "gamesPlayed": "Сыграйте {{count}} игр",
+                "playStreak": "Играйте {{count}} дней подряд",
+                "songsGuessed": "Угадайте {{count}} песен",
+                "win": "Выиграйте игру"
+            },
+            "badgeHintPrompt": "Наведите курсор или нажмите на значок, чтобы узнать, как его получить",
+            "badgeLocked": "Заблокировано",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Значки",
             "buffFirstGame": "Первая игра дня",
             "buffPowerHour": "Час силы",

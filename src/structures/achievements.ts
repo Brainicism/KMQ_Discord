@@ -23,6 +23,11 @@ export interface AchievementContext {
     wonGame: boolean;
 }
 
+interface AchievementHint {
+    key: "firstGame" | "win" | "gamesPlayed" | "songsGuessed" | "playStreak";
+    count?: number;
+}
+
 interface AchievementDefinition {
     /** Stable badge id; also the `badges.id` seeded by the migration. */
     badgeId: number;
@@ -32,6 +37,8 @@ interface AchievementDefinition {
     priority: number;
     /** True when the player qualifies for this achievement. */
     earned: (ctx: AchievementContext) => boolean;
+    /** How to earn it, localized by the client; count mirrors earned's threshold. */
+    hint: AchievementHint;
 }
 
 export const AUTOMATIC_ACHIEVEMENTS: ReadonlyArray<AchievementDefinition> = [
@@ -40,48 +47,56 @@ export const AUTOMATIC_ACHIEVEMENTS: ReadonlyArray<AchievementDefinition> = [
         name: "🎮 First Game",
         priority: 1,
         earned: (c) => c.gamesPlayed >= 1,
+        hint: { key: "firstGame" },
     },
     {
         badgeId: 1001,
         name: "🏆 First Victory",
         priority: 5,
         earned: (c) => c.wonGame,
+        hint: { key: "win" },
     },
     {
         badgeId: 1002,
         name: "💯 Century Club",
         priority: 8,
         earned: (c) => c.songsGuessed >= 100,
+        hint: { key: "songsGuessed", count: 100 },
     },
     {
         badgeId: 1003,
         name: "🕹️ Centurion",
         priority: 10,
         earned: (c) => c.gamesPlayed >= 100,
+        hint: { key: "gamesPlayed", count: 100 },
     },
     {
         badgeId: 1004,
         name: "🔥 Week Warrior",
         priority: 12,
         earned: (c) => c.longestPlayStreak >= 7,
+        hint: { key: "playStreak", count: 7 },
     },
     {
         badgeId: 1005,
         name: "🎵 Melophile",
         priority: 15,
         earned: (c) => c.songsGuessed >= 1000,
+        hint: { key: "songsGuessed", count: 1000 },
     },
     {
         badgeId: 1006,
         name: "🌟 Monthly Devotion",
         priority: 25,
         earned: (c) => c.longestPlayStreak >= 30,
+        hint: { key: "playStreak", count: 30 },
     },
     {
         badgeId: 1007,
         name: "🎧 Living Encyclopedia",
         priority: 30,
         earned: (c) => c.songsGuessed >= 10000,
+        hint: { key: "songsGuessed", count: 10000 },
     },
 ];
 
@@ -94,4 +109,73 @@ export interface UnlockedAchievement {
 export interface PlayerAchievementUnlocks {
     userID: string;
     achievements: UnlockedAchievement[];
+}
+
+export interface ProfileBadge {
+    name: string;
+    earned: boolean;
+    /** How to earn it; null for manually-awarded badges. */
+    hint: AchievementHint | null;
+    /** Progress toward a locked threshold achievement; null otherwise. */
+    progress: { current: number; target: number } | null;
+}
+
+/**
+ * Builds the profile's badge list: owned badges first (in their stored
+ * priority order), then the automatic achievements still locked, easiest first.
+ * @param owned - the player's badges, ordered by priority desc
+ * @param stats - the player's lifetime stats, for locked-badge progress
+ * @returns the badges to show on the profile
+ */
+export function buildProfileBadges(
+    owned: ReadonlyArray<{ id: number; name: string }>,
+    stats: Pick<
+        AchievementContext,
+        "gamesPlayed" | "songsGuessed" | "longestPlayStreak"
+    >,
+): ProfileBadge[] {
+    const hintsByID = new Map(
+        AUTOMATIC_ACHIEVEMENTS.map((a) => [a.badgeId, a.hint]),
+    );
+
+    const ownedIDs = new Set(owned.map((b) => b.id));
+    const progressValue: Record<AchievementHint["key"], number | null> = {
+        firstGame: stats.gamesPlayed,
+        win: null,
+        gamesPlayed: stats.gamesPlayed,
+        songsGuessed: stats.songsGuessed,
+        playStreak: stats.longestPlayStreak,
+    };
+
+    const locked = AUTOMATIC_ACHIEVEMENTS.filter(
+        (a) => !ownedIDs.has(a.badgeId),
+    )
+        .sort((a, b) => a.priority - b.priority)
+        .map((a): ProfileBadge => {
+            const current = progressValue[a.hint.key];
+            return {
+                name: a.name,
+                earned: false,
+                hint: a.hint,
+                progress:
+                    current !== null && a.hint.count
+                        ? {
+                              current: Math.min(current, a.hint.count),
+                              target: a.hint.count,
+                          }
+                        : null,
+            };
+        });
+
+    return [
+        ...owned.map(
+            (b): ProfileBadge => ({
+                name: b.name,
+                earned: true,
+                hint: hintsByID.get(b.id) ?? null,
+                progress: null,
+            }),
+        ),
+        ...locked,
+    ];
 }

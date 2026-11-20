@@ -216,6 +216,16 @@
             "weighted_hard": "Pesé (Difficile)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Joue ta première partie",
+                "gamesPlayed": "Joue {{count}} parties",
+                "playStreak": "Joue {{count}} jours d'affilée",
+                "songsGuessed": "Devine {{count}} chansons correctement",
+                "win": "Gagne une partie"
+            },
+            "badgeHintPrompt": "Survole ou touche un badge pour voir comment l'obtenir",
+            "badgeLocked": "Verrouillé",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Badges",
             "buffFirstGame": "Première partie de la journée",
             "buffPowerHour": "Power Hour",

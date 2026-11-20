@@ -216,6 +216,16 @@
             "weighted_hard": "Ponderado (Difícil)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Jogue sua primeira partida",
+                "gamesPlayed": "Jogue {{count}} partidas",
+                "playStreak": "Jogue {{count}} dias seguidos",
+                "songsGuessed": "Acerte {{count}} músicas",
+                "win": "Vença uma partida"
+            },
+            "badgeHintPrompt": "Passe o mouse ou toque em uma insígnia para ver como conquistá-la",
+            "badgeLocked": "Bloqueada",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Distintivos",
             "buffFirstGame": "Primeiro jogo do dia",
             "buffPowerHour": "Hora do Poder",

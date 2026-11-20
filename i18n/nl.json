@@ -216,6 +216,16 @@
             "weighted_hard": "Gewogen (Moeilijk)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "Speel je eerste spel",
+                "gamesPlayed": "Speel {{count}} spellen",
+                "playStreak": "Speel {{count}} dagen op rij",
+                "songsGuessed": "Raad {{count}} nummers goed",
+                "win": "Win een spel"
+            },
+            "badgeHintPrompt": "Beweeg over of tik op een badge om te zien hoe je hem verdient",
+            "badgeLocked": "Vergrendeld",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "Badges",
             "buffFirstGame": "Eerste spel van de dag",
             "buffPowerHour": "Krachtuur",

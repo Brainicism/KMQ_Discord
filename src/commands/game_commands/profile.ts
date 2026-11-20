@@ -6,6 +6,7 @@ import {
     VOTE_LINK,
 } from "../../constants";
 import { IPCLogger } from "../../logger";
+import { buildProfileBadges } from "../../structures/achievements";
 import {
     clickableSlashCommand,
     fetchUser,
@@ -52,7 +53,7 @@ interface RawProfileData {
     timesVoted: number;
     /** Vote-bonus expiry, or null when the player has no active bonus. */
     voteBuffExpiry: Date | null;
-    badges: string[];
+    badges: Array<{ id: number; name: string }>;
     currentPlayStreak: number;
     longestPlayStreak: number;
 }
@@ -502,11 +503,11 @@ export default class ProfileCommand implements BaseCommand {
             await dbContext.kmq
                 .selectFrom("badges_players")
                 .innerJoin("badges", "badges_players.badge_id", "badges.id")
-                .select(["badges.name as badge_name"])
+                .select(["badges.id as badge_id", "badges.name as badge_name"])
                 .where("badges_players.user_id", "=", playerID)
                 .orderBy("badges.priority", "desc")
                 .execute()
-        ).map((x) => x["badge_name"]);
+        ).map((x) => ({ id: x["badge_id"], name: x["badge_name"] }));
 
         return {
             songsGuessed,
@@ -602,7 +603,11 @@ export default class ProfileCommand implements BaseCommand {
             timesVoted: raw.timesVoted,
             currentPlayStreak: raw.currentPlayStreak,
             longestPlayStreak: raw.longestPlayStreak,
-            badges: raw.badges,
+            badges: buildProfileBadges(raw.badges, {
+                gamesPlayed: raw.gamesPlayed,
+                songsGuessed: raw.songsGuessed,
+                longestPlayStreak: raw.longestPlayStreak,
+            }),
             buffs: {
                 powerHour,
                 firstGameOfDay,
@@ -728,7 +733,7 @@ export default class ProfileCommand implements BaseCommand {
         }
 
         // Optional fields
-        const badges = raw.badges.join("\n");
+        const badges = raw.badges.map((b) => b.name).join("\n");
         if (badges) {
             fields.push({
                 name: i18n.translate(guildID, "command.profile.badges"),

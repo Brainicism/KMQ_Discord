@@ -216,6 +216,16 @@
             "weighted_hard": "重み付け (難しい)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "初めてのゲームをプレイする",
+                "gamesPlayed": "{{count}}回ゲームをプレイする",
+                "playStreak": "{{count}}日連続でプレイする",
+                "songsGuessed": "{{count}}曲正解する",
+                "win": "ゲームに勝利する"
+            },
+            "badgeHintPrompt": "バッジにカーソルを合わせるかタップすると獲得条件が表示されます",
+            "badgeLocked": "未獲得",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "バッジ",
             "buffFirstGame": "今日の最初のゲーム",
             "buffPowerHour": "パワーアワー",

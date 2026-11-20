@@ -216,6 +216,16 @@
             "weighted_hard": "加权（困难）"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "玩第一局游戏",
+                "gamesPlayed": "玩 {{count}} 局游戏",
+                "playStreak": "连续 {{count}} 天进行游戏",
+                "songsGuessed": "猜对 {{count}} 首歌曲",
+                "win": "赢得一局游戏"
+            },
+            "badgeHintPrompt": "将鼠标悬停或点击徽章即可查看获取方式",
+            "badgeLocked": "未解锁",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "徽章",
             "buffFirstGame": "今天的第一场比赛",
             "buffPowerHour": "高能时刻",

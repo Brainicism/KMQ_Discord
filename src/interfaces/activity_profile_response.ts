@@ -1,3 +1,5 @@
+import type { ProfileBadge } from "../structures/achievements";
+
 /**
  * Account-level EXP buffs that apply regardless of the active game's options
  * (i.e. not the per-round / per-option penalties). Surfaced on the profile
@@ -50,7 +52,8 @@ export interface ActivityProfileStats {
     currentPlayStreak: number;
     /** Best consecutive-days-played streak the player has ever reached. */
     longestPlayStreak: number;
-    badges: string[];
+    /** Owned badges, then locked automatic achievements with progress. */
+    badges: ProfileBadge[];
     buffs: ActivityProfileBuffs;
     /** top.gg vote link for the "vote for bonus EXP" CTA. */
     voteURL: string;

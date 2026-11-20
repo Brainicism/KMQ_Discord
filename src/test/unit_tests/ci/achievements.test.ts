@@ -1,4 +1,7 @@
-import { AUTOMATIC_ACHIEVEMENTS } from "../../../structures/achievements";
+import {
+    AUTOMATIC_ACHIEVEMENTS,
+    buildProfileBadges,
+} from "../../../structures/achievements";
 import assert from "assert";
 import type { AchievementContext } from "../../../structures/achievements";
 
@@ -96,6 +99,105 @@ describe("automatic achievements", () => {
             const at30 = earnedNames({ longestPlayStreak: 30 });
             assert.ok(at30.includes("🔥 Week Warrior"));
             assert.ok(at30.includes("🌟 Monthly Devotion"));
+        });
+    });
+
+    describe("hints", () => {
+        const statForHint = {
+            firstGame: "gamesPlayed",
+            gamesPlayed: "gamesPlayed",
+            songsGuessed: "songsGuessed",
+            playStreak: "longestPlayStreak",
+        } as const;
+
+        it("should match each achievement's real unlock threshold", () => {
+            for (const a of AUTOMATIC_ACHIEVEMENTS) {
+                if (a.hint.key === "win") {
+                    assert.ok(a.earned({ ...BASE_CONTEXT, wonGame: true }));
+                    assert.ok(!a.earned(BASE_CONTEXT));
+                    continue;
+                }
+
+                const stat = statForHint[a.hint.key];
+                const count = a.hint.count ?? 1;
+                assert.ok(
+                    a.earned({ ...BASE_CONTEXT, [stat]: count }),
+                    `${a.name} should unlock at ${count}`,
+                );
+
+                assert.ok(
+                    !a.earned({ ...BASE_CONTEXT, [stat]: count - 1 }),
+                    `${a.name} should not unlock below ${count}`,
+                );
+            }
+        });
+    });
+
+    describe("buildProfileBadges", () => {
+        const stats = {
+            gamesPlayed: 150,
+            songsGuessed: 742,
+            longestPlayStreak: 3,
+        };
+
+        it("lists owned badges first, then locked ones easiest first", () => {
+            const badges = buildProfileBadges(
+                [
+                    { id: 1003, name: "🕹️ Centurion" },
+                    { id: 7, name: "Beta Tester" },
+                ],
+                stats,
+            );
+
+            assert.deepStrictEqual(
+                badges.slice(0, 2).map((b) => [b.name, b.earned]),
+                [
+                    ["🕹️ Centurion", true],
+                    ["Beta Tester", true],
+                ],
+            );
+
+            const locked = badges.slice(2);
+            assert.ok(locked.every((b) => !b.earned));
+            assert.strictEqual(
+                locked.length,
+                AUTOMATIC_ACHIEVEMENTS.length - 1,
+            );
+            assert.strictEqual(locked[0]!.name, "🎮 First Game");
+        });
+
+        it("gives manual badges no hint and owned badges no progress", () => {
+            const [manual, owned] = buildProfileBadges(
+                [
+                    { id: 7, name: "Beta Tester" },
+                    { id: 1005, name: "🎵 Melophile" },
+                ],
+                stats,
+            );
+
+            assert.strictEqual(manual!.hint, null);
+            assert.deepStrictEqual(owned!.hint, {
+                key: "songsGuessed",
+                count: 1000,
+            });
+            assert.strictEqual(owned!.progress, null);
+        });
+
+        it("reports clamped progress toward locked thresholds", () => {
+            const byName = new Map(
+                buildProfileBadges([], stats).map((b) => [b.name, b]),
+            );
+
+            assert.deepStrictEqual(byName.get("🎵 Melophile")!.progress, {
+                current: 742,
+                target: 1000,
+            });
+
+            assert.deepStrictEqual(byName.get("🕹️ Centurion")!.progress, {
+                current: 100,
+                target: 100,
+            });
+            assert.strictEqual(byName.get("🏆 First Victory")!.progress, null);
         });
     });
 });

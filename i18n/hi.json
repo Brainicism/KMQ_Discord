@@ -216,6 +216,16 @@
             "weighted_hard": "वेटेड (कठिन)"
         },
         "profile": {
+            "badgeHint": {
+                "firstGame": "अपना पहला गेम खेलें",
+                "gamesPlayed": "{{count}} गेम खेलें",
+                "playStreak": "लगातार {{count}} दिन खेलें",
+                "songsGuessed": "{{count}} गाने सही पहचानें",
+                "win": "एक गेम जीतें"
+            },
+            "badgeHintPrompt": "बैज कैसे मिलेगा यह देखने के लिए उस पर होवर या टैप करें",
+            "badgeLocked": "लॉक है",
+            "badgeProgress": "{{current}} / {{target}}",
             "badges": "बैज",
             "buffFirstGame": "दिन का पहला खेल",
             "buffPowerHour": "पावर आवर",
