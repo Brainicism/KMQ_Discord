@@ -7,15 +7,12 @@ import {
     EMBED_DESCRIPTION_MAX_LENGTH,
     EMBED_ERROR_COLOR,
     EMBED_SUCCESS_COLOR,
-    KMQ_USER_AGENT,
     KmqImages,
-    LATEST_DAISUKI_DUMP,
 } from "../constants";
 import { IPCLogger } from "../logger";
 import { config } from "dotenv";
 import {
     discordDateFormat,
-    parseJsonFile,
     pathExists,
     standardDateFormat,
     truncatedString,
@@ -26,10 +23,17 @@ import {
     sendInfoWebhook,
 } from "../helpers/discord_utils";
 import { sql } from "kysely";
-import Axios from "axios";
+import {
+    cleanup,
+    importStagingToLive,
+    pull,
+    publish,
+    transform,
+    validate,
+} from "./seed_pipeline";
 import EnvType from "../enums/env_type";
 import KmqSongDownloader from "../helpers/kmq_song_downloader";
-import _ from "lodash";
+import Axios from "axios";
 import fs from "fs";
 import path from "path";
 import util from "util";
@@ -38,20 +42,8 @@ import type { DatabaseContext } from "../database_context";
 const exec = util.promisify(cp.exec);
 
 config({ path: path.resolve(__dirname, "../../.env") });
-const SQL_DUMP_EXPIRY = 10;
-const daisukiDbDownloadUrl = "https://soridata.com/download.php?pass=$PASSWORD";
 
 const logger = new IPCLogger("seed_db");
-
-async function getDaisukiTableNames(db: DatabaseContext): Promise<string[]> {
-    return (
-        await db.infoSchema
-            .selectFrom("TABLES")
-            .select("TABLE_NAME")
-            .where("TABLE_SCHEMA", "=", "kpop_videos")
-            .execute()
-    ).map((x) => x.TABLE_NAME);
-}
 
 /**
  * @param db - The database context
@@ -96,39 +88,6 @@ export async function tableExists(
     );
 }
 
-async function listTables(
-    db: DatabaseContext,
-    databaseName: string,
-): Promise<Array<string>> {
-    return (
-        await db.infoSchema
-            .selectFrom("TABLES")
-            .where("TABLE_SCHEMA", "=", databaseName)
-            .select("TABLE_NAME")
-            .execute()
-    ).map((x) => x["TABLE_NAME"]);
-}
-
-async function getBetterAudioMapping(
-    db: DatabaseContext,
-): Promise<Record<string, string | null>> {
-    let betterAudioMappings: Record<string, string | null> = {};
-    if (await tableExists(db, "kmq", "expected_available_songs")) {
-        betterAudioMappings = (
-            await db.kmq
-                .selectFrom("expected_available_songs")
-                .select(["better_audio_link", "link"])
-                .execute()
-        ).reduce((acc: Record<string, string | null>, entry) => {
-            acc[entry.link] = entry.better_audio_link;
-
-            return acc;
-        }, {});
-    }
-
-    return betterAudioMappings;
-}
-
 const program = new Command()
     .option("-p, --skip-pull", "Skip re-pull of Daisuki database dump", false)
     .option(
@@ -157,48 +116,32 @@ const program = new Command()
 // Use defaults when imported as a module; only parse CLI args when running directly
 let options = program.opts();
 
-async function getOverrideQueries(db: DatabaseContext): Promise<Array<string>> {
-    return (
-        await db.kmq
-            .selectFrom("kpop_videos_sql_overrides")
-            .select(["query"])
-            .execute()
-    ).map((x) => x.query);
-}
-
 /**
- * Re-creates the KMQ data tables
+ * Re-creates the KMQ data tables (available_songs + app_kpop_group_safe).
+ * Delegates to the BuildAvailableSongs stored procedure.
  * @param db - The database context
  */
 export async function generateKmqDataTables(
     db: DatabaseContext,
 ): Promise<void> {
-    logger.info("Re-creating KMQ data tables view...");
-    await sql`CALL CreateKmqDataTables();`.execute(db.kmq);
+    logger.info("Re-creating KMQ data tables...");
+    await publish(db);
 }
 
 /**
- * Re-creates the KMQ data tables
- * @param db - The database context
- */
-async function postSeedDataCleaning(db: DatabaseContext): Promise<void> {
-    logger.info("Performing post seed data cleaning...");
-    await sql`CALL PostSeedDataCleaning();`.execute(db.kmq);
-}
-
-/**
- * Re-creates the KMQ data tables
+ * Builds expected_available_songs from source data.
+ * Delegates to the BuildExpectedAvailableSongs stored procedure.
  * @param db - The database context
  */
 export async function generateExpectedAvailableSongs(
     db: DatabaseContext,
 ): Promise<void> {
-    logger.info("Performing generate expected available songs...");
-    await sql.raw("CALL GenerateExpectedAvailableSongs();").execute(db.kmq);
+    logger.info("Building expected available songs...");
+    await sql.raw("CALL BuildExpectedAvailableSongs();").execute(db.kmq);
 }
 
 /**
- * Reloads all existing stored procedures
+ * Reloads all existing stored procedures from sql/procedures/.
  */
 export async function loadStoredProcedures(): Promise<void> {
     const storedProcedureDefinitions = (
@@ -215,36 +158,8 @@ export async function loadStoredProcedures(): Promise<void> {
     }
 }
 
-async function loadStoredProceduresForValidation(): Promise<void> {
-    const storedProcedureDefinitions = (
-        await fs.promises.readdir(path.join(__dirname, "../../sql/procedures"))
-    )
-        .map((x) => path.join(__dirname, "../../sql/procedures", x))
-        .sort();
-
-    for (const storedProcedureDefinition of storedProcedureDefinitions) {
-        const testProcedurePath = path.resolve(
-            path.dirname(storedProcedureDefinition),
-            "..",
-            path
-                .basename(storedProcedureDefinition)
-                .replace(".sql", ".validation.sql"),
-        );
-
-        await exec(
-            `sed 's/kpop_videos/kpop_videos_validation/g' ${storedProcedureDefinition} > ${testProcedurePath}`,
-        );
-
-        logger.info(`Loading procedure for validation: ${testProcedurePath}`);
-
-        await exec(
-            `mysql --default-character-set=utf8mb4 -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${testProcedurePath}`,
-        );
-    }
-}
-
 /**
- * Update typings for Kyseley
+ * Update typings for Kysely
  * @param db - The database context
  */
 async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
@@ -261,37 +176,18 @@ async function updateDaisukiSchemaTypings(db: DatabaseContext): Promise<void> {
     );
 }
 
-const downloadDb = async (): Promise<void> => {
-    const daisukiDownloadResp = await Axios.get(
-        daisukiDbDownloadUrl.replace(
-            "$PASSWORD",
-            process.env.DAISUKI_DB_PASSWORD as string,
-        ),
-        {
-            responseType: "arraybuffer",
-            headers: {
-                "User-Agent": KMQ_USER_AGENT,
-            },
-        },
-    );
-
-    await fs.promises.writeFile(LATEST_DAISUKI_DUMP, daisukiDownloadResp.data, {
-        encoding: null,
-    });
-    logger.info("Downloaded Daisuki database archive");
-};
-
-async function extractDb(): Promise<void> {
-    await fs.promises.mkdir(`${DATABASE_DOWNLOAD_DIR}/`, { recursive: true });
-    await exec(`unzip -oq ${LATEST_DAISUKI_DUMP} -d ${DATABASE_DOWNLOAD_DIR}/`);
-
-    logger.info("Extracted Daisuki database");
-}
-
 async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     const frozenTableColumnNames: { [table: string]: string[] } = {};
+    const daisukiTables = (
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .select("TABLE_NAME")
+            .where("TABLE_SCHEMA", "=", "kpop_videos")
+            .execute()
+    ).map((x) => x.TABLE_NAME);
+
     await Promise.allSettled(
-        (await getDaisukiTableNames(db)).map(async (table) => {
+        daisukiTables.map(async (table) => {
             const commaSeparatedColumnNames = (
                 await db.infoSchema
                     .selectFrom("COLUMNS")
@@ -303,7 +199,8 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
                     .executeTakeFirstOrThrow()
             ).x;
 
-            const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
+            const columnNames = commaSeparatedColumnNames.split(",").sort();
+
             frozenTableColumnNames[table] = columnNames;
         }),
     );
@@ -314,158 +211,63 @@ async function recordDaisukiTableSchema(db: DatabaseContext): Promise<void> {
     );
 }
 
-async function validateDaisukiTableSchema(
+/**
+ * Pipeline: Update kpop_videos database from Daisuki.
+ *
+ * Phases:
+ *   1. Pull (download + extract)
+ *   2. Validate (import to staging, check counts/overrides/procedures)
+ *   3. Import (atomic swap staging → kpop_videos)
+ *   4. Transform (build expected_available_songs)
+ *
+ * @param db - The database context
+ * @param bootstrap - Whether or not this is a bootstrap run
+ */
+export async function updateKpopDatabase(
     db: DatabaseContext,
-    frozenSchema: any,
-): Promise<void> {
-    const outputMessages: Array<string> = [];
-    await Promise.allSettled(
-        (await getDaisukiTableNames(db)).map(async (table) => {
-            const commaSeparatedColumnNames = (
-                await db.infoSchema
-                    .selectFrom("COLUMNS")
-                    .select((eb) =>
-                        eb.fn<string>("group_concat", ["COLUMN_NAME"]).as("x"),
-                    )
-                    .where("TABLE_SCHEMA", "=", "kpop_videos_validation")
-                    .where("TABLE_NAME", "=", table)
-                    .executeTakeFirstOrThrow()
-            ).x;
-
-            const columnNames = _.sortBy(commaSeparatedColumnNames.split(","));
-            if (!_.isEqual(frozenSchema[table], columnNames)) {
-                const addedColumns = _.difference(
-                    columnNames,
-                    frozenSchema[table],
-                );
-
-                const removedColumns = _.difference(
-                    frozenSchema[table],
-                    columnNames,
-                );
-
-                if (addedColumns.length > 0 || removedColumns.length > 0) {
-                    outputMessages.push(
-                        `__${table}__\nAdded columns: ${JSON.stringify(
-                            addedColumns,
-                        )}.\nRemoved Columns: ${JSON.stringify(
-                            removedColumns,
-                        )}\n`,
-                    );
-                }
-            }
-        }),
-    );
-
-    if (outputMessages.length > 0) {
-        outputMessages.unshift("Daisuki schema has changed.");
-        outputMessages.push(
-            "If the Daisuki schema change is acceptable, delete frozen schema file and re-run this script",
-        );
-        throw new Error(outputMessages.join("\n"));
-    }
-}
-
-async function validateSqlDump(
-    db: DatabaseContext,
-    mvSeedFilePath: string,
     bootstrap = false,
 ): Promise<void> {
-    try {
-        await sql`DROP DATABASE IF EXISTS kpop_videos_validation;`.execute(
-            db.agnostic,
-        );
-
-        await sql`CREATE DATABASE kpop_videos_validation;`.execute(db.agnostic);
-
-        await exec(
-            `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_validation < ${mvSeedFilePath}`,
-        );
-
-        logger.info("Validating MV song count");
-        const mvSongCount = (await db.kpopVideosValidation
-            .selectFrom("app_kpop")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .where("is_audio", "=", "n")
-            .executeTakeFirst())!.count;
-
-        logger.info(`Found ${mvSongCount} music videos`);
-
-        logger.info("Validating audio-only song count");
-        const audioSongCount = (await db.kpopVideosValidation
-            .selectFrom("app_kpop")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .where("is_audio", "=", "y")
-            .executeTakeFirst())!.count;
-
-        logger.info(`Found ${audioSongCount} audio-only videos`);
-
-        logger.info("Validating group count");
-        const artistCount = (await db.kpopVideosValidation
-            .selectFrom("app_kpop_group")
-            .select((eb) => eb.fn.countAll<number>().as("count"))
-            .executeTakeFirst())!.count;
-
-        logger.info(`Found ${artistCount} artists`);
-
-        if (
-            mvSongCount < 10000 ||
-            audioSongCount < 1000 ||
-            artistCount < 1000
-        ) {
-            throw new Error("SQL dump valid, but potentially missing data.");
-        }
-
-        logger.info("Validating overrides");
-        const overrideQueries = await getOverrideQueries(db);
-
-        await Promise.all(
-            overrideQueries.map(async (overrideQuery) => {
-                await sql.raw(overrideQuery).execute(db.kpopVideosValidation);
-            }),
-        );
-
-        if (!bootstrap) {
-            await loadStoredProceduresForValidation();
-            logger.info("Validating post-seed data cleaning");
-            await sql
-                .raw("CALL PostSeedDataCleaning();")
-                .execute(db.kpopVideosValidation);
-
-            logger.info("Validating generate expected available songs");
-            await sql
-                .raw("CALL GenerateExpectedAvailableSongs();")
-                .execute(db.kpopVideosValidation);
-
-            logger.info("Validating creation of data tables");
-            await sql
-                .raw("CALL CreateKmqDataTables();")
-                .execute(db.kpopVideosValidation);
-        }
-    } catch (e) {
-        throw new Error(
-            `SQL dump validation failed. ${e.sqlMessage || e.stderr || e}. stack = ${new Error().stack}`,
-        );
+    if (!options.skipPull && !bootstrap) {
+        // Phase 1: Pull
+        await pull();
+    } else {
+        logger.info("Skipping Daisuki SQL dump pull...");
     }
 
-    if (await pathExists(DataFiles.FROZEN_TABLE_SCHEMA)) {
-        logger.info("Daisuki schema exists... checking for changes");
-        const frozenSchema = await parseJsonFile(DataFiles.FROZEN_TABLE_SCHEMA);
-        await validateDaisukiTableSchema(db, frozenSchema);
-    }
+    if (!options.skipReseed) {
+        // Phase 2: Validate
+        if (!options.skipValidate) {
+            await validate(db, bootstrap);
+            // Phase 3: Import (reuses staging DB from validate)
+            await importStagingToLive(db);
+        } else {
+            // Skip validate but still need to import
+            // Fall back to legacy import path: import dump into tmp, swap to live
+            await legacySeedDb(db, bootstrap);
+        }
 
-    logger.info("SQL dump validated successfully");
+        // Phase 4: Transform
+        await transform(db);
+    } else {
+        logger.info("Skipping reseed");
+    }
 }
 
-async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
+/**
+ * Legacy import path — used when --skip-validate is set but --skip-reseed is not.
+ * Imports the dump directly into kpop_videos_tmp then swaps.
+ */
+async function legacySeedDb(
+    db: DatabaseContext,
+    bootstrap: boolean,
+): Promise<void> {
     try {
         await fs.promises.mkdir(DATABASE_DOWNLOAD_DIR);
-        logger.info("Creating database download");
+        logger.info("Creating database download directory");
     } catch (e) {
         logger.info("Database download directory already exists");
     }
 
-    // validating SQL dump
     const sqlFiles = (
         await fs.promises.readdir(`${DATABASE_DOWNLOAD_DIR}`)
     ).filter((x) => x.endsWith(".sql"));
@@ -478,13 +280,6 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         ? `${DATABASE_DOWNLOAD_DIR}/bootstrap.sql`
         : `${DATABASE_DOWNLOAD_DIR}/${dbSeedFile}`;
 
-    logger.info(`Validating SQL dump (${path.basename(dbSeedFilePath)})`);
-
-    if (!options.skipValidate) {
-        await validateSqlDump(db, dbSeedFilePath, bootstrap);
-    }
-
-    // importing dump into temporary database
     logger.info("Dropping K-Pop video temporary database");
     await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
     logger.info("Creating K-Pop video temporary database");
@@ -494,9 +289,16 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         `mysql -u ${process.env.DB_USER} -p${process.env.DB_PASS} -h ${process.env.DB_HOST} --port ${process.env.DB_PORT} kpop_videos_tmp < ${dbSeedFilePath}`,
     );
 
-    // update table using data from temporary database, without downtime
     logger.info("Updating K-pop database from temporary database");
-    for (const tableName of await listTables(db, "kpop_videos_tmp")) {
+    const tmpTables = (
+        await db.infoSchema
+            .selectFrom("TABLES")
+            .where("TABLE_SCHEMA", "=", "kpop_videos_tmp")
+            .select("TABLE_NAME")
+            .execute()
+    ).map((x) => x["TABLE_NAME"]);
+
+    for (const tableName of tmpTables) {
         const kpopVideoTableExists = await tableExists(
             db,
             "kpop_videos",
@@ -532,9 +334,14 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
     await sql`DROP TABLE IF EXISTS kpop_videos.old;`.execute(db.agnostic);
     await sql`DROP DATABASE IF EXISTS kpop_videos_tmp;`.execute(db.agnostic);
 
-    // override queries
+    // Override queries
     logger.info("Performing data overrides");
-    const overrideQueries = await getOverrideQueries(db);
+    const overrideQueries = (
+        await db.kmq
+            .selectFrom("kpop_videos_sql_overrides")
+            .select(["query"])
+            .execute()
+    ).map((x) => x.query);
 
     await Promise.all(
         overrideQueries.map(async (overrideQuery) =>
@@ -542,106 +349,7 @@ async function seedDb(db: DatabaseContext, bootstrap: boolean): Promise<void> {
         ),
     );
 
-    logger.info(
-        "Imported database dump successfully. Make sure to run 'get-unclean-song-names' to check for new songs that may need aliasing",
-    );
-}
-
-async function pruneSqlDumps(): Promise<void> {
-    try {
-        await exec(
-            `find ${DATABASE_DOWNLOAD_DIR} -mindepth 1 -name "*backup_*" -mtime +${SQL_DUMP_EXPIRY} -delete`,
-        );
-        logger.info("Finished pruning old SQL dumps");
-    } catch (err) {
-        logger.error(`Error attempting to prune SQL dumps directory, ${err}`);
-    }
-}
-
-/**
- * Checks if the better audio links have been modified
- * @param db - The database context
- */
-async function checkModifiedBetterAudioLinks(
-    db: DatabaseContext,
-): Promise<void> {
-    logger.info("Checking if better audio links have been modified...");
-    if (!(await tableExists(db, "kmq", "expected_available_songs"))) {
-        logger.info(
-            "Table 'expected_available_songs' doesn't exist (likely an initial seed), skipping better audio link check",
-        );
-        return;
-    }
-
-    const oldBetterAudioMapping = await getBetterAudioMapping(db);
-    await generateExpectedAvailableSongs(db);
-    const newBetterAudioMapping = await getBetterAudioMapping(db);
-
-    const invalidatedBetterAudioToDelete: Array<string> = [];
-    for (const primarySongLink in oldBetterAudioMapping) {
-        if (primarySongLink in newBetterAudioMapping) {
-            const oldBetterAudioLink = oldBetterAudioMapping[primarySongLink];
-
-            const newBetterAudioLink = newBetterAudioMapping[primarySongLink];
-
-            if (oldBetterAudioLink !== newBetterAudioLink) {
-                logger.info(
-                    `Better audio link change detected for ${primarySongLink}: ${oldBetterAudioLink} => ${newBetterAudioLink}... scheduling for deletion`,
-                );
-
-                invalidatedBetterAudioToDelete.push(primarySongLink);
-            }
-        }
-    }
-
-    if (invalidatedBetterAudioToDelete.length > 100) {
-        throw new Error(
-            `Number of invalidated better audio links is too high (${invalidatedBetterAudioToDelete.length}), this is unexpected. Please inspect the database state, do not re-seed.`,
-        );
-    }
-
-    for (const songToDelete of invalidatedBetterAudioToDelete) {
-        logger.info(`Deleting old better audio for ${songToDelete}`);
-        const songAudioPath = path.resolve(
-            process.env.SONG_DOWNLOAD_DIR!,
-            `${songToDelete}.ogg`,
-        );
-
-        await db.kmq
-            .deleteFrom("cached_song_duration")
-            .where("vlink", "=", songToDelete)
-            .execute();
-
-        if (await pathExists(songAudioPath)) {
-            logger.info(`Deleting old better audio file: ${songAudioPath}`);
-
-            await fs.promises.rename(songAudioPath, `${songAudioPath}.old`);
-        }
-    }
-}
-
-/**
- * @param db - The database context
- * @param bootstrap - Whether or not this is a bootstrap run
- */
-async function updateKpopDatabase(
-    db: DatabaseContext,
-    bootstrap = false,
-): Promise<void> {
-    if (!options.skipPull && !bootstrap) {
-        await downloadDb();
-        await extractDb();
-    } else {
-        logger.info("Skipping Daisuki SQL dump pull...");
-    }
-
-    if (!options.skipReseed) {
-        await seedDb(db, bootstrap);
-        await postSeedDataCleaning(db);
-        await checkModifiedBetterAudioLinks(db);
-    } else {
-        logger.info("Skipping reseed");
-    }
+    logger.info("Imported database dump successfully via legacy path");
 }
 
 /**
@@ -664,22 +372,23 @@ async function updateGroupList(db: DatabaseContext): Promise<void> {
 }
 
 /**
- * @param db - The database context
- */
-/**
  * Perform a full seed of the Daisuki database and download any new songs.
  *
+ * Pipeline phases:
+ *   1. Pull (download + extract Daisuki dump)
+ *   2. Validate (import to staging, run checks)
+ *   3. Import (atomic swap staging → kpop_videos)
+ *   4. Transform (build expected_available_songs, detect better_audio changes)
+ *   5. Download (fetch + encode audio files)
+ *   6. Publish (build available_songs + app_kpop_group_safe)
+ *   7. Cleanup (prune old dumps, drop temp databases)
+ *
  * @param db - database context to perform operations against
- * @param limit - optional cap on number of songs to download (undefined for
- *   no limit)
- * @param songs - optional explicit list of YouTube IDs to fetch; when provided
- *   the limit is ignored
- * @param checkSongDurations - if true, downloaded tracks will be validated
- *   against any cached duration entries
- * @param skipDownload - if true, the seed steps will run but the download
- *   stage will be skipped (used for testing)
- * @param skipDatabaseUpdate - if true, skip Daisuki DB update/reseed and
- *   proceed directly to the download stage
+ * @param limit - optional cap on number of songs to download
+ * @param songs - optional explicit list of YouTube IDs to fetch
+ * @param checkSongDurations - if true, validate cached duration entries
+ * @param skipDownload - if true, skip the download stage
+ * @param skipDatabaseUpdate - if true, skip Daisuki DB update/reseed
  */
 export async function seedAndDownloadNewSongs(
     db: DatabaseContext,
@@ -694,8 +403,10 @@ export async function seedAndDownloadNewSongs(
     let songsFailed = 0;
     try {
         if (!skipDatabaseUpdate) {
-            await pruneSqlDumps();
+            // Phase 7 (cleanup) first — prune old dumps before pulling new ones
+            await cleanup(db);
             try {
+                // Phases 1-4: Pull, Validate, Import, Transform
                 await updateKpopDatabase(db);
             } catch (e) {
                 logger.error(`Failed to update kpop_videos database. ${e}`);
@@ -725,6 +436,7 @@ export async function seedAndDownloadNewSongs(
             30 * 60 * 1000,
         );
 
+        // Phase 5: Download
         const songDownloader = new KmqSongDownloader();
         const result = await songDownloader.downloadNewSongs(
             limit,
@@ -748,12 +460,13 @@ export async function seedAndDownloadNewSongs(
             );
         }
 
+        // Phase 6: Publish
         await generateKmqDataTables(db);
         if (process.env.NODE_ENV === EnvType.PROD) {
             await updateGroupList(db);
         }
 
-        // freeze table schema
+        // Freeze table schema
         if (!(await pathExists(DataFiles.FROZEN_TABLE_SCHEMA))) {
             logger.info("Frozen Daisuki schema doesn't exist... creating");
             await recordDaisukiTableSchema(db);
@@ -769,7 +482,7 @@ export async function seedAndDownloadNewSongs(
         await sendInfoWebhook(
             process.env.ALERT_WEBHOOK_URL!,
             "Download and seed failure",
-            e.toString(),
+            (e as Error).toString(),
             EMBED_ERROR_COLOR,
             KmqImages.NOT_IMPRESSED,
             "Kimiqo",
@@ -976,5 +689,3 @@ async function reloadAutocompleteData(): Promise<void> {
         }
     }
 })();
-
-export { updateKpopDatabase };
