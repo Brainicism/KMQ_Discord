@@ -1482,13 +1482,22 @@ export default class GameSession extends Session {
                 };
             }
 
+            // Record the first correct guesser's own time-to-guess, not the
+            // round-end wall time: endRoundCore runs after the multiguess
+            // delay, so timePlayed is inflated by it (and by a variable
+            // amount when the delay is skipped for some rounds).
+            const fastestTimeMs = round.getTimeToGuessMs(
+                correctGuessers[0]!.id,
+                this.isHiddenMode(),
+            );
+
             if (
                 this.fastestGuess === null ||
-                timePlayed < this.fastestGuess.timeMs
+                fastestTimeMs < this.fastestGuess.timeMs
             ) {
                 this.fastestGuess = {
                     userID: correctGuessers[0]!.id,
-                    timeMs: timePlayed,
+                    timeMs: fastestTimeMs,
                 };
             }
 
