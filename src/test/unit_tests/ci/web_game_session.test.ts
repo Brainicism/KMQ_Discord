@@ -1,3 +1,4 @@
+import * as gameUtils from "../../../helpers/game_utils";
 import { IPCLogger } from "../../../logger";
 import {
     clearWebRoomMembers,
@@ -420,6 +421,95 @@ describe("web game session", () => {
             await clock.tickAsync(0);
             assert.strictEqual(resolved, true);
             await pending;
+        });
+
+        it("records the recap fastest guess from the guesser's time, not the round-end time", async () => {
+            // Regression test: the recap used to record timePlayed (the
+            // round-end wall time), which is measured after the multiguess
+            // delay, so every round's fastest guess was inflated by ~1.5s
+            // and disagreed with the per-round lightning times players saw.
+            const songStartedAt = 100_000;
+            const clock = sandbox.useFakeTimers({
+                now: songStartedAt + 3461,
+            });
+
+            const round = new GameRound(
+                new QueriedSong({
+                    songName: "Butterfly",
+                    cleanSongName: "butterfly",
+                    hangulSongName: null,
+                    artistName: "LOONA",
+                    hangulArtistName: null,
+                    youtubeLink: "dQw4w9WgXcQ",
+                    betterAudioLink: null,
+                    publishDate: new Date(),
+                    members: "female",
+                    artistID: 1,
+                    isSolo: "n",
+                    views: 0,
+                    tags: null,
+                    vtype: "main",
+                }),
+                1000,
+                ROOM_ID,
+            );
+
+            round.songStartedAt = songStartedAt;
+            round.storeGuess(
+                OWNER_ID,
+                "Butterfly",
+                songStartedAt + 2957,
+                GuessModeType.SONG_NAME,
+            );
+
+            round.storeGuess(
+                MEMBER_ID,
+                "Butterfly",
+                songStartedAt + 3461,
+                GuessModeType.SONG_NAME,
+            );
+
+            sandbox.stub(session, "updateScoreboard" as any).callsFake(() => {
+                round.playerRoundResults = [
+                    {
+                        player: new KmqMember(OWNER_ID),
+                        pointsEarned: 1,
+                        expGain: 0,
+                        streak: 1,
+                    },
+                    {
+                        player: new KmqMember(MEMBER_ID),
+                        pointsEarned: 0.5,
+                        expGain: 0,
+                        streak: 0,
+                    },
+                ];
+            });
+            sandbox.stub(round, "interactionMarkAnswers").resolves();
+            sandbox.stub(round, "getEndRoundDescription").returns("");
+            sandbox.stub(round, "getEndRoundColor").returns(0);
+            sandbox.stub(gameUtils, "userBonusIsActive").resolves(false);
+            sandbox.stub(session, "sendRoundMessage" as any).resolves();
+            sandbox
+                .stub(session, "sendActivityReducedRoundReveal" as any)
+                .resolves();
+            sandbox.stub(session, "startRoundCore" as any).resolves(null);
+
+            const pending = session.endRound(
+                false,
+                new MessageContext("", new KmqMember(OWNER_ID), ROOM_ID),
+                round,
+            );
+
+            // elapse the 1.5s multiguess delay; the old code recorded
+            // timePlayed = 3461 + 1500 = 4961ms here
+            await clock.tickAsync(1500);
+            await pending;
+
+            assert.deepStrictEqual(session.buildRecap().fastestGuess, {
+                userID: OWNER_ID,
+                timeMs: 2957,
+            });
         });
     });
 
